@@ -1,0 +1,1055 @@
+{
+  "$schema": "./game-config.schema.json",
+  "version": 1,
+  "colors": {
+    "ink": "#244451",
+    "muted": "#739391",
+    "snow": "#f3f7f0",
+    "ice": "#dfece8",
+    "blue": "#348ea0",
+    "teal": "#24716d",
+    "red": "#ce6855",
+    "gold": "#dba45a",
+    "wood": "#976e4d"
+  },
+  "courses": {
+    "slalom": {
+      "name": "Slalom",
+      "sub": "THE CLASSIC",
+      "length": 540,
+      "fee": 0,
+      "pace": 156,
+      "spacing": 260,
+      "density": 0.8,
+      "color": "#ce6855",
+      "kind": "slalom"
+    },
+    "freestyle": {
+      "name": "Freestyle",
+      "sub": "TAKE FLIGHT",
+      "length": 1040,
+      "fee": 0,
+      "pace": 164,
+      "spacing": 0,
+      "density": 0.72,
+      "color": "#348ea0",
+      "kind": "freestyle"
+    },
+    "forest": {
+      "name": "Tree slalom",
+      "sub": "MIND THE PINES",
+      "length": 1040,
+      "fee": 0,
+      "pace": 160,
+      "spacing": 285,
+      "density": 1.3,
+      "color": "#24716d",
+      "kind": "forest"
+    },
+    "rush": {
+      "name": "Lunch Rush",
+      "sub": "FAST SLALOM",
+      "length": 1200,
+      "fee": 210,
+      "pace": 228,
+      "spacing": 315,
+      "density": 1.1,
+      "color": "#ce6855",
+      "kind": "rush"
+    },
+    "mushroom": {
+      "name": "Spore Decisions",
+      "sub": "BOUNCE RESPONSIBLY",
+      "length": 1200,
+      "fee": 220,
+      "pace": 172,
+      "spacing": 285,
+      "density": 1.1,
+      "color": "#b16a74",
+      "kind": "mushroom"
+    },
+    "polite": {
+      "name": "Polite Pursuit",
+      "sub": "YETI OFF PISTE",
+      "length": 1040,
+      "fee": 235,
+      "pace": 178,
+      "spacing": 300,
+      "density": 1,
+      "color": "#348ea0",
+      "kind": "slow"
+    },
+    "panic": {
+      "name": "Last Lunch",
+      "sub": "DANGER OFF PISTE",
+      "length": 1600,
+      "fee": 245,
+      "pace": 240,
+      "spacing": 330,
+      "density": 1.15,
+      "color": "#68779a",
+      "kind": "fast"
+    },
+    "free": {
+      "name": "Free skiing",
+      "sub": "NO WRONG TURNS",
+      "length": 540,
+      "fee": 0,
+      "pace": 160,
+      "spacing": 0,
+      "density": 0.7,
+      "color": "#24716d",
+      "kind": "free"
+    }
+  },
+  "atlas": {
+    "spruceTree": [
+      "trees",
+      20,
+      72,
+      483,
+      659
+    ],
+    "crookedTree": [
+      "trees",
+      529,
+      86,
+      491,
+      630
+    ],
+    "cedarTree": [
+      "trees",
+      1055,
+      159,
+      560,
+      564
+    ],
+    "alpineTree": [
+      "trees",
+      1645,
+      75,
+      383,
+      651
+    ],
+    "skier": [
+      "ski",
+      46,
+      101,
+      244,
+      265
+    ],
+    "left": [
+      "ski",
+      316,
+      105,
+      294,
+      282
+    ],
+    "right": [
+      "ski",
+      646,
+      102,
+      286,
+      276
+    ],
+    "fall": [
+      "ski",
+      945,
+      102,
+      307,
+      282
+    ],
+    "yeti": [
+      "ski",
+      38,
+      453,
+      225,
+      230
+    ],
+    "yetiWalk": [
+      "ski",
+      276,
+      459,
+      216,
+      230
+    ],
+    "yetiHappy": [
+      "ski",
+      496,
+      455,
+      218,
+      226
+    ],
+    "pine": [
+      "ski",
+      710,
+      377,
+      222,
+      309
+    ],
+    "fir": [
+      "ski",
+      939,
+      455,
+      160,
+      228
+    ],
+    "smallPine": [
+      "ski",
+      1106,
+      532,
+      147,
+      147
+    ],
+    "rock": [
+      "ski",
+      37,
+      718,
+      234,
+      185
+    ],
+    "pebble": [
+      "ski",
+      267,
+      769,
+      162,
+      139
+    ],
+    "ramp": [
+      "ski",
+      891,
+      728,
+      342,
+      192
+    ],
+    "snowball": [
+      "ski",
+      31,
+      1005,
+      195,
+      194
+    ],
+    "star": [
+      "ski",
+      239,
+      1020,
+      136,
+      135
+    ],
+    "flag": [
+      "ski",
+      834,
+      1040,
+      99,
+      113
+    ],
+    "lodge": [
+      "village",
+      0,
+      50,
+      332,
+      357
+    ],
+    "rental": [
+      "village",
+      334,
+      81,
+      302,
+      323
+    ],
+    "lift": [
+      "village",
+      643,
+      52,
+      347,
+      350
+    ],
+    "sign": [
+      "village",
+      1004,
+      44,
+      230,
+      357
+    ],
+    "dog": [
+      "village",
+      49,
+      408,
+      232,
+      293
+    ],
+    "dogLeft": [
+      "village",
+      351,
+      426,
+      263,
+      272
+    ],
+    "dogRight": [
+      "village",
+      676,
+      425,
+      258,
+      280
+    ],
+    "boarder": [
+      "village",
+      990,
+      425,
+      245,
+      280
+    ],
+    "personRed": [
+      "village",
+      69,
+      704,
+      194,
+      272
+    ],
+    "personYellow": [
+      "village",
+      364,
+      704,
+      220,
+      272
+    ],
+    "personGreen": [
+      "village",
+      689,
+      704,
+      187,
+      272
+    ],
+    "mushroom": [
+      "village",
+      974,
+      711,
+      267,
+      272
+    ],
+    "stump": [
+      "village",
+      10,
+      981,
+      315,
+      257
+    ],
+    "mogul": [
+      "village",
+      324,
+      1011,
+      315,
+      235
+    ],
+    "sled": [
+      "village",
+      650,
+      1004,
+      326,
+      229
+    ],
+    "bush": [
+      "village",
+      983,
+      986,
+      265,
+      254
+    ],
+    "bear": [
+      "wildlife",
+      100,
+      100,
+      162,
+      230
+    ],
+    "bearRun": [
+      "wildlife",
+      452,
+      98,
+      188,
+      237
+    ],
+    "rabbit": [
+      "wildlife",
+      837,
+      120,
+      140,
+      219
+    ],
+    "rabbitRun": [
+      "wildlife",
+      1160,
+      135,
+      220,
+      201
+    ],
+    "wolf": [
+      "wildlife",
+      35,
+      432,
+      304,
+      229
+    ],
+    "wolfRun": [
+      "wildlife",
+      401,
+      435,
+      310,
+      227
+    ],
+    "fox": [
+      "wildlife",
+      764,
+      431,
+      266,
+      229
+    ],
+    "foxRun": [
+      "wildlife",
+      1100,
+      440,
+      318,
+      215
+    ],
+    "cat": [
+      "wildlife",
+      80,
+      790,
+      192,
+      202
+    ],
+    "catClimb": [
+      "wildlife",
+      438,
+      719,
+      179,
+      316
+    ],
+    "still": [
+      "wildlife",
+      770,
+      717,
+      255,
+      314
+    ],
+    "uphill": [
+      "wildlife",
+      1124,
+      715,
+      280,
+      319
+    ]
+  },
+  "palette": [
+    "#142c40",
+    "#244451",
+    "#375769",
+    "#548091",
+    "#79a5b4",
+    "#9ec9d3",
+    "#c7e0e4",
+    "#e5f0ee",
+    "#f8faf0",
+    "#0c5058",
+    "#1b7379",
+    "#399799",
+    "#65b3b0",
+    "#b0794c",
+    "#714a37",
+    "#463735",
+    "#d39b61",
+    "#f2c98f",
+    "#ffe4ae",
+    "#e58039",
+    "#f6a252",
+    "#9b403e",
+    "#cc5655",
+    "#ee8275",
+    "#403959",
+    "#70557d",
+    "#987bb1",
+    "#d3becd",
+    "#618272",
+    "#9fb4a1"
+  ],
+  "render": {
+    "width": 480,
+    "defaultHeight": 840,
+    "minHeight": 620,
+    "maxHeight": 1120,
+    "zoom": 0.5,
+    "playerScreenY": 0.31,
+    "cameraXFollow": 4,
+    "cameraYFollow": 7,
+    "spriteAlphaCutoff": 100,
+    "playerWidth": 44,
+    "fallWidth": 60,
+    "speechSeconds": 2.5,
+    "speechLimit": 5,
+    "messageSeconds": 3.2,
+    "messageLimit": 4,
+    "resultSeconds": 18,
+    "cheerSeconds": 20,
+    "trailLimit": 1800,
+    "trailSpacing": 6,
+    "fastSkierRGB": [
+      204,
+      86,
+      85
+    ],
+    "guestRGB": [
+      112,
+      85,
+      125
+    ]
+  },
+  "world": {
+    "seed": 48372,
+    "unitsPerMetre": 10,
+    "summitAltitude": 1840,
+    "chunkSize": 440,
+    "chunkMarginX": 600,
+    "chunkMarginAbove": 550,
+    "chunkMarginBelow": 700,
+    "chunkRetention": 6000,
+    "sceneryRetentionBehind": 6500,
+    "ambientCount": 3,
+    "uphillCount": 5,
+    "uphillForestY": -400,
+    "uphillTreeChance": 0.55,
+    "meadowHalfWidth": 350,
+    "meadowTop": -350,
+    "meadowBottom": 650,
+    "autoCourseY": 730,
+    "safeSummitHalfWidth": 1050,
+    "safeSummitTop": -700,
+    "safeSummitBottom": 1150,
+    "safeCourseHalfWidth": 490,
+    "courseSway": [
+      85,
+      55
+    ],
+    "courseWavelength": [
+      1200,
+      3100
+    ],
+    "terrainSpacing": [
+      125,
+      205
+    ],
+    "terrainOffsetX": 320,
+    "terrainDensityChance": 0.55,
+    "lakeChance": 0.16,
+    "lakeRadiusX": [
+      65,
+      190
+    ],
+    "lakeRadiusY": [
+      80,
+      225
+    ],
+    "lakeMinY": 700,
+    "animalVisitorChance": 0.008,
+    "humanPredatorChance": 0.008,
+    "wildPredatorChance": 0.28
+  },
+  "physics": {
+    "speedMultiplier": 2.9,
+    "villagePace": 135,
+    "freePace": 165,
+    "hudKmhPerSpeed": 0.2,
+    "accelerationBase": 48,
+    "accelerationDownhill": 98,
+    "turnFollow": 10,
+    "acrossSpeedFraction": 0.36,
+    "downhillSpeedFraction": 0.64,
+    "brakeDeceleration": 390,
+    "overSpeedDeceleration": 90,
+    "turnDeceleration": 180,
+    "overSpeedRatio": 1.1,
+    "walkSpeed": 62,
+    "walkFollow": 8,
+    "traverseSpeed": 145,
+    "traverseFollow": 12,
+    "walkingBumpLimit": 150,
+    "stopEpsilon": 0.5,
+    "roadWalkSpeed": 25,
+    "roadTraverseSpeed": 70,
+    "roadSlideSpeed": 40,
+    "roadDeceleration": 255,
+    "boostMultiplier": 1.25,
+    "playerRadius": 11,
+    "collisionYScale": 0.85,
+    "fastImpactSpeed": 211,
+    "crashSeconds": 1.18,
+    "resumeShieldSeconds": 0.15,
+    "deathSeconds": 1.4,
+    "crashSeparation": 24,
+    "bushSpeedRetention": 0.83,
+    "sledSpeedRetention": 0.86,
+    "iceTopSpeed": 1800,
+    "iceAcceleration": 265,
+    "iceRestartSlideSpeed": 75,
+    "iceHeadingSpeedMinimum": 3,
+    "downhillCosMinimum": 0.18
+  },
+  "controls": {
+    "pointerDeadZone": 11,
+    "pointerScale": 68,
+    "keyRepeatSeconds": 0.17,
+    "stepDegrees": 30
+  },
+  "jump": {
+    "baseSeconds": 1.05,
+    "manualSeconds": 0.72,
+    "rainbowSeconds": 1.4,
+    "mushroomSeconds": 1.35,
+    "rampSeconds": 1.1,
+    "mogulSeconds": 0.56,
+    "durationBase": 0.5,
+    "durationSpeedDivisor": 260,
+    "durationMin": 0.65,
+    "durationMax": 2.8,
+    "heightBase": 18,
+    "heightPerSpeed": 0.26,
+    "heightMin": 25,
+    "heightMax": 235,
+    "spinRate": 1.6,
+    "cooldownSeconds": 0.2,
+    "rainbowTrailSeconds": 8,
+    "rainbowBoostSeconds": 2,
+    "mushroomBoostSeconds": 1.5
+  },
+  "race": {
+    "minimumGateFraction": 0.9,
+    "gatePoints": 8,
+    "finishBase": 45,
+    "cleanBonus": 50,
+    "crashedBonus": 25,
+    "crashPenalty": 4,
+    "jumpBasePoints": 12,
+    "spinPointMultiplier": 5,
+    "heightPointMultiplier": 0.07,
+    "gateHalfWidth": 90,
+    "forestGateHalfWidth": 78,
+    "finishWidthMultiplier": 2,
+    "gateStartOffset": 400,
+    "gateFinishClearance": 180,
+    "gateSwing": 150,
+    "forestGateSwing": 130,
+    "courseOffscreenMargin": 400,
+    "terrainStartOffset": 170,
+    "finishRecoveryDistance": 320,
+    "townAfterFinish": 300,
+    "offPisteDistance": 410,
+    "rainbowFirstOffset": 1300,
+    "rainbowSpacing": 4200,
+    "freestyleRainbowSpacing": 2600,
+    "spectators": 6,
+    "entryHalfWidth": 100,
+    "entryChoices": [
+      "slalom",
+      "freestyle",
+      "forest"
+    ],
+    "villageChoices": [
+      "slalom",
+      "freestyle",
+      "rush",
+      "mushroom",
+      "polite",
+      "panic",
+      "forest"
+    ]
+  },
+  "village": {
+    "houseCount": 32,
+    "rows": 7,
+    "firstRow": 310,
+    "rowSpacing": 230,
+    "rowJitter": 38,
+    "columns": [
+      -650,
+      -435,
+      -215,
+      0,
+      215,
+      435,
+      650
+    ],
+    "columnJitter": 45,
+    "halfWidth": 900,
+    "endOffset": 2430,
+    "choiceY": 2170,
+    "choiceSpacing": 265,
+    "choiceTitleY": 1980,
+    "houseWidth": [
+      142,
+      185
+    ],
+    "houseGap": 35,
+    "houseFootWidthRatio": 0.45,
+    "houseFootHeightRatio": 0.25,
+    "mainRoadWidth": 64,
+    "laneWidth": 32,
+    "roadBendMin": 250,
+    "roadBendMax": 315,
+    "roadStartY": 120,
+    "roadEndY": 1990,
+    "roadClearance": 14,
+    "pathGrid": 32,
+    "pathMaxNodes": 7000,
+    "walkers": 34,
+    "walkerSpeed": [
+      11,
+      24
+    ],
+    "stationX": 470,
+    "stationY": 1780,
+    "stationClearance": 135,
+    "catCount": 2,
+    "dogCount": 2,
+    "skierCount": 5,
+    "roadColors": [
+      "#e0e2cf",
+      "#c4b7a1",
+      "#cfc4af",
+      "#b7aa96"
+    ],
+    "placementAttempts": 1200,
+    "roadTileSize": 12,
+    "roadSampleSpacing": 8
+  },
+  "wildlife": {
+    "activeRadius": 2100,
+    "packMin": 3,
+    "packMax": 4,
+    "packSpacingX": 24,
+    "packSpacingY": 44,
+    "wolfAlertDistance": 220,
+    "wolfAlertSeconds": 9,
+    "wolfPlayerChaseSpeed": 105,
+    "wolfSkierChaseSpeed": 235,
+    "wolfSkierDetection": 360,
+    "wolfHuntSpeed": 160,
+    "foxHuntSpeed": 150,
+    "huntChance": 0.65,
+    "huntInterval": [
+      4,
+      8
+    ],
+    "rabbitDetection": 350,
+    "rabbitWalkSpeed": 38,
+    "rabbitFleeSpeed": 143,
+    "rabbitFearDistance": 225,
+    "rabbitTurnSeconds": [
+      0.6,
+      2.3
+    ],
+    "roamSpeed": 30,
+    "bearRoamSpeed": 17,
+    "bearWakeDistance": 180,
+    "bearChaseSpeed": 85,
+    "bearChaseDistance": 2100,
+    "packFollowDistance": 95,
+    "packFollowSpeed": 65,
+    "roamSeconds": [
+      2,
+      5
+    ],
+    "captureDistance": 22,
+    "feedingSeconds": 2.2,
+    "satedSeconds": 9,
+    "avoidProbeDistance": 55,
+    "avoidCommitSeconds": 1.2,
+    "avoidProbeDegrees": [
+      0,
+      30,
+      -30,
+      60,
+      -60,
+      90,
+      -90,
+      120,
+      -120,
+      150,
+      -150,
+      180
+    ],
+    "avoidLookaheadSeconds": 0.6,
+    "npcFearSeconds": 5,
+    "npcFearDistance": 310,
+    "npcFleeSpeed": 290,
+    "npcFleeLateralSpeed": 200,
+    "npcSpeechCooldown": 4,
+    "npcWolfFallSeconds": 3,
+    "wolfKillKmh": 30,
+    "wolfFadeSeconds": 1.5,
+    "rescueThanksRadius": 500,
+    "rescueThanksCooldown": 8,
+    "bearKnockoutKmh": 30,
+    "yetiKnockoutKmh": 60,
+    "knockoutSeconds": 12,
+    "knockoutSpeedRetention": 0.78,
+    "knockoutShieldSeconds": 0.2,
+    "catFleeSpeed": 150,
+    "catClimbSpeed": 48,
+    "catClimbHeightRatio": 0.6,
+    "catSpookSeconds": 18,
+    "catCrowdRadius": 230,
+    "catCrowdSpeed": 50,
+    "catCrowdStandOff": 43,
+    "catAnnoyedSeconds": 9,
+    "catRoamChance": 0.4,
+    "catRoamSeconds": [
+      10,
+      18
+    ],
+    "catCalmSeconds": 12,
+    "yetiWakeDistance": 175,
+    "yetiWildSpeedRatio": 0.87,
+    "yetiWildChaseDistance": 4400
+  },
+  "chasers": {
+    "speedRatios": {
+      "fast": 0.94,
+      "slow": 0.62,
+      "dog": 0.55,
+      "bear": 0.27,
+      "patrol": 0.8
+    },
+    "spawnAbove": 160,
+    "spawnSpacing": 70,
+    "ambushCount": {
+      "fast": 3,
+      "patrol": 4,
+      "dog": 5
+    },
+    "captureDistance": 23,
+    "knockoutDistance": 30,
+    "patrolFallSeconds": 1.4,
+    "slowTalkSeconds": 7,
+    "dogContactSpeed": 130,
+    "dogContactChaseDistance": 1700
+  },
+  "skiers": {
+    "slowSpeed": [
+      38,
+      90
+    ],
+    "fastSpeed": [
+      460,
+      650
+    ],
+    "boarderSpeed": [
+      330,
+      480
+    ],
+    "ambientFastChance": 0.32,
+    "courseFastChance": 0.35,
+    "fastSpawnSeconds": [
+      5,
+      8
+    ],
+    "fastSpawnAbove": 100,
+    "fastSpawnOffsetX": [
+      95,
+      240
+    ],
+    "fastSpeedRatio": 1.32,
+    "fastAimDistance": 600,
+    "fastAimLeadSeconds": 0.35,
+    "fastAimWeight": 0.55,
+    "fastMaxLateralSpeed": 90,
+    "fastSteeringFollow": 2.5,
+    "tauntDistance": 260,
+    "tauntCooldownSeconds": 6,
+    "bumpSpeechCooldownSeconds": 3
+  },
+  "lift": {
+    "x": 400,
+    "startY": -600,
+    "routeBendDistance": 900,
+    "rideSeconds": 2.4,
+    "rideSpeed": 150,
+    "chairSpeed": 78,
+    "chairSpacing": 240,
+    "towerSpacing": 380
+  },
+  "spawnTables": {
+    "human": [
+      "pine",
+      "pine",
+      "fir",
+      "rock",
+      "pebble",
+      "skier",
+      "skier",
+      "personGreen",
+      "rabbit",
+      "fir",
+      "cat",
+      "bush"
+    ],
+    "wild": [
+      "pine",
+      "pine",
+      "fir",
+      "rock",
+      "pebble",
+      "skier",
+      "rabbit",
+      "fir",
+      "bear",
+      "cat",
+      "lurker",
+      "bush"
+    ],
+    "classic": [
+      "skier",
+      "skier",
+      "boarder",
+      "personGreen",
+      "personYellow"
+    ],
+    "forest": [
+      "pine",
+      "pine",
+      "fir",
+      "rock",
+      "dog",
+      "skier",
+      "ramp",
+      "mogul"
+    ],
+    "mushroom": [
+      "mushroom",
+      "mushroom",
+      "sled",
+      "mogul",
+      "cat",
+      "dog",
+      "pine"
+    ],
+    "mixed": [
+      "pine",
+      "fir",
+      "rock",
+      "dog",
+      "skier",
+      "boarder",
+      "mushroom",
+      "ramp",
+      "mogul",
+      "bush"
+    ],
+    "treeVariants": [
+      "classic",
+      "classic",
+      "spruce",
+      "crooked",
+      "cedar",
+      "alpine"
+    ]
+  },
+  "dialogue": {
+    "fastTaunts": [
+      "Nice speed. Is that walking?",
+      "Move over, snow snail!",
+      "Your grandma skis faster!",
+      "Coming through, amateur!",
+      "Try to keep up!"
+    ],
+    "fastBumps": [
+      "You were in MY way!",
+      "That counts as overtaking.",
+      "Learn to ski, speed bump!"
+    ],
+    "terrified": [
+      "WOLVES! HELP!",
+      "NOT MY SKIS! RUN!",
+      "HELP! THEY ARE GAINING!",
+      "PLEASE EAT THE OTHER GUY!"
+    ],
+    "rescued": [
+      "You saved me! Thank you!",
+      "My hero! I owe you cocoa!",
+      "THANK YOU! That was close!",
+      "Best skier on this mountain!"
+    ],
+    "wolfCaught": [
+      "AAAH! MY TROUSERS!",
+      "BAD DOG! BAD DOG!"
+    ],
+    "cheers": [
+      "PERFECT RUN!",
+      "EVERY SINGLE FLAG!",
+      "BRAVO!",
+      "WHAT A LEGEND!",
+      "TEN OUT OF TEN!"
+    ],
+    "skierBumps": [
+      "I had right of way!",
+      "Excellent parking.",
+      "That was my good knee!"
+    ],
+    "personBumps": [
+      "Bloody tourists!",
+      "#@! MY COCOA!",
+      "Oi! These are NEW boots!",
+      "You absolute snowplough!"
+    ],
+    "greetings": [
+      "Looking sharp!",
+      "Lovely day for poor decisions.",
+      "Save some snow for us.",
+      "The cocoa is mostly cocoa."
+    ],
+    "catAnnoyed": [
+      "You scared the cat!",
+      "Oi! We were having a moment.",
+      "Slow down, you monster!"
+    ],
+    "politeYeti": [
+      "Sorry! Just a little nibble?",
+      "I can wait.",
+      "Lovely scarf!"
+    ]
+  },
+  "simulation": {
+    "stepSeconds": 0.008333333333333333,
+    "maxFrameSeconds": 0.05
+  },
+  "timing": {
+    "enabled": true,
+    "maxBonus": 60,
+    "historyLimit": 20,
+    "recordVersion": 1,
+    "targets": {
+      "slalom": {
+        "goldSeconds": 22,
+        "parSeconds": 40
+      },
+      "forest": {
+        "goldSeconds": 42,
+        "parSeconds": 72
+      },
+      "rush": {
+        "goldSeconds": 34,
+        "parSeconds": 61
+      },
+      "mushroom": {
+        "goldSeconds": 48,
+        "parSeconds": 80
+      },
+      "polite": {
+        "goldSeconds": 41,
+        "parSeconds": 69
+      },
+      "panic": {
+        "goldSeconds": 43,
+        "parSeconds": 75
+      }
+    }
+  }
+}

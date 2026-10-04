@@ -24,17 +24,46 @@ The surrounding mountain, including the forest uphill from the starting clearing
 
 Villages, the summit and marked course corridors are protected: bears and yetis stay outside, including pursuers. Foxes and wolves are rare visitors to human areas and common in the wilderness. Yeti challenge and penalty chases wait outside the protected piste. In the wilderness, yetis and bears can catch you. A catch automatically restarts you at the summit, preserving your wallet but losing unfinished course points. There is no death menu. Bears chase much more slowly. A direct hit above 30 km/h knocks a bear out for 12 seconds; above 60 km/h does the same to a yeti. These thresholds use the HUD speed, and the player must be moving toward the animal. Dogs and ski patrol knock you down without restarting you.
 
-Wolves spawn in packs of 3–4, stay together, and chase nearby players slowly outside protected areas. Foxes and wolves hunt rabbits; a caught rabbit is consumed in a snow puff, and the predator pauses to eat. Both predators alternate gait frames with correctly facing sprites and a running bob. Fast skiers wear red and periodically enter from uphill at overtaking speed. Other skiers and snowboarders provide slower traffic. Cats attract nearby slower skiers. Hitting a cat at speed scares it toward a tree or house; it climbs to safety while the spectators complain.
+Wolves spawn in packs of 3–4, stay together, and chase nearby players slowly outside protected areas. Foxes and wolves hunt rabbits; a caught rabbit is consumed in a snow puff, and the predator pauses to eat. Both predators alternate gait frames with correctly facing sprites and a running bob. Fast skiers wear red and periodically enter from uphill at overtaking speed. They gently aim toward your predicted position while overtaking and have their own taunts and collision remarks. Wolves also pursue skiers outside protected areas; skiers shout and flee, and can be knocked down by a wolf. A direct player impact above 30 km/h kills a wolf in a snow puff; endangered nearby skiers thank you. Animals commit to avoidance turns around shorelines, buildings, and protected boundaries instead of flipping back and forth in place. Other skiers and snowboarders provide slower traffic. Cats attract nearby slower skiers. Hitting a cat at speed scares it toward a tree or house; it climbs to safety while the spectators complain.
 
 ## Snowdrift Village
 
-The village has four rows of houses, connected roads that slow skis (their paving pattern stays fixed as the camera moves), walking residents, and a chairlift terminal. The moving chairs and cable follow the slope down into town. Ski into the station to return to the summit. The course flags are all on one row below the village; additional choices lie to either side.
+The village has 32 houses in seven staggered, randomized bands. Central buildings interrupt the straight downhill route. A winding main street and routed footpaths connect the houses and lift; lanes avoid building footprints. Roads slow skis, and their paving remains fixed in world coordinates. Residents walk along the paths. Planned villages and distant gates are retained until you pass them, fixing the disappearing-house bug. The moving chairs and cable follow the slope down into town. Ski into the station to return to the summit. The course flags are all on one row below the village; additional choices lie to either side.
 
-Paid courses deduct their fee only when you can afford it. Entry costs: Lunch Rush 210, Spore Decisions 220, Polite Pursuit 235, Last Lunch 245 coins. These are calibrated against the regular slalom's 247-coin perfect result before jumps. Existing wallet balances are retained.
+Paid courses deduct their fee only when you can afford it. Entry costs: Lunch Rush 210, Spore Decisions 220, Polite Pursuit 235, Last Lunch 245 coins. These are calibrated against the regular slalom's 247-coin perfect result before jumps or the new speed bonus (up to 307 with that bonus). Existing wallet balances are retained.
 
-Entering without enough coins triggers a random ambush and makes the entire run ineligible for coins or a saved best, even with perfect gates. Failed gate quotas or missed finishes also award zero. For an eligible finish, the reward is gate/jump points + 45 + the crash bonus (50 with no crashes, otherwise max(0, 25 − 4 × crashes)). The entry-price bonus has been removed.
+Entering without enough coins triggers a random ambush and makes the entire run ineligible for coins or a saved best, even with perfect gates. Failed gate quotas or missed finishes also award zero. For an eligible finish, the reward is gate/jump points + 45 + the crash bonus (50 with no crashes, otherwise max(0, 25 − 4 × crashes)) + the speed bonus for a timed course. The entry-price bonus has been removed.
 
-At the end, an automatic 18-second overlay shows gates, percentage, misses, crashes, jumps, time, score, bonus, and coins or the reason for no reward. Skiing continues without menus. A successful 100%-gate run activates waving and shouting from spectators already waiting by the finish. Completed-course rewards and wallet balance save on this browser and device.
+At the end, an automatic 18-second overlay shows gates, percentage, misses, crashes, jumps, time, score, bonus, and coins or the reason for no reward. Skiing continues without menus. A successful 100%-gate run activates waving and shouting from spectators already waiting by the finish. Completed-course rewards, wallet balance, per-course personal best times, and the last 20 timed attempts per course save on this browser and device.
+
+## Timed slaloms
+
+The live clock starts when you cross the actual course start line, not when you choose the course. It keeps running while you recover from crashes or ski uphill and stops at a successful finish crossing. Hidden-tab time is paused with the game. Finishes require the existing 90% gate quota; failed or unpaid runs cannot set a qualifying best time or earn a speed bonus. Their attempt times still appear in the local history.
+
+The bonus scales linearly from zero at the par time to **60 coins** at the gold time, capped at 60 even if you go faster:
+
+`round(maxBonus × clamp((parSeconds − time) / (parSeconds − goldSeconds), 0, 1))`
+
+| Course | Gold time (+60) | Par time (+0) |
+| --- | ---: | ---: |
+| Slalom | 22 s | 40 s |
+| Tree slalom | 42 s | 72 s |
+| Lunch Rush | 34 s | 61 s |
+| Spore Decisions | 48 s | 80 s |
+| Polite Pursuit | 41 s | 69 s |
+| Last Lunch | 43 s | 75 s |
+
+For example, a clean, perfect regular slalom in 31 seconds pays 152 gate points + 95 finish bonus + 30 speed bonus = **277 coins**. Freestyle and free skiing have no slalom speed bonus. These initial target times are tuning defaults and have not been playtested for difficulty.
+
+The clock and personal best appear while racing; best times also appear beside course entry flags. The automatic finish overlay shows elapsed time, finish and speed bonuses, coins, and a new-best indicator. Changing key course/physics settings starts a new comparable best-time record while retaining attempt history. Increase `timing.recordVersion` after other edits that make old times incomparable.
+
+## Editing game settings
+
+[`game-config.json`](game-config.json) is the editable source for gameplay tuning. [`game-config.schema.json`](game-config.schema.json) supplies editor completion and validation. See [`CONFIG.md`](CONFIG.md) for sections, units, and examples.
+
+- **Hosted game:** edit and publish `game-config.json`, then reload. It is fetched without caching on startup.
+- **Local `file://` game:** edit the JSON, run `python3 build.py`, and reload `index.html`. Browsers restrict sibling-file fetches, so the offline HTML embeds the settings and assets.
+- Changes to JavaScript, the template, or assets also require rebuilding. Invalid settings produce a clear startup error. The build validates the JSON before replacing the game.
 
 ## Assets and source
 
@@ -44,10 +73,10 @@ Edit `game.js` and `index.template.html`, then run `python3 build.py` to rebuild
 
 ## Development and publishing
 
-Run `python3 build.py` after editing `game.js`, `index.template.html`, or the PNG atlases. This regenerates the self-contained `index.html`. No package install or server is needed to play locally.
+Run `python3 build.py` after editing source, configuration, the template, or PNG atlases. This regenerates the self-contained `index.html`. No package install or server is needed to play locally.
 
 The repository includes the source, build script, documentation, original asset atlases, and built game. GitHub Pages serves the root of the `main` branch. Commit the rebuilt `index.html` with source changes and push `main` to publish updates.
 
-## Verification status
+## Review status
 
-The production renderer has been used to inspect the updated game. The older behavior simulation suite has not been rerun against the latest gameplay changes; its local historical reports are not included in this repository.
+The offline game was rebuilt and the village and finish overlay were visually inspected with the production canvas renderer. No automated gameplay tests were run for this revision.

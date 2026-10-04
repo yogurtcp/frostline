@@ -1,0 +1,4172 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "$schema",
+    "version",
+    "colors",
+    "courses",
+    "atlas",
+    "palette",
+    "render",
+    "world",
+    "physics",
+    "controls",
+    "jump",
+    "race",
+    "village",
+    "wildlife",
+    "chasers",
+    "skiers",
+    "lift",
+    "spawnTables",
+    "dialogue",
+    "simulation",
+    "timing"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "version": {
+      "type": "number",
+      "minimum": 0
+    },
+    "colors": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ink",
+        "muted",
+        "snow",
+        "ice",
+        "blue",
+        "teal",
+        "red",
+        "gold",
+        "wood"
+      ],
+      "properties": {
+        "ink": {
+          "type": "string"
+        },
+        "muted": {
+          "type": "string"
+        },
+        "snow": {
+          "type": "string"
+        },
+        "ice": {
+          "type": "string"
+        },
+        "blue": {
+          "type": "string"
+        },
+        "teal": {
+          "type": "string"
+        },
+        "red": {
+          "type": "string"
+        },
+        "gold": {
+          "type": "string"
+        },
+        "wood": {
+          "type": "string"
+        }
+      }
+    },
+    "courses": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "slalom",
+        "freestyle",
+        "forest",
+        "rush",
+        "mushroom",
+        "polite",
+        "panic",
+        "free"
+      ],
+      "properties": {
+        "slalom": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "name",
+            "sub",
+            "length",
+            "fee",
+            "pace",
+            "spacing",
+            "density",
+            "color",
+            "kind"
+          ],
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "sub": {
+              "type": "string"
+            },
+            "length": {
+              "type": "number",
+              "minimum": 0,
+              "exclusiveMinimum": 0
+            },
+            "fee": {
+              "type": "number",
+              "minimum": 0
+            },
+            "pace": {
+              "type": "number",
+              "minimum": 0,
+              "exclusiveMinimum": 0
+            },
+            "spacing": {
+              "type": "number",
+              "minimum": 0
+            },
+            "density": {
+              "type": "number",
+              "minimum": 0
+            },
+            "color": {
+              "type": "string"
+            },
+            "kind": {
+              "type": "string"
+            }
+          }
+        },
+        "freestyle": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "name",
+            "sub",
+            "length",
+            "fee",
+            "pace",
+            "spacing",
+            "density",
+            "color",
+            "kind"
+          ],
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "sub": {
+              "type": "string"
+            },
+            "length": {
+              "type": "number",
+              "minimum": 0,
+              "exclusiveMinimum": 0
+            },
+            "fee": {
+              "type": "number",
+              "minimum": 0
+            },
+            "pace": {
+              "type": "number",
+              "minimum": 0,
+              "exclusiveMinimum": 0
+            },
+            "spacing": {
+              "type": "number",
+              "minimum": 0
+            },
+            "density": {
+              "type": "number",
+              "minimum": 0
+            },
+            "color": {
+              "type": "string"
+            },
+            "kind": {
+              "type": "string"
+            }
+          }
+        },
+        "forest": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "name",
+            "sub",
+            "length",
+            "fee",
+            "pace",
+            "spacing",
+            "density",
+            "color",
+            "kind"
+          ],
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "sub": {
+              "type": "string"
+            },
+            "length": {
+              "type": "number",
+              "minimum": 0,
+              "exclusiveMinimum": 0
+            },
+            "fee": {
+              "type": "number",
+              "minimum": 0
+            },
+            "pace": {
+              "type": "number",
+              "minimum": 0,
+              "exclusiveMinimum": 0
+            },
+            "spacing": {
+              "type": "number",
+              "minimum": 0
+            },
+            "density": {
+              "type": "number",
+              "minimum": 0
+            },
+            "color": {
+              "type": "string"
+            },
+            "kind": {
+              "type": "string"
+            }
+          }
+        },
+        "rush": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "name",
+            "sub",
+            "length",
+            "fee",
+            "pace",
+            "spacing",
+            "density",
+            "color",
+            "kind"
+          ],
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "sub": {
+              "type": "string"
+            },
+            "length": {
+              "type": "number",
+              "minimum": 0,
+              "exclusiveMinimum": 0
+            },
+            "fee": {
+              "type": "number",
+              "minimum": 0
+            },
+            "pace": {
+              "type": "number",
+              "minimum": 0,
+              "exclusiveMinimum": 0
+            },
+            "spacing": {
+              "type": "number",
+              "minimum": 0
+            },
+            "density": {
+              "type": "number",
+              "minimum": 0
+            },
+            "color": {
+              "type": "string"
+            },
+            "kind": {
+              "type": "string"
+            }
+          }
+        },
+        "mushroom": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "name",
+            "sub",
+            "length",
+            "fee",
+            "pace",
+            "spacing",
+            "density",
+            "color",
+            "kind"
+          ],
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "sub": {
+              "type": "string"
+            },
+            "length": {
+              "type": "number",
+              "minimum": 0,
+              "exclusiveMinimum": 0
+            },
+            "fee": {
+              "type": "number",
+              "minimum": 0
+            },
+            "pace": {
+              "type": "number",
+              "minimum": 0,
+              "exclusiveMinimum": 0
+            },
+            "spacing": {
+              "type": "number",
+              "minimum": 0
+            },
+            "density": {
+              "type": "number",
+              "minimum": 0
+            },
+            "color": {
+              "type": "string"
+            },
+            "kind": {
+              "type": "string"
+            }
+          }
+        },
+        "polite": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "name",
+            "sub",
+            "length",
+            "fee",
+            "pace",
+            "spacing",
+            "density",
+            "color",
+            "kind"
+          ],
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "sub": {
+              "type": "string"
+            },
+            "length": {
+              "type": "number",
+              "minimum": 0,
+              "exclusiveMinimum": 0
+            },
+            "fee": {
+              "type": "number",
+              "minimum": 0
+            },
+            "pace": {
+              "type": "number",
+              "minimum": 0,
+              "exclusiveMinimum": 0
+            },
+            "spacing": {
+              "type": "number",
+              "minimum": 0
+            },
+            "density": {
+              "type": "number",
+              "minimum": 0
+            },
+            "color": {
+              "type": "string"
+            },
+            "kind": {
+              "type": "string"
+            }
+          }
+        },
+        "panic": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "name",
+            "sub",
+            "length",
+            "fee",
+            "pace",
+            "spacing",
+            "density",
+            "color",
+            "kind"
+          ],
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "sub": {
+              "type": "string"
+            },
+            "length": {
+              "type": "number",
+              "minimum": 0,
+              "exclusiveMinimum": 0
+            },
+            "fee": {
+              "type": "number",
+              "minimum": 0
+            },
+            "pace": {
+              "type": "number",
+              "minimum": 0,
+              "exclusiveMinimum": 0
+            },
+            "spacing": {
+              "type": "number",
+              "minimum": 0
+            },
+            "density": {
+              "type": "number",
+              "minimum": 0
+            },
+            "color": {
+              "type": "string"
+            },
+            "kind": {
+              "type": "string"
+            }
+          }
+        },
+        "free": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "name",
+            "sub",
+            "length",
+            "fee",
+            "pace",
+            "spacing",
+            "density",
+            "color",
+            "kind"
+          ],
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "sub": {
+              "type": "string"
+            },
+            "length": {
+              "type": "number",
+              "minimum": 0,
+              "exclusiveMinimum": 0
+            },
+            "fee": {
+              "type": "number",
+              "minimum": 0
+            },
+            "pace": {
+              "type": "number",
+              "minimum": 0,
+              "exclusiveMinimum": 0
+            },
+            "spacing": {
+              "type": "number",
+              "minimum": 0
+            },
+            "density": {
+              "type": "number",
+              "minimum": 0
+            },
+            "color": {
+              "type": "string"
+            },
+            "kind": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "atlas": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "spruceTree",
+        "crookedTree",
+        "cedarTree",
+        "alpineTree",
+        "skier",
+        "left",
+        "right",
+        "fall",
+        "yeti",
+        "yetiWalk",
+        "yetiHappy",
+        "pine",
+        "fir",
+        "smallPine",
+        "rock",
+        "pebble",
+        "ramp",
+        "snowball",
+        "star",
+        "flag",
+        "lodge",
+        "rental",
+        "lift",
+        "sign",
+        "dog",
+        "dogLeft",
+        "dogRight",
+        "boarder",
+        "personRed",
+        "personYellow",
+        "personGreen",
+        "mushroom",
+        "stump",
+        "mogul",
+        "sled",
+        "bush",
+        "bear",
+        "bearRun",
+        "rabbit",
+        "rabbitRun",
+        "wolf",
+        "wolfRun",
+        "fox",
+        "foxRun",
+        "cat",
+        "catClimb",
+        "still",
+        "uphill"
+      ],
+      "properties": {
+        "spruceTree": {
+          "type": "array",
+          "minItems": 5,
+          "maxItems": 5,
+          "prefixItems": [
+            {
+              "type": "string",
+              "enum": [
+                "ski",
+                "village",
+                "wildlife",
+                "trees"
+              ]
+            },
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "integer",
+              "minimum": 1
+            },
+            {
+              "type": "integer",
+              "minimum": 1
+            }
+          ]
+        },
+        "crookedTree": {
+          "type": "array",
+          "minItems": 5,
+          "maxItems": 5,
+          "prefixItems": [
+            {
+              "type": "string",
+              "enum": [
+                "ski",
+                "village",
+                "wildlife",
+                "trees"
+              ]
+            },
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "integer",
+              "minimum": 1
+            },
+            {
+              "type": "integer",
+              "minimum": 1
+            }
+          ]
+        },
+        "cedarTree": {
+          "type": "array",
+          "minItems": 5,
+          "maxItems": 5,
+          "prefixItems": [
+            {
+              "type": "string",
+              "enum": [
+                "ski",
+                "village",
+                "wildlife",
+                "trees"
+              ]
+            },
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "integer",
+              "minimum": 1
+            },
+            {
+              "type": "integer",
+              "minimum": 1
+            }
+          ]
+        },
+        "alpineTree": {
+          "type": "array",
+          "minItems": 5,
+          "maxItems": 5,
+          "prefixItems": [
+            {
+              "type": "string",
+              "enum": [
+                "ski",
+                "village",
+                "wildlife",
+                "trees"
+              ]
+            },
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "integer",
+              "minimum": 1
+            },
+            {
+              "type": "integer",
+              "minimum": 1
+            }
+          ]
+        },
+        "skier": {
+          "type": "array",
+          "minItems": 5,
+          "maxItems": 5,
+          "prefixItems": [
+            {
+              "type": "string",
+              "enum": [
+                "ski",
+                "village",
+                "wildlife",
+                "trees"
+              ]
+            },
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "integer",
+              "minimum": 1
+            },
+            {
+              "type": "integer",
+              "minimum": 1
+            }
+          ]
+        },
+        "left": {
+          "type": "array",
+          "minItems": 5,
+          "maxItems": 5,
+          "prefixItems": [
+            {
+              "type": "string",
+              "enum": [
+                "ski",
+                "village",
+                "wildlife",
+                "trees"
+              ]
+            },
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "integer",
+              "minimum": 1
+            },
+            {
+              "type": "integer",
+              "minimum": 1
+            }
+          ]
+        },
+        "right": {
+          "type": "array",
+          "minItems": 5,
+          "maxItems": 5,
+          "prefixItems": [
+            {
+              "type": "string",
+              "enum": [
+                "ski",
+                "village",
+                "wildlife",
+                "trees"
+              ]
+            },
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "integer",
+              "minimum": 1
+            },
+            {
+              "type": "integer",
+              "minimum": 1
+            }
+          ]
+        },
+        "fall": {
+          "type": "array",
+          "minItems": 5,
+          "maxItems": 5,
+          "prefixItems": [
+            {
+              "type": "string",
+              "enum": [
+                "ski",
+                "village",
+                "wildlife",
+                "trees"
+              ]
+            },
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "integer",
+              "minimum": 1
+            },
+            {
+              "type": "integer",
+              "minimum": 1
+            }
+          ]
+        },
+        "yeti": {
+          "type": "array",
+          "minItems": 5,
+          "maxItems": 5,
+          "prefixItems": [
+            {
+              "type": "string",
+              "enum": [
+                "ski",
+                "village",
+                "wildlife",
+                "trees"
+              ]
+            },
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "integer",
+              "minimum": 1
+            },
+            {
+              "type": "integer",
+              "minimum": 1
+            }
+          ]
+        },
+        "yetiWalk": {
+          "type": "array",
+          "minItems": 5,
+          "maxItems": 5,
+          "prefixItems": [
+            {
+              "type": "string",
+              "enum": [
+                "ski",
+                "village",
+                "wildlife",
+                "trees"
+              ]
+            },
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "integer",
+              "minimum": 1
+            },
+            {
+              "type": "integer",
+              "minimum": 1
+            }
+          ]
+        },
+        "yetiHappy": {
+          "type": "array",
+          "minItems": 5,
+          "maxItems": 5,
+          "prefixItems": [
+            {
+              "type": "string",
+              "enum": [
+                "ski",
+                "village",
+                "wildlife",
+                "trees"
+              ]
+            },
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "integer",
+              "minimum": 1
+            },
+            {
+              "type": "integer",
+              "minimum": 1
+            }
+          ]
+        },
+        "pine": {
+          "type": "array",
+          "minItems": 5,
+          "maxItems": 5,
+          "prefixItems": [
+            {
+              "type": "string",
+              "enum": [
+                "ski",
+                "village",
+                "wildlife",
+                "trees"
+              ]
+            },
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "integer",
+              "minimum": 1
+            },
+            {
+              "type": "integer",
+              "minimum": 1
+            }
+          ]
+        },
+        "fir": {
+          "type": "array",
+          "minItems": 5,
+          "maxItems": 5,
+          "prefixItems": [
+            {
+              "type": "string",
+              "enum": [
+                "ski",
+                "village",
+                "wildlife",
+                "trees"
+              ]
+            },
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "integer",
+              "minimum": 1
+            },
+            {
+              "type": "integer",
+              "minimum": 1
+            }
+          ]
+        },
+        "smallPine": {
+          "type": "array",
+          "minItems": 5,
+          "maxItems": 5,
+          "prefixItems": [
+            {
+              "type": "string",
+              "enum": [
+                "ski",
+                "village",
+                "wildlife",
+                "trees"
+              ]
+            },
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "integer",
+              "minimum": 1
+            },
+            {
+              "type": "integer",
+              "minimum": 1
+            }
+          ]
+        },
+        "rock": {
+          "type": "array",
+          "minItems": 5,
+          "maxItems": 5,
+          "prefixItems": [
+            {
+              "type": "string",
+              "enum": [
+                "ski",
+                "village",
+                "wildlife",
+                "trees"
+              ]
+            },
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "integer",
+              "minimum": 1
+            },
+            {
+              "type": "integer",
+              "minimum": 1
+            }
+          ]
+        },
+        "pebble": {
+          "type": "array",
+          "minItems": 5,
+          "maxItems": 5,
+          "prefixItems": [
+            {
+              "type": "string",
+              "enum": [
+                "ski",
+                "village",
+                "wildlife",
+                "trees"
+              ]
+            },
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "integer",
+              "minimum": 1
+            },
+            {
+              "type": "integer",
+              "minimum": 1
+            }
+          ]
+        },
+        "ramp": {
+          "type": "array",
+          "minItems": 5,
+          "maxItems": 5,
+          "prefixItems": [
+            {
+              "type": "string",
+              "enum": [
+                "ski",
+                "village",
+                "wildlife",
+                "trees"
+              ]
+            },
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "integer",
+              "minimum": 1
+            },
+            {
+              "type": "integer",
+              "minimum": 1
+            }
+          ]
+        },
+        "snowball": {
+          "type": "array",
+          "minItems": 5,
+          "maxItems": 5,
+          "prefixItems": [
+            {
+              "type": "string",
+              "enum": [
+                "ski",
+                "village",
+                "wildlife",
+                "trees"
+              ]
+            },
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "integer",
+              "minimum": 1
+            },
+            {
+              "type": "integer",
+              "minimum": 1
+            }
+          ]
+        },
+        "star": {
+          "type": "array",
+          "minItems": 5,
+          "maxItems": 5,
+          "prefixItems": [
+            {
+              "type": "string",
+              "enum": [
+                "ski",
+                "village",
+                "wildlife",
+                "trees"
+              ]
+            },
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "integer",
+              "minimum": 1
+            },
+            {
+              "type": "integer",
+              "minimum": 1
+            }
+          ]
+        },
+        "flag": {
+          "type": "array",
+          "minItems": 5,
+          "maxItems": 5,
+          "prefixItems": [
+            {
+              "type": "string",
+              "enum": [
+                "ski",
+                "village",
+                "wildlife",
+                "trees"
+              ]
+            },
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "integer",
+              "minimum": 1
+            },
+            {
+              "type": "integer",
+              "minimum": 1
+            }
+          ]
+        },
+        "lodge": {
+          "type": "array",
+          "minItems": 5,
+          "maxItems": 5,
+          "prefixItems": [
+            {
+              "type": "string",
+              "enum": [
+                "ski",
+                "village",
+                "wildlife",
+                "trees"
+              ]
+            },
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "integer",
+              "minimum": 1
+            },
+            {
+              "type": "integer",
+              "minimum": 1
+            }
+          ]
+        },
+        "rental": {
+          "type": "array",
+          "minItems": 5,
+          "maxItems": 5,
+          "prefixItems": [
+            {
+              "type": "string",
+              "enum": [
+                "ski",
+                "village",
+                "wildlife",
+                "trees"
+              ]
+            },
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "integer",
+              "minimum": 1
+            },
+            {
+              "type": "integer",
+              "minimum": 1
+            }
+          ]
+        },
+        "lift": {
+          "type": "array",
+          "minItems": 5,
+          "maxItems": 5,
+          "prefixItems": [
+            {
+              "type": "string",
+              "enum": [
+                "ski",
+                "village",
+                "wildlife",
+                "trees"
+              ]
+            },
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "integer",
+              "minimum": 1
+            },
+            {
+              "type": "integer",
+              "minimum": 1
+            }
+          ]
+        },
+        "sign": {
+          "type": "array",
+          "minItems": 5,
+          "maxItems": 5,
+          "prefixItems": [
+            {
+              "type": "string",
+              "enum": [
+                "ski",
+                "village",
+                "wildlife",
+                "trees"
+              ]
+            },
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "integer",
+              "minimum": 1
+            },
+            {
+              "type": "integer",
+              "minimum": 1
+            }
+          ]
+        },
+        "dog": {
+          "type": "array",
+          "minItems": 5,
+          "maxItems": 5,
+          "prefixItems": [
+            {
+              "type": "string",
+              "enum": [
+                "ski",
+                "village",
+                "wildlife",
+                "trees"
+              ]
+            },
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "integer",
+              "minimum": 1
+            },
+            {
+              "type": "integer",
+              "minimum": 1
+            }
+          ]
+        },
+        "dogLeft": {
+          "type": "array",
+          "minItems": 5,
+          "maxItems": 5,
+          "prefixItems": [
+            {
+              "type": "string",
+              "enum": [
+                "ski",
+                "village",
+                "wildlife",
+                "trees"
+              ]
+            },
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "integer",
+              "minimum": 1
+            },
+            {
+              "type": "integer",
+              "minimum": 1
+            }
+          ]
+        },
+        "dogRight": {
+          "type": "array",
+          "minItems": 5,
+          "maxItems": 5,
+          "prefixItems": [
+            {
+              "type": "string",
+              "enum": [
+                "ski",
+                "village",
+                "wildlife",
+                "trees"
+              ]
+            },
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "integer",
+              "minimum": 1
+            },
+            {
+              "type": "integer",
+              "minimum": 1
+            }
+          ]
+        },
+        "boarder": {
+          "type": "array",
+          "minItems": 5,
+          "maxItems": 5,
+          "prefixItems": [
+            {
+              "type": "string",
+              "enum": [
+                "ski",
+                "village",
+                "wildlife",
+                "trees"
+              ]
+            },
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "integer",
+              "minimum": 1
+            },
+            {
+              "type": "integer",
+              "minimum": 1
+            }
+          ]
+        },
+        "personRed": {
+          "type": "array",
+          "minItems": 5,
+          "maxItems": 5,
+          "prefixItems": [
+            {
+              "type": "string",
+              "enum": [
+                "ski",
+                "village",
+                "wildlife",
+                "trees"
+              ]
+            },
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "integer",
+              "minimum": 1
+            },
+            {
+              "type": "integer",
+              "minimum": 1
+            }
+          ]
+        },
+        "personYellow": {
+          "type": "array",
+          "minItems": 5,
+          "maxItems": 5,
+          "prefixItems": [
+            {
+              "type": "string",
+              "enum": [
+                "ski",
+                "village",
+                "wildlife",
+                "trees"
+              ]
+            },
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "integer",
+              "minimum": 1
+            },
+            {
+              "type": "integer",
+              "minimum": 1
+            }
+          ]
+        },
+        "personGreen": {
+          "type": "array",
+          "minItems": 5,
+          "maxItems": 5,
+          "prefixItems": [
+            {
+              "type": "string",
+              "enum": [
+                "ski",
+                "village",
+                "wildlife",
+                "trees"
+              ]
+            },
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "integer",
+              "minimum": 1
+            },
+            {
+              "type": "integer",
+              "minimum": 1
+            }
+          ]
+        },
+        "mushroom": {
+          "type": "array",
+          "minItems": 5,
+          "maxItems": 5,
+          "prefixItems": [
+            {
+              "type": "string",
+              "enum": [
+                "ski",
+                "village",
+                "wildlife",
+                "trees"
+              ]
+            },
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "integer",
+              "minimum": 1
+            },
+            {
+              "type": "integer",
+              "minimum": 1
+            }
+          ]
+        },
+        "stump": {
+          "type": "array",
+          "minItems": 5,
+          "maxItems": 5,
+          "prefixItems": [
+            {
+              "type": "string",
+              "enum": [
+                "ski",
+                "village",
+                "wildlife",
+                "trees"
+              ]
+            },
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "integer",
+              "minimum": 1
+            },
+            {
+              "type": "integer",
+              "minimum": 1
+            }
+          ]
+        },
+        "mogul": {
+          "type": "array",
+          "minItems": 5,
+          "maxItems": 5,
+          "prefixItems": [
+            {
+              "type": "string",
+              "enum": [
+                "ski",
+                "village",
+                "wildlife",
+                "trees"
+              ]
+            },
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "integer",
+              "minimum": 1
+            },
+            {
+              "type": "integer",
+              "minimum": 1
+            }
+          ]
+        },
+        "sled": {
+          "type": "array",
+          "minItems": 5,
+          "maxItems": 5,
+          "prefixItems": [
+            {
+              "type": "string",
+              "enum": [
+                "ski",
+                "village",
+                "wildlife",
+                "trees"
+              ]
+            },
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "integer",
+              "minimum": 1
+            },
+            {
+              "type": "integer",
+              "minimum": 1
+            }
+          ]
+        },
+        "bush": {
+          "type": "array",
+          "minItems": 5,
+          "maxItems": 5,
+          "prefixItems": [
+            {
+              "type": "string",
+              "enum": [
+                "ski",
+                "village",
+                "wildlife",
+                "trees"
+              ]
+            },
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "integer",
+              "minimum": 1
+            },
+            {
+              "type": "integer",
+              "minimum": 1
+            }
+          ]
+        },
+        "bear": {
+          "type": "array",
+          "minItems": 5,
+          "maxItems": 5,
+          "prefixItems": [
+            {
+              "type": "string",
+              "enum": [
+                "ski",
+                "village",
+                "wildlife",
+                "trees"
+              ]
+            },
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "integer",
+              "minimum": 1
+            },
+            {
+              "type": "integer",
+              "minimum": 1
+            }
+          ]
+        },
+        "bearRun": {
+          "type": "array",
+          "minItems": 5,
+          "maxItems": 5,
+          "prefixItems": [
+            {
+              "type": "string",
+              "enum": [
+                "ski",
+                "village",
+                "wildlife",
+                "trees"
+              ]
+            },
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "integer",
+              "minimum": 1
+            },
+            {
+              "type": "integer",
+              "minimum": 1
+            }
+          ]
+        },
+        "rabbit": {
+          "type": "array",
+          "minItems": 5,
+          "maxItems": 5,
+          "prefixItems": [
+            {
+              "type": "string",
+              "enum": [
+                "ski",
+                "village",
+                "wildlife",
+                "trees"
+              ]
+            },
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "integer",
+              "minimum": 1
+            },
+            {
+              "type": "integer",
+              "minimum": 1
+            }
+          ]
+        },
+        "rabbitRun": {
+          "type": "array",
+          "minItems": 5,
+          "maxItems": 5,
+          "prefixItems": [
+            {
+              "type": "string",
+              "enum": [
+                "ski",
+                "village",
+                "wildlife",
+                "trees"
+              ]
+            },
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "integer",
+              "minimum": 1
+            },
+            {
+              "type": "integer",
+              "minimum": 1
+            }
+          ]
+        },
+        "wolf": {
+          "type": "array",
+          "minItems": 5,
+          "maxItems": 5,
+          "prefixItems": [
+            {
+              "type": "string",
+              "enum": [
+                "ski",
+                "village",
+                "wildlife",
+                "trees"
+              ]
+            },
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "integer",
+              "minimum": 1
+            },
+            {
+              "type": "integer",
+              "minimum": 1
+            }
+          ]
+        },
+        "wolfRun": {
+          "type": "array",
+          "minItems": 5,
+          "maxItems": 5,
+          "prefixItems": [
+            {
+              "type": "string",
+              "enum": [
+                "ski",
+                "village",
+                "wildlife",
+                "trees"
+              ]
+            },
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "integer",
+              "minimum": 1
+            },
+            {
+              "type": "integer",
+              "minimum": 1
+            }
+          ]
+        },
+        "fox": {
+          "type": "array",
+          "minItems": 5,
+          "maxItems": 5,
+          "prefixItems": [
+            {
+              "type": "string",
+              "enum": [
+                "ski",
+                "village",
+                "wildlife",
+                "trees"
+              ]
+            },
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "integer",
+              "minimum": 1
+            },
+            {
+              "type": "integer",
+              "minimum": 1
+            }
+          ]
+        },
+        "foxRun": {
+          "type": "array",
+          "minItems": 5,
+          "maxItems": 5,
+          "prefixItems": [
+            {
+              "type": "string",
+              "enum": [
+                "ski",
+                "village",
+                "wildlife",
+                "trees"
+              ]
+            },
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "integer",
+              "minimum": 1
+            },
+            {
+              "type": "integer",
+              "minimum": 1
+            }
+          ]
+        },
+        "cat": {
+          "type": "array",
+          "minItems": 5,
+          "maxItems": 5,
+          "prefixItems": [
+            {
+              "type": "string",
+              "enum": [
+                "ski",
+                "village",
+                "wildlife",
+                "trees"
+              ]
+            },
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "integer",
+              "minimum": 1
+            },
+            {
+              "type": "integer",
+              "minimum": 1
+            }
+          ]
+        },
+        "catClimb": {
+          "type": "array",
+          "minItems": 5,
+          "maxItems": 5,
+          "prefixItems": [
+            {
+              "type": "string",
+              "enum": [
+                "ski",
+                "village",
+                "wildlife",
+                "trees"
+              ]
+            },
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "integer",
+              "minimum": 1
+            },
+            {
+              "type": "integer",
+              "minimum": 1
+            }
+          ]
+        },
+        "still": {
+          "type": "array",
+          "minItems": 5,
+          "maxItems": 5,
+          "prefixItems": [
+            {
+              "type": "string",
+              "enum": [
+                "ski",
+                "village",
+                "wildlife",
+                "trees"
+              ]
+            },
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "integer",
+              "minimum": 1
+            },
+            {
+              "type": "integer",
+              "minimum": 1
+            }
+          ]
+        },
+        "uphill": {
+          "type": "array",
+          "minItems": 5,
+          "maxItems": 5,
+          "prefixItems": [
+            {
+              "type": "string",
+              "enum": [
+                "ski",
+                "village",
+                "wildlife",
+                "trees"
+              ]
+            },
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "integer",
+              "minimum": 1
+            },
+            {
+              "type": "integer",
+              "minimum": 1
+            }
+          ]
+        }
+      }
+    },
+    "palette": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1
+    },
+    "render": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "width",
+        "defaultHeight",
+        "minHeight",
+        "maxHeight",
+        "zoom",
+        "playerScreenY",
+        "cameraXFollow",
+        "cameraYFollow",
+        "spriteAlphaCutoff",
+        "playerWidth",
+        "fallWidth",
+        "speechSeconds",
+        "speechLimit",
+        "messageSeconds",
+        "messageLimit",
+        "resultSeconds",
+        "cheerSeconds",
+        "trailLimit",
+        "trailSpacing",
+        "fastSkierRGB",
+        "guestRGB"
+      ],
+      "properties": {
+        "width": {
+          "type": "number",
+          "minimum": 0
+        },
+        "defaultHeight": {
+          "type": "number",
+          "minimum": 0,
+          "exclusiveMinimum": 0
+        },
+        "minHeight": {
+          "type": "number",
+          "minimum": 0,
+          "exclusiveMinimum": 0
+        },
+        "maxHeight": {
+          "type": "number",
+          "minimum": 0,
+          "exclusiveMinimum": 0
+        },
+        "zoom": {
+          "type": "number",
+          "minimum": 0.2,
+          "exclusiveMinimum": 0,
+          "maximum": 2
+        },
+        "playerScreenY": {
+          "type": "number",
+          "minimum": 0
+        },
+        "cameraXFollow": {
+          "type": "number",
+          "minimum": 0
+        },
+        "cameraYFollow": {
+          "type": "number",
+          "minimum": 0
+        },
+        "spriteAlphaCutoff": {
+          "type": "number",
+          "minimum": 0
+        },
+        "playerWidth": {
+          "type": "number",
+          "minimum": 0,
+          "exclusiveMinimum": 0
+        },
+        "fallWidth": {
+          "type": "number",
+          "minimum": 0,
+          "exclusiveMinimum": 0
+        },
+        "speechSeconds": {
+          "type": "number",
+          "minimum": 0,
+          "exclusiveMinimum": 0
+        },
+        "speechLimit": {
+          "type": "number",
+          "minimum": 0
+        },
+        "messageSeconds": {
+          "type": "number",
+          "minimum": 0,
+          "exclusiveMinimum": 0
+        },
+        "messageLimit": {
+          "type": "number",
+          "minimum": 0
+        },
+        "resultSeconds": {
+          "type": "number",
+          "minimum": 0,
+          "exclusiveMinimum": 0
+        },
+        "cheerSeconds": {
+          "type": "number",
+          "minimum": 0,
+          "exclusiveMinimum": 0
+        },
+        "trailLimit": {
+          "type": "number",
+          "minimum": 0
+        },
+        "trailSpacing": {
+          "type": "number",
+          "minimum": 0,
+          "exclusiveMinimum": 0
+        },
+        "fastSkierRGB": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 255
+          },
+          "minItems": 3,
+          "maxItems": 3
+        },
+        "guestRGB": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 255
+          },
+          "minItems": 3,
+          "maxItems": 3
+        }
+      }
+    },
+    "world": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "seed",
+        "unitsPerMetre",
+        "summitAltitude",
+        "chunkSize",
+        "chunkMarginX",
+        "chunkMarginAbove",
+        "chunkMarginBelow",
+        "chunkRetention",
+        "sceneryRetentionBehind",
+        "ambientCount",
+        "uphillCount",
+        "uphillForestY",
+        "uphillTreeChance",
+        "meadowHalfWidth",
+        "meadowTop",
+        "meadowBottom",
+        "autoCourseY",
+        "safeSummitHalfWidth",
+        "safeSummitTop",
+        "safeSummitBottom",
+        "safeCourseHalfWidth",
+        "courseSway",
+        "courseWavelength",
+        "terrainSpacing",
+        "terrainOffsetX",
+        "terrainDensityChance",
+        "lakeChance",
+        "lakeRadiusX",
+        "lakeRadiusY",
+        "lakeMinY",
+        "animalVisitorChance",
+        "humanPredatorChance",
+        "wildPredatorChance"
+      ],
+      "properties": {
+        "seed": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "unitsPerMetre": {
+          "type": "number",
+          "minimum": 0,
+          "exclusiveMinimum": 0
+        },
+        "summitAltitude": {
+          "type": "number",
+          "minimum": 0
+        },
+        "chunkSize": {
+          "type": "number",
+          "minimum": 0,
+          "exclusiveMinimum": 0
+        },
+        "chunkMarginX": {
+          "type": "number",
+          "minimum": 0
+        },
+        "chunkMarginAbove": {
+          "type": "number",
+          "minimum": 0
+        },
+        "chunkMarginBelow": {
+          "type": "number",
+          "minimum": 0
+        },
+        "chunkRetention": {
+          "type": "number",
+          "minimum": 0
+        },
+        "sceneryRetentionBehind": {
+          "type": "number",
+          "minimum": 0
+        },
+        "ambientCount": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "uphillCount": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "uphillForestY": {
+          "type": "number"
+        },
+        "uphillTreeChance": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "meadowHalfWidth": {
+          "type": "number",
+          "minimum": 0,
+          "exclusiveMinimum": 0
+        },
+        "meadowTop": {
+          "type": "number"
+        },
+        "meadowBottom": {
+          "type": "number",
+          "minimum": 0
+        },
+        "autoCourseY": {
+          "type": "number",
+          "minimum": 0
+        },
+        "safeSummitHalfWidth": {
+          "type": "number",
+          "minimum": 0,
+          "exclusiveMinimum": 0
+        },
+        "safeSummitTop": {
+          "type": "number"
+        },
+        "safeSummitBottom": {
+          "type": "number",
+          "minimum": 0
+        },
+        "safeCourseHalfWidth": {
+          "type": "number",
+          "minimum": 0,
+          "exclusiveMinimum": 0
+        },
+        "courseSway": {
+          "type": "array",
+          "items": {
+            "type": "number",
+            "minimum": 0
+          },
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "courseWavelength": {
+          "type": "array",
+          "items": {
+            "type": "number",
+            "minimum": 0,
+            "exclusiveMinimum": 0
+          },
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "terrainSpacing": {
+          "type": "array",
+          "items": {
+            "type": "number",
+            "minimum": 0,
+            "exclusiveMinimum": 0
+          },
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "terrainOffsetX": {
+          "type": "number",
+          "minimum": 0
+        },
+        "terrainDensityChance": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "lakeChance": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "lakeRadiusX": {
+          "type": "array",
+          "items": {
+            "type": "number",
+            "minimum": 0,
+            "exclusiveMinimum": 0
+          },
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "lakeRadiusY": {
+          "type": "array",
+          "items": {
+            "type": "number",
+            "minimum": 0,
+            "exclusiveMinimum": 0
+          },
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "lakeMinY": {
+          "type": "number",
+          "minimum": 0
+        },
+        "animalVisitorChance": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "humanPredatorChance": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "wildPredatorChance": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        }
+      }
+    },
+    "physics": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "speedMultiplier",
+        "villagePace",
+        "freePace",
+        "hudKmhPerSpeed",
+        "accelerationBase",
+        "accelerationDownhill",
+        "turnFollow",
+        "acrossSpeedFraction",
+        "downhillSpeedFraction",
+        "brakeDeceleration",
+        "overSpeedDeceleration",
+        "turnDeceleration",
+        "overSpeedRatio",
+        "walkSpeed",
+        "walkFollow",
+        "traverseSpeed",
+        "traverseFollow",
+        "walkingBumpLimit",
+        "stopEpsilon",
+        "roadWalkSpeed",
+        "roadTraverseSpeed",
+        "roadSlideSpeed",
+        "roadDeceleration",
+        "boostMultiplier",
+        "playerRadius",
+        "collisionYScale",
+        "fastImpactSpeed",
+        "crashSeconds",
+        "resumeShieldSeconds",
+        "deathSeconds",
+        "crashSeparation",
+        "bushSpeedRetention",
+        "sledSpeedRetention",
+        "iceTopSpeed",
+        "iceAcceleration",
+        "iceRestartSlideSpeed",
+        "iceHeadingSpeedMinimum",
+        "downhillCosMinimum"
+      ],
+      "properties": {
+        "speedMultiplier": {
+          "type": "number",
+          "minimum": 0,
+          "exclusiveMinimum": 0
+        },
+        "villagePace": {
+          "type": "number",
+          "minimum": 0
+        },
+        "freePace": {
+          "type": "number",
+          "minimum": 0
+        },
+        "hudKmhPerSpeed": {
+          "type": "number",
+          "minimum": 0
+        },
+        "accelerationBase": {
+          "type": "number",
+          "minimum": 0
+        },
+        "accelerationDownhill": {
+          "type": "number",
+          "minimum": 0
+        },
+        "turnFollow": {
+          "type": "number",
+          "minimum": 0
+        },
+        "acrossSpeedFraction": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "downhillSpeedFraction": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "brakeDeceleration": {
+          "type": "number",
+          "minimum": 0
+        },
+        "overSpeedDeceleration": {
+          "type": "number",
+          "minimum": 0
+        },
+        "turnDeceleration": {
+          "type": "number",
+          "minimum": 0
+        },
+        "overSpeedRatio": {
+          "type": "number",
+          "minimum": 0
+        },
+        "walkSpeed": {
+          "type": "number",
+          "minimum": 0
+        },
+        "walkFollow": {
+          "type": "number",
+          "minimum": 0
+        },
+        "traverseSpeed": {
+          "type": "number",
+          "minimum": 0
+        },
+        "traverseFollow": {
+          "type": "number",
+          "minimum": 0
+        },
+        "walkingBumpLimit": {
+          "type": "number",
+          "minimum": 0
+        },
+        "stopEpsilon": {
+          "type": "number",
+          "minimum": 0
+        },
+        "roadWalkSpeed": {
+          "type": "number",
+          "minimum": 0
+        },
+        "roadTraverseSpeed": {
+          "type": "number",
+          "minimum": 0
+        },
+        "roadSlideSpeed": {
+          "type": "number",
+          "minimum": 0
+        },
+        "roadDeceleration": {
+          "type": "number",
+          "minimum": 0
+        },
+        "boostMultiplier": {
+          "type": "number",
+          "minimum": 0
+        },
+        "playerRadius": {
+          "type": "number",
+          "minimum": 0
+        },
+        "collisionYScale": {
+          "type": "number",
+          "minimum": 0
+        },
+        "fastImpactSpeed": {
+          "type": "number",
+          "minimum": 0
+        },
+        "crashSeconds": {
+          "type": "number",
+          "minimum": 0,
+          "exclusiveMinimum": 0
+        },
+        "resumeShieldSeconds": {
+          "type": "number",
+          "minimum": 0,
+          "exclusiveMinimum": 0
+        },
+        "deathSeconds": {
+          "type": "number",
+          "minimum": 0,
+          "exclusiveMinimum": 0
+        },
+        "crashSeparation": {
+          "type": "number",
+          "minimum": 0
+        },
+        "bushSpeedRetention": {
+          "type": "number",
+          "minimum": 0
+        },
+        "sledSpeedRetention": {
+          "type": "number",
+          "minimum": 0
+        },
+        "iceTopSpeed": {
+          "type": "number",
+          "minimum": 0
+        },
+        "iceAcceleration": {
+          "type": "number",
+          "minimum": 0
+        },
+        "iceRestartSlideSpeed": {
+          "type": "number",
+          "minimum": 0
+        },
+        "iceHeadingSpeedMinimum": {
+          "type": "number",
+          "minimum": 0
+        },
+        "downhillCosMinimum": {
+          "type": "number",
+          "minimum": 0
+        }
+      }
+    },
+    "controls": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "pointerDeadZone",
+        "pointerScale",
+        "keyRepeatSeconds",
+        "stepDegrees"
+      ],
+      "properties": {
+        "pointerDeadZone": {
+          "type": "number",
+          "minimum": 0
+        },
+        "pointerScale": {
+          "type": "number",
+          "minimum": 0
+        },
+        "keyRepeatSeconds": {
+          "type": "number",
+          "minimum": 0,
+          "exclusiveMinimum": 0
+        },
+        "stepDegrees": {
+          "type": "number",
+          "minimum": 0,
+          "exclusiveMinimum": 0
+        }
+      }
+    },
+    "jump": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "baseSeconds",
+        "manualSeconds",
+        "rainbowSeconds",
+        "mushroomSeconds",
+        "rampSeconds",
+        "mogulSeconds",
+        "durationBase",
+        "durationSpeedDivisor",
+        "durationMin",
+        "durationMax",
+        "heightBase",
+        "heightPerSpeed",
+        "heightMin",
+        "heightMax",
+        "spinRate",
+        "cooldownSeconds",
+        "rainbowTrailSeconds",
+        "rainbowBoostSeconds",
+        "mushroomBoostSeconds"
+      ],
+      "properties": {
+        "baseSeconds": {
+          "type": "number",
+          "minimum": 0,
+          "exclusiveMinimum": 0
+        },
+        "manualSeconds": {
+          "type": "number",
+          "minimum": 0,
+          "exclusiveMinimum": 0
+        },
+        "rainbowSeconds": {
+          "type": "number",
+          "minimum": 0,
+          "exclusiveMinimum": 0
+        },
+        "mushroomSeconds": {
+          "type": "number",
+          "minimum": 0,
+          "exclusiveMinimum": 0
+        },
+        "rampSeconds": {
+          "type": "number",
+          "minimum": 0,
+          "exclusiveMinimum": 0
+        },
+        "mogulSeconds": {
+          "type": "number",
+          "minimum": 0,
+          "exclusiveMinimum": 0
+        },
+        "durationBase": {
+          "type": "number",
+          "minimum": 0
+        },
+        "durationSpeedDivisor": {
+          "type": "number",
+          "minimum": 0,
+          "exclusiveMinimum": 0
+        },
+        "durationMin": {
+          "type": "number",
+          "minimum": 0
+        },
+        "durationMax": {
+          "type": "number",
+          "minimum": 0
+        },
+        "heightBase": {
+          "type": "number",
+          "minimum": 0
+        },
+        "heightPerSpeed": {
+          "type": "number",
+          "minimum": 0
+        },
+        "heightMin": {
+          "type": "number",
+          "minimum": 0
+        },
+        "heightMax": {
+          "type": "number",
+          "minimum": 0
+        },
+        "spinRate": {
+          "type": "number",
+          "minimum": 0
+        },
+        "cooldownSeconds": {
+          "type": "number",
+          "minimum": 0,
+          "exclusiveMinimum": 0
+        },
+        "rainbowTrailSeconds": {
+          "type": "number",
+          "minimum": 0,
+          "exclusiveMinimum": 0
+        },
+        "rainbowBoostSeconds": {
+          "type": "number",
+          "minimum": 0,
+          "exclusiveMinimum": 0
+        },
+        "mushroomBoostSeconds": {
+          "type": "number",
+          "minimum": 0,
+          "exclusiveMinimum": 0
+        }
+      }
+    },
+    "race": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "minimumGateFraction",
+        "gatePoints",
+        "finishBase",
+        "cleanBonus",
+        "crashedBonus",
+        "crashPenalty",
+        "jumpBasePoints",
+        "spinPointMultiplier",
+        "heightPointMultiplier",
+        "gateHalfWidth",
+        "forestGateHalfWidth",
+        "finishWidthMultiplier",
+        "gateStartOffset",
+        "gateFinishClearance",
+        "gateSwing",
+        "forestGateSwing",
+        "courseOffscreenMargin",
+        "terrainStartOffset",
+        "finishRecoveryDistance",
+        "townAfterFinish",
+        "offPisteDistance",
+        "rainbowFirstOffset",
+        "rainbowSpacing",
+        "freestyleRainbowSpacing",
+        "spectators",
+        "entryHalfWidth",
+        "entryChoices",
+        "villageChoices"
+      ],
+      "properties": {
+        "minimumGateFraction": {
+          "type": "number",
+          "minimum": 0.5,
+          "maximum": 1
+        },
+        "gatePoints": {
+          "type": "number",
+          "minimum": 0
+        },
+        "finishBase": {
+          "type": "number",
+          "minimum": 0
+        },
+        "cleanBonus": {
+          "type": "number",
+          "minimum": 0
+        },
+        "crashedBonus": {
+          "type": "number",
+          "minimum": 0
+        },
+        "crashPenalty": {
+          "type": "number",
+          "minimum": 0
+        },
+        "jumpBasePoints": {
+          "type": "number",
+          "minimum": 0
+        },
+        "spinPointMultiplier": {
+          "type": "number",
+          "minimum": 0
+        },
+        "heightPointMultiplier": {
+          "type": "number",
+          "minimum": 0
+        },
+        "gateHalfWidth": {
+          "type": "number",
+          "minimum": 0,
+          "exclusiveMinimum": 0
+        },
+        "forestGateHalfWidth": {
+          "type": "number",
+          "minimum": 0,
+          "exclusiveMinimum": 0
+        },
+        "finishWidthMultiplier": {
+          "type": "number",
+          "minimum": 0
+        },
+        "gateStartOffset": {
+          "type": "number",
+          "minimum": 0
+        },
+        "gateFinishClearance": {
+          "type": "number",
+          "minimum": 0
+        },
+        "gateSwing": {
+          "type": "number",
+          "minimum": 0
+        },
+        "forestGateSwing": {
+          "type": "number",
+          "minimum": 0
+        },
+        "courseOffscreenMargin": {
+          "type": "number",
+          "minimum": 0
+        },
+        "terrainStartOffset": {
+          "type": "number",
+          "minimum": 0
+        },
+        "finishRecoveryDistance": {
+          "type": "number",
+          "minimum": 0
+        },
+        "townAfterFinish": {
+          "type": "number",
+          "minimum": 0
+        },
+        "offPisteDistance": {
+          "type": "number",
+          "minimum": 0
+        },
+        "rainbowFirstOffset": {
+          "type": "number",
+          "minimum": 0
+        },
+        "rainbowSpacing": {
+          "type": "number",
+          "minimum": 0,
+          "exclusiveMinimum": 0
+        },
+        "freestyleRainbowSpacing": {
+          "type": "number",
+          "minimum": 0,
+          "exclusiveMinimum": 0
+        },
+        "spectators": {
+          "type": "number",
+          "minimum": 0
+        },
+        "entryHalfWidth": {
+          "type": "number",
+          "minimum": 0,
+          "exclusiveMinimum": 0
+        },
+        "entryChoices": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1
+        },
+        "villageChoices": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1
+        }
+      }
+    },
+    "village": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "houseCount",
+        "rows",
+        "firstRow",
+        "rowSpacing",
+        "rowJitter",
+        "columns",
+        "columnJitter",
+        "halfWidth",
+        "endOffset",
+        "choiceY",
+        "choiceSpacing",
+        "choiceTitleY",
+        "houseWidth",
+        "houseGap",
+        "houseFootWidthRatio",
+        "houseFootHeightRatio",
+        "mainRoadWidth",
+        "laneWidth",
+        "roadBendMin",
+        "roadBendMax",
+        "roadStartY",
+        "roadEndY",
+        "roadClearance",
+        "pathGrid",
+        "pathMaxNodes",
+        "walkers",
+        "walkerSpeed",
+        "stationX",
+        "stationY",
+        "stationClearance",
+        "catCount",
+        "dogCount",
+        "skierCount",
+        "roadColors",
+        "placementAttempts",
+        "roadTileSize",
+        "roadSampleSpacing"
+      ],
+      "properties": {
+        "houseCount": {
+          "type": "integer",
+          "minimum": 0,
+          "exclusiveMinimum": 0
+        },
+        "rows": {
+          "type": "integer",
+          "minimum": 0,
+          "exclusiveMinimum": 0
+        },
+        "firstRow": {
+          "type": "number",
+          "minimum": 0
+        },
+        "rowSpacing": {
+          "type": "number",
+          "minimum": 0,
+          "exclusiveMinimum": 0
+        },
+        "rowJitter": {
+          "type": "number",
+          "minimum": 0
+        },
+        "columns": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "minItems": 1
+        },
+        "columnJitter": {
+          "type": "number",
+          "minimum": 0
+        },
+        "halfWidth": {
+          "type": "number",
+          "minimum": 0,
+          "exclusiveMinimum": 0
+        },
+        "endOffset": {
+          "type": "number",
+          "minimum": 0
+        },
+        "choiceY": {
+          "type": "number",
+          "minimum": 0
+        },
+        "choiceSpacing": {
+          "type": "number",
+          "minimum": 0,
+          "exclusiveMinimum": 0
+        },
+        "choiceTitleY": {
+          "type": "number",
+          "minimum": 0
+        },
+        "houseWidth": {
+          "type": "array",
+          "items": {
+            "type": "number",
+            "minimum": 0,
+            "exclusiveMinimum": 0
+          },
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "houseGap": {
+          "type": "number",
+          "minimum": 0
+        },
+        "houseFootWidthRatio": {
+          "type": "number",
+          "minimum": 0
+        },
+        "houseFootHeightRatio": {
+          "type": "number",
+          "minimum": 0
+        },
+        "mainRoadWidth": {
+          "type": "number",
+          "minimum": 0,
+          "exclusiveMinimum": 0
+        },
+        "laneWidth": {
+          "type": "number",
+          "minimum": 0,
+          "exclusiveMinimum": 0
+        },
+        "roadBendMin": {
+          "type": "number",
+          "minimum": 0
+        },
+        "roadBendMax": {
+          "type": "number",
+          "minimum": 0
+        },
+        "roadStartY": {
+          "type": "number",
+          "minimum": 0
+        },
+        "roadEndY": {
+          "type": "number",
+          "minimum": 0
+        },
+        "roadClearance": {
+          "type": "number",
+          "minimum": 0
+        },
+        "pathGrid": {
+          "type": "number",
+          "minimum": 0
+        },
+        "pathMaxNodes": {
+          "type": "integer",
+          "minimum": 0,
+          "exclusiveMinimum": 0
+        },
+        "walkers": {
+          "type": "number",
+          "minimum": 0
+        },
+        "walkerSpeed": {
+          "type": "array",
+          "items": {
+            "type": "number",
+            "minimum": 0
+          },
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "stationX": {
+          "type": "number",
+          "minimum": 0
+        },
+        "stationY": {
+          "type": "number",
+          "minimum": 0
+        },
+        "stationClearance": {
+          "type": "number",
+          "minimum": 0
+        },
+        "catCount": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "dogCount": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "skierCount": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "roadColors": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1
+        },
+        "placementAttempts": {
+          "type": "number",
+          "minimum": 0
+        },
+        "roadTileSize": {
+          "type": "number",
+          "minimum": 0,
+          "exclusiveMinimum": 0
+        },
+        "roadSampleSpacing": {
+          "type": "number",
+          "minimum": 0,
+          "exclusiveMinimum": 0
+        }
+      }
+    },
+    "wildlife": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "activeRadius",
+        "packMin",
+        "packMax",
+        "packSpacingX",
+        "packSpacingY",
+        "wolfAlertDistance",
+        "wolfAlertSeconds",
+        "wolfPlayerChaseSpeed",
+        "wolfSkierChaseSpeed",
+        "wolfSkierDetection",
+        "wolfHuntSpeed",
+        "foxHuntSpeed",
+        "huntChance",
+        "huntInterval",
+        "rabbitDetection",
+        "rabbitWalkSpeed",
+        "rabbitFleeSpeed",
+        "rabbitFearDistance",
+        "rabbitTurnSeconds",
+        "roamSpeed",
+        "bearRoamSpeed",
+        "bearWakeDistance",
+        "bearChaseSpeed",
+        "bearChaseDistance",
+        "packFollowDistance",
+        "packFollowSpeed",
+        "roamSeconds",
+        "captureDistance",
+        "feedingSeconds",
+        "satedSeconds",
+        "avoidProbeDistance",
+        "avoidCommitSeconds",
+        "avoidProbeDegrees",
+        "avoidLookaheadSeconds",
+        "npcFearSeconds",
+        "npcFearDistance",
+        "npcFleeSpeed",
+        "npcFleeLateralSpeed",
+        "npcSpeechCooldown",
+        "npcWolfFallSeconds",
+        "wolfKillKmh",
+        "wolfFadeSeconds",
+        "rescueThanksRadius",
+        "rescueThanksCooldown",
+        "bearKnockoutKmh",
+        "yetiKnockoutKmh",
+        "knockoutSeconds",
+        "knockoutSpeedRetention",
+        "knockoutShieldSeconds",
+        "catFleeSpeed",
+        "catClimbSpeed",
+        "catClimbHeightRatio",
+        "catSpookSeconds",
+        "catCrowdRadius",
+        "catCrowdSpeed",
+        "catCrowdStandOff",
+        "catAnnoyedSeconds",
+        "catRoamChance",
+        "catRoamSeconds",
+        "catCalmSeconds",
+        "yetiWakeDistance",
+        "yetiWildSpeedRatio",
+        "yetiWildChaseDistance"
+      ],
+      "properties": {
+        "activeRadius": {
+          "type": "number",
+          "minimum": 0
+        },
+        "packMin": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "packMax": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "packSpacingX": {
+          "type": "number",
+          "minimum": 0
+        },
+        "packSpacingY": {
+          "type": "number",
+          "minimum": 0
+        },
+        "wolfAlertDistance": {
+          "type": "number",
+          "minimum": 0
+        },
+        "wolfAlertSeconds": {
+          "type": "number",
+          "minimum": 0,
+          "exclusiveMinimum": 0
+        },
+        "wolfPlayerChaseSpeed": {
+          "type": "number",
+          "minimum": 0
+        },
+        "wolfSkierChaseSpeed": {
+          "type": "number",
+          "minimum": 0
+        },
+        "wolfSkierDetection": {
+          "type": "number",
+          "minimum": 0
+        },
+        "wolfHuntSpeed": {
+          "type": "number",
+          "minimum": 0
+        },
+        "foxHuntSpeed": {
+          "type": "number",
+          "minimum": 0
+        },
+        "huntChance": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "huntInterval": {
+          "type": "array",
+          "items": {
+            "type": "number",
+            "minimum": 0
+          },
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "rabbitDetection": {
+          "type": "number",
+          "minimum": 0
+        },
+        "rabbitWalkSpeed": {
+          "type": "number",
+          "minimum": 0
+        },
+        "rabbitFleeSpeed": {
+          "type": "number",
+          "minimum": 0
+        },
+        "rabbitFearDistance": {
+          "type": "number",
+          "minimum": 0
+        },
+        "rabbitTurnSeconds": {
+          "type": "array",
+          "items": {
+            "type": "number",
+            "minimum": 0,
+            "exclusiveMinimum": 0
+          },
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "roamSpeed": {
+          "type": "number",
+          "minimum": 0
+        },
+        "bearRoamSpeed": {
+          "type": "number",
+          "minimum": 0
+        },
+        "bearWakeDistance": {
+          "type": "number",
+          "minimum": 0
+        },
+        "bearChaseSpeed": {
+          "type": "number",
+          "minimum": 0
+        },
+        "bearChaseDistance": {
+          "type": "number",
+          "minimum": 0
+        },
+        "packFollowDistance": {
+          "type": "number",
+          "minimum": 0
+        },
+        "packFollowSpeed": {
+          "type": "number",
+          "minimum": 0
+        },
+        "roamSeconds": {
+          "type": "array",
+          "items": {
+            "type": "number",
+            "minimum": 0,
+            "exclusiveMinimum": 0
+          },
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "captureDistance": {
+          "type": "number",
+          "minimum": 0
+        },
+        "feedingSeconds": {
+          "type": "number",
+          "minimum": 0,
+          "exclusiveMinimum": 0
+        },
+        "satedSeconds": {
+          "type": "number",
+          "minimum": 0,
+          "exclusiveMinimum": 0
+        },
+        "avoidProbeDistance": {
+          "type": "number",
+          "minimum": 0
+        },
+        "avoidCommitSeconds": {
+          "type": "number",
+          "minimum": 0,
+          "exclusiveMinimum": 0
+        },
+        "avoidProbeDegrees": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "minItems": 1
+        },
+        "avoidLookaheadSeconds": {
+          "type": "number",
+          "minimum": 0,
+          "exclusiveMinimum": 0
+        },
+        "npcFearSeconds": {
+          "type": "number",
+          "minimum": 0,
+          "exclusiveMinimum": 0
+        },
+        "npcFearDistance": {
+          "type": "number",
+          "minimum": 0
+        },
+        "npcFleeSpeed": {
+          "type": "number",
+          "minimum": 0
+        },
+        "npcFleeLateralSpeed": {
+          "type": "number",
+          "minimum": 0
+        },
+        "npcSpeechCooldown": {
+          "type": "number",
+          "minimum": 0
+        },
+        "npcWolfFallSeconds": {
+          "type": "number",
+          "minimum": 0,
+          "exclusiveMinimum": 0
+        },
+        "wolfKillKmh": {
+          "type": "number",
+          "minimum": 0
+        },
+        "wolfFadeSeconds": {
+          "type": "number",
+          "minimum": 0,
+          "exclusiveMinimum": 0
+        },
+        "rescueThanksRadius": {
+          "type": "number",
+          "minimum": 0
+        },
+        "rescueThanksCooldown": {
+          "type": "number",
+          "minimum": 0
+        },
+        "bearKnockoutKmh": {
+          "type": "number",
+          "minimum": 0
+        },
+        "yetiKnockoutKmh": {
+          "type": "number",
+          "minimum": 0
+        },
+        "knockoutSeconds": {
+          "type": "number",
+          "minimum": 0,
+          "exclusiveMinimum": 0
+        },
+        "knockoutSpeedRetention": {
+          "type": "number",
+          "minimum": 0
+        },
+        "knockoutShieldSeconds": {
+          "type": "number",
+          "minimum": 0,
+          "exclusiveMinimum": 0
+        },
+        "catFleeSpeed": {
+          "type": "number",
+          "minimum": 0
+        },
+        "catClimbSpeed": {
+          "type": "number",
+          "minimum": 0
+        },
+        "catClimbHeightRatio": {
+          "type": "number",
+          "minimum": 0
+        },
+        "catSpookSeconds": {
+          "type": "number",
+          "minimum": 0,
+          "exclusiveMinimum": 0
+        },
+        "catCrowdRadius": {
+          "type": "number",
+          "minimum": 0
+        },
+        "catCrowdSpeed": {
+          "type": "number",
+          "minimum": 0
+        },
+        "catCrowdStandOff": {
+          "type": "number",
+          "minimum": 0
+        },
+        "catAnnoyedSeconds": {
+          "type": "number",
+          "minimum": 0,
+          "exclusiveMinimum": 0
+        },
+        "catRoamChance": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "catRoamSeconds": {
+          "type": "array",
+          "items": {
+            "type": "number",
+            "minimum": 0,
+            "exclusiveMinimum": 0
+          },
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "catCalmSeconds": {
+          "type": "number",
+          "minimum": 0,
+          "exclusiveMinimum": 0
+        },
+        "yetiWakeDistance": {
+          "type": "number",
+          "minimum": 0
+        },
+        "yetiWildSpeedRatio": {
+          "type": "number",
+          "minimum": 0
+        },
+        "yetiWildChaseDistance": {
+          "type": "number",
+          "minimum": 0
+        }
+      }
+    },
+    "chasers": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "speedRatios",
+        "spawnAbove",
+        "spawnSpacing",
+        "ambushCount",
+        "captureDistance",
+        "knockoutDistance",
+        "patrolFallSeconds",
+        "slowTalkSeconds",
+        "dogContactSpeed",
+        "dogContactChaseDistance"
+      ],
+      "properties": {
+        "speedRatios": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "fast",
+            "slow",
+            "dog",
+            "bear",
+            "patrol"
+          ],
+          "properties": {
+            "fast": {
+              "type": "number",
+              "minimum": 0
+            },
+            "slow": {
+              "type": "number",
+              "minimum": 0
+            },
+            "dog": {
+              "type": "number",
+              "minimum": 0
+            },
+            "bear": {
+              "type": "number",
+              "minimum": 0
+            },
+            "patrol": {
+              "type": "number",
+              "minimum": 0
+            }
+          }
+        },
+        "spawnAbove": {
+          "type": "number",
+          "minimum": 0
+        },
+        "spawnSpacing": {
+          "type": "number",
+          "minimum": 0,
+          "exclusiveMinimum": 0
+        },
+        "ambushCount": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "fast",
+            "patrol",
+            "dog"
+          ],
+          "properties": {
+            "fast": {
+              "type": "number",
+              "minimum": 0
+            },
+            "patrol": {
+              "type": "number",
+              "minimum": 0
+            },
+            "dog": {
+              "type": "number",
+              "minimum": 0
+            }
+          }
+        },
+        "captureDistance": {
+          "type": "number",
+          "minimum": 0
+        },
+        "knockoutDistance": {
+          "type": "number",
+          "minimum": 0
+        },
+        "patrolFallSeconds": {
+          "type": "number",
+          "minimum": 0,
+          "exclusiveMinimum": 0
+        },
+        "slowTalkSeconds": {
+          "type": "number",
+          "minimum": 0,
+          "exclusiveMinimum": 0
+        },
+        "dogContactSpeed": {
+          "type": "number",
+          "minimum": 0
+        },
+        "dogContactChaseDistance": {
+          "type": "number",
+          "minimum": 0
+        }
+      }
+    },
+    "skiers": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "slowSpeed",
+        "fastSpeed",
+        "boarderSpeed",
+        "ambientFastChance",
+        "courseFastChance",
+        "fastSpawnSeconds",
+        "fastSpawnAbove",
+        "fastSpawnOffsetX",
+        "fastSpeedRatio",
+        "fastAimDistance",
+        "fastAimLeadSeconds",
+        "fastAimWeight",
+        "fastMaxLateralSpeed",
+        "fastSteeringFollow",
+        "tauntDistance",
+        "tauntCooldownSeconds",
+        "bumpSpeechCooldownSeconds"
+      ],
+      "properties": {
+        "slowSpeed": {
+          "type": "array",
+          "items": {
+            "type": "number",
+            "minimum": 0
+          },
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "fastSpeed": {
+          "type": "array",
+          "items": {
+            "type": "number",
+            "minimum": 0
+          },
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "boarderSpeed": {
+          "type": "array",
+          "items": {
+            "type": "number",
+            "minimum": 0
+          },
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "ambientFastChance": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "courseFastChance": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "fastSpawnSeconds": {
+          "type": "array",
+          "items": {
+            "type": "number",
+            "minimum": 0,
+            "exclusiveMinimum": 0
+          },
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "fastSpawnAbove": {
+          "type": "number",
+          "minimum": 0
+        },
+        "fastSpawnOffsetX": {
+          "type": "array",
+          "items": {
+            "type": "number",
+            "minimum": 0
+          },
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "fastSpeedRatio": {
+          "type": "number",
+          "minimum": 0
+        },
+        "fastAimDistance": {
+          "type": "number",
+          "minimum": 0
+        },
+        "fastAimLeadSeconds": {
+          "type": "number",
+          "minimum": 0,
+          "exclusiveMinimum": 0
+        },
+        "fastAimWeight": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "fastMaxLateralSpeed": {
+          "type": "number",
+          "minimum": 0
+        },
+        "fastSteeringFollow": {
+          "type": "number",
+          "minimum": 0
+        },
+        "tauntDistance": {
+          "type": "number",
+          "minimum": 0
+        },
+        "tauntCooldownSeconds": {
+          "type": "number",
+          "minimum": 0,
+          "exclusiveMinimum": 0
+        },
+        "bumpSpeechCooldownSeconds": {
+          "type": "number",
+          "minimum": 0,
+          "exclusiveMinimum": 0
+        }
+      }
+    },
+    "lift": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "x",
+        "startY",
+        "routeBendDistance",
+        "rideSeconds",
+        "rideSpeed",
+        "chairSpeed",
+        "chairSpacing",
+        "towerSpacing"
+      ],
+      "properties": {
+        "x": {
+          "type": "number",
+          "minimum": 0
+        },
+        "startY": {
+          "type": "number"
+        },
+        "routeBendDistance": {
+          "type": "number",
+          "minimum": 0
+        },
+        "rideSeconds": {
+          "type": "number",
+          "minimum": 0,
+          "exclusiveMinimum": 0
+        },
+        "rideSpeed": {
+          "type": "number",
+          "minimum": 0
+        },
+        "chairSpeed": {
+          "type": "number",
+          "minimum": 0
+        },
+        "chairSpacing": {
+          "type": "number",
+          "minimum": 0,
+          "exclusiveMinimum": 0
+        },
+        "towerSpacing": {
+          "type": "number",
+          "minimum": 0,
+          "exclusiveMinimum": 0
+        }
+      }
+    },
+    "spawnTables": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "human",
+        "wild",
+        "classic",
+        "forest",
+        "mushroom",
+        "mixed",
+        "treeVariants"
+      ],
+      "properties": {
+        "human": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1
+        },
+        "wild": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1
+        },
+        "classic": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1
+        },
+        "forest": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1
+        },
+        "mushroom": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1
+        },
+        "mixed": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1
+        },
+        "treeVariants": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1
+        }
+      }
+    },
+    "dialogue": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "fastTaunts",
+        "fastBumps",
+        "terrified",
+        "rescued",
+        "wolfCaught",
+        "cheers",
+        "skierBumps",
+        "personBumps",
+        "greetings",
+        "catAnnoyed",
+        "politeYeti"
+      ],
+      "properties": {
+        "fastTaunts": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1
+        },
+        "fastBumps": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1
+        },
+        "terrified": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1
+        },
+        "rescued": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1
+        },
+        "wolfCaught": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1
+        },
+        "cheers": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1
+        },
+        "skierBumps": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1
+        },
+        "personBumps": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1
+        },
+        "greetings": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1
+        },
+        "catAnnoyed": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1
+        },
+        "politeYeti": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1
+        }
+      }
+    },
+    "simulation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "stepSeconds",
+        "maxFrameSeconds"
+      ],
+      "properties": {
+        "stepSeconds": {
+          "type": "number",
+          "minimum": 0,
+          "exclusiveMinimum": 0.001,
+          "maximum": 0.05
+        },
+        "maxFrameSeconds": {
+          "type": "number",
+          "minimum": 0,
+          "exclusiveMinimum": 0
+        }
+      }
+    },
+    "timing": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "enabled",
+        "maxBonus",
+        "historyLimit",
+        "recordVersion",
+        "targets"
+      ],
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "maxBonus": {
+          "type": "number",
+          "minimum": 0
+        },
+        "historyLimit": {
+          "type": "integer",
+          "minimum": 0,
+          "exclusiveMinimum": 0
+        },
+        "recordVersion": {
+          "type": "number",
+          "minimum": 0
+        },
+        "targets": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "slalom",
+            "forest",
+            "rush",
+            "mushroom",
+            "polite",
+            "panic"
+          ],
+          "properties": {
+            "slalom": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "goldSeconds",
+                "parSeconds"
+              ],
+              "properties": {
+                "goldSeconds": {
+                  "type": "number",
+                  "minimum": 0,
+                  "exclusiveMinimum": 0
+                },
+                "parSeconds": {
+                  "type": "number",
+                  "minimum": 0,
+                  "exclusiveMinimum": 0
+                }
+              }
+            },
+            "forest": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "goldSeconds",
+                "parSeconds"
+              ],
+              "properties": {
+                "goldSeconds": {
+                  "type": "number",
+                  "minimum": 0,
+                  "exclusiveMinimum": 0
+                },
+                "parSeconds": {
+                  "type": "number",
+                  "minimum": 0,
+                  "exclusiveMinimum": 0
+                }
+              }
+            },
+            "rush": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "goldSeconds",
+                "parSeconds"
+              ],
+              "properties": {
+                "goldSeconds": {
+                  "type": "number",
+                  "minimum": 0,
+                  "exclusiveMinimum": 0
+                },
+                "parSeconds": {
+                  "type": "number",
+                  "minimum": 0,
+                  "exclusiveMinimum": 0
+                }
+              }
+            },
+            "mushroom": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "goldSeconds",
+                "parSeconds"
+              ],
+              "properties": {
+                "goldSeconds": {
+                  "type": "number",
+                  "minimum": 0,
+                  "exclusiveMinimum": 0
+                },
+                "parSeconds": {
+                  "type": "number",
+                  "minimum": 0,
+                  "exclusiveMinimum": 0
+                }
+              }
+            },
+            "polite": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "goldSeconds",
+                "parSeconds"
+              ],
+              "properties": {
+                "goldSeconds": {
+                  "type": "number",
+                  "minimum": 0,
+                  "exclusiveMinimum": 0
+                },
+                "parSeconds": {
+                  "type": "number",
+                  "minimum": 0,
+                  "exclusiveMinimum": 0
+                }
+              }
+            },
+            "panic": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "goldSeconds",
+                "parSeconds"
+              ],
+              "properties": {
+                "goldSeconds": {
+                  "type": "number",
+                  "minimum": 0,
+                  "exclusiveMinimum": 0
+                },
+                "parSeconds": {
+                  "type": "number",
+                  "minimum": 0,
+                  "exclusiveMinimum": 0
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Frostline game settings"
+}
