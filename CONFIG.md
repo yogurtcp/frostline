@@ -37,6 +37,7 @@ World coordinates increase rightward and downhill. `world.unitsPerMetre` default
 - Make wolves easier to hit: lower `wildlife.wolfKillKmh` (30 by default; the actual impact must be faster than the threshold).
 - Less harassment: lower `skiers.fastAimWeight`, increase `fastSpawnSeconds`, or lower `ambientFastChance` and `courseFastChance`.
 - More houses: increase `village.houseCount`; if placement space runs out, also expand `halfWidth`, `rows`, or spacing. `corridorOffsets` specifies the horizontal center of the ski route at each building band; its pattern repeats if there are more rows than entries. Houses never overwrite roads or each other, so a very large requested count can be limited by available space.
+- Town road surfaces: `village.mainRoadSurface` controls the main street and lift approach (`snow` by default, or `paved`). `snowRoadColors` contains the bank, packed-snow, highlight and track colors. Snow takes precedence over paving where routes cross.
 - Longer village: expand its row layout and move `stationY`, `roadEndY`, `choiceTitleY`, `choiceY`, and `endOffset` down together. Keep the choice row below the houses and the village end below the choices.
 - Fewer wolf encounters: lower `world.wolfShareOfPredators`, increase `wildlife.packSpawnSeparation`, or reduce `wildlife.packLimit`. Packs retain their configured 3–4 members.
 - Fewer rabbits: remove rabbit entries from `spawnTables.human` / `wild` or add more copies of other objects.

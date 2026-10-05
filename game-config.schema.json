@@ -3002,7 +3002,9 @@
         "corridorOffsets",
         "corridorEntryOffset",
         "corridorExitOffset",
-        "plazaRows"
+        "plazaRows",
+        "mainRoadSurface",
+        "snowRoadColors"
       ],
       "properties": {
         "houseCount": {
@@ -3184,6 +3186,21 @@
             "minimum": 0
           },
           "minItems": 1
+        },
+        "mainRoadSurface": {
+          "type": "string",
+          "enum": [
+            "snow",
+            "paved"
+          ]
+        },
+        "snowRoadColors": {
+          "type": "array",
+          "minItems": 4,
+          "maxItems": 4,
+          "items": {
+            "type": "string"
+          }
         }
       }
     },

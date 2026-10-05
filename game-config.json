@@ -728,6 +728,13 @@
       2,
       6,
       9
+    ],
+    "mainRoadSurface": "snow",
+    "snowRoadColors": [
+      "#d7e4df",
+      "#eaf2ec",
+      "#f7faf3",
+      "#d1e0db"
     ]
   },
   "wildlife": {
