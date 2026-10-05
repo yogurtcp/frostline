@@ -96,7 +96,7 @@ window.FROSTLINE_READY = (async () => {
     if(id==='slalom')state.objects=state.objects.filter(o=>!classicArea(o.x,o.y,70)||['gate','courseStart','finish','entrance','skier','boarder','personRed','personGreen','personYellow'].includes(o.type));
     const oldRoute=state.liftRoutes[state.liftRoutes.length-1];
     if(oldRoute&&oldRoute.y1>startY)oldRoute.y1=startY;
-    state.liftRoutes.push({x0:oldRoute?liftX(oldRoute,startY):run.x+S.lift.x,x1:run.x+S.village.stationX,y0:startY,y1:state.plannedTown.stationY});
+    state.liftRoutes.push({x0:oldRoute?liftX(oldRoute,startY):run.x+S.lift.x,x1:state.plannedTown.stationX,y0:startY,y1:state.plannedTown.stationY});
     announce(s.name.toUpperCase(),`${s.length} m ahead${s.fee?(paid?`  ·  ${s.fee} coins paid`:'  ·  Unpaid adventure!'):'  ·  Follow the flags.'}`,s.color);
     if(run.objective==='mushrooms')announce('SPORE DECISIONS',`COLLECT ${Math.ceil(run.totalMushrooms*S.mushroomHunt.minimumFraction)}/${run.totalMushrooms} MUSHROOMS - THEN FINISH${s.fee&&paid?' · '+s.fee+' PAID':''}`,s.color,5);
     if(!paid)triggerAmbush();else if(s.kind==='slow'){addChasers('slow',S.politePursuit.count,run);announce('POLITE PURSUIT',`${S.politePursuit.count} SLOW YETIS - THEY FOLLOW YOU OFF PISTE`,s.color,5);}else if(s.kind==='fast')addChasers('fast',1);
@@ -197,7 +197,7 @@ window.FROSTLINE_READY = (async () => {
     const push=n=>{open.push(n);let i=open.length-1;while(i){const parent=(i-1)>>1;if(open[parent].score<=n.score)break;open[i]=open[parent];i=parent;}open[i]=n;};
     const pop=()=>{const best=open[0],tail=open.pop();if(open.length){let i=0;while(i*2+1<open.length){let child=i*2+1;if(child+1<open.length&&open[child+1].score<open[child].score)child++;if(open[child].score>=tail.score)break;open[i]=open[child];i=child;}open[i]=tail;}return best;};
     push({...a,cost:0,score:0});
-    const blocked=n=>{const p=world(n);return Math.abs(p.x-town.x)>V.halfWidth||p.y<town.origin+V.roadStartY-g||p.y>town.origin+V.roadEndY+g||houses.some(h=>houseClearance(h,p.x,p.y)<V.laneWidth/2+5);};
+    const blocked=n=>{const p=world(n);return Math.abs(p.x-town.x)>V.halfWidth||p.y<town.origin+V.roadStartY-g||p.y>town.roadEndY+g||houses.some(h=>houseClearance(h,p.x,p.y)<V.laneWidth/2+5);};
     let found=null;
     for(let count=0;open.length&&count<V.pathMaxNodes;count++){
       const n=pop();if(n.cost>seen.get(key(n.x,n.y)))continue;
@@ -213,29 +213,56 @@ window.FROSTLINE_READY = (async () => {
     return points.filter((p,i)=>!i||i===points.length-1||Math.abs((p.x-points[i-1].x)*(points[i+1].y-p.y)-(p.y-points[i-1].y)*(points[i+1].x-p.x))>.1);
   }
   function makeVillage(origin,base=state.p.x,activate=true) {
-    const V=S.village,town={origin,x:base,end:origin+V.endOffset,stationY:origin+V.stationY};state.villages.push(town);
+    const V=S.village,R=V.randomization,varied=R.enabled;
+    // Build once, below the viewport. A dedicated generator keeps each layout stable afterwards.
+    const layoutSeed=R.seed?(R.seed+Math.imul(state.villages.length+1,2654435761))>>>0:Math.floor(Math.random()*4294967296)>>>0;
+    let layoutState=layoutSeed;
+    const rand=()=>{layoutState=(Math.imul(layoutState,1664525)+1013904223)>>>0;return layoutState/4294967296;};
+    const between=(a,b)=>a+rand()*(b-a),choose=values=>values[Math.floor(rand()*values.length)];
+    const shuffled=values=>{const out=[...values];for(let i=out.length-1;i>0;i--){const j=Math.floor(rand()*(i+1));[out[i],out[j]]=[out[j],out[i]];}return out;};
+    const rowYs=[origin+V.firstRow+(varied?between(-R.firstRowJitter,R.firstRowJitter):0)];
+    for(let row=1;row<V.rows;row++)rowYs.push(rowYs[row-1]+Math.max(V.corridorEntryOffset+V.corridorExitOffset+V.roadClearance*2,V.rowSpacing*(varied?between(...R.rowSpacingScale):1)));
+    const lengthChange=rowYs.at(-1)-(origin+V.firstRow+(V.rows-1)*V.rowSpacing);
+    const town={origin,x:base,end:origin+V.endOffset+lengthChange,roadEndY:origin+V.roadEndY+lengthChange,layoutSeed};
+    town.stationX=base+(varied?choose([-1,1]):1)*(V.stationX+(varied?between(-R.stationJitterX,R.stationJitterX):0));
+    town.stationY=clamp(origin+V.stationY+lengthChange+(varied?between(-R.stationJitterY,R.stationJitterY):0),rowYs.at(-1)+V.stationClearance,town.roadEndY-60);
+    state.villages.push(town);
     if(activate){state.zone={kind:'village',origin,x:base,end:town.end};state.transitions.push({kind:'village',y:state.p.y});}
     entity('villageTitle',base,origin+10,{r:0,width:300});
-    // Layout follows the ski route; buildings form its walls instead of random obstacles.
-    const rowYs=Array.from({length:V.rows},(_,i)=>origin+V.firstRow+i*V.rowSpacing);
-    const centers=rowYs.map((_,i)=>base+V.corridorOffsets[i%V.corridorOffsets.length]);
+    const phase=varied?Math.floor(rand()*V.corridorOffsets.length):0,mirror=varied?choose([-1,1]):1,reverse=varied?choose([-1,1]):1,scale=varied?between(...R.corridorScale):1;
+    const centers=[],halfWidths=[],styles=[];
+    const maxOffset=Math.max(0,V.halfWidth-V.corridorHalfWidth-V.houseWidth[1]);
+    for(let row=0;row<V.rows;row++){
+      const index=((phase+row*reverse)%V.corridorOffsets.length+V.corridorOffsets.length)%V.corridorOffsets.length;
+      let offset=V.corridorOffsets[index]*mirror*scale+(varied?between(-R.corridorJitter,R.corridorJitter):0);
+      if(varied&&row)offset=clamp(offset,centers[row-1]-base-R.maxBendStep,centers[row-1]-base+R.maxBendStep);
+      centers.push(base+clamp(offset,-maxOffset,maxOffset));halfWidths.push(V.corridorHalfWidth*(varied?between(...R.corridorWidthScale):1));styles.push(varied?Math.floor(rand()*S.houseAnimation.trimRGB.length):row%4);
+    }
+    const plazaCount=varied?Math.max(0,V.plazaRows.length+Math.floor(between(-R.plazaCountVariation,R.plazaCountVariation+1))):V.plazaRows.length;
+    const plazaRows=[];
+    if(varied){for(const row of shuffled(Array.from({length:Math.max(0,V.rows-2)},(_,i)=>i+1))){if(plazaRows.length>=plazaCount)break;if(plazaRows.every(other=>Math.abs(other-row)>1))plazaRows.push(row);}}
+    else plazaRows.push(...V.plazaRows.filter(row=>row<V.rows));
     const main={surface:V.mainRoadSurface,width:V.mainRoadWidth,points:[{x:base,y:origin+V.roadStartY}]};
     for(let row=0;row<V.rows;row++)main.points.push({x:centers[row],y:rowYs[row]-V.corridorEntryOffset},{x:centers[row],y:rowYs[row]+V.corridorExitOffset});
-    main.points.push({x:base,y:origin+V.roadEndY});
-    const station={x:base+V.stationX,y:town.stationY};
+    main.points.push({x:base,y:town.roadEndY});
+    town.route=main.points;town.plazaRows=plazaRows;
+    const station={x:town.stationX,y:town.stationY};
     const nearest=main.points.reduce((a,b)=>Math.hypot(a.x-station.x,a.y-station.y)<Math.hypot(b.x-station.x,b.y-station.y)?a:b);
     const branch={surface:V.mainRoadSurface,width:V.mainRoadWidth,points:[nearest,{x:station.x,y:nearest.y},station]},roads=[main,branch],houses=[];
+    const houseCount=Math.round(V.houseCount*(varied?between(...R.houseCountScale):1));
     // Fill the inner walls along the whole route first, then grow outward into blocks.
     const rings=Math.ceil(V.halfWidth*2/V.housePitch);
-    for(let ring=0;ring<rings&&houses.length<V.houseCount;ring++)for(let row=0;row<V.rows&&houses.length<V.houseCount;row++)for(const side of [-1,1]){
-      if(houses.length>=V.houseCount)break;
-      const style=(row+ring+(side>0?1:0))%4,width=mix(V.houseWidth[0],V.houseWidth[1],((row*7+ring*3+(side>0?2:0))%5)/4);
-      const x=centers[row]+side*(V.corridorHalfWidth+V.houseWidth[1]*V.houseFootWidthRatio+ring*V.housePitch),y=rowYs[row];
+    for(let ring=0;ring<rings&&houses.length<houseCount;ring++)for(const row of (varied?shuffled(Array.from({length:V.rows},(_,i)=>i)):Array.from({length:V.rows},(_,i)=>i)))for(const side of [-1,1]){
+      if(houses.length>=houseCount)break;
+      if(varied&&ring>0&&rand()<R.outerGapChance)continue;
+      const style=varied?(rand()<.7?styles[row]:Math.floor(rand()*S.houseAnimation.trimRGB.length)):(row+ring+(side>0?1:0))%4;
+      const width=varied?between(...V.houseWidth):mix(V.houseWidth[0],V.houseWidth[1],((row*7+ring*3+(side>0?2:0))%5)/4);
+      const x=centers[row]+side*(halfWidths[row]+V.houseWidth[1]*V.houseFootWidthRatio+ring*V.housePitch+(varied?between(0,R.houseJitterX):0)),y=rowYs[row]+(varied?between(-R.houseJitterY,R.houseJitterY):0);
       const candidate={x,y,width},hw=width*V.houseFootWidthRatio,hh=width*V.houseFootHeightRatio;
       if(Math.abs(x-base)+hw>V.halfWidth||Math.hypot(x-station.x,y-station.y)<V.stationClearance+hw)continue;
       if(houses.some(h=>Math.abs(x-h.x)<(width+h.width)*V.houseFootWidthRatio+V.houseGap&&Math.abs((y-hh)-(h.y-h.width*V.houseFootHeightRatio))<(width+h.width)*V.houseFootHeightRatio+V.houseGap))continue;
       if(roads.some(r=>r.points.some((b,i)=>{if(!i)return false;const a=r.points[i-1],n=Math.ceil(Math.hypot(b.x-a.x,b.y-a.y)/12);for(let j=0;j<=n;j++)if(houseClearance(candidate,mix(a.x,b.x,j/(n||1)),mix(a.y,b.y,j/(n||1)))<r.width/2+V.roadClearance)return true;return false;})))continue;
-      houses.push(entity((row+ring)%3?'rental':'lodge',x,y,{width,r:hw,town,houseStyle:style}));
+      houses.push(entity(varied?(rand()<.35?'lodge':'rental'):(row+ring)%3?'rental':'lodge',x,y,{width,r:hw,town,houseStyle:style}));
     }
     const network=main.points.slice();
     for(const h of houses){
@@ -244,11 +271,15 @@ window.FROSTLINE_READY = (async () => {
       if(points){points.unshift({x:h.x,y:h.y+14});roads.push({surface:'paved',width:V.laneWidth,points});network.push(...points.slice(1));}
     }
     state.roads.push(...roads);
-    for(const row of V.plazaRows){if(row>=V.rows)continue;const x=centers[row],y=rowYs[row]+V.corridorExitOffset;
-      for(const side of [-1,1])entity('lamp',x+side*(V.corridorHalfWidth-22),y,{width:20,r:6,town});
-      entity('bunting',x,y-95,{width:V.corridorHalfWidth*2,r:0,town});
-      entity('bench',x+V.corridorHalfWidth-26,y+55,{width:46,r:9,town});
-      entity('snowman',x-V.corridorHalfWidth+24,y+58,{width:28,r:9,town});
+    const decorate=(type,x,y,extra)=>{
+      if(roads.some(r=>r.surface==='snow'&&roadDistance(r,x,y)<r.width/2+extra.r+12)||houses.some(h=>houseClearance(h,x,y)<extra.r+8))return;
+      entity(type,x,y,{...extra,town});
+    };
+    for(const row of plazaRows){const x=centers[row],y=rowYs[row]+V.corridorExitOffset,half=halfWidths[row],side=varied?choose([-1,1]):1;
+      for(const sign of [-1,1])decorate('lamp',x+sign*(half-22),y,{width:20,r:6});
+      entity('bunting',x,y-95,{width:half*2,r:0,town});
+      decorate('bench',x+side*(half-26),y+55,{width:46,r:9});
+      decorate('snowman',x-side*(half-24),y+58,{width:28,r:9});
     }
     for(let i=0;i<V.walkers;i++){
       const path=pick(roads).points,at=Math.floor(random()*path.length),p=path[at];
@@ -258,8 +289,8 @@ window.FROSTLINE_READY = (async () => {
     for(let i=0;i<V.dogCount;i++){const p=pick(main.points);entity('dog',p.x+45,p.y,{width:34,r:10,roam:15,town});}
     for(let i=0;i<V.skierCount;i++){const p=pick(main.points);entity('skier',p.x,p.y,{width:42,r:12,vy:30,vx:0,town});}
     entity('lift',station.x,station.y,{width:174,r:0,half:73,used:false,town});entity('liftLabel',station.x,station.y+55,{r:0,width:160,town});
-    S.race.villageChoices.forEach((id,i)=>entrance(id,base+(i-(S.race.villageChoices.length-1)/2)*V.choiceSpacing,origin+V.choiceY));
-    entity('trailChoices',base,origin+V.choiceTitleY,{r:0,width:400});return town;
+    S.race.villageChoices.forEach((id,i)=>entrance(id,base+(i-(S.race.villageChoices.length-1)/2)*V.choiceSpacing,origin+V.choiceY+lengthChange));
+    entity('trailChoices',base,origin+V.choiceTitleY+lengthChange,{r:0,width:400});return town;
   }
   function drawRoads(){
     const V=S.village,unit=V.roadTileSize;

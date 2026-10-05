@@ -735,7 +735,36 @@
       "#eaf2ec",
       "#f7faf3",
       "#d1e0db"
-    ]
+    ],
+    "randomization": {
+      "enabled": true,
+      "seed": 0,
+      "corridorScale": [
+        0.8,
+        1.2
+      ],
+      "corridorJitter": 45,
+      "maxBendStep": 270,
+      "rowSpacingScale": [
+        0.9,
+        1.15
+      ],
+      "firstRowJitter": 25,
+      "corridorWidthScale": [
+        0.92,
+        1.22
+      ],
+      "houseCountScale": [
+        0.84,
+        1.06
+      ],
+      "houseJitterX": 18,
+      "houseJitterY": 24,
+      "outerGapChance": 0.16,
+      "plazaCountVariation": 1,
+      "stationJitterX": 65,
+      "stationJitterY": 55
+    }
   },
   "wildlife": {
     "activeRadius": 2100,

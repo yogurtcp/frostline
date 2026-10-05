@@ -18,7 +18,7 @@ World coordinates increase rightward and downhill. `world.unitsPerMetre` default
 | `controls` | Drag dead zone, drag scale, repeat interval and steering angle steps |
 | `jump` | Manual/ramp/mushroom/rainbow airtime, height scaling, spin, boosts and cooldown |
 | `world` | Random seed, terrain density, chunk sizes, cleanup distance, course sway, ice sizes and predator frequency |
-| `village` | House count, corridor offsets, planned building bands, footprints, path widths/routing, squares, walkers, pets, lift and entry positions |
+| `village` | House count, corridor offsets, layout randomization, building bands, footprints, path widths/routing, squares, walkers, pets, lift and entry positions |
 | `houseAnimation` | Chimney smoke, opening doors, roof snow, awning movement, window flicker and muted trim palettes |
 | `wildlife` | Impact speed/angle thresholds, defeated-predator fade duration, pack sizes, detection distances, chase/flee speeds, predator meals, avoidance, rescue reactions, impact thresholds and cat behavior |
 | `pedestrians` | Stroll radius, walking speeds and durations, pauses, obstacle clearance, spectator range and step animation |
@@ -39,7 +39,8 @@ World coordinates increase rightward and downhill. `world.unitsPerMetre` default
 - Bear/yeti impacts: `wildlife.bearKnockoutKmh` and `yetiKnockoutKmh` are 65/85; `bearMaxImpactAngleDegrees` and `yetiMaxImpactAngleDegrees` are 45/10. Speed alone cannot override the angle limit. Successful impacts kill the animal; it fades over `predatorFadeSeconds`.
 - Make wolves easier to hit: lower `wildlife.wolfKillKmh` (30 by default; the actual impact must be faster than the threshold).
 - Less harassment: lower `skiers.fastAimWeight`, increase `fastSpawnSeconds`, or lower `ambientFastChance` and `courseFastChance`.
-- More houses: increase `village.houseCount`; if placement space runs out, also expand `halfWidth`, `rows`, or spacing. `corridorOffsets` specifies the horizontal center of the ski route at each building band; its pattern repeats if there are more rows than entries. Houses never overwrite roads or each other, so a very large requested count can be limited by available space.
+- More houses: increase `village.houseCount`; if placement space runs out, also expand `halfWidth`, `rows`, or spacing. `corridorOffsets` provides the baseline horizontal route at each building band; randomization mirrors, reverses, shifts, scales and perturbs this pattern. Houses never overwrite roads or each other, so a very large requested count can be limited by available space.
+- Different towns: `village.randomization` controls bend/width variation, row spacing, house counts and jitter, courtyard gaps, plaza count, and lift-station offsets. `enabled: true` and `seed: 0` generate fresh layouts each time a village is created; layouts stay fixed while you ski through them. A positive `seed` makes the layout sequence reproducible from the summit (resident activity remains independent). Set `enabled: false` for the original planned arrangement. Changes to row spacing automatically shift the town exit, lift, and course-choice row together.
 - Town road surfaces: `village.mainRoadSurface` controls the main street and lift approach (`snow` by default, or `paved`). `snowRoadColors` contains the bank, packed-snow, highlight and track colors. Snow takes precedence over paving where routes cross.
 - Longer village: expand its row layout and move `stationY`, `roadEndY`, `choiceTitleY`, `choiceY`, and `endOffset` down together. Keep the choice row below the houses and the village end below the choices.
 - Fewer wolf encounters: lower `world.wolfShareOfPredators`, increase `wildlife.packSpawnSeparation`, or reduce `wildlife.packLimit`. Packs retain their configured 3–4 members.

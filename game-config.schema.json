@@ -3006,7 +3006,8 @@
         "corridorExitOffset",
         "plazaRows",
         "mainRoadSurface",
-        "snowRoadColors"
+        "snowRoadColors",
+        "randomization"
       ],
       "properties": {
         "houseCount": {
@@ -3202,6 +3203,110 @@
           "maxItems": 4,
           "items": {
             "type": "string"
+          }
+        },
+        "randomization": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "enabled",
+            "seed",
+            "corridorScale",
+            "corridorJitter",
+            "maxBendStep",
+            "rowSpacingScale",
+            "firstRowJitter",
+            "corridorWidthScale",
+            "houseCountScale",
+            "houseJitterX",
+            "houseJitterY",
+            "outerGapChance",
+            "plazaCountVariation",
+            "stationJitterX",
+            "stationJitterY"
+          ],
+          "properties": {
+            "enabled": {
+              "type": "boolean"
+            },
+            "seed": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "corridorScale": {
+              "type": "array",
+              "minItems": 2,
+              "maxItems": 2,
+              "items": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              }
+            },
+            "corridorJitter": {
+              "type": "number",
+              "minimum": 0
+            },
+            "maxBendStep": {
+              "type": "number",
+              "minimum": 0,
+              "exclusiveMinimum": 0
+            },
+            "rowSpacingScale": {
+              "type": "array",
+              "minItems": 2,
+              "maxItems": 2,
+              "items": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              }
+            },
+            "firstRowJitter": {
+              "type": "number",
+              "minimum": 0
+            },
+            "corridorWidthScale": {
+              "type": "array",
+              "minItems": 2,
+              "maxItems": 2,
+              "items": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              }
+            },
+            "houseCountScale": {
+              "type": "array",
+              "minItems": 2,
+              "maxItems": 2,
+              "items": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              }
+            },
+            "houseJitterX": {
+              "type": "number",
+              "minimum": 0
+            },
+            "houseJitterY": {
+              "type": "number",
+              "minimum": 0
+            },
+            "outerGapChance": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "plazaCountVariation": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "stationJitterX": {
+              "type": "number",
+              "minimum": 0
+            },
+            "stationJitterY": {
+              "type": "number",
+              "minimum": 0
+            }
           }
         }
       }
