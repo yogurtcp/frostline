@@ -99,7 +99,7 @@ window.FROSTLINE_READY = (async () => {
     state.liftRoutes.push({x0:oldRoute?liftX(oldRoute,startY):run.x+S.lift.x,x1:run.x+S.village.stationX,y0:startY,y1:state.plannedTown.stationY});
     announce(s.name.toUpperCase(),`${s.length} m ahead${s.fee?(paid?`  ·  ${s.fee} coins paid`:'  ·  Unpaid adventure!'):'  ·  Follow the flags.'}`,s.color);
     if(run.objective==='mushrooms')announce('SPORE DECISIONS',`COLLECT ${Math.ceil(run.totalMushrooms*S.mushroomHunt.minimumFraction)}/${run.totalMushrooms} MUSHROOMS - THEN FINISH${s.fee&&paid?' · '+s.fee+' PAID':''}`,s.color,5);
-    if(!paid)triggerAmbush();else if(s.kind==='slow')addChasers('slow',1);else if(s.kind==='fast')addChasers('fast',1);
+    if(!paid)triggerAmbush();else if(s.kind==='slow'){addChasers('slow',S.politePursuit.count,run);announce('POLITE PURSUIT',`${S.politePursuit.count} SLOW YETIS - THEY FOLLOW YOU OFF PISTE`,s.color,5);}else if(s.kind==='fast')addChasers('fast',1);
     state.transitions.push({kind:'start',id,y:p.y,paid});beep(650,.14);return true;
   }
 
@@ -123,12 +123,12 @@ window.FROSTLINE_READY = (async () => {
     o.collected=true;o.r=0;run.collected++;run.points+=S.mushroomHunt.pointsEach;
     burst(o.x,o.y,C.gold,8);say('+'+S.mushroomHunt.pointsEach,o,.7);beep(660+(run.collected%5)*65,.06);
   }
-  function addChasers(kind,count) {
-    const speed=topSpeed()*S.chasers.speedRatios[kind];
+  function addChasers(kind,count,chaseRun=null) {
+    const speed=topSpeed()*(chaseRun?S.politePursuit.speedRatio:S.chasers.speedRatios[kind]);
     for(let i=0;i<count;i++){
       let x=state.p.x+range(-90,90),y=state.cam.y-S.chasers.spawnAbove-i*S.chasers.spawnSpacing;
       if(['fast','slow','bear'].includes(kind))while(humanArea(x,y))x+=(i%2?-1:1)*440;
-      state.chasers.push({kind,x,y,speed,phase:range(0,6),expires:Infinity,leaving:false,talkAt:clock+range(4,8)});
+      state.chasers.push({kind,x,y,speed,chaseRun,id:random(),phase:range(0,6),expires:Infinity,leaving:false,talkAt:clock+range(4,8)});
     }
   }
 
@@ -139,7 +139,7 @@ window.FROSTLINE_READY = (async () => {
     state.course.ambush=kind;
   }
   function formatTime(seconds){const cs=Math.max(0,Math.round(seconds*100));return `${Math.floor(cs/6000)}:${String(Math.floor(cs/100)%60).padStart(2,'0')}.${String(cs%100).padStart(2,'0')}`;}
-  function timingSignature(id){const c=stages[id],rules=[S.timing.recordVersion,c.length,c.spacing,c.pace,S.physics,S.race,S.controls,S.jump,S.world.courseSway,S.world.courseWavelength];if(c.kind==='mushroom')rules.push(S.mushroomHunt);return JSON.stringify(rules);}
+  function timingSignature(id){const c=stages[id],rules=[S.timing.recordVersion,c.length,c.spacing,c.pace,S.physics,S.race,S.controls,S.jump,S.world.courseSway,S.world.courseWavelength];if(c.kind==='mushroom')rules.push(S.mushroomHunt);if(c.kind==='slow')rules.push(S.politePursuit);return JSON.stringify(rules);}
   function courseRecord(id){const saved=state.times[id];return saved?.signature===timingSignature(id)&&Number.isFinite(saved.bestSeconds)&&saved.bestSeconds>0?saved:null;}
   function creditRun(caught=false) {
     if(caught){die('YETI');return;}
@@ -428,8 +428,9 @@ window.FROSTLINE_READY = (async () => {
 
   function knockOut(o,kind){
     const p=state.p,threshold=kind==='bear'?S.wildlife.bearKnockoutKmh:['fast','slow','lurker'].includes(kind)?S.wildlife.yetiKnockoutKmh:Infinity;
-    if(p.air>0||p.fall||p.awaitingInput||p.speed*S.physics.hudKmhPerSpeed<=threshold||(o.x-p.x)*p.vx+(o.y-p.y)*p.vy<=0)return false;
-    o.stunnedUntil=clock+S.wildlife.knockoutSeconds;o.running=false;p.speed*=S.wildlife.knockoutSpeedRetention;p.shield=S.wildlife.knockoutShieldSeconds;
+    const maxAngle=kind==='bear'?S.wildlife.bearMaxImpactAngleDegrees:S.wildlife.yetiMaxImpactAngleDegrees,impactAngle=Math.atan2(Math.abs(p.vx),p.vy)*180/Math.PI;
+    if(o.dead||impactAngle>maxAngle||p.air>0||p.fall||p.awaitingInput||p.speed*S.physics.hudKmhPerSpeed<=threshold||(o.x-p.x)*p.vx+(o.y-p.y)*p.vy<=0)return false;
+    o.dead=true;o.r=0;o.fadeUntil=clock+S.wildlife.predatorFadeSeconds;o.running=false;p.speed*=S.wildlife.knockoutSpeedRetention;p.shield=S.wildlife.knockoutShieldSeconds;
     burst(o.x,o.y,C.gold,12);say(kind==='bear'?'BEAR DOWN!':'YETI DOWN!',o);beep(190,.12,'triangle');return true;
   }
   function hit(o) {
@@ -562,7 +563,7 @@ window.FROSTLINE_READY = (async () => {
       if(o.type==='lift'&&!o.used&&previous.y<o.y&&p.y>=o.y&&Math.abs(p.x-o.x)<o.half){o.used=true;state.liftTimer=S.lift.rideSeconds;p.speed=0;announce('UP WE GO','Next stop: the summit.',C.teal,3);}
       if(o.r>0&&Math.abs(o.y-p.y)<Math.max(130,o.width)){const d=Math.hypot(p.x-o.x,(p.y-o.y)*.85);if(obstacleClearance(o,p.x,p.y)<S.physics.playerRadius)hit(o);else if(o.type.startsWith('person')&&!o.greeted&&d<85){o.greeted=true;say(pick(S.dialogue.greetings),o);}}
     }
-    if(state.course){const off=Math.abs(p.x-centerAt(p.y))>S.race.offPisteDistance;if(off&&!state.course.left){state.course.left=true;for(const c of state.chasers)c.expires=p.y+(c.kind==='dog'?2100:220);if(state.course.violation)announce('OFF PISTE',state.course.ambush==='dog'?'The dogs are still very interested.':'Ski patrol has jurisdiction issues.',C.blue,3);}const run=state.course;
+    if(state.course){const off=Math.abs(p.x-centerAt(p.y))>S.race.offPisteDistance;if(off&&!state.course.left){state.course.left=true;for(const c of state.chasers)if(c.chaseRun!==state.course)c.expires=p.y+(c.kind==='dog'?2100:220);if(state.course.violation)announce('OFF PISTE',state.course.ambush==='dog'?'The dogs are still very interested.':'Ski patrol has jurisdiction issues.',C.blue,3);}const run=state.course;
       if(previous.y<run.endY&&p.y>=run.endY){
         const crossX=mix(previous.x,p.x,(run.endY-previous.y)/(p.y-previous.y||1));
         if(Math.abs(crossX-run.x)<run.finishHalf){run.time=Math.max(0,run.time-dt*(1-clamp((run.endY-previous.y)/(p.y-previous.y||1),0,1)));run.finishPassed=true;creditRun();}
@@ -629,10 +630,10 @@ window.FROSTLINE_READY = (async () => {
     }
   }
   let houseCacheTime=-1,houseCache=[];
-  function travel(o,angle,speed,dt,animal=false){
+  function travel(o,angle,speed,dt,animal=false,avoidTowns=false){
     if(houseCacheTime!==clock){houseCache=state.objects.filter(h=>h.type==='lodge'||h.type==='rental');houseCacheTime=clock;}
     const A=S.wildlife,houses=houseCache;
-    const valid=(x,y)=>!patchAt(x,y)&&!houses.some(h=>houseClearance(h,x,y)<(o.r||10)+5)&&(!animal||!classicArea(x,y,35)&&(!(o.type==='bear'||(['fox','wolf'].includes(o.type)&&!o.humanVisitor))||!humanArea(x,y)));
+    const valid=(x,y)=>(!avoidTowns||!insideTown(x,y))&&!patchAt(x,y)&&!houses.some(h=>houseClearance(h,x,y)<(o.r||10)+5)&&(!animal||!classicArea(x,y,35)&&(!(o.type==='bear'||(['fox','wolf'].includes(o.type)&&!o.humanVisitor))||!humanArea(x,y)));
     const probe=Math.max(A.avoidProbeDistance,speed*A.avoidLookaheadSeconds);
     const clear=a=>[Math.min(probe,speed*dt),probe*.5,probe].every(d=>valid(o.x+Math.cos(a)*d,o.y+Math.sin(a)*d));
     let heading=o.avoidUntil>clock?o.avoidHeading:angle;
@@ -740,21 +741,34 @@ window.FROSTLINE_READY = (async () => {
   function updateChasers(dt) {
     const p=state.p;if(!state.started)return;
     for(const c of state.chasers){
+      if(c.dead)continue;
+      // Course-owned pursuers have no distance leash; retire only when their run ends.
+      if(c.chaseRun&&c.chaseRun!==state.course){c.leaving=true;c.y-=c.speed*dt;continue;}
+      const pursuit=!!c.chaseRun&&c.chaseRun===state.course;
+      if(pursuit)c.expires=Infinity;
       if(c.stunnedUntil>clock)continue;
       if(p.y>c.expires){c.leaving=true;c.speed*=.97;continue;}
       const dx=p.x-c.x,dy=p.y-c.y,len=Math.hypot(dx,dy)||1;
       const lethal=['fast','slow','bear'].includes(c.kind),nx=c.x+dx/len*c.speed*dt,ny=c.y+dy/len*c.speed*dt;
-      if(lethal&&(humanArea(p.x,p.y)||humanArea(nx,ny)))continue;
-      c.x=nx;c.y=ny;
+      if(pursuit){
+        if(insideTown(p.x,p.y))continue;
+        // The course's own yetis can enter pistes and follow far into the wilderness.
+        // Reuse committed avoidance turns to route around towns, houses and lakes.
+        travel(c,Math.atan2(dy,dx),c.speed,dt,false,true);
+      }else{
+        if(lethal&&(humanArea(p.x,p.y)||humanArea(nx,ny)))continue;
+        c.x=nx;c.y=ny;
+      }
       if(c.kind==='slow'&&clock>c.talkAt){say(pick(S.dialogue.politeYeti),c);c.talkAt=clock+S.chasers.slowTalkSeconds;}
-      if(len<S.chasers.knockoutDistance&&knockOut(c,c.kind))continue;
-      if(len<S.chasers.captureDistance&&p.shield<=0&&p.air<=0){
+      const contactDistance=Math.hypot(c.x-p.x,c.y-p.y);
+      if(contactDistance<S.chasers.knockoutDistance&&knockOut(c,c.kind))continue;
+      if(contactDistance<S.chasers.captureDistance&&p.shield<=0&&p.air<=0){
         if(p.awaitingInput&&!lethal)continue;
-        if(['fast','slow','bear'].includes(c.kind)){die(c.kind==='bear'?'BEAR':'YETI');break;}
-        crash(null,S.chasers.patrolFallSeconds);announce(c.kind==='dog'?'AGGRESSIVELY LOVED':'A WORD FROM SKI PATROL',c.kind==='dog'?'Covered in slobber. Wallet intact.':'They are very disappointed.',C.red,3);for(const other of state.chasers)other.expires=p.y-1;burst(p.x,p.y,C.ice,20);break;
+        if(['fast','slow','bear'].includes(c.kind)){if(state.course&&!p.awaitingInput)state.course.hits++;burst(p.x,p.y,C.ice,12);die(c.kind==='bear'?'BEAR':'YETI');break;}
+        crash(null,S.chasers.patrolFallSeconds);announce(c.kind==='dog'?'AGGRESSIVELY LOVED':'A WORD FROM SKI PATROL',c.kind==='dog'?'Covered in slobber. Wallet intact.':'They are very disappointed.',C.red,3);for(const other of state.chasers)if(!other.chaseRun||other.chaseRun!==state.course)other.expires=p.y-1;burst(p.x,p.y,C.ice,20);break;
       }
     }
-    state.chasers=state.chasers.filter(c=>!c.leaving||Math.abs(c.y-p.y)<H*.7);
+    state.chasers=state.chasers.filter(c=>(!c.dead||clock<c.fadeUntil)&&(!c.leaving||Math.abs(c.y-p.y)<H*.7));
   }
 
   function box(x,y,w,h,color) {ctx.fillStyle=color;ctx.fillRect(Math.round(x),Math.round(y),Math.round(w),Math.round(h));}
@@ -925,7 +939,7 @@ window.FROSTLINE_READY = (async () => {
   }
   function drawObject(o) {
     const s=screen(o.x,o.y);if(s.x<-230||s.x>W+230||s.y<-80||s.y>H+230)return;
-    if(o.dead){sprite('wolf',s.x,s.y,o.width,{rotate:Math.PI/2,alpha:clamp((o.fadeUntil-clock)/S.wildlife.wolfFadeSeconds,0,1)});return;}
+    if(o.dead){ctx.save();ctx.globalAlpha=clamp((o.fadeUntil-clock)/(o.type==='wolf'?S.wildlife.wolfFadeSeconds:S.wildlife.predatorFadeSeconds),0,1);if(o.type==='wolf')sprite('wolf',s.x,s.y,o.width,{rotate:Math.PI/2});else drawKnockedOut(o,s,o.type);ctx.restore();return;}
     if(o.npcFallUntil>clock){sprite('fall',s.x,s.y,o.width);return;}
     if(o.fearUntil>clock)text('!',s.x,s.y-o.width*ZOOM-10,11,C.red);
     if(o.type==='ice'||o.type==='awakened'||o.eaten||o.collected)return;
@@ -1019,7 +1033,7 @@ window.FROSTLINE_READY = (async () => {
   }
 
   function drawChaser(c) {
-    if(c.stunnedUntil>clock){drawKnockedOut(c,screen(c.x,c.y),c.kind);return;}
+    if(c.dead||c.stunnedUntil>clock){ctx.save();if(c.dead)ctx.globalAlpha=clamp((c.fadeUntil-clock)/S.wildlife.predatorFadeSeconds,0,1);drawKnockedOut(c,screen(c.x,c.y),c.kind);ctx.restore();return;}
     const s=screen(c.x,c.y),bob=Math.sin(clock*(c.kind==='slow'?5:9)+c.phase)*2;
     if(c.kind==='bear'){sprite(Math.sin(clock*6)>.2?'bearRun':'bear',s.x,s.y+bob,48,{flip:c.x>state.p.x});return;}
     if(c.kind==='dog')sprite(Math.sin(clock*8+c.phase)>.3?'dog':'dogLeft',s.x,s.y+bob,39);
@@ -1067,7 +1081,7 @@ window.FROSTLINE_READY = (async () => {
     }
     const msg=state.messages[state.messages.length-1];
     if(msg){const alpha=clamp((msg.until-clock)*2,0,1)*clamp((clock-msg.start)*5,0,1);ctx.globalAlpha=alpha;const width=Math.min(W-18,Math.max(msg.title.length*6,msg.detail.length*6)+26),x=(W-width)/2;box(x+2,83,width,49,'#bfd2cb');box(x,81,width,49,'#fbf7e9');box(x,81,3,49,msg.color);text(msg.title,W/2,98,12,msg.color);text(msg.detail,W/2,116,8,C.ink);ctx.globalAlpha=1;}
-    const nearby=state.chasers.filter(c=>!c.leaving);if(nearby.length){const nearest=nearby.reduce((a,b)=>Math.hypot(a.x-p.x,a.y-p.y)<Math.hypot(b.x-p.x,b.y-p.y)?a:b);const gap=Math.round(Math.hypot(nearest.x-p.x,nearest.y-p.y)/PX_PER_M);const sp=screen(nearest.x,nearest.y);if(sp.y<75)text(`↑ ${nearest.kind==='dog'?'DOGS':nearest.kind==='patrol'?'PATROL':'YETI'}  ${gap} m`,W/2,153,10,C.red);}
+    const nearby=state.chasers.filter(c=>!c.leaving&&!c.dead);if(nearby.length){const nearest=nearby.reduce((a,b)=>Math.hypot(a.x-p.x,a.y-p.y)<Math.hypot(b.x-p.x,b.y-p.y)?a:b);const gap=Math.round(Math.hypot(nearest.x-p.x,nearest.y-p.y)/PX_PER_M);const sp=screen(nearest.x,nearest.y);if(sp.y<75)text(`↑ ${nearest.kind==='dog'?'DOGS':nearest.kind==='patrol'?'PATROL':'YETI'}  ${gap} m`,W/2,153,10,C.red);}
     if(run&&Math.abs(p.x-centerAt(p.y))>240){text(p.x<centerAt(p.y)?'COURSE →':'← COURSE',p.x<centerAt(p.y)?W-65:65,H*.55,10,C.blue);}
   }
   function touchControl() {

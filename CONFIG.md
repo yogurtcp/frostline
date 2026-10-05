@@ -20,9 +20,10 @@ World coordinates increase rightward and downhill. `world.unitsPerMetre` default
 | `world` | Random seed, terrain density, chunk sizes, cleanup distance, course sway, ice sizes and predator frequency |
 | `village` | House count, corridor offsets, planned building bands, footprints, path widths/routing, squares, walkers, pets, lift and entry positions |
 | `houseAnimation` | Chimney smoke, opening doors, roof snow, awning movement, window flicker and muted trim palettes |
-| `wildlife` | Pack sizes, detection distances, chase/flee speeds, predator meals, avoidance, rescue reactions, impact thresholds and cat behavior |
+| `wildlife` | Impact speed/angle thresholds, defeated-predator fade duration, pack sizes, detection distances, chase/flee speeds, predator meals, avoidance, rescue reactions, impact thresholds and cat behavior |
 | `pedestrians` | Stroll radius, walking speeds and durations, pauses, obstacle clearance, spectator range and step animation |
 | `skiers` | Traffic speeds/frequency, aggressive skier aiming and taunt cooldowns |
+| `politePursuit` | Number and speed of the persistent course yetis (three, at 42% of straight-down top speed) |
 | `chasers` | Yeti/dog/patrol speed ratios, ambush sizes and capture distances |
 | `lift` | Cable location, chairs, towers, ride duration and speed |
 | `spawnTables` | Weighted object pools; repeated entries increase their probability |
@@ -35,6 +36,7 @@ World coordinates increase rightward and downhill. `world.unitsPerMetre` default
 
 - Make regular slalom timing more forgiving: increase `timing.targets.slalom.goldSeconds` and `parSeconds`, keeping gold below par.
 - Reduce all speed prizes: lower `timing.maxBonus` (60 by default).
+- Bear/yeti impacts: `wildlife.bearKnockoutKmh` and `yetiKnockoutKmh` are 65/85; `bearMaxImpactAngleDegrees` and `yetiMaxImpactAngleDegrees` are 45/10. Speed alone cannot override the angle limit. Successful impacts kill the animal; it fades over `predatorFadeSeconds`.
 - Make wolves easier to hit: lower `wildlife.wolfKillKmh` (30 by default; the actual impact must be faster than the threshold).
 - Less harassment: lower `skiers.fastAimWeight`, increase `fastSpawnSeconds`, or lower `ambientFastChance` and `courseFastChance`.
 - More houses: increase `village.houseCount`; if placement space runs out, also expand `halfWidth`, `rows`, or spacing. `corridorOffsets` specifies the horizontal center of the ski route at each building band; its pattern repeats if there are more rows than entries. Houses never overwrite roads or each other, so a very large requested count can be limited by available space.

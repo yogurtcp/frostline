@@ -70,7 +70,7 @@
     },
     "polite": {
       "name": "Polite Pursuit",
-      "sub": "YETI OFF PISTE",
+      "sub": "THREE POLITE YETIS",
       "length": 1040,
       "fee": 235,
       "pace": 178,
@@ -804,9 +804,8 @@
     "wolfFadeSeconds": 1.5,
     "rescueThanksRadius": 500,
     "rescueThanksCooldown": 8,
-    "bearKnockoutKmh": 30,
-    "yetiKnockoutKmh": 60,
-    "knockoutSeconds": 12,
+    "bearKnockoutKmh": 65,
+    "yetiKnockoutKmh": 85,
     "knockoutSpeedRetention": 0.78,
     "knockoutShieldSeconds": 0.2,
     "catFleeSpeed": 150,
@@ -828,7 +827,10 @@
     "yetiWildChaseDistance": 4400,
     "packSpawnSeparation": 1400,
     "packLimitRadius": 2800,
-    "packLimit": 2
+    "packLimit": 2,
+    "bearMaxImpactAngleDegrees": 45,
+    "yetiMaxImpactAngleDegrees": 10,
+    "predatorFadeSeconds": 2.4
   },
   "chasers": {
     "speedRatios": {
@@ -1144,5 +1146,9 @@
     "finishClearance": 450,
     "obstacleClearance": 65,
     "glintSeconds": 1.6
+  },
+  "politePursuit": {
+    "count": 3,
+    "speedRatio": 0.42
   }
 }

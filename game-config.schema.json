@@ -25,7 +25,8 @@
     "timing",
     "houseAnimation",
     "pedestrians",
-    "mushroomHunt"
+    "mushroomHunt",
+    "politePursuit"
   ],
   "properties": {
     "$schema": {
@@ -3255,7 +3256,6 @@
         "rescueThanksCooldown",
         "bearKnockoutKmh",
         "yetiKnockoutKmh",
-        "knockoutSeconds",
         "knockoutSpeedRetention",
         "knockoutShieldSeconds",
         "catFleeSpeed",
@@ -3274,7 +3274,10 @@
         "yetiWildChaseDistance",
         "packSpawnSeparation",
         "packLimitRadius",
-        "packLimit"
+        "packLimit",
+        "bearMaxImpactAngleDegrees",
+        "yetiMaxImpactAngleDegrees",
+        "predatorFadeSeconds"
       ],
       "properties": {
         "activeRadius": {
@@ -3490,11 +3493,6 @@
           "type": "number",
           "minimum": 0
         },
-        "knockoutSeconds": {
-          "type": "number",
-          "minimum": 0,
-          "exclusiveMinimum": 0
-        },
         "knockoutSpeedRetention": {
           "type": "number",
           "minimum": 0
@@ -3583,6 +3581,20 @@
         "packLimit": {
           "type": "integer",
           "minimum": 0
+        },
+        "bearMaxImpactAngleDegrees": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 90
+        },
+        "yetiMaxImpactAngleDegrees": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 90
+        },
+        "predatorFadeSeconds": {
+          "type": "number",
+          "exclusiveMinimum": 0
         }
       }
     },
@@ -4427,6 +4439,26 @@
         "glintSeconds": {
           "type": "number",
           "exclusiveMinimum": 0
+        }
+      }
+    },
+    "politePursuit": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "count",
+        "speedRatio"
+      ],
+      "properties": {
+        "count": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 12
+        },
+        "speedRatio": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 1
         }
       }
     }
