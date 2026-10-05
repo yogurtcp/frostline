@@ -550,8 +550,9 @@
     ],
     "lakeMinY": 700,
     "animalVisitorChance": 0.008,
-    "humanPredatorChance": 0.008,
-    "wildPredatorChance": 0.28
+    "humanPredatorChance": 0.003,
+    "wildPredatorChance": 0.15,
+    "wolfShareOfPredators": 0.2
   },
   "physics": {
     "speedMultiplier": 2.9,
@@ -663,62 +664,71 @@
     ]
   },
   "village": {
-    "houseCount": 32,
-    "rows": 7,
-    "firstRow": 310,
-    "rowSpacing": 230,
-    "rowJitter": 38,
-    "columns": [
-      -650,
-      -435,
-      -215,
-      0,
-      215,
-      435,
-      650
-    ],
-    "columnJitter": 45,
-    "halfWidth": 900,
-    "endOffset": 2430,
-    "choiceY": 2170,
+    "houseCount": 84,
+    "rows": 12,
+    "firstRow": 350,
+    "rowSpacing": 270,
+    "halfWidth": 1000,
+    "endOffset": 4180,
+    "choiceY": 3920,
     "choiceSpacing": 265,
-    "choiceTitleY": 1980,
+    "choiceTitleY": 3750,
     "houseWidth": [
-      142,
-      185
+      138,
+      172
     ],
-    "houseGap": 35,
+    "houseGap": 18,
     "houseFootWidthRatio": 0.45,
     "houseFootHeightRatio": 0.25,
     "mainRoadWidth": 64,
     "laneWidth": 32,
-    "roadBendMin": 250,
-    "roadBendMax": 315,
     "roadStartY": 120,
-    "roadEndY": 1990,
+    "roadEndY": 3660,
     "roadClearance": 14,
     "pathGrid": 32,
     "pathMaxNodes": 7000,
-    "walkers": 34,
+    "walkers": 48,
     "walkerSpeed": [
       11,
       24
     ],
-    "stationX": 470,
-    "stationY": 1780,
+    "stationX": 520,
+    "stationY": 3500,
     "stationClearance": 135,
-    "catCount": 2,
-    "dogCount": 2,
-    "skierCount": 5,
+    "catCount": 3,
+    "dogCount": 3,
+    "skierCount": 7,
     "roadColors": [
       "#e0e2cf",
       "#c4b7a1",
       "#cfc4af",
       "#b7aa96"
     ],
-    "placementAttempts": 1200,
     "roadTileSize": 12,
-    "roadSampleSpacing": 8
+    "roadSampleSpacing": 8,
+    "corridorHalfWidth": 110,
+    "housePitch": 182,
+    "corridorOffsets": [
+      -240,
+      -240,
+      0,
+      240,
+      240,
+      0,
+      -260,
+      -260,
+      -80,
+      220,
+      220,
+      0
+    ],
+    "corridorEntryOffset": 140,
+    "corridorExitOffset": 65,
+    "plazaRows": [
+      2,
+      6,
+      9
+    ]
   },
   "wildlife": {
     "activeRadius": 2100,
@@ -808,7 +818,10 @@
     "catCalmSeconds": 12,
     "yetiWakeDistance": 175,
     "yetiWildSpeedRatio": 0.87,
-    "yetiWildChaseDistance": 4400
+    "yetiWildChaseDistance": 4400,
+    "packSpawnSeparation": 1400,
+    "packLimitRadius": 2800,
+    "packLimit": 2
   },
   "chasers": {
     "speedRatios": {
@@ -1051,5 +1064,37 @@
         "parSeconds": 75
       }
     }
+  },
+  "houseAnimation": {
+    "smokeSeconds": 3.4,
+    "smokePuffs": 3,
+    "doorCycleSeconds": 12,
+    "doorOpenSeconds": 2.4,
+    "snowCycleSeconds": 19,
+    "snowFallSeconds": 1.3,
+    "awningSpeed": 2.2,
+    "lampFlickerSpeed": 1.5,
+    "trimRGB": [
+      [
+        155,
+        64,
+        62
+      ],
+      [
+        80,
+        123,
+        124
+      ],
+      [
+        112,
+        85,
+        125
+      ],
+      [
+        151,
+        110,
+        77
+      ]
+    ]
   }
 }

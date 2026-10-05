@@ -17,7 +17,8 @@ World coordinates increase rightward and downhill. `world.unitsPerMetre` default
 | `controls` | Drag dead zone, drag scale, repeat interval and steering angle steps |
 | `jump` | Manual/ramp/mushroom/rainbow airtime, height scaling, spin, boosts and cooldown |
 | `world` | Random seed, terrain density, chunk sizes, cleanup distance, course sway, ice sizes and predator frequency |
-| `village` | House count, placement bands/jitter, footprints, path widths/routing, walkers, pets, lift and entry positions |
+| `village` | House count, corridor offsets, planned building bands, footprints, path widths/routing, squares, walkers, pets, lift and entry positions |
+| `houseAnimation` | Chimney smoke, opening doors, roof snow, awning movement, window flicker and muted trim palettes |
 | `wildlife` | Pack sizes, detection distances, chase/flee speeds, predator meals, avoidance, rescue reactions, impact thresholds and cat behavior |
 | `skiers` | Traffic speeds/frequency, aggressive skier aiming and taunt cooldowns |
 | `chasers` | Yeti/dog/patrol speed ratios, ambush sizes and capture distances |
@@ -34,8 +35,9 @@ World coordinates increase rightward and downhill. `world.unitsPerMetre` default
 - Reduce all speed prizes: lower `timing.maxBonus` (60 by default).
 - Make wolves easier to hit: lower `wildlife.wolfKillKmh` (30 by default; the actual impact must be faster than the threshold).
 - Less harassment: lower `skiers.fastAimWeight`, increase `fastSpawnSeconds`, or lower `ambientFastChance` and `courseFastChance`.
-- More houses: increase `village.houseCount`; if placement space runs out, also expand `columns`, `halfWidth`, `rows`, or spacing. Houses never overwrite roads or each other, so a very large requested count can be limited by available space.
+- More houses: increase `village.houseCount`; if placement space runs out, also expand `halfWidth`, `rows`, or spacing. `corridorOffsets` specifies the horizontal center of the ski route at each building band; its pattern repeats if there are more rows than entries. Houses never overwrite roads or each other, so a very large requested count can be limited by available space.
 - Longer village: expand its row layout and move `stationY`, `roadEndY`, `choiceTitleY`, `choiceY`, and `endOffset` down together. Keep the choice row below the houses and the village end below the choices.
+- Fewer wolf encounters: lower `world.wolfShareOfPredators`, increase `wildlife.packSpawnSeparation`, or reduce `wildlife.packLimit`. Packs retain their configured 3–4 members.
 - Fewer rabbits: remove rabbit entries from `spawnTables.human` / `wild` or add more copies of other objects.
 - Preserve comparable best times after a substantial change: increment `timing.recordVersion`. Wallets remain intact.
 

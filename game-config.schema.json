@@ -22,7 +22,8 @@
     "spawnTables",
     "dialogue",
     "simulation",
-    "timing"
+    "timing",
+    "houseAnimation"
   ],
   "properties": {
     "$schema": {
@@ -2272,7 +2273,8 @@
         "lakeMinY",
         "animalVisitorChance",
         "humanPredatorChance",
-        "wildPredatorChance"
+        "wildPredatorChance",
+        "wolfShareOfPredators"
       ],
       "properties": {
         "seed": {
@@ -2440,6 +2442,11 @@
           "maximum": 1
         },
         "wildPredatorChance": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "wolfShareOfPredators": {
           "type": "number",
           "minimum": 0,
           "maximum": 1
@@ -2962,9 +2969,6 @@
         "rows",
         "firstRow",
         "rowSpacing",
-        "rowJitter",
-        "columns",
-        "columnJitter",
         "halfWidth",
         "endOffset",
         "choiceY",
@@ -2976,8 +2980,6 @@
         "houseFootHeightRatio",
         "mainRoadWidth",
         "laneWidth",
-        "roadBendMin",
-        "roadBendMax",
         "roadStartY",
         "roadEndY",
         "roadClearance",
@@ -2992,9 +2994,14 @@
         "dogCount",
         "skierCount",
         "roadColors",
-        "placementAttempts",
         "roadTileSize",
-        "roadSampleSpacing"
+        "roadSampleSpacing",
+        "corridorHalfWidth",
+        "housePitch",
+        "corridorOffsets",
+        "corridorEntryOffset",
+        "corridorExitOffset",
+        "plazaRows"
       ],
       "properties": {
         "houseCount": {
@@ -3015,21 +3022,6 @@
           "type": "number",
           "minimum": 0,
           "exclusiveMinimum": 0
-        },
-        "rowJitter": {
-          "type": "number",
-          "minimum": 0
-        },
-        "columns": {
-          "type": "array",
-          "items": {
-            "type": "number"
-          },
-          "minItems": 1
-        },
-        "columnJitter": {
-          "type": "number",
-          "minimum": 0
         },
         "halfWidth": {
           "type": "number",
@@ -3084,14 +3076,6 @@
           "type": "number",
           "minimum": 0,
           "exclusiveMinimum": 0
-        },
-        "roadBendMin": {
-          "type": "number",
-          "minimum": 0
-        },
-        "roadBendMax": {
-          "type": "number",
-          "minimum": 0
         },
         "roadStartY": {
           "type": "number",
@@ -3158,10 +3142,6 @@
           },
           "minItems": 1
         },
-        "placementAttempts": {
-          "type": "number",
-          "minimum": 0
-        },
         "roadTileSize": {
           "type": "number",
           "minimum": 0,
@@ -3171,6 +3151,38 @@
           "type": "number",
           "minimum": 0,
           "exclusiveMinimum": 0
+        },
+        "corridorHalfWidth": {
+          "type": "number",
+          "minimum": 0
+        },
+        "housePitch": {
+          "type": "number",
+          "minimum": 0,
+          "exclusiveMinimum": 0
+        },
+        "corridorOffsets": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "minItems": 1
+        },
+        "corridorEntryOffset": {
+          "type": "number",
+          "minimum": 0
+        },
+        "corridorExitOffset": {
+          "type": "number",
+          "minimum": 0
+        },
+        "plazaRows": {
+          "type": "array",
+          "items": {
+            "type": "number",
+            "minimum": 0
+          },
+          "minItems": 1
         }
       }
     },
@@ -3240,7 +3252,10 @@
         "catCalmSeconds",
         "yetiWakeDistance",
         "yetiWildSpeedRatio",
-        "yetiWildChaseDistance"
+        "yetiWildChaseDistance",
+        "packSpawnSeparation",
+        "packLimitRadius",
+        "packLimit"
       ],
       "properties": {
         "activeRadius": {
@@ -3534,6 +3549,20 @@
         },
         "yetiWildChaseDistance": {
           "type": "number",
+          "minimum": 0
+        },
+        "packSpawnSeparation": {
+          "type": "number",
+          "minimum": 0,
+          "exclusiveMinimum": 0
+        },
+        "packLimitRadius": {
+          "type": "number",
+          "minimum": 0,
+          "exclusiveMinimum": 0
+        },
+        "packLimit": {
+          "type": "integer",
           "minimum": 0
         }
       }
@@ -4163,6 +4192,75 @@
               }
             }
           }
+        }
+      }
+    },
+    "houseAnimation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "smokeSeconds",
+        "smokePuffs",
+        "doorCycleSeconds",
+        "doorOpenSeconds",
+        "snowCycleSeconds",
+        "snowFallSeconds",
+        "awningSpeed",
+        "lampFlickerSpeed",
+        "trimRGB"
+      ],
+      "properties": {
+        "smokeSeconds": {
+          "type": "number",
+          "minimum": 0,
+          "exclusiveMinimum": 0
+        },
+        "smokePuffs": {
+          "type": "integer",
+          "minimum": 0,
+          "exclusiveMinimum": 0
+        },
+        "doorCycleSeconds": {
+          "type": "number",
+          "minimum": 0,
+          "exclusiveMinimum": 0
+        },
+        "doorOpenSeconds": {
+          "type": "number",
+          "minimum": 0,
+          "exclusiveMinimum": 0
+        },
+        "snowCycleSeconds": {
+          "type": "number",
+          "minimum": 0,
+          "exclusiveMinimum": 0
+        },
+        "snowFallSeconds": {
+          "type": "number",
+          "minimum": 0,
+          "exclusiveMinimum": 0
+        },
+        "awningSpeed": {
+          "type": "number",
+          "minimum": 0
+        },
+        "lampFlickerSpeed": {
+          "type": "number",
+          "minimum": 0
+        },
+        "trimRGB": {
+          "type": "array",
+          "items": {
+            "type": "array",
+            "minItems": 3,
+            "maxItems": 3,
+            "items": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 255
+            }
+          },
+          "minItems": 1
         }
       }
     }

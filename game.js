@@ -22,6 +22,8 @@ window.FROSTLINE_READY = (async () => {
   let ready = false;
   let stored = {};
   try { stored = JSON.parse(localStorage.getItem('frostline-v2') || localStorage.getItem('frostline-save') || '{}'); } catch {}
+  if(!stored||typeof stored!=='object'||Array.isArray(stored))stored={};
+  for(const key of ['best','times'])if(!stored[key]||typeof stored[key]!=='object'||Array.isArray(stored[key]))stored[key]={};
   const state = {
     bank:Number.isFinite(stored.bank)?Math.max(0,Math.floor(stored.bank)):0,
     best:stored.best || {}, times:stored.times || {}, muted:stored.muted ?? false, started:false, activeTime:0,
@@ -115,8 +117,8 @@ window.FROSTLINE_READY = (async () => {
     state.course.ambush=kind;
   }
   function formatTime(seconds){const cs=Math.max(0,Math.round(seconds*100));return `${Math.floor(cs/6000)}:${String(Math.floor(cs/100)%60).padStart(2,'0')}.${String(cs%100).padStart(2,'0')}`;}
-  function timingSignature(id){const c=stages[id];return JSON.stringify([S.timing.recordVersion,c.length,c.spacing,c.pace,S.physics,S.race.minimumGateFraction,S.race.gateHalfWidth,S.race.forestGateHalfWidth,S.world.courseSway,S.world.courseWavelength]);}
-  function courseRecord(id){const saved=state.times[id];return saved?.signature===timingSignature(id)?saved:null;}
+  function timingSignature(id){const c=stages[id];return JSON.stringify([S.timing.recordVersion,c.length,c.spacing,c.pace,S.physics,S.race,S.controls,S.jump,S.world.courseSway,S.world.courseWavelength]);}
+  function courseRecord(id){const saved=state.times[id];return saved?.signature===timingSignature(id)&&Number.isFinite(saved.bestSeconds)&&saved.bestSeconds>0?saved:null;}
   function creditRun(caught=false) {
     if(caught){die('YETI');return;}
     const run=state.course;if(!run)return;
@@ -129,7 +131,7 @@ window.FROSTLINE_READY = (async () => {
     const reason=!run.finishPassed?'MISSED THE FINISH FLAGS':run.cleared<required?`NEED AT LEAST ${Math.round(S.race.minimumGateFraction*100)}% OF GATES`:run.violation?'UNPAID ENTRY - NO REWARD':'';
     const prior=courseRecord(run.id),newBest=eligible&&timed&&(!prior?.bestSeconds||run.time<prior.bestSeconds);
     if(timed){
-      const history=[...(state.times[run.id]?.history||[]),{seconds:Math.round(run.time*100)/100,cleared:run.cleared,total,crashes:run.hits,passed,paid:!run.violation,speedBonus,date:new Date().toISOString(),signature:timingSignature(run.id)}].slice(-S.timing.historyLimit);
+      const history=[...(Array.isArray(state.times[run.id]?.history)?state.times[run.id].history:[]),{seconds:Math.round(run.time*100)/100,cleared:run.cleared,total,crashes:run.hits,passed,paid:!run.violation,speedBonus,date:new Date().toISOString(),signature:timingSignature(run.id)}].slice(-S.timing.historyLimit);
       state.times[run.id]={signature:timingSignature(run.id),bestSeconds:newBest?run.time:prior?.bestSeconds??null,lastSeconds:run.time,history};
     }
     if(earned){state.bank+=earned;state.best[run.id]=Math.max(state.best[run.id]||0,earned);}save();
@@ -162,23 +164,26 @@ window.FROSTLINE_READY = (async () => {
   function segmentDistance(x,y,a,b){const dx=b.x-a.x,dy=b.y-a.y,t=clamp(((x-a.x)*dx+(y-a.y)*dy)/(dx*dx+dy*dy||1),0,1);return Math.hypot(x-a.x-dx*t,y-a.y-dy*t);}
   function roadDistance(road,x,y){let d=Infinity;for(let i=1;i<road.points.length;i++)d=Math.min(d,segmentDistance(x,y,road.points[i-1],road.points[i]));return d;}
   function houseClearance(o,x,y){
-    const hw=o.width*S.village.houseFootWidthRatio,hh=o.width*S.village.houseFootHeightRatio;
+    const hw=o.type==='fence'?o.width/2:o.width*S.village.houseFootWidthRatio,hh=o.type==='fence'?5:o.width*S.village.houseFootHeightRatio;
     const dx=Math.abs(x-o.x)-hw,dy=Math.abs(y-(o.y-hh))-hh;
     return Math.hypot(Math.max(dx,0),Math.max(dy,0))+Math.min(Math.max(dx,dy),0);
   }
-  function obstacleClearance(o,x,y){return ['lodge','rental'].includes(o.type)?houseClearance(o,x,y):Math.hypot(x-o.x,(y-o.y)*S.physics.collisionYScale)-o.r;}
+  function obstacleClearance(o,x,y){return ['lodge','rental','fence'].includes(o.type)?houseClearance(o,x,y):Math.hypot(x-o.x,(y-o.y)*S.physics.collisionYScale)-o.r;}
   function laneRoute(start,goal,houses,town){
     const V=S.village,g=V.pathGrid,key=(x,y)=>x+','+y,cell=p=>({x:Math.round((p.x-town.x)/g),y:Math.round((p.y-town.origin)/g)}),world=n=>({x:town.x+n.x*g,y:town.origin+n.y*g});
-    const a=cell(start),b=cell(goal),open=[{...a,cost:0,score:0}],seen=new Map([[key(a.x,a.y),0]]),parents=new Map();
+    const a=cell(start),b=cell(goal),open=[],seen=new Map([[key(a.x,a.y),0]]),parents=new Map();
+    const push=n=>{open.push(n);let i=open.length-1;while(i){const parent=(i-1)>>1;if(open[parent].score<=n.score)break;open[i]=open[parent];i=parent;}open[i]=n;};
+    const pop=()=>{const best=open[0],tail=open.pop();if(open.length){let i=0;while(i*2+1<open.length){let child=i*2+1;if(child+1<open.length&&open[child+1].score<open[child].score)child++;if(open[child].score>=tail.score)break;open[i]=open[child];i=child;}open[i]=tail;}return best;};
+    push({...a,cost:0,score:0});
     const blocked=n=>{const p=world(n);return Math.abs(p.x-town.x)>V.halfWidth||p.y<town.origin+V.roadStartY-g||p.y>town.origin+V.roadEndY+g||houses.some(h=>houseClearance(h,p.x,p.y)<V.laneWidth/2+5);};
     let found=null;
     for(let count=0;open.length&&count<V.pathMaxNodes;count++){
-      open.sort((a,b)=>b.score-a.score);const n=open.pop();if(n.cost>seen.get(key(n.x,n.y)))continue;
+      const n=pop();if(n.cost>seen.get(key(n.x,n.y)))continue;
       if(n.x===b.x&&n.y===b.y){found=n;break;}
       for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1],[1,1],[-1,1],[1,-1],[-1,-1]]){
         const q={x:n.x+dx,y:n.y+dy};if(blocked(q)||dx&&dy&&(blocked({x:n.x+dx,y:n.y})||blocked({x:n.x,y:n.y+dy})))continue;
         const cost=n.cost+Math.hypot(dx,dy),k=key(q.x,q.y);if(cost>=(seen.get(k)??Infinity))continue;
-        seen.set(k,cost);parents.set(k,n);open.push({...q,cost,score:cost+Math.hypot(q.x-b.x,q.y-b.y)});
+        seen.set(k,cost);parents.set(k,n);push({...q,cost,score:cost+Math.hypot(q.x-b.x,q.y-b.y)});
       }
     }
     if(!found)return null;
@@ -189,29 +194,41 @@ window.FROSTLINE_READY = (async () => {
     const V=S.village,town={origin,x:base,end:origin+V.endOffset,stationY:origin+V.stationY};state.villages.push(town);
     if(activate){state.zone={kind:'village',origin,x:base,end:town.end};state.transitions.push({kind:'village',y:state.p.y});}
     entity('villageTitle',base,origin+10,{r:0,width:300});
-    const rowYs=Array.from({length:V.rows},(_,i)=>origin+V.firstRow+i*V.rowSpacing+range(-25,25));
+    // Layout follows the ski route; buildings form its walls instead of random obstacles.
+    const rowYs=Array.from({length:V.rows},(_,i)=>origin+V.firstRow+i*V.rowSpacing);
+    const centers=rowYs.map((_,i)=>base+V.corridorOffsets[i%V.corridorOffsets.length]);
     const main={width:V.mainRoadWidth,points:[{x:base,y:origin+V.roadStartY}]};
-    for(let row=0;row<V.rows;row++){const x=base+(row%2?1:-1)*range(V.roadBendMin,V.roadBendMax),y=rowYs[row];main.points.push({x,y:y-range(130,150)},{x,y:y+range(55,75)});}
-    main.points.push({x:base+range(-80,80),y:origin+V.roadEndY});
+    for(let row=0;row<V.rows;row++)main.points.push({x:centers[row],y:rowYs[row]-V.corridorEntryOffset},{x:centers[row],y:rowYs[row]+V.corridorExitOffset});
+    main.points.push({x:base,y:origin+V.roadEndY});
     const station={x:base+V.stationX,y:town.stationY};
-    let nearest=main.points.reduce((a,b)=>Math.hypot(a.x-station.x,a.y-station.y)<Math.hypot(b.x-station.x,b.y-station.y)?a:b);
+    const nearest=main.points.reduce((a,b)=>Math.hypot(a.x-station.x,a.y-station.y)<Math.hypot(b.x-station.x,b.y-station.y)?a:b);
     const branch={width:V.mainRoadWidth,points:[nearest,{x:station.x,y:nearest.y},station]},roads=[main,branch],houses=[];
-    for(let attempt=0;houses.length<V.houseCount&&attempt<V.placementAttempts;attempt++){
-      const row=attempt<V.rows?attempt:Math.floor(random()*V.rows),width=range(...V.houseWidth),x=base+(attempt<V.rows?0:pick(V.columns))+range(-V.columnJitter,V.columnJitter),y=rowYs[row]+range(-V.rowJitter,V.rowJitter);
+    // Fill the inner walls along the whole route first, then grow outward into blocks.
+    const rings=Math.ceil(V.halfWidth*2/V.housePitch);
+    for(let ring=0;ring<rings&&houses.length<V.houseCount;ring++)for(let row=0;row<V.rows&&houses.length<V.houseCount;row++)for(const side of [-1,1]){
+      if(houses.length>=V.houseCount)break;
+      const style=(row+ring+(side>0?1:0))%4,width=mix(V.houseWidth[0],V.houseWidth[1],((row*7+ring*3+(side>0?2:0))%5)/4);
+      const x=centers[row]+side*(V.corridorHalfWidth+V.houseWidth[1]*V.houseFootWidthRatio+ring*V.housePitch),y=rowYs[row];
       const candidate={x,y,width},hw=width*V.houseFootWidthRatio,hh=width*V.houseFootHeightRatio;
-      if(Math.hypot(x-station.x,y-station.y)<V.stationClearance+hw)continue;
+      if(Math.abs(x-base)+hw>V.halfWidth||Math.hypot(x-station.x,y-station.y)<V.stationClearance+hw)continue;
       if(houses.some(h=>Math.abs(x-h.x)<(width+h.width)*V.houseFootWidthRatio+V.houseGap&&Math.abs((y-hh)-(h.y-h.width*V.houseFootHeightRatio))<(width+h.width)*V.houseFootHeightRatio+V.houseGap))continue;
-      // Keep the entire building footprint off the winding through-road.
       if(roads.some(r=>r.points.some((b,i)=>{if(!i)return false;const a=r.points[i-1],n=Math.ceil(Math.hypot(b.x-a.x,b.y-a.y)/12);for(let j=0;j<=n;j++)if(houseClearance(candidate,mix(a.x,b.x,j/(n||1)),mix(a.y,b.y,j/(n||1)))<r.width/2+V.roadClearance)return true;return false;})))continue;
-      houses.push(entity(random()<.35?'lodge':'rental',x,y,{width,r:hw,town}));
+      houses.push(entity((row+ring)%3?'rental':'lodge',x,y,{width,r:hw,town,houseStyle:style}));
     }
+    const fences=[];for(const y of rowYs){const rowHouses=houses.filter(h=>h.y===y).sort((a,b)=>a.x-b.x);for(let i=1;i<rowHouses.length;i++){const a=rowHouses[i-1],b=rowHouses[i],center=centers[rowYs.indexOf(y)];if(a.x<center&&b.x>center)continue;const left=a.x+a.width*V.houseFootWidthRatio,right=b.x-b.width*V.houseFootWidthRatio;if(right>left)fences.push(entity('fence',(left+right)/2,y-7,{width:right-left,r:5,town}));}}
     const network=main.points.slice();
     for(const h of houses){
       const door={x:h.x,y:h.y+V.laneWidth/2+V.pathGrid},goal=network.reduce((a,b)=>Math.hypot(a.x-door.x,a.y-door.y)<Math.hypot(b.x-door.x,b.y-door.y)?a:b);
-      const points=laneRoute(door,goal,houses,town);
+      const points=laneRoute(door,goal,[...houses,...fences],town);
       if(points){points.unshift({x:h.x,y:h.y+14});roads.push({width:V.laneWidth,points});network.push(...points.slice(1));}
     }
     state.roads.push(...roads);
+    for(const row of V.plazaRows){if(row>=V.rows)continue;const x=centers[row],y=rowYs[row]+V.corridorExitOffset;
+      for(const side of [-1,1])entity('lamp',x+side*(V.corridorHalfWidth-22),y,{width:20,r:6,town});
+      entity('bunting',x,y-95,{width:V.corridorHalfWidth*2,r:0,town});
+      entity('bench',x+V.corridorHalfWidth-26,y+55,{width:46,r:9,town});
+      entity('snowman',x-V.corridorHalfWidth+24,y+58,{width:28,r:9,town});
+    }
     for(let i=0;i<V.walkers;i++){
       const path=pick(roads).points,at=Math.floor(random()*path.length),p=path[at];
       entity(pick(['personRed','personYellow','personGreen']),p.x,p.y,{width:30,r:10,walker:true,path,pathIndex:at,pathDir:at===path.length-1?-1:1,walkSpeed:range(...V.walkerSpeed),town});
@@ -231,7 +248,7 @@ window.FROSTLINE_READY = (async () => {
       if(!r.tiles){const cells=new Map();for(let i=1;i<r.points.length;i++){
         const a=r.points[i-1],b=r.points[i],steps=Math.ceil(Math.hypot(b.x-a.x,b.y-a.y)/V.roadSampleSpacing);
         for(let j=0;j<=steps;j++){const x=mix(a.x,b.x,j/(steps||1)),y=mix(a.y,b.y,j/(steps||1)),n=Math.ceil(r.width/2/unit);
-          for(let dx=-n;dx<=n;dx++)for(let dy=-n;dy<=n;dy++){const tx=Math.floor(x/unit)+dx,ty=Math.floor(y/unit)+dy;if(roadDistance(r,(tx+.5)*unit,(ty+.5)*unit)<=r.width/2)cells.set(tx+','+ty,{x:tx*unit,y:ty*unit,color:Math.abs(tx*17+ty*31)%7<2?V.roadColors[3]:V.roadColors[2]});}
+          for(let dx=-n;dx<=n;dx++)for(let dy=-n;dy<=n;dy++){const tx=Math.floor(x/unit)+dx,ty=Math.floor(y/unit)+dy;if(segmentDistance((tx+.5)*unit,(ty+.5)*unit,a,b)<=r.width/2)cells.set(tx+','+ty,{x:tx*unit,y:ty*unit,color:Math.abs(tx*17+ty*31)%7<2?V.roadColors[3]:V.roadColors[2]});}
         }
       }r.tiles=[...cells.values()];}
       for(const cell of r.tiles){const a=screen(cell.x,cell.y);if(a.x<-unit*ZOOM||a.x>W||a.y<-unit*ZOOM||a.y>H)continue;box(a.x,a.y,Math.ceil(unit*ZOOM)+1,Math.ceil(unit*ZOOM)+1,V.roadColors[1]);box(a.x+1,a.y+1,Math.max(1,unit*ZOOM-1),Math.max(1,unit*ZOOM-1),cell.color);}
@@ -245,6 +262,9 @@ window.FROSTLINE_READY = (async () => {
   }
   function classicArea(x,y,margin=0){return state.safeTrails.some(r=>r.id==='slalom'&&y>r.startY-120-margin&&y<r.endY+60+margin&&Math.abs(x-centerAt(y,r))<S.world.safeCourseHalfWidth+margin);}
   function spawnWolfPack(x,y,extra={}){
+    const existing=state.objects.filter(o=>o.type==='wolf'&&!o.dead);
+    const nearbyPacks=new Set(existing.filter(o=>Math.hypot(o.x-x,o.y-y)<S.wildlife.packLimitRadius).map(o=>o.packId));
+    if(existing.some(o=>Math.hypot(o.x-x,o.y-y)<S.wildlife.packSpawnSeparation)||nearbyPacks.size>=S.wildlife.packLimit)return [];
     const packId=random(),count=Math.floor(range(S.wildlife.packMin,S.wildlife.packMax+1)),visitor=humanArea(x,y),wolves=[];
     for(let i=0;i<count;i++){
       let xx=x+(i%2?1:-1)*i*S.wildlife.packSpacingX,yy=y+Math.floor(i/2)*S.wildlife.packSpacingY;
@@ -263,8 +283,8 @@ window.FROSTLINE_READY = (async () => {
     const roll=random();
     if(classicArea(x,y,70))return pick(['skier','skier','personGreen']);
     if(y<S.world.uphillForestY&&roll<S.world.uphillTreeChance)return pick(['pine','pine','fir']);
-    if(humanArea(x,y))return roll<S.world.humanPredatorChance?pick(['fox','wolf']):pick(S.spawnTables.human);
-    return roll<S.world.wildPredatorChance?pick(['fox','wolf']):pick(S.spawnTables.wild);
+    if(humanArea(x,y))return roll<S.world.humanPredatorChance?(random()<S.world.wolfShareOfPredators?'wolf':'fox'):pick(S.spawnTables.human);
+    return roll<S.world.wildPredatorChance?(random()<S.world.wolfShareOfPredators?'wolf':'fox'):pick(S.spawnTables.wild);
   }
   function protectScenery(){
     // Newly selected terrain is below the viewport; don't reveal replacements on screen.
@@ -313,7 +333,7 @@ window.FROSTLINE_READY = (async () => {
         if(patchAt(x,y)||insideTown(x,y)||(!state.course&&state.zone.kind==='start'&&Math.abs(x)<S.world.meadowHalfWidth&&y>S.world.meadowTop&&y<S.world.meadowBottom))continue;
         if(state.objects.some(o=>(o.type==='gate'||o.type==='entrance')&&Math.abs(o.x-x)<o.half+60&&Math.abs(o.y-y)<140))continue;
         const type=ambientType(x,y);
-        if(type==='wolf'){spawnWolfPack(x,y,{worldChunk:key});continue;}
+        if(type==='wolf'){if(!spawnWolfPack(x,y,{worldChunk:key}).length)entity('fir',x,y,{width:65,r:16,worldChunk:key});continue;}
         const fast=type==='skier'&&random()<S.skiers.ambientFastChance;
         const widths={pine:range(60,90),fir:range(52,74),rock:44,pebble:28,skier:42,personGreen:30,rabbit:20,fox:39,wolf:43,bear:44,cat:25,lurker:55,bush:35};
         entity(type,x,y,{worldChunk:key,fast,width:widths[type],r:['lurker','bear'].includes(type)?18:type==='rabbit'?5:12,animal:['rabbit','fox','wolf','bear','cat'].includes(type),humanVisitor:humanArea(x,y)||random()<S.world.animalVisitorChance,ai:'idle',nextAI:clock+range(1,5),climb:0,vy:type==='skier'?(fast?range(...S.skiers.fastSpeed):range(...S.skiers.slowSpeed)):0});
@@ -409,6 +429,7 @@ window.FROSTLINE_READY = (async () => {
     if((o.type==='pine'||o.type==='fir')&&fast&&!uphill) {
       o.type='stump';o.width=65;o.r=15;burst(o.x,o.y,'#658479',24);say('TIMBERRR!',o);beep(115,.15,'sawtooth');
     }
+    if(o.type==='fence'&&fast){o.broken=true;o.r=0;p.speed*=S.physics.sledSpeedRetention;burst(o.x,o.y,C.wood,8);return;}
     if(o.type==='sled'&&fast){o.vx=90*Math.sign(p.vx||1);o.vy=240;p.speed*=S.physics.sledSpeedRetention;say('Express delivery!',o);return;}
     if(o.type==='bush'){o.flatten=true;p.speed*=S.physics.bushSpeedRetention;burst(o.x,o.y,C.gold,7);return;}
     if(['personRed','personGreen','personYellow'].includes(o.type))say(uphill?'BACKWARDS? Seriously?':pick(S.dialogue.personBumps),o);
@@ -477,7 +498,7 @@ window.FROSTLINE_READY = (async () => {
     const p=state.p;
     if(key==='up'){p.desiredHeading=state.keyboardStep<0?-Math.PI:Math.PI;p.mode='walk';return;}
     if(key==='down')state.keyboardStep=0;
-    else if(p.speed<S.physics.stopEpsilon||p.mode==='traverse'||Math.cos(p.desiredHeading)<-S.physics.downhillCosMinimum||(p.mode==='still'&&Math.abs(Math.cos(p.desiredHeading))<.18))state.keyboardStep=key==='left'?-3:3;
+    else if(p.speed<S.physics.stopEpsilon||p.mode==='traverse'||Math.cos(p.desiredHeading)<-S.physics.downhillCosMinimum||(p.mode==='still'&&Math.abs(Math.cos(p.desiredHeading))<S.physics.downhillCosMinimum))state.keyboardStep=key==='left'?-3:3;
     else state.keyboardStep=clamp(state.keyboardStep+(key==='left'?-1:1),-3,3);
     p.desiredHeading=Math.abs(state.keyboardStep)===3?Math.sign(state.keyboardStep)*Math.PI/2:state.keyboardStep*S.controls.stepDegrees*Math.PI/180;
     p.mode=Math.abs(state.keyboardStep)===3?'traverse':'slide';
@@ -496,7 +517,7 @@ window.FROSTLINE_READY = (async () => {
       if(!['skier','boarder'].includes(o.type)){if(o.vx&&!o.animal)o.x+=o.vx*dt;if(o.vy&&!o.animal)o.y+=o.vy*dt;}
       if(o.cheerUntil>clock&&clock>=(o.nextCheer||0)&&Math.hypot(o.x-p.x,o.y-p.y)<650){say(pick(S.dialogue.cheers),o,2.2);o.nextCheer=clock+3.4+o.phase*.2;}
       if(o.roam)o.x+=Math.cos(clock*.8+o.phase)*o.roam*dt*.3;
-      if(o.walker&&o.path){let target=o.path[o.pathIndex],d=Math.hypot(target.x-o.x,target.y-o.y);if(d<o.walkSpeed*dt+1){if(o.pathIndex===o.path.length-1)o.pathDir=-1;if(o.pathIndex===0)o.pathDir=1;o.pathIndex+=o.pathDir;target=o.path[o.pathIndex];d=Math.hypot(target.x-o.x,target.y-o.y);}if(d){o.x+=(target.x-o.x)/d*o.walkSpeed*dt;o.y+=(target.y-o.y)/d*o.walkSpeed*dt;}}
+      if(o.walker&&o.path&&Math.abs(o.y-p.y)<S.wildlife.activeRadius){let target=o.path[o.pathIndex],d=Math.hypot(target.x-o.x,target.y-o.y);if(d<o.walkSpeed*dt+1){if(o.pathIndex===o.path.length-1)o.pathDir=-1;if(o.pathIndex===0)o.pathDir=1;o.pathIndex+=o.pathDir;target=o.path[o.pathIndex];d=Math.hypot(target.x-o.x,target.y-o.y);}if(d){o.x+=(target.x-o.x)/d*o.walkSpeed*dt;o.y+=(target.y-o.y)/d*o.walkSpeed*dt;}}
 
       if(state.started&&!(o.stunnedUntil>clock)&&o.type==='lurker'&&!humanArea(o.x,o.y)&&!humanArea(p.x,p.y)&&Math.hypot(o.x-p.x,o.y-p.y)<S.wildlife.yetiWakeDistance){o.type='awakened';o.r=0;state.chasers.push({kind:'fast',x:o.x,y:o.y,speed:topSpeed()*S.wildlife.yetiWildSpeedRatio,phase:o.phase,expires:p.y+S.wildlife.yetiWildChaseDistance,talkAt:clock+6});say('Oh. Breakfast.',o);}
       if(o.type==='gate'&&o.run===state.course&&!o.checked&&previous.y<o.y&&p.y>=o.y){o.checked=true;const ratio=(o.y-previous.y)/(p.y-previous.y||1),crossX=mix(previous.x,p.x,ratio);if(state.course){if(Math.abs(crossX-o.x)<o.half){state.course.points+=S.race.gatePoints;state.course.cleared++;o.good=true;burst(o.x,o.y,C.gold,9);beep(710,.04);}else{state.course.missed++;o.good=false;beep(210,.045);}}}
@@ -519,8 +540,10 @@ window.FROSTLINE_READY = (async () => {
     for(const q of state.particles){q.x+=q.vx*dt;q.y+=q.vy*dt;q.vy+=80*dt;q.life-=dt;}state.particles=state.particles.filter(q=>q.life>0);state.speech=state.speech.filter(q=>q.until>clock);state.messages=state.messages.filter(q=>q.until>clock);
     state.cam.x=ease(state.cam.x,p.x,S.render.cameraXFollow,dt);state.cam.y=ease(state.cam.y,p.y-H*S.render.playerScreenY/ZOOM,S.render.cameraYFollow,dt);state.screenShake=Math.max(0,state.screenShake-dt);
   }
+  let houseCacheTime=-1,houseCache=[];
   function travel(o,angle,speed,dt,animal=false){
-    const A=S.wildlife,houses=state.objects.filter(h=>h.type==='lodge'||h.type==='rental');
+    if(houseCacheTime!==clock){houseCache=state.objects.filter(h=>h.type==='lodge'||h.type==='rental'||h.type==='fence'&&!h.broken);houseCacheTime=clock;}
+    const A=S.wildlife,houses=houseCache;
     const valid=(x,y)=>!patchAt(x,y)&&!houses.some(h=>houseClearance(h,x,y)<(o.r||10)+5)&&(!animal||!classicArea(x,y,35)&&(!(o.type==='bear'||(['fox','wolf'].includes(o.type)&&!o.humanVisitor))||!humanArea(x,y)));
     const probe=Math.max(A.avoidProbeDistance,speed*A.avoidLookaheadSeconds);
     const clear=a=>[Math.min(probe,speed*dt),probe*.5,probe].every(d=>valid(o.x+Math.cos(a)*d,o.y+Math.sin(a)*d));
@@ -530,13 +553,13 @@ window.FROSTLINE_READY = (async () => {
       let next=options.find(clear);
       // If a moving target left us inside a newly protected region, walk out continuously.
       if(next===undefined){
-        if(valid(o.x,o.y)){o.running=false;return;}
+        if(valid(o.x,o.y)){o.running=false;o.motionVx=0;return;}
         const escape=options.find(a=>valid(o.x+Math.cos(a)*probe*2,o.y+Math.sin(a)*probe*2));
         next=escape??(o.avoidUntil>clock?o.avoidHeading:angle+Math.PI/2*turn);
       }
       heading=next;o.avoidHeading=heading;o.avoidUntil=clock+A.avoidCommitSeconds;o.avoidSide=turn;
     }
-    o.angle=heading;o.x+=Math.cos(heading)*speed*dt;o.y+=Math.sin(heading)*speed*dt;o.running=speed>60;
+    o.motionVx=Math.cos(heading)*speed;o.angle=heading;o.x+=o.motionVx*dt;o.y+=Math.sin(heading)*speed*dt;o.running=speed>60;
   }
   function killWolf(o){
     const p=state.p,A=S.wildlife;
@@ -664,7 +687,7 @@ window.FROSTLINE_READY = (async () => {
   function sprite(name,x,y,width,opts={}) {
     const a=atlas[name],img=a&&images[a[0]];if(!a||!img)return;
     width=Math.max(2,Math.round(width*(opts.ui?1:ZOOM)));
-    const h=Math.round(width*a[4]/a[3]),key=name+':'+width+(opts.guest?':guest':'')+(opts.fast?':fast':'');
+    const h=Math.round(width*a[4]/a[3]),key=name+':'+width+(opts.guest?':guest':'')+(opts.fast?':fast':'')+(opts.houseStyle!==undefined?':house'+opts.houseStyle:'');
     if(!spriteCache.has(key)){
       const tile=document.createElement('canvas');tile.width=width;tile.height=h;
       const t=tile.getContext('2d');t.imageSmoothingEnabled=true;t.imageSmoothingQuality='high';
@@ -674,6 +697,7 @@ window.FROSTLINE_READY = (async () => {
         for(const rgb of paletteRGB){const d=(data[i]-rgb[0])**2+(data[i+1]-rgb[1])**2+(data[i+2]-rgb[2])**2;if(d<distance){distance=d;nearest=rgb;}}
         if(opts.fast&&nearest[1]>nearest[0]*1.25&&nearest[2]>nearest[0]*1.25&&nearest[0]<110)nearest=S.render.fastSkierRGB;
         else if(opts.guest&&nearest[1]>nearest[0]*1.25&&nearest[2]>nearest[0]*1.25&&nearest[0]<110)nearest=S.render.guestRGB;
+        if(opts.houseStyle!==undefined&&nearest[0]>nearest[1]*1.25&&nearest[1]<120&&nearest[0]>125)nearest=S.houseAnimation.trimRGB[opts.houseStyle%S.houseAnimation.trimRGB.length];
         data[i]=nearest[0];data[i+1]=nearest[1];data[i+2]=nearest[2];data[i+3]=255;
       }
       t.putImageData(pixels,0,0);spriteCache.set(key,tile);
@@ -764,6 +788,50 @@ window.FROSTLINE_READY = (async () => {
     sprite(kind==='bear'?'bearRun':'yeti',s.x,s.y,kind==='bear'?44:52,{rotate:Math.PI/2});
     for(let i=0;i<3;i++){const a=clock*4+i*TAU/3;box(s.x+Math.cos(a)*12,s.y-17+Math.sin(a)*4,2,2,C.gold);}
   }
+  function drawHouse(o,s){
+    const A=S.houseAnimation,w=o.width*ZOOM,a=atlas[o.type],h=w*a[4]/a[3],style=o.houseStyle??0;
+    sprite(o.type,s.x,s.y,o.width,{houseStyle:style});
+    // Native-pixel accents: warm windows, smoking chimneys, shop awnings and occupied doors.
+    const phase=clock+o.phase*A.doorCycleSeconds,door=phase%A.doorCycleSeconds;
+    const chimneyX=s.x-w*.24,chimneyY=s.y-h*.78;
+    box(chimneyX-2,chimneyY-5,5,8,'#735e58');box(chimneyX-3,chimneyY-6,7,2,'#e5f0ee');
+    for(let i=0;i<A.smokePuffs;i++){
+      const t=((clock/A.smokeSeconds+i/A.smokePuffs+o.phase)%1),size=2+Math.floor(t*3);
+      ctx.globalAlpha=(1-t)*.32;box(chimneyX+Math.sin(t*5+o.phase)*4,chimneyY-7-t*22,size,size,'#91a5ab');
+    }ctx.globalAlpha=1;
+    const warm=Math.sin(clock*A.lampFlickerSpeed+o.phase)>.15?'#f2c98f':'#d39b61';
+    for(const side of [-1,1]){box(s.x+side*w*.19-2,s.y-h*.25,4,5,warm);box(s.x+side*w*.19,s.y-h*.25,1,5,'#714a37');}
+    if(style===1||style===3){
+      const y=s.y-h*.22,flap=Math.round(Math.sin(clock*A.awningSpeed+o.phase)),width=Math.round(w*.38);
+      for(let x=0;x<width;x+=4){box(s.x-width/2+x,y,4,3,(x/4)%2?'#e5f0ee':style===1?'#548091':'#9b403e');box(s.x-width/2+x,y+3,4,2+flap,(x/4)%2?'#c7e0e4':'#714a37');}
+    }
+    if(door<A.doorOpenSeconds){
+      const x=s.x-w*.045,y=s.y-h*.17;
+      box(x-2,y,8,Math.max(8,h*.16),'#463735');box(x-1,y+1,5,Math.max(6,h*.14),'#d39b61');
+      box(x,y+2,3,3,'#f2c98f');box(x-1,y+5,5,5,style%2?'#548091':'#9b403e');
+      box(x+4,y+4+Math.round(Math.sin(clock*7+o.phase)),2,3,'#f2c98f');
+    }
+    const slide=(clock+o.phase*A.snowCycleSeconds)%A.snowCycleSeconds;
+    if(style===2&&slide<A.snowFallSeconds){
+      const t=slide/A.snowFallSeconds;
+      for(let i=0;i<5;i++)box(s.x-w*.31+i*3+t*3,s.y-h*.58+t*t*h*.58,2,2,t>.85?'#c7e0e4':'#f8faf0');
+    }
+  }
+  function drawTownDetail(o,s){
+    if(o.type==='fence'){const w=o.width*ZOOM;if(o.broken){box(s.x-w/2,s.y,w,2,'#976e4d');return;}box(s.x-w/2,s.y-9,w,2,'#976e4d');box(s.x-w/2,s.y-4,w,2,'#714a37');for(let x=-w/2;x<=w/2;x+=10){box(s.x+x,s.y-12,2,13,'#b0794c');box(s.x+x-1,s.y-13,4,2,'#e5f0ee');}return;}
+    if(o.type==='lamp'){
+      box(s.x-1,s.y-26,2,26,'#375769');box(s.x-5,s.y-27,10,2,'#244451');
+      box(s.x-3,s.y-25,6,6,'#714a37');box(s.x-2,s.y-24,4,4,'#f2c98f');box(s.x-4,s.y-29,8,2,'#e5f0ee');box(s.x-3,s.y,6,2,'#548091');return;
+    }
+    if(o.type==='bench'){
+      box(s.x-11,s.y-11,22,3,'#976e4d');box(s.x-11,s.y-7,22,3,'#b0794c');box(s.x-12,s.y-3,24,3,'#714a37');box(s.x-9,s.y,2,4,'#375769');box(s.x+7,s.y,2,4,'#375769');box(s.x-10,s.y-12,19,1,'#e5f0ee');return;
+    }
+    if(o.type==='snowman'){
+      box(s.x-6,s.y-10,12,9,'#c7e0e4');box(s.x-5,s.y-11,10,9,'#f8faf0');box(s.x-4,s.y-19,8,8,'#f8faf0');box(s.x-5,s.y-20,10,2,'#375769');box(s.x-3,s.y-23,6,4,'#244451');box(s.x-4,s.y-12,9,2,'#9b403e');box(s.x+2,s.y-16,5,2,'#e58039');box(s.x,s.y-17,1,1,'#244451');box(s.x,s.y-7,1,1,'#244451');line(s.x-5,s.y-9,s.x-11,s.y-15,'#714a37');return;
+    }
+    const half=o.width*ZOOM/2;line(s.x-half,s.y-34,s.x,s.y-29,'#739391');line(s.x,s.y-29,s.x+half,s.y-34,'#739391');
+    for(let i=0;i<9;i++){const x=s.x-half+i*half/4,y=s.y-34+Math.sin(i/8*Math.PI)*5,wave=Math.round(Math.sin(clock*3+o.phase+i));box(x,y,5,4+wave,['#9b403e','#548091','#d39b61'][i%3]);box(x+1,y+4+wave,3,2,['#9b403e','#548091','#d39b61'][i%3]);}
+  }
   function drawTree(o,s){
     const name={spruce:'spruceTree',crooked:'crookedTree',cedar:'cedarTree',alpine:'alpineTree'}[o.treeVariant]||'pine';
     sprite(name,s.x,s.y,o.width);
@@ -777,6 +845,8 @@ window.FROSTLINE_READY = (async () => {
     if(o.stunnedUntil>clock){drawKnockedOut(o,s,o.type);return;}
     if((o.type==='pine'||o.type==='fir')&&o.treeVariant&&o.treeVariant!=='classic'){drawTree(o,s);return;}
     if(o.type==='entrance'){drawEntrance(o,s);return;}
+    if(o.type==='lodge'||o.type==='rental'){drawHouse(o,s);return;}
+    if(['lamp','bunting','bench','snowman','fence'].includes(o.type)){drawTownDetail(o,s);return;}
     if(o.type==='courseStart'){text(o.name.toUpperCase()+'  ·  START',s.x,s.y-22,11,C.teal);for(let x=-220;x<220;x+=20)box(s.x+x,s.y,10,2,'#a8c7bb');return;}
     if(o.type==='rainbow'){drawRainbow(s.x,s.y,o.width);return;}
     if(o.type==='lurker'){sprite('yetiHappy',s.x,s.y,o.width);text('z',s.x+12,s.y-27,9,C.muted);return;}
@@ -789,7 +859,7 @@ window.FROSTLINE_READY = (async () => {
     if(o.type==='gate'){
       const a=o.checked?.6:1;ctx.globalAlpha=a;
       flag(s.x-o.half*ZOOM,s.y,o.color,1,o.good);flag(s.x+o.half*ZOOM,s.y,o.color,-1,o.good);
-      if(o.checked){text(o.good?'+8':'×',s.x,s.y-15,10,o.good?C.teal:C.red);}else text(String(o.number).padStart(2,'0'),s.x,s.y+9,8,'#8eaaa5');
+      if(o.checked){text(o.good?'+'+S.race.gatePoints:'×',s.x,s.y-15,10,o.good?C.teal:C.red);}else text(String(o.number).padStart(2,'0'),s.x,s.y+9,8,'#8eaaa5');
       ctx.globalAlpha=1;return;
     }
     if(o.type==='finish'){
@@ -806,11 +876,11 @@ window.FROSTLINE_READY = (async () => {
       sprite(o.type,s.x,s.y,30);
       for(const side of [-1,1]){box(s.x+side*5-1,s.y-15,3,4,coat);box(s.x+side*7-1,s.y-19+wave,2,5,coat);box(s.x+side*7-1,s.y-21+wave,2,2,'#f2c98f');}return;
     }
-    if(o.type==='skier'){sprite(o.vx<-5?'left':o.vx>5?'right':'skier',s.x,s.y,o.width,{guest:true,fast:o.fast});if(o.fast){line(s.x-5,s.y+3,s.x-5,s.y+12,C.muted);line(s.x+5,s.y+3,s.x+5,s.y+15,C.muted);}return;}
+    if(o.type==='skier'){sprite((o.motionVx??o.vx)<-5?'left':(o.motionVx??o.vx)>5?'right':'skier',s.x,s.y,o.width,{guest:true,fast:o.fast});if(o.fast){line(s.x-5,s.y+3,s.x-5,s.y+12,C.muted);line(s.x+5,s.y+3,s.x+5,s.y+15,C.muted);}return;}
     if(o.type==='dog'){sprite((Math.sin(clock*3+o.phase)>.4?'dogLeft':'dog'),s.x,s.y+wiggle,o.width);return;}
     if(o.type==='boarder'){sprite('boarder',s.x,s.y,o.width,{rotate:Math.sin(clock+o.phase)*.08});return;}
     sprite(o.type,s.x,s.y+wiggle,o.width,{alpha:o.flatten?.55:1});
-    if((o.type==='lodge'||o.type==='rental')&&Math.sin(clock*2+o.phase)>.2){const yy=s.y-o.width*.82;ctx.globalAlpha=.2;box(s.x-o.width*.22,yy-8-(clock*8%18),5,7,'#91a9b0');ctx.globalAlpha=1;}
+
   }
   function playerPose(){
     const p=state.p;
@@ -925,7 +995,7 @@ window.FROSTLINE_READY = (async () => {
     if(state.deathTimer>0&&state.deathTimer<.5){ctx.globalAlpha=1-state.deathTimer/.5;box(0,0,W,H,C.snow);ctx.globalAlpha=1;}
   }
   function resize() {
-    const r=canvas.getBoundingClientRect();H=clamp(Math.round(W*(r.height||840)/(r.width||480 )),S.render.minHeight,S.render.maxHeight);canvas.width=W;canvas.height=H;ctx.imageSmoothingEnabled=false;state.cam.y=state.p.y-H*S.render.playerScreenY/ZOOM;
+    const r=canvas.getBoundingClientRect();H=clamp(Math.round(W*(r.height||S.render.defaultHeight)/(r.width||S.render.width)),S.render.minHeight,S.render.maxHeight);canvas.width=W;canvas.height=H;ctx.imageSmoothingEnabled=false;state.cam.y=state.p.y-H*S.render.playerScreenY/ZOOM;
   }
   function pointerCoords(e){const r=canvas.getBoundingClientRect();return {x:(e.clientX-r.left)*W/r.width,y:(e.clientY-r.top)*H/r.height};}
   canvas.addEventListener('pointerdown',e=>{e.preventDefault();if(state.input.pointer){if(e.pointerId!==state.input.pointer.id&&!state.p.awaitingInput)state.input.jump=true;return;}if(!startMoving())return;const p=pointerCoords(e);state.control='pointer';state.input.pointer={id:e.pointerId,sx:p.x,sy:p.y,...p};canvas.setPointerCapture(e.pointerId);});
@@ -938,8 +1008,8 @@ window.FROSTLINE_READY = (async () => {
   document.addEventListener('visibilitychange',()=>{lastTime=0;accumulator=0;});
   function frame(t) {const elapsed=lastTime?Math.min(S.simulation.maxFrameSeconds,(t-lastTime)/1000):0;lastTime=t;if(!document.hidden){accumulator+=elapsed;while(accumulator>=S.simulation.stepSeconds){step(S.simulation.stepSeconds);accumulator-=S.simulation.stepSeconds;}render();}requestAnimationFrame(frame);}
   startMeadow();resize();state.liftRoutes.push({x0:S.lift.x,x1:S.lift.x,y0:S.lift.startY,y1:Infinity});ensureWorld(true);
-  const loaded=Promise.all(Object.entries(window.FROSTLINE_ASSETS).map(([key,src])=>new Promise((resolve,reject)=>{const im=new Image();im.onload=()=>{images[key]=im;resolve();};im.onerror=reject;im.src=src;})));
-  loaded.then(()=>{ready=true;render();requestAnimationFrame(frame);});
+  const loaded=Promise.all(Object.entries(window.FROSTLINE_ASSETS).map(([key,src])=>new Promise((resolve,reject)=>{const im=new Image();im.onload=()=>{images[key]=im;resolve();};im.onerror=()=>reject(new Error('Cannot load sprite atlas: '+key));im.src=src;})));
+  loaded.then(()=>{ready=true;render();requestAnimationFrame(frame);}).catch(window.showFrostlineError);
   // Kept out of the UI: deterministic hooks for simulation and renderer checks.
   window.Frostline={config:S,state,stages,atlas,loaded,step,render,startCourse,creditRun,makeVillage,hit,triggerAmbush,addChasers,startMoving,resize,launch,playerPose,keyboardDirection,releasePointer,ensureWorld,updateWildlife,die,resetSummit,patchAt,onRoad,entity,topSpeed,viewBounds,humanArea,lakeContains,get ready(){return ready;},get height(){return H;}};
 })().catch(window.showFrostlineError);
