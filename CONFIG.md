@@ -20,6 +20,7 @@ World coordinates increase rightward and downhill. `world.unitsPerMetre` default
 | `village` | House count, corridor offsets, planned building bands, footprints, path widths/routing, squares, walkers, pets, lift and entry positions |
 | `houseAnimation` | Chimney smoke, opening doors, roof snow, awning movement, window flicker and muted trim palettes |
 | `wildlife` | Pack sizes, detection distances, chase/flee speeds, predator meals, avoidance, rescue reactions, impact thresholds and cat behavior |
+| `pedestrians` | Stroll radius, walking speeds and durations, pauses, obstacle clearance, spectator range and step animation |
 | `skiers` | Traffic speeds/frequency, aggressive skier aiming and taunt cooldowns |
 | `chasers` | Yeti/dog/patrol speed ratios, ambush sizes and capture distances |
 | `lift` | Cable location, chairs, towers, ride duration and speed |

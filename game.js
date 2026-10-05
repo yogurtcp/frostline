@@ -512,12 +512,11 @@ window.FROSTLINE_READY = (async () => {
     state.activeTime+=state.started?dt:0;
     const p=state.p,previous={x:p.x,y:p.y};movePlayer(dt);ensureWorld();spawnFastSkier();
     if(state.course){const run=state.course;if(!run.timingStarted&&p.y>=run.startY){run.timingStarted=true;run.time+=dt*clamp((p.y-run.startY)/(p.y-previous.y||1),0,1);}else if(run.timingStarted)run.time+=dt;spawnTerrain();}
-    updateWildlife(dt);updateSkiers(dt);
+    updateWildlife(dt);updateSkiers(dt);updatePedestrians(dt);
     for(const o of state.objects){
       if(!['skier','boarder'].includes(o.type)){if(o.vx&&!o.animal)o.x+=o.vx*dt;if(o.vy&&!o.animal)o.y+=o.vy*dt;}
       if(o.cheerUntil>clock&&clock>=(o.nextCheer||0)&&Math.hypot(o.x-p.x,o.y-p.y)<650){say(pick(S.dialogue.cheers),o,2.2);o.nextCheer=clock+3.4+o.phase*.2;}
       if(o.roam)o.x+=Math.cos(clock*.8+o.phase)*o.roam*dt*.3;
-      if(o.walker&&o.path&&Math.abs(o.y-p.y)<S.wildlife.activeRadius){let target=o.path[o.pathIndex],d=Math.hypot(target.x-o.x,target.y-o.y);if(d<o.walkSpeed*dt+1){if(o.pathIndex===o.path.length-1)o.pathDir=-1;if(o.pathIndex===0)o.pathDir=1;o.pathIndex+=o.pathDir;target=o.path[o.pathIndex];d=Math.hypot(target.x-o.x,target.y-o.y);}if(d){o.x+=(target.x-o.x)/d*o.walkSpeed*dt;o.y+=(target.y-o.y)/d*o.walkSpeed*dt;}}
 
       if(state.started&&!(o.stunnedUntil>clock)&&o.type==='lurker'&&!humanArea(o.x,o.y)&&!humanArea(p.x,p.y)&&Math.hypot(o.x-p.x,o.y-p.y)<S.wildlife.yetiWakeDistance){o.type='awakened';o.r=0;state.chasers.push({kind:'fast',x:o.x,y:o.y,speed:topSpeed()*S.wildlife.yetiWildSpeedRatio,phase:o.phase,expires:p.y+S.wildlife.yetiWildChaseDistance,talkAt:clock+6});say('Oh. Breakfast.',o);}
       if(o.type==='gate'&&o.run===state.course&&!o.checked&&previous.y<o.y&&p.y>=o.y){o.checked=true;const ratio=(o.y-previous.y)/(p.y-previous.y||1),crossX=mix(previous.x,p.x,ratio);if(state.course){if(Math.abs(crossX-o.x)<o.half){state.course.points+=S.race.gatePoints;state.course.cleared++;o.good=true;burst(o.x,o.y,C.gold,9);beep(710,.04);}else{state.course.missed++;o.good=false;beep(210,.045);}}}
@@ -539,6 +538,57 @@ window.FROSTLINE_READY = (async () => {
     state.objects=state.objects.filter(o=>!o.eaten&&o.type!=='awakened'&&(!o.dead||clock<o.fadeUntil)&&(o.worldChunk||o.y>p.y-S.world.sceneryRetentionBehind));
     for(const q of state.particles){q.x+=q.vx*dt;q.y+=q.vy*dt;q.vy+=80*dt;q.life-=dt;}state.particles=state.particles.filter(q=>q.life>0);state.speech=state.speech.filter(q=>q.until>clock);state.messages=state.messages.filter(q=>q.until>clock);
     state.cam.x=ease(state.cam.x,p.x,S.render.cameraXFollow,dt);state.cam.y=ease(state.cam.y,p.y-H*S.render.playerScreenY/ZOOM,S.render.cameraYFollow,dt);state.screenShake=Math.max(0,state.screenShake-dt);
+  }
+  function updatePedestrians(dt){
+    const P=S.pedestrians,people=state.objects.filter(o=>o.type.startsWith('person'));
+    const solids=state.objects.filter(o=>o.r>0&&['pine','fir','rock','pebble','lodge','rental','fence','lift','bench','lamp','snowman','stump'].includes(o.type));
+    const flags=state.objects.filter(o=>['gate','entrance','finish'].includes(o.type));
+    for(const o of people){
+      o.walking=false;
+      if(Math.hypot(o.x-state.p.x,o.y-state.p.y)>P.activeRadius||o.cheerUntil>clock)continue;
+      const oldX=o.x,oldY=o.y;
+      if(o.walker&&o.path?.length>1){
+        // Residents keep following their existing village footpaths.
+        let remaining=o.walkSpeed*dt;
+        for(let i=0;i<o.path.length+1&&remaining>0;i++){
+          const target=o.path[o.pathIndex],d=Math.hypot(target.x-o.x,target.y-o.y),move=Math.min(d,remaining);
+          if(d){o.x+=(target.x-o.x)/d*move;o.y+=(target.y-o.y)/d*move;}remaining-=move;
+          if(d>move)break;
+          if(o.pathIndex===o.path.length-1)o.pathDir=-1;else if(o.pathIndex===0)o.pathDir=1;
+          o.pathIndex+=o.pathDir;
+        }
+      }else{
+        const radius=o.cheerRun?P.spectatorRadius:P.roamRadius;
+        const clear=(x,y)=>{
+          if(Math.hypot(x-o.homeX,y-o.homeY)>radius||patchAt(x,y))return false;
+          if(solids.some(h=>obstacleClearance(h,x,y)<o.r+P.obstacleMargin))return false;
+          if(flags.some(f=>Math.abs(y-f.y)<P.gateClearance&&Math.abs(x-f.x)<(f.half||0)+o.r+P.obstacleMargin))return false;
+          if(o.cheerRun){const run=o.cheerRun;if((x-run.x)*Math.sign(o.homeX-run.x)<run.finishHalf+o.r+P.obstacleMargin)return false;}
+          return true;
+        };
+        if(o.stroll&&clock>=o.walkUntil){o.stroll=null;o.pauseUntil=clock+range(...P.pauseSeconds);}
+        if(o.pauseUntil===undefined)o.pauseUntil=clock+o.id*P.pauseSeconds[1];
+        if(!o.stroll&&clock>=o.pauseUntil){
+          o.walkSpeed=range(...P.walkSpeed);const duration=range(...P.walkSeconds);
+          for(let attempt=0;attempt<P.targetAttempts;attempt++){
+            const angle=range(0,TAU),distance=Math.min(o.walkSpeed*duration,radius*.8),target={x:o.x+Math.cos(angle)*distance,y:o.y+Math.sin(angle)*distance};
+            // Check the entire little stroll, so people don't cut through a tree or lake.
+            const samples=Math.max(1,Math.ceil(distance/Math.max(4,o.r)));
+            let safe=true;for(let i=1;i<=samples;i++)if(!clear(mix(o.x,target.x,i/samples),mix(o.y,target.y,i/samples))){safe=false;break;}
+            if(safe){o.stroll=target;o.walkUntil=clock+distance/o.walkSpeed;break;}
+          }
+          if(!o.stroll)o.pauseUntil=clock+range(...P.pauseSeconds);
+        }
+        if(o.stroll){
+          const d=Math.hypot(o.stroll.x-o.x,o.stroll.y-o.y),move=Math.min(d,o.walkSpeed*dt);
+          const x=o.x+(o.stroll.x-o.x)/(d||1)*move,y=o.y+(o.stroll.y-o.y)/(d||1)*move;
+          if(clear(x,y)){o.x=x;o.y=y;}else {o.stroll=null;o.pauseUntil=clock+range(...P.pauseSeconds);}
+          if(d<=move){o.stroll=null;o.pauseUntil=clock+range(...P.pauseSeconds);}
+        }
+      }
+      const distance=Math.hypot(o.x-oldX,o.y-oldY);o.walking=distance>0;
+      o.walkCycle=(o.walkCycle||0)+distance*P.stridePerUnit;if(Math.abs(o.x-oldX)>.001)o.walkFacing=Math.sign(o.x-oldX);
+    }
   }
   let houseCacheTime=-1,houseCache=[];
   function travel(o,angle,speed,dt,animal=false){
@@ -875,6 +925,12 @@ window.FROSTLINE_READY = (async () => {
       const wave=Math.sin(clock*11+o.phase)>0?0:3,coat=o.type==='personYellow'?'#dba45a':'#ce6855';
       sprite(o.type,s.x,s.y,30);
       for(const side of [-1,1]){box(s.x+side*5-1,s.y-15,3,4,coat);box(s.x+side*7-1,s.y-19+wave,2,5,coat);box(s.x+side*7-1,s.y-21+wave,2,2,'#f2c98f');}return;
+    }
+    if(o.type.startsWith('person')){
+      const phase=o.walkCycle||0,bob=o.walking?Math.sin(phase*2)*.6:0;
+      sprite(o.type,s.x,s.y+bob,o.width,{flip:o.walkFacing<0});
+      if(o.walking){for(const side of [-1,1]){const lift=Math.sin(phase+side*Math.PI/2)>0?1:0;box(s.x+side*2-1,s.y-3-lift,2,3,'#244451');}}
+      return;
     }
     if(o.type==='skier'){sprite((o.motionVx??o.vx)<-5?'left':(o.motionVx??o.vx)>5?'right':'skier',s.x,s.y,o.width,{guest:true,fast:o.fast});if(o.fast){line(s.x-5,s.y+3,s.x-5,s.y+12,C.muted);line(s.x+5,s.y+3,s.x+5,s.y+15,C.muted);}return;}
     if(o.type==='dog'){sprite((Math.sin(clock*3+o.phase)>.4?'dogLeft':'dog'),s.x,s.y+wiggle,o.width);return;}

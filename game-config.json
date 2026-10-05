@@ -1096,5 +1096,26 @@
         77
       ]
     ]
+  },
+  "pedestrians": {
+    "activeRadius": 1700,
+    "roamRadius": 85,
+    "spectatorRadius": 34,
+    "walkSpeed": [
+      18,
+      32
+    ],
+    "walkSeconds": [
+      1.6,
+      3.8
+    ],
+    "pauseSeconds": [
+      0.8,
+      2.8
+    ],
+    "targetAttempts": 10,
+    "obstacleMargin": 8,
+    "gateClearance": 35,
+    "stridePerUnit": 0.24
   }
 }

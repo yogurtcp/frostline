@@ -23,7 +23,8 @@
     "dialogue",
     "simulation",
     "timing",
-    "houseAnimation"
+    "houseAnimation",
+    "pedestrians"
   ],
   "properties": {
     "$schema": {
@@ -4261,6 +4262,79 @@
             }
           },
           "minItems": 1
+        }
+      }
+    },
+    "pedestrians": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "activeRadius",
+        "roamRadius",
+        "spectatorRadius",
+        "walkSpeed",
+        "walkSeconds",
+        "pauseSeconds",
+        "targetAttempts",
+        "obstacleMargin",
+        "gateClearance",
+        "stridePerUnit"
+      ],
+      "properties": {
+        "activeRadius": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "roamRadius": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "spectatorRadius": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "walkSpeed": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": {
+            "type": "number",
+            "exclusiveMinimum": 0
+          }
+        },
+        "walkSeconds": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": {
+            "type": "number",
+            "exclusiveMinimum": 0
+          }
+        },
+        "pauseSeconds": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": {
+            "type": "number",
+            "exclusiveMinimum": 0
+          }
+        },
+        "targetAttempts": {
+          "type": "integer",
+          "exclusiveMinimum": 0
+        },
+        "obstacleMargin": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "gateClearance": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "stridePerUnit": {
+          "type": "number",
+          "exclusiveMinimum": 0
         }
       }
     }
