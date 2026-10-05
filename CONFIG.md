@@ -12,7 +12,8 @@ World coordinates increase rightward and downhill. `world.unitsPerMetre` default
 | --- | --- |
 | `courses` | Names, fees, lengths in metres, pace, gate spacing, obstacle density and type |
 | `race` | Gate widths, required success fraction, point rewards, finish bonuses, choice rows and scenery placement |
-| `timing` | Enable timing, maximum speed bonus, gold/par targets for each slalom, record revision and history length |
+| `mushroomHunt` | Mushroom count, required fraction, points, pickup size, spread, spacing clearances and glints in Spore Decisions |
+| `timing` | Enable timing, maximum speed bonus, gold/par targets for each timed course, record revision and history length |
 | `physics` | Acceleration, top speed, turning, walking, braking, ice, road slowdown, collisions and crash recovery |
 | `controls` | Drag dead zone, drag scale, repeat interval and steering angle steps |
 | `jump` | Manual/ramp/mushroom/rainbow airtime, height scaling, spin, boosts and cooldown |
@@ -43,6 +44,6 @@ World coordinates increase rightward and downhill. `world.unitsPerMetre` default
 - Fewer rabbits: remove rabbit entries from `spawnTables.human` / `wild` or add more copies of other objects.
 - Preserve comparable best times after a substantial change: increment `timing.recordVersion`. Wallets remain intact.
 
-Saved data uses the browser's `frostline-v2` local-storage key. `times[courseId]` contains the personal best, last attempt, and bounded attempt history; each history item has time, gate results, crashes, payment status, speed bonus, date, and rules signature. Failed/unpaid attempts are recorded but never become qualifying best times.
+Saved data uses the browser's `frostline-v2` local-storage key. `times[courseId]` contains the personal best, last attempt, and bounded attempt history; each history item has time, gate or mushroom results, crashes, payment status, speed bonus, date, and rules signature. Failed/unpaid attempts are recorded but never become qualifying best times.
 
 Local-file and hosted versions have separate browser storage origins. Publishing does not move the offline wallet or records to the hosted site.

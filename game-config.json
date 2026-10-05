@@ -59,11 +59,11 @@
     },
     "mushroom": {
       "name": "Spore Decisions",
-      "sub": "BOUNCE RESPONSIBLY",
+      "sub": "FILL YOUR BASKET",
       "length": 1200,
       "fee": 220,
       "pace": 172,
-      "spacing": 285,
+      "spacing": 0,
       "density": 1.1,
       "color": "#b16a74",
       "kind": "mushroom"
@@ -943,13 +943,14 @@
       "mogul"
     ],
     "mushroom": [
-      "mushroom",
-      "mushroom",
-      "sled",
-      "mogul",
-      "cat",
+      "pine",
+      "fir",
+      "rock",
+      "skier",
+      "skier",
       "dog",
-      "pine"
+      "cat",
+      "bush"
     ],
     "mixed": [
       "pine",
@@ -1034,6 +1035,12 @@
       "Sorry! Just a little nibble?",
       "I can wait.",
       "Lovely scarf!"
+    ],
+    "mushroomCheers": [
+      "FULL BASKET!",
+      "EVERY SINGLE MUSHROOM!",
+      "SOUP FOR EVERYONE!",
+      "MASTER FORAGER!"
     ]
   },
   "simulation": {
@@ -1124,5 +1131,18 @@
     "obstacleMargin": 8,
     "gateClearance": 35,
     "stridePerUnit": 0.24
+  },
+  "mushroomHunt": {
+    "count": 40,
+    "minimumFraction": 0.9,
+    "pointsEach": 8,
+    "pickupRadius": 14,
+    "spriteWidth": 32,
+    "spread": 285,
+    "maxLateralShift": 220,
+    "startClearance": 450,
+    "finishClearance": 450,
+    "obstacleClearance": 65,
+    "glintSeconds": 1.6
   }
 }

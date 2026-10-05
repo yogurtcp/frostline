@@ -36,9 +36,17 @@ Entering without enough coins triggers a random ambush and makes the entire run 
 
 At the end, an automatic 18-second overlay shows gates, percentage, misses, crashes, jumps, time, score, bonus, and coins or the reason for no reward. Skiing continues without menus. A successful 100%-gate run activates waving and shouting from spectators already waiting by the finish. Completed-course rewards, wallet balance, per-course personal best times, and the last 20 timed attempts per course save on this browser and device.
 
-## Timed slaloms
+## Spore Decisions: mushroom hunt
 
-The live clock starts when you cross the actual course start line, not when you choose the course. It keeps running while you recover from crashes or ski uphill and stops at a successful finish crossing. Hidden-tab time is paused with the game. Finishes require the existing 90% gate quota; failed or unpaid runs cannot set a qualifying best time or earn a speed bonus. Their attempt times still appear in the local history.
+Spore Decisions is now a 1,200-metre collection course with no slalom gates. Forty small, sparkling mushroom pickups are scattered along the descent. Ski directly over them on the ground to collect them; each disappears once and awards 8 points. These pickups do not bounce or boost you. The old sled-and-mogul obstacle mix is replaced by trees, rocks, people, dogs, cats, and bushes, with clear space reserved around each pickup. Ordinary bouncing mushrooms elsewhere on the mountain keep their original behavior.
+
+Collect at least **36 of 40**, then cross between the finish flags, to earn a reward. Entry remains 220 coins. The HUD and finish overlay show mushroom totals, misses and the required count. A full basket triggers mushroom-specific cheers. Failed or unpaid attempts earn no coins. Finish bonuses and the existing timed bonus still apply; a clean full basket is 320 points + 95 finish bonus, plus up to 60 for speed. Records from the former mushroom slalom are kept in history but cannot count as best times for the redesigned hunt.
+
+The `mushroomHunt` JSON section controls the count, quota, points, pickup size, distribution and obstacle clearance.
+
+## Timed courses
+
+The live clock starts when you cross the actual course start line, not when you choose the course. It keeps running while you recover from crashes or ski uphill and stops at a successful finish crossing. Hidden-tab time is paused with the game. Slalom finishes require the existing 90% gate quota; Spore Decisions requires its mushroom quota; failed or unpaid runs cannot set a qualifying best time or earn a speed bonus. Their attempt times still appear in the local history.
 
 The bonus scales linearly from zero at the par time to **60 coins** at the gold time, capped at 60 even if you go faster:
 

@@ -24,7 +24,8 @@
     "simulation",
     "timing",
     "houseAnimation",
-    "pedestrians"
+    "pedestrians",
+    "mushroomHunt"
   ],
   "properties": {
     "$schema": {
@@ -3947,7 +3948,8 @@
         "personBumps",
         "greetings",
         "catAnnoyed",
-        "politeYeti"
+        "politeYeti",
+        "mushroomCheers"
       ],
       "properties": {
         "fastTaunts": {
@@ -4026,6 +4028,13 @@
             "type": "string"
           },
           "minItems": 1
+        },
+        "mushroomCheers": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          }
         }
       }
     },
@@ -4350,6 +4359,72 @@
           "exclusiveMinimum": 0
         },
         "stridePerUnit": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        }
+      }
+    },
+    "mushroomHunt": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "count",
+        "minimumFraction",
+        "pointsEach",
+        "pickupRadius",
+        "spriteWidth",
+        "spread",
+        "maxLateralShift",
+        "startClearance",
+        "finishClearance",
+        "obstacleClearance",
+        "glintSeconds"
+      ],
+      "properties": {
+        "count": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "minimum": 1,
+          "maximum": 200
+        },
+        "minimumFraction": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 1
+        },
+        "pointsEach": {
+          "type": "integer",
+          "exclusiveMinimum": 0
+        },
+        "pickupRadius": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "spriteWidth": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "spread": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "maxLateralShift": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "startClearance": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "finishClearance": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "obstacleClearance": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "glintSeconds": {
           "type": "number",
           "exclusiveMinimum": 0
         }
