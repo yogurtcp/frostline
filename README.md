@@ -18,7 +18,7 @@ The body stays upright while standing and climbing. Fast and slow diagonal skiin
 
 ## The mountain
 
-Ski between physical flags to choose a course. Classic slalom contains only gates and people: trees, rocks, animals, ice pools, mushrooms, and ramps stay outside its corridor. Slalom is 540 metres; freestyle and tree slalom are 1,040 metres. Courses with gates require at least 90% correct (18 of 19 on the regular slalom), plus a downhill crossing between the finish flags. The finish opening is twice the width of that course's normal gate. Freestyle and free skiing have no gate quota but still require the finish crossing. Missing the finish allows a short uphill recovery window; continuing 32 metres beyond it records a failed run with no reward. Every set of choices shares one horizontal row. New course scenery starts beyond the visible screen, and the village is prepared before you approach the finish.
+Ski between physical flags to choose a course. Classic slalom contains only gates and people: trees, rocks, animals, ice pools, mushrooms, and ramps stay outside its corridor. Slalom is 540 metres; freestyle and tree slalom are 1,040 metres. Lunch Rush is the faster slalom, with a 1,600-metre course and 40 metres between successive gates. Courses with gates require at least 90% correct (18 of 19 on the regular slalom), plus a downhill crossing between the finish flags. The finish opening is twice the width of that course's normal gate. Freestyle and free skiing have no gate quota but still require the finish crossing. Missing the finish allows a short uphill recovery window; continuing 32 metres beyond it records a failed run with no reward. Every set of choices shares one horizontal row. New course scenery starts beyond the visible screen, and the village is prepared before you approach the finish.
 
 The surrounding mountain, including the forest uphill from the starting clearing, continues in every direction, with sparse trees, rocks, people, wildlife and sleeping yetis. Rabbit spawn weight is halved. Trees mix the original pines and firs with dark mountain spruce, crooked old pine, broad winter cedar, and alpine fir, drawn from a transparent pixel-art atlas and sharing the existing collision, breakage, and cat-climbing interactions. Rainbow jumps give a colorful powder trail. Small and large ice pools have irregular coves, narrow waists, snowy islands, frosted banks and cracks. The visible shoreline determines where ice starts and ends. Ice locks your entry direction and keeps you gliding even after release, including sideways and uphill. Only downhill entries accelerate: the acceleration remains 265 world units/s², with the ice limit raised from 1,200 to 1,800 world units/s. Sideways and uphill entries retain their entry speed. NPCs steer around the pools.
 
@@ -48,7 +48,7 @@ The bonus scales linearly from zero at the par time to **60 coins** at the gold 
 | --- | ---: | ---: |
 | Slalom | 22 s | 40 s |
 | Tree slalom | 42 s | 72 s |
-| Lunch Rush | 34 s | 61 s |
+| Lunch Rush | 45 s | 81 s |
 | Spore Decisions | 48 s | 80 s |
 | Polite Pursuit | 41 s | 69 s |
 | Last Lunch | 43 s | 75 s |

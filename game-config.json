@@ -49,10 +49,10 @@
     "rush": {
       "name": "Lunch Rush",
       "sub": "FAST SLALOM",
-      "length": 1200,
+      "length": 1600,
       "fee": 210,
       "pace": 228,
-      "spacing": 315,
+      "spacing": 400,
       "density": 1.1,
       "color": "#ce6855",
       "kind": "rush"
@@ -1055,8 +1055,8 @@
         "parSeconds": 72
       },
       "rush": {
-        "goldSeconds": 34,
-        "parSeconds": 61
+        "goldSeconds": 45,
+        "parSeconds": 81
       },
       "mushroom": {
         "goldSeconds": 48,
