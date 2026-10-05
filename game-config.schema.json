@@ -2497,7 +2497,8 @@
         "iceAcceleration",
         "iceRestartSlideSpeed",
         "iceHeadingSpeedMinimum",
-        "downhillCosMinimum"
+        "downhillCosMinimum",
+        "minimumCollisionKmh"
       ],
       "properties": {
         "speedMultiplier": {
@@ -2655,6 +2656,10 @@
           "minimum": 0
         },
         "downhillCosMinimum": {
+          "type": "number",
+          "minimum": 0
+        },
+        "minimumCollisionKmh": {
           "type": "number",
           "minimum": 0
         }

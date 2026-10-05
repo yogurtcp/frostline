@@ -35,7 +35,7 @@ window.FROSTLINE_READY = (async () => {
     freefallAt:0,nextFastSkier:2, results:null, receipts:[], transitions:[], soundReady:false,
     chunks:new Map(),safeTrails:[],roads:[],villages:[],liftRoutes:[],plannedTown:null,deathTimer:0,liftTimer:0,deaths:0,keyboardStep:0,control:'keyboard',lastSteer:-10
   };
-  function newPlayer(){return {x:0,y:0,vx:0,vy:0,speed:0,heading:Math.PI/2,desiredHeading:Math.PI/2,mode:'still',awaitingInput:false,crashObstacle:null,fall:0,shield:0,air:0,airTotal:0,jumpHeight:0,spin:0,boost:0,jumpLock:0,onIce:false,iceHeading:0,icePushPending:false,airHeading:0,airSpeed:0,airSpin:0,rainbow:0};}
+  function newPlayer(){return {x:0,y:0,vx:0,vy:0,speed:0,heading:Math.PI/2,desiredHeading:Math.PI/2,mode:'still',awaitingInput:false,crashObstacle:null,slowContacts:new Set(),fall:0,shield:0,air:0,airTotal:0,jumpHeight:0,spin:0,boost:0,jumpLock:0,onIce:false,iceHeading:0,icePushPending:false,airHeading:0,airSpeed:0,airSpin:0,rainbow:0};}
   function viewBounds(){return {left:state.cam.x-W/(2*ZOOM),right:state.cam.x+W/(2*ZOOM),top:state.cam.y,bottom:state.cam.y+H/ZOOM};}
   function belowView(margin=330){return Math.max(viewBounds().bottom,state.p.y+H*(1-S.render.playerScreenY)/ZOOM)+margin;}
   function topSpeed(){return (state.course?stages[state.course.id].pace:state.zone.kind==='village'?S.physics.villagePace:S.physics.freePace)*S.physics.speedMultiplier;}
@@ -464,9 +464,13 @@ window.FROSTLINE_READY = (async () => {
     o.dead=true;o.r=0;o.fadeUntil=clock+S.wildlife.predatorFadeSeconds;o.running=false;p.speed*=S.wildlife.knockoutSpeedRetention;p.shield=S.wildlife.knockoutShieldSeconds;
     burst(o.x,o.y,C.gold,12);say(kind==='bear'?'BEAR DOWN!':'YETI DOWN!',o);beep(190,.12,'triangle');return true;
   }
+  function tooSlowToCrash(){return state.p.speed*S.physics.hudKmhPerSpeed<=S.physics.minimumCollisionKmh;}
   function hit(o) {
     if(o.collectible){collectMushroom(o);return;}
-    const p=state.p;if(o.dead||o.stunnedUntil>clock||p.awaitingInput||p.shield>0||o===p.crashObstacle)return;
+    const p=state.p;if(o.dead||o.stunnedUntil>clock)return;
+    // Remember slow overlaps during recovery too, until the player moves fully clear.
+    if(tooSlowToCrash())p.slowContacts.add(o);
+    if(p.awaitingInput||p.shield>0||o===p.crashObstacle)return;
     if(o.type==='wolf'&&killWolf(o))return;
     if(['bear','lurker'].includes(o.type)&&knockOut(o,o.type))return;
     if(o.touched&&['ramp','mogul','mushroom','rainbow','sled','bush','cat'].includes(o.type))return;
@@ -478,6 +482,9 @@ window.FROSTLINE_READY = (async () => {
       return;
     }
     if(['rabbit','fox','wolf'].includes(o.type)){o.angle=Math.atan2(o.y-p.y,o.x-p.x);o.nextAI=clock+2;o.running=true;return;}
+
+    // Accelerating inside an existing slow contact must not cause another fall.
+    if(p.slowContacts.has(o))return;
 
     // Walking bumps stop against obstacles without a fall; moving away from an overlap is allowed.
     if(!p.onIce&&p.air<=0&&p.speed<=S.physics.walkingBumpLimit&&(p.mode==='traverse'||p.mode==='walk')){
@@ -512,6 +519,7 @@ window.FROSTLINE_READY = (async () => {
   }
   function movePlayer(dt) {
     const p=state.p,inp=inputVector();if(!state.started&&!p.awaitingInput)return;
+    for(const o of p.slowContacts)if(o.dead||obstacleClearance(o,p.x,p.y)>Math.max(S.physics.playerRadius,S.physics.crashSeparation))p.slowContacts.delete(o);
     if(p.crashObstacle&&obstacleClearance(p.crashObstacle,p.x,p.y)>S.physics.crashSeparation)p.crashObstacle=null;
     if(p.awaitingInput){
       p.speed=p.vx=p.vy=0;p.fall=Math.max(0,p.fall-dt);p.shield=Math.max(0,p.shield-dt);
@@ -794,7 +802,7 @@ window.FROSTLINE_READY = (async () => {
       const contactDistance=Math.hypot(c.x-p.x,c.y-p.y);
       if(contactDistance<S.chasers.knockoutDistance&&knockOut(c,c.kind))continue;
       if(contactDistance<S.chasers.captureDistance&&p.shield<=0&&p.air<=0){
-        if(p.awaitingInput&&!lethal)continue;
+        if(!lethal&&(p.awaitingInput||tooSlowToCrash()))continue;
         if(['fast','slow','bear'].includes(c.kind)){if(state.course&&!p.awaitingInput)state.course.hits++;burst(p.x,p.y,C.ice,12);die(c.kind==='bear'?'BEAR':'YETI');break;}
         crash(null,S.chasers.patrolFallSeconds);announce(c.kind==='dog'?'AGGRESSIVELY LOVED':'A WORD FROM SKI PATROL',c.kind==='dog'?'Covered in slobber. Wallet intact.':'They are very disappointed.',C.red,3);for(const other of state.chasers)if(!other.chaseRun||other.chaseRun!==state.course)other.expires=p.y-1;burst(p.x,p.y,C.ice,20);break;
       }

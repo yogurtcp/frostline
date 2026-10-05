@@ -36,6 +36,7 @@ World coordinates increase rightward and downhill. `world.unitsPerMetre` default
 
 - Make regular slalom timing more forgiving: increase `timing.targets.slalom.goldSeconds` and `parSeconds`, keeping gold below par.
 - Reduce all speed prizes: lower `timing.maxBonus` (60 by default).
+- Slow recovery: `physics.minimumCollisionKmh` (8) disables obstacle impacts at or below that HUD speed. Objects touched while creeping stay harmless until you fully clear them, even if you accelerate. Chasing predators can still catch a stopped player.
 - Bear/yeti impacts: `wildlife.bearKnockoutKmh` and `yetiKnockoutKmh` are 65/85; `bearMaxImpactAngleDegrees` and `yetiMaxImpactAngleDegrees` are 45/10. Speed alone cannot override the angle limit. Successful impacts kill the animal; it fades over `predatorFadeSeconds`.
 - Make wolves easier to hit: lower `wildlife.wolfKillKmh` (30 by default; the actual impact must be faster than the threshold).
 - Less harassment: lower `skiers.fastAimWeight`, increase `fastSpawnSeconds`, or lower `ambientFastChance` and `courseFastChance`.

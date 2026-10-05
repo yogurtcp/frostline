@@ -592,7 +592,8 @@
     "iceAcceleration": 265,
     "iceRestartSlideSpeed": 75,
     "iceHeadingSpeedMinimum": 3,
-    "downhillCosMinimum": 0.18
+    "downhillCosMinimum": 0.18,
+    "minimumCollisionKmh": 8
   },
   "controls": {
     "pointerDeadZone": 11,

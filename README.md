@@ -6,7 +6,7 @@ Open `index.html` in a browser, or reload the already open game tab. The game co
 
 ## Controls
 
-- Keyboard: Down points downhill and builds speed. Left/right turn through a fast diagonal, a slow diagonal, then horizontal walking. Diagonals persist on release; horizontal walking stops on release on snow. At zero speed, hold Left or Right to walk horizontally regardless of facing, including after recovering from a crash. The opposite arrow reverses horizontal walking directly. Walking into an obstacle stops you without a fall; you can reverse to walk away. Only Up climbs uphill, stopping on release on snow.
+- Keyboard: Down points downhill and builds speed. Left/right turn through a fast diagonal, a slow diagonal, then horizontal walking. Diagonals persist on release; horizontal walking stops on release on snow. At zero speed, hold Left or Right to walk horizontally regardless of facing, including after recovering from a crash. The opposite arrow reverses horizontal walking directly. At 8 km/h or less, obstacle impacts are ignored so you can creep clear after a crash; those contacts stay harmless until you fully separate, even while accelerating. Above that threshold, walking into an obstacle stops you without a fall; you can reverse to walk away. Only Up climbs uphill, stopping on release on snow.
 - Touch and mouse: drag relative to the point where you first pressed. Release while sliding downhill to straighten out. Release while standing or going uphill on snow to stop with the same facing.
 - On phones, keep one finger down to steer and tap anywhere with a second finger to jump. Space jumps on keyboard. M toggles sound.
 - Airborne jumps keep their takeoff heading and speed; steering resumes on landing.
