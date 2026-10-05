@@ -29,7 +29,7 @@ window.FROSTLINE_READY = (async () => {
     best:stored.best || {}, times:stored.times || {}, muted:stored.muted ?? false, started:false, activeTime:0,
     p:newPlayer(),
     cam:{x:0,y:-H*S.render.playerScreenY/ZOOM}, zone:{kind:'start',origin:0}, course:null,
-    objects:[], trails:[], chasers:[], particles:[], speech:[], messages:[],
+    objects:[], trails:[], chasers:[], patrolPenalty:null, particles:[], speech:[], messages:[],
     input:{left:false,right:false,up:false,down:false,pointer:null,jump:false},
     lastTrack:null, generated:0, gateCount:0, elevated:0, screenShake:0, finishCount:0,
     freefallAt:0,nextFastSkier:2, results:null, receipts:[], transitions:[], soundReady:false,
@@ -124,6 +124,7 @@ window.FROSTLINE_READY = (async () => {
     burst(o.x,o.y,C.gold,8);say('+'+S.mushroomHunt.pointsEach,o,.7);beep(660+(run.collected%5)*65,.06);
   }
   function addChasers(kind,count,chaseRun=null) {
+    if(kind==='patrol'){spawnPatrolWave(count);return;}
     const speed=topSpeed()*(chaseRun?S.politePursuit.speedRatio:S.chasers.speedRatios[kind]);
     for(let i=0;i<count;i++){
       let x=state.p.x+range(-90,90),y=state.cam.y-S.chasers.spawnAbove-i*S.chasers.spawnSpacing;
@@ -134,8 +135,9 @@ window.FROSTLINE_READY = (async () => {
 
   function triggerAmbush(forced) {
     const kind=forced || pick(['fast','patrol','dog']);
+    if(kind==='patrol')state.patrolPenalty={remaining:S.chasers.patrolWaves.durationSeconds,nextWave:S.chasers.patrolWaves.intervalSeconds,nextSpeech:clock};
     addChasers(kind,S.chasers.ambushCount[kind]);
-    announce('UNPAID ADVENTURE',kind==='fast'?'Three yetis outside the flags. Stay on the piste!':kind==='patrol'?'Ski patrol would like a word.':'The dogs have your scent. And no other plans.',C.red,4.5);
+    announce('UNPAID ADVENTURE',kind==='fast'?'Three yetis outside the flags. Stay on the piste!':kind==='patrol'?'Four skiers. Every few seconds. They remember unpaid tickets.':'The dogs have your scent. And no other plans.',C.red,4.5);
     state.course.ambush=kind;
   }
   function formatTime(seconds){const cs=Math.max(0,Math.round(seconds*100));return `${Math.floor(cs/6000)}:${String(Math.floor(cs/100)%60).padStart(2,'0')}.${String(cs%100).padStart(2,'0')}`;}
@@ -165,7 +167,7 @@ window.FROSTLINE_READY = (async () => {
       burst(state.p.x,state.p.y,C.gold,34);
     }
     beep(passed?880:210,.2);state.course=null;
-    for(const c of state.chasers)c.expires=state.p.y+(c.kind==='dog'?1600:220);
+    for(const c of state.chasers)if(!c.patrolPass)c.expires=state.p.y+(c.kind==='dog'?1600:220);
     const town=state.plannedTown||makeVillage(belowView(300),state.p.x,false);
     state.zone={kind:'village',origin:town.origin,x:town.x,end:town.end};state.transitions.push({kind:'village',y:state.p.y});state.plannedTown=null;
   }
@@ -177,6 +179,7 @@ window.FROSTLINE_READY = (async () => {
     beep(110,.3,'triangle');save();
   }
   function resetSummit(lift=false){
+    if(!lift)state.patrolPenalty=null;else if(state.patrolPenalty)state.patrolPenalty.nextWave=0;
     state.p=newPlayer();state.results=null;state.course=null;state.zone={kind:'start',origin:0};state.objects=[];state.trails=[];state.chasers=[];state.particles=[];state.speech=[];state.messages=[];
     state.roads=[];state.villages=[];state.safeTrails=[];state.liftRoutes=[];state.chunks.clear();state.plannedTown=null;state.generated=0;state.lastTrack=null;state.started=false;state.activeTime=0;state.keyboardStep=0;state.control='keyboard';state.input={left:false,right:false,up:false,down:false,pointer:null,jump:false};state.deathTimer=state.liftTimer=0;state.elevated=0;state.nextFastSkier=clock+2;
     state.cam={x:0,y:-H*S.render.playerScreenY/ZOOM};startMeadow();state.liftRoutes.push({x0:S.lift.x,x1:S.lift.x,y0:S.lift.startY,y1:Infinity});ensureWorld(true);
@@ -602,7 +605,7 @@ window.FROSTLINE_READY = (async () => {
       if(o.type==='lift'&&!o.used&&previous.y<o.y&&p.y>=o.y&&Math.abs(p.x-o.x)<o.half){o.used=true;state.liftTimer=S.lift.rideSeconds;p.speed=0;announce('UP WE GO','Next stop: the summit.',C.teal,3);}
       if(o.r>0&&Math.abs(o.y-p.y)<Math.max(130,o.width)){const d=Math.hypot(p.x-o.x,(p.y-o.y)*.85);if(obstacleClearance(o,p.x,p.y)<S.physics.playerRadius)hit(o);else if(o.type.startsWith('person')&&!o.greeted&&d<85){o.greeted=true;say(pick(S.dialogue.greetings),o);}}
     }
-    if(state.course){const off=Math.abs(p.x-centerAt(p.y))>S.race.offPisteDistance;if(off&&!state.course.left){state.course.left=true;for(const c of state.chasers)if(c.chaseRun!==state.course)c.expires=p.y+(c.kind==='dog'?2100:220);if(state.course.violation)announce('OFF PISTE',state.course.ambush==='dog'?'The dogs are still very interested.':'Ski patrol has jurisdiction issues.',C.blue,3);}const run=state.course;
+    if(state.course){const off=Math.abs(p.x-centerAt(p.y))>S.race.offPisteDistance;if(off&&!state.course.left){state.course.left=true;for(const c of state.chasers)if(!c.patrolPass&&c.chaseRun!==state.course)c.expires=p.y+(c.kind==='dog'?2100:220);if(state.course.violation)announce('OFF PISTE',state.course.ambush==='dog'?'The dogs are still very interested.':state.course.ambush==='patrol'?'Ski patrol follows you off piste. Pay next time!':'You left the marked course.',C.blue,3);}const run=state.course;
       if(previous.y<run.endY&&p.y>=run.endY){
         const crossX=mix(previous.x,p.x,(run.endY-previous.y)/(p.y-previous.y||1));
         if(Math.abs(crossX-run.x)<run.finishHalf){run.time=Math.max(0,run.time-dt*(1-clamp((run.endY-previous.y)/(p.y-previous.y||1),0,1)));run.finishPassed=true;creditRun();}
@@ -777,9 +780,49 @@ window.FROSTLINE_READY = (async () => {
     }
   }
 
+  function spawnPatrolWave(count=S.chasers.ambushCount.patrol){
+    const p=state.p,K=S.chasers.patrolWaves;
+    for(let i=0;i<count;i++){
+      const lane=(i-(count-1)/2)*K.laneSpacing;
+      state.chasers.push({kind:'patrol',patrolPass:true,x:p.x+lane,y:viewBounds().top-S.chasers.spawnAbove-i*S.chasers.spawnSpacing,
+        vx:0,lane,passed:false,bumped:false,taunted:false,remaining:K.passLifetimeSeconds,width:42,r:12,id:random(),phase:range(0,TAU)});
+    }
+  }
+  function updatePatrolWaves(dt){
+    const penalty=state.patrolPenalty;if(!penalty)return;
+    penalty.remaining-=dt;penalty.nextWave-=dt;
+    if(penalty.remaining<=0){state.patrolPenalty=null;return;}
+    if(penalty.nextWave<=0){spawnPatrolWave();penalty.nextWave+=S.chasers.patrolWaves.intervalSeconds;}
+  }
+  function updatePatrolPass(c,dt){
+    const p=state.p,K=S.chasers.patrolWaves;c.remaining-=dt;
+    // Aim only on approach, then commit to the pass. Never home back onto the player.
+    if(c.y>=p.y-K.commitDistance)c.passed=true;
+    const targetVx=c.passed?0:clamp((p.x+p.vx*K.leadSeconds+c.lane-c.x)*K.steeringFollow,-K.maxLateralSpeed,K.maxLateralSpeed);
+    c.vx=ease(c.vx,targetVx,K.steeringFollow,dt);
+    const vy=Math.max(topSpeed()*K.speedRatio,Math.max(0,p.vy)+K.overtakeSpeed);
+    const previous={x:c.x,y:c.y};
+    travel(c,Math.atan2(vy,c.vx),Math.hypot(vy,c.vx),dt);
+    const distance=Math.hypot(c.x-p.x,c.y-p.y),penalty=state.patrolPenalty;
+    if(!c.taunted&&distance<K.tauntDistance&&(!penalty||clock>=penalty.nextSpeech)){
+      say(pick(S.dialogue.patrolTaunts),c,K.speechSeconds);c.taunted=true;
+      if(penalty)penalty.nextSpeech=clock+K.speechSpacingSeconds;
+    }
+    if(!c.bumped&&segmentDistance(p.x,p.y,previous,c)<S.chasers.captureDistance){
+      c.bumped=true;c.passed=true;
+      if(!p.awaitingInput&&p.shield<=0&&p.air<=0&&!tooSlowToCrash()){
+        crash(null,S.chasers.patrolFallSeconds);burst(p.x,p.y,C.ice,12);
+        say('Should have paid for the course!',c,K.speechSeconds);
+      }
+    }
+    if(c.y>viewBounds().bottom+K.despawnMargin)c.remaining=0;
+  }
+
   function updateChasers(dt) {
     const p=state.p;if(!state.started)return;
+    updatePatrolWaves(dt);
     for(const c of state.chasers){
+      if(c.patrolPass){updatePatrolPass(c,dt);continue;}
       if(c.dead)continue;
       // Course-owned pursuers have no distance leash; retire only when their run ends.
       if(c.chaseRun&&c.chaseRun!==state.course){c.leaving=true;c.y-=c.speed*dt;continue;}
@@ -804,10 +847,10 @@ window.FROSTLINE_READY = (async () => {
       if(contactDistance<S.chasers.captureDistance&&p.shield<=0&&p.air<=0){
         if(!lethal&&(p.awaitingInput||tooSlowToCrash()))continue;
         if(['fast','slow','bear'].includes(c.kind)){if(state.course&&!p.awaitingInput)state.course.hits++;burst(p.x,p.y,C.ice,12);die(c.kind==='bear'?'BEAR':'YETI');break;}
-        crash(null,S.chasers.patrolFallSeconds);announce(c.kind==='dog'?'AGGRESSIVELY LOVED':'A WORD FROM SKI PATROL',c.kind==='dog'?'Covered in slobber. Wallet intact.':'They are very disappointed.',C.red,3);for(const other of state.chasers)if(!other.chaseRun||other.chaseRun!==state.course)other.expires=p.y-1;burst(p.x,p.y,C.ice,20);break;
+        crash(null,S.chasers.patrolFallSeconds);announce(c.kind==='dog'?'AGGRESSIVELY LOVED':'A WORD FROM SKI PATROL',c.kind==='dog'?'Covered in slobber. Wallet intact.':'They are very disappointed.',C.red,3);for(const other of state.chasers)if(!other.patrolPass&&(!other.chaseRun||other.chaseRun!==state.course))other.expires=p.y-1;burst(p.x,p.y,C.ice,20);break;
       }
     }
-    state.chasers=state.chasers.filter(c=>(!c.dead||clock<c.fadeUntil)&&(!c.leaving||Math.abs(c.y-p.y)<H*.7));
+    state.chasers=state.chasers.filter(c=>(!c.patrolPass||c.remaining>0)&&(!c.dead||clock<c.fadeUntil)&&(!c.leaving||Math.abs(c.y-p.y)<H*.7));
   }
 
   function box(x,y,w,h,color) {ctx.fillStyle=color;ctx.fillRect(Math.round(x),Math.round(y),Math.round(w),Math.round(h));}
@@ -1076,7 +1119,7 @@ window.FROSTLINE_READY = (async () => {
     const s=screen(c.x,c.y),bob=Math.sin(clock*(c.kind==='slow'?5:9)+c.phase)*2;
     if(c.kind==='bear'){sprite(Math.sin(clock*6)>.2?'bearRun':'bear',s.x,s.y+bob,48,{flip:c.x>state.p.x});return;}
     if(c.kind==='dog')sprite(Math.sin(clock*8+c.phase)>.3?'dog':'dogLeft',s.x,s.y+bob,39);
-    else if(c.kind==='patrol')sprite('boarder',s.x,s.y+bob,47);
+    else if(c.kind==='patrol'){sprite(c.motionVx<-5?'left':c.motionVx>5?'right':'skier',s.x,s.y+bob,42,{guest:true,fast:true});line(s.x-5,s.y+3,s.x-5,s.y+12,C.muted);}
     else {shadow(s.x,s.y,20,5);sprite(c.kind==='slow'?'yetiHappy':Math.sin(clock*7+c.phase)>.2?'yeti':'yetiWalk',s.x,s.y+bob,c.kind==='slow'?52:59);if(c.kind==='slow'){box(s.x-10,s.y-9,20,2,'#7aabc1');box(s.x+6,s.y-8,2,4,'#7aabc1');}else {text('!',s.x,s.y-37,11,C.red);}}
   }
   function drawSpeech() {

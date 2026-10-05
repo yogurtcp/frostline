@@ -882,7 +882,23 @@
     "patrolFallSeconds": 1.4,
     "slowTalkSeconds": 7,
     "dogContactSpeed": 130,
-    "dogContactChaseDistance": 1700
+    "dogContactChaseDistance": 1700,
+    "patrolWaves": {
+      "durationSeconds": 120,
+      "intervalSeconds": 5,
+      "passLifetimeSeconds": 18,
+      "speedRatio": 1.4,
+      "overtakeSpeed": 220,
+      "laneSpacing": 48,
+      "maxLateralSpeed": 360,
+      "steeringFollow": 3,
+      "leadSeconds": 0.35,
+      "commitDistance": 110,
+      "tauntDistance": 370,
+      "speechSeconds": 2.7,
+      "speechSpacingSeconds": 0.85,
+      "despawnMargin": 220
+    }
   },
   "skiers": {
     "slowSpeed": [
@@ -1073,6 +1089,18 @@
       "EVERY SINGLE MUSHROOM!",
       "SOUP FOR EVERYONE!",
       "MASTER FORAGER!"
+    ],
+    "patrolTaunts": [
+      "Pay for the course, cheapskate!",
+      "Too poor for a ticket?",
+      "No coins, all the audacity!",
+      "This course is not a free sample!",
+      "Hey, freeloader! Buy a pass!",
+      "Your wallet called. Still empty!",
+      "Nice skis. Shame about the budget.",
+      "Pay up, penny pincher!",
+      "We take coins, not excuses!",
+      "Cheapskate coming through!"
     ]
   },
   "simulation": {

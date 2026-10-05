@@ -24,7 +24,7 @@ World coordinates increase rightward and downhill. `world.unitsPerMetre` default
 | `pedestrians` | Stroll radius, walking speeds and durations, pauses, obstacle clearance, spectator range and step animation |
 | `skiers` | Traffic speeds/frequency, aggressive skier aiming and taunt cooldowns |
 | `politePursuit` | Number and speed of the persistent course yetis (three, at 42% of straight-down top speed) |
-| `chasers` | Yeti/dog/patrol speed ratios, ambush sizes and capture distances |
+| `chasers` | Pursuer speeds, ambush sizes, capture distances, and recurring patrol-wave duration, interval, steering and speech |
 | `lift` | Cable location, chairs, towers, ride duration and speed |
 | `spawnTables` | Weighted object pools; repeated entries increase their probability |
 | `dialogue` | Taunts, fear, thanks, collision remarks, greetings and cheers |
@@ -44,6 +44,7 @@ World coordinates increase rightward and downhill. `world.unitsPerMetre` default
 - Different towns: `village.randomization` controls bend/width variation, row spacing, house counts and jitter, courtyard gaps, plaza count, and lift-station offsets. `enabled: true` and `seed: 0` generate fresh layouts each time a village is created; layouts stay fixed while you ski through them. A positive `seed` makes the layout sequence reproducible from the summit (resident activity remains independent). Set `enabled: false` for the original planned arrangement. Changes to row spacing automatically shift the town exit, lift, and course-choice row together.
 - Town road surfaces: `village.mainRoadSurface` controls the main street and lift approach (`snow` by default, or `paved`). `snowRoadColors` contains the bank, packed-snow, highlight and track colors. Snow takes precedence over paving where routes cross.
 - Longer village: expand its row layout and move `stationY`, `roadEndY`, `choiceTitleY`, `choiceY`, and `endOffset` down together. Keep the choice row below the houses and the village end below the choices.
+- Ski-patrol punishment: `chasers.ambushCount.patrol` is 4. `chasers.patrolWaves.durationSeconds` is 120 and `intervalSeconds` is 5. The same section controls overtaking speed, lateral steering, lane spacing, pass lifetime and speech timing. `dialogue.patrolTaunts` contains the unpaid-ticket heckles. Course exits and finishes do not cancel waves.
 - Fewer wolf encounters: lower `world.wolfShareOfPredators`, increase `wildlife.packSpawnSeparation`, or reduce `wildlife.packLimit`. Packs retain their configured 3–4 members.
 - Fewer rabbits: remove rabbit entries from `spawnTables.human` / `wild` or add more copies of other objects.
 - Preserve comparable best times after a substantial change: increment `timing.recordVersion`. Wallets remain intact.

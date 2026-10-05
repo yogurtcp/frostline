@@ -3721,7 +3721,8 @@
         "patrolFallSeconds",
         "slowTalkSeconds",
         "dogContactSpeed",
-        "dogContactChaseDistance"
+        "dogContactChaseDistance",
+        "patrolWaves"
       ],
       "properties": {
         "speedRatios": {
@@ -3814,6 +3815,84 @@
         "dogContactChaseDistance": {
           "type": "number",
           "minimum": 0
+        },
+        "patrolWaves": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "durationSeconds",
+            "intervalSeconds",
+            "passLifetimeSeconds",
+            "speedRatio",
+            "overtakeSpeed",
+            "laneSpacing",
+            "maxLateralSpeed",
+            "steeringFollow",
+            "leadSeconds",
+            "commitDistance",
+            "tauntDistance",
+            "speechSeconds",
+            "speechSpacingSeconds",
+            "despawnMargin"
+          ],
+          "properties": {
+            "durationSeconds": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "intervalSeconds": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "passLifetimeSeconds": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "speedRatio": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "overtakeSpeed": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "laneSpacing": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "maxLateralSpeed": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "steeringFollow": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "leadSeconds": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "commitDistance": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "tauntDistance": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "speechSeconds": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "speechSpacingSeconds": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "despawnMargin": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            }
+          }
         }
       }
     },
@@ -4071,7 +4150,8 @@
         "greetings",
         "catAnnoyed",
         "politeYeti",
-        "mushroomCheers"
+        "mushroomCheers",
+        "patrolTaunts"
       ],
       "properties": {
         "fastTaunts": {
@@ -4152,6 +4232,13 @@
           "minItems": 1
         },
         "mushroomCheers": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          }
+        },
+        "patrolTaunts": {
           "type": "array",
           "minItems": 1,
           "items": {
