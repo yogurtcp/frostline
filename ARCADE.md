@@ -114,18 +114,18 @@ Densities are placement attempts, not exact counts: gates, finish openings, lake
 
 | # | Name | Top speed km/h | Gates | Vertical gap m | Starting yetis | Yeti speed km/h |
 | --- | --- | ---: | ---: | ---: | --- | ---: |
-| 1 | First Tracks | 90 | 12 | 30 | 0 teal | 0.0 |
-| 2 | Mind the Pines | 90 | 15 | 30 | 0 teal | 0.0 |
+| 1 | First Tracks | 90 | 12 | 30 | 4 teal | 0 |
+| 2 | Mind the Pines | 90 | 15 | 30 | 0 teal | 0 |
 | 3 | Polite Pursuit | 103 | 19 | 30 | 3 teal | 72.1 |
 | 4 | Forest Company | 103 | 20 | 30 | 3 teal | 76.22 |
-| 5 | Orange Alert | 132 | 17 | 40 | 3 orange | 113.52 |
-| 6 | Timber Express | 132 | 18 | 40 | 3 orange | 116.16 |
-| 7 | Rush Hour | 132 | 19 | 40 | 3 orange | 116.16 |
-| 8 | Frozen Assets | 132 | 20 | 40 | 3 orange | 116.16 |
-| 9 | Air Mail | 132 | 18 | 48 | 3 orange | 118.8 |
-| 10 | Flag Consequences | 132 | 24 | 40 | 3 orange | 118.8 |
-| 11 | Violet Warning | 132 | 27 | 40 | 2 violet | 125.4 |
-| 12 | Last Tracks | 132 | 28 | 48 | 2 violet | 128.04 |
+| 5 | Orange Alert | 115 | 17 | 40 | 3 orange | 90 |
+| 6 | Timber Express | 115 | 18 | 40 | 3 orange | 88 |
+| 7 | Rush Hour | 115 | 19 | 40 | 2 teal | 80 |
+| 8 | Frozen Assets | 115 | 20 | 40 | 3 orange | 92 |
+| 9 | Air Mail | 132 | 18 | 48 | 2 orange | 95 |
+| 10 | Flag Consequences | 132 | 24 | 40 | 3 orange | 110 |
+| 11 | Violet Warning | 132 | 27 | 40 | 2 violet | 120 |
+| 12 | Last Tracks | 132 | 28 | 48 | 2 violet | 128 |
 
 ## Gear, towns and records
 
