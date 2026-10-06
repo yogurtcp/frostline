@@ -1257,15 +1257,25 @@ window.FROSTLINE_READY = (async () => {
     }
   }
   function drawGearHUD(){
-    const a=state.arcade,G=S.arcade.gear,width=(W-50)/2,y=H-99;
-    for(const [i,kind] of ['shield','sword'].entries()){
-      const x=18+i*(width+14),stock=a[kind+'s'],cap=kind==='shield'?G.maxShields:G.maxSwords;
-      const progress=kind==='shield'?a.shieldCharge:a.swordCharge/G.swordGatesPerSword,color=kind==='shield'?G.shieldColor:G.swordColor;
-      box(x-4,y-16,width+4,45,'#f3f7f0');gearIcon(kind,x+9,y-2,2);
-      text(kind.toUpperCase()+' '+stock+'/'+cap,x+26,y-7,9,C.ink,'left');
-      const label=stock>=cap?'FULL':kind==='shield'?Math.floor(progress*100)+'/100 SHIELD CHARGE':a.swordCharge+'/'+G.swordGatesPerSword+' SWORD GATES';
-      text(label,x+26,y+6,8,C.muted,'left');
-      box(x+26,y+17,width-31,5,'#d2e0dc');box(x+26,y+17,(width-31)*(stock>=cap?1:progress),5,a.gearFlash?.kind===kind&&a.gearFlash.until>clock?C.gold:color);
+    const a=state.arcade,G=S.arcade.gear,scale=2,y=H-79;
+    let x=28;
+    for(const kind of ['shield','sword']){
+      const stock=a[kind+'s'],cap=kind==='shield'?G.maxShields:G.maxSwords;
+      const progress=clamp(kind==='shield'?a.shieldCharge:a.swordCharge/G.swordGatesPerSword,0,1);
+      const color=kind==='shield'?G.shieldColor:G.swordColor,pixels=gearPixels[kind];
+      for(let slot=0;slot<cap;slot++){
+        const ready=slot<stock,fill=ready?1:slot===stock?progress:0;
+        for(let row=0;row<pixels.length;row++)for(let col=0;col<pixels[row].length;col++){
+          const pixel=pixels[row][col];if(pixel==='0')continue;
+          const px=x+(col-4)*scale,py=y+(row-4)*scale;
+          box(px,py,scale,scale,pixel==='1'?'#acbfbb':'#dce6df');
+          const height=clamp(fill*pixels.length-(pixels.length-1-row),0,1)*scale;
+          if(height>0){ctx.save();ctx.globalAlpha=ready?1:.55;box(px,py+scale-height,scale,height,pixel==='1'?C.ink:pixel==='3'?C.gold:color);ctx.restore();}
+          if(ready&&pixel==='2'&&row<2)box(px,py,scale,1,'#fff9d9');
+        }
+        x+=25;
+      }
+      x+=14;
     }
   }
   function drawGearEffect(){
