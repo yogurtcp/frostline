@@ -18,6 +18,7 @@
         "overtakeSeconds": 24,
         "yetiTier": "none",
         "yetis": 0,
+        "yetiSpeedPercent": 0,
         "missYetis": 0,
         "missTier": "fast",
         "gateScale": 1,
@@ -25,9 +26,7 @@
         "ice": false,
         "jumps": false,
         "mixed": false,
-        "featureEveryGates": 6,
-        "yetiGatePacePercent": 0,
-        "missYetiGatePacePercent": 90
+        "featureEveryGates": 6
       },
       {
         "name": "Mind the Pines",
@@ -43,6 +42,7 @@
         "overtakeSeconds": 16,
         "yetiTier": "none",
         "yetis": 0,
+        "yetiSpeedPercent": 0,
         "missYetis": 0,
         "missTier": "fast",
         "gateScale": 1,
@@ -50,15 +50,13 @@
         "ice": false,
         "jumps": false,
         "mixed": false,
-        "featureEveryGates": 6,
-        "yetiGatePacePercent": 0,
-        "missYetiGatePacePercent": 90
+        "featureEveryGates": 6
       },
       {
         "name": "Polite Pursuit",
         "lengthMetres": 600,
-        "topSpeedKmh": 132,
-        "gateSpacingMetres": 60,
+        "topSpeedKmh": 103,
+        "gateSpacingMetres": 30,
         "treesPer100m": 2.5,
         "skierGroupsPer100m": 3.4,
         "endTrafficMultiplier": 1.5,
@@ -68,6 +66,7 @@
         "overtakeSeconds": 14,
         "yetiTier": "slow",
         "yetis": 3,
+        "yetiSpeedPercent": 70,
         "missYetis": 0,
         "missTier": "fast",
         "gateScale": 1,
@@ -75,15 +74,13 @@
         "ice": false,
         "jumps": false,
         "mixed": false,
-        "featureEveryGates": 6,
-        "yetiGatePacePercent": 80,
-        "missYetiGatePacePercent": 90
+        "featureEveryGates": 6
       },
       {
         "name": "Forest Company",
         "lengthMetres": 650,
-        "topSpeedKmh": 132,
-        "gateSpacingMetres": 60,
+        "topSpeedKmh": 103,
+        "gateSpacingMetres": 30,
         "treesPer100m": 6,
         "skierGroupsPer100m": 3.6,
         "endTrafficMultiplier": 1.5,
@@ -93,6 +90,7 @@
         "overtakeSeconds": 14,
         "yetiTier": "slow",
         "yetis": 3,
+        "yetiSpeedPercent": 74,
         "missYetis": 0,
         "missTier": "fast",
         "gateScale": 1,
@@ -100,9 +98,7 @@
         "ice": false,
         "jumps": false,
         "mixed": false,
-        "featureEveryGates": 6,
-        "yetiGatePacePercent": 82,
-        "missYetiGatePacePercent": 90
+        "featureEveryGates": 6
       },
       {
         "name": "Orange Alert",
@@ -118,6 +114,7 @@
         "overtakeSeconds": 10,
         "yetiTier": "fast",
         "yetis": 3,
+        "yetiSpeedPercent": 86,
         "missYetis": 0,
         "missTier": "fast",
         "gateScale": 1,
@@ -125,9 +122,7 @@
         "ice": false,
         "jumps": false,
         "mixed": false,
-        "featureEveryGates": 6,
-        "yetiGatePacePercent": 86,
-        "missYetiGatePacePercent": 90
+        "featureEveryGates": 6
       },
       {
         "name": "Timber Express",
@@ -143,6 +138,7 @@
         "overtakeSeconds": 10,
         "yetiTier": "fast",
         "yetis": 3,
+        "yetiSpeedPercent": 88,
         "missYetis": 0,
         "missTier": "fast",
         "gateScale": 1,
@@ -150,9 +146,7 @@
         "ice": false,
         "jumps": false,
         "mixed": false,
-        "featureEveryGates": 6,
-        "yetiGatePacePercent": 88,
-        "missYetiGatePacePercent": 90
+        "featureEveryGates": 6
       },
       {
         "name": "Rush Hour",
@@ -168,6 +162,7 @@
         "overtakeSeconds": 7,
         "yetiTier": "fast",
         "yetis": 3,
+        "yetiSpeedPercent": 88,
         "missYetis": 0,
         "missTier": "fast",
         "gateScale": 1,
@@ -175,9 +170,7 @@
         "ice": false,
         "jumps": false,
         "mixed": false,
-        "featureEveryGates": 6,
-        "yetiGatePacePercent": 88,
-        "missYetiGatePacePercent": 90
+        "featureEveryGates": 6
       },
       {
         "name": "Frozen Assets",
@@ -193,6 +186,7 @@
         "overtakeSeconds": 10,
         "yetiTier": "fast",
         "yetis": 3,
+        "yetiSpeedPercent": 88,
         "missYetis": 0,
         "missTier": "fast",
         "gateScale": 1,
@@ -200,9 +194,7 @@
         "ice": true,
         "jumps": false,
         "mixed": false,
-        "featureEveryGates": 4,
-        "yetiGatePacePercent": 88,
-        "missYetiGatePacePercent": 90
+        "featureEveryGates": 4
       },
       {
         "name": "Air Mail",
@@ -218,6 +210,7 @@
         "overtakeSeconds": 10,
         "yetiTier": "fast",
         "yetis": 3,
+        "yetiSpeedPercent": 90,
         "missYetis": 0,
         "missTier": "fast",
         "gateScale": 1,
@@ -225,9 +218,7 @@
         "ice": false,
         "jumps": true,
         "mixed": false,
-        "featureEveryGates": 4,
-        "yetiGatePacePercent": 90,
-        "missYetiGatePacePercent": 90
+        "featureEveryGates": 4
       },
       {
         "name": "Flag Consequences",
@@ -243,6 +234,7 @@
         "overtakeSeconds": 10,
         "yetiTier": "fast",
         "yetis": 3,
+        "yetiSpeedPercent": 90,
         "missYetis": 1,
         "missTier": "fast",
         "gateScale": 0.88,
@@ -250,9 +242,7 @@
         "ice": false,
         "jumps": false,
         "mixed": false,
-        "featureEveryGates": 4,
-        "yetiGatePacePercent": 90,
-        "missYetiGatePacePercent": 90
+        "featureEveryGates": 4
       },
       {
         "name": "Violet Warning",
@@ -268,6 +258,7 @@
         "overtakeSeconds": 10,
         "yetiTier": "elite",
         "yetis": 2,
+        "yetiSpeedPercent": 95,
         "missYetis": 2,
         "missTier": "fast",
         "gateScale": 0.88,
@@ -275,9 +266,7 @@
         "ice": false,
         "jumps": false,
         "mixed": false,
-        "featureEveryGates": 4,
-        "yetiGatePacePercent": 92,
-        "missYetiGatePacePercent": 90
+        "featureEveryGates": 4
       },
       {
         "name": "Last Tracks",
@@ -293,6 +282,7 @@
         "overtakeSeconds": 10,
         "yetiTier": "elite",
         "yetis": 2,
+        "yetiSpeedPercent": 97,
         "missYetis": 2,
         "missTier": "fast",
         "gateScale": 0.88,
@@ -300,11 +290,14 @@
         "ice": true,
         "jumps": true,
         "mixed": true,
-        "featureEveryGates": 4,
-        "yetiGatePacePercent": 94,
-        "missYetiGatePacePercent": 90
+        "featureEveryGates": 4
       }
     ],
+    "yetiRatios": {
+      "slow": 0.42,
+      "fast": 0.82,
+      "elite": 0.94
+    },
     "yetiColors": {
       "slow": "#4babb0",
       "fast": "#d18143",
@@ -367,9 +360,7 @@
     "startLineSideOffsetMetres": 11,
     "startLineRowOffsetMetres": 6,
     "startLineDownhillOffsetMetres": 3,
-    "wakeSeconds": 0.8,
-    "pursuitTurnAllowanceSeconds": 0.3,
-    "finishApproachGateSpacings": 1
+    "wakeSeconds": 0.8
   },
   "colors": {
     "ink": "#244451",

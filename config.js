@@ -30,8 +30,8 @@ window.loadFrostlineConfig = async function () {
     if (!(target.goldSeconds < target.parSeconds)) throw new Error(`timing.targets.${id}: goldSeconds must be below parSeconds`);
   }
   for (const [i, stage] of config.arcade.stages.entries()) {
-    if (stage.yetis > 0 && (stage.yetiTier === 'none' || stage.yetiGatePacePercent <= 0)) throw new Error(`arcade.stages[${i}]: starting yetis need a tier and positive yetiGatePacePercent`);
-    if (stage.missYetis > 0 && (stage.missTier === 'none' || stage.missYetiGatePacePercent <= 0)) throw new Error(`arcade.stages[${i}]: missed-gate yetis need a missTier and positive missYetiGatePacePercent`);
+    if (stage.yetis > 0 && (stage.yetiTier === 'none' || stage.yetiSpeedPercent <= 0)) throw new Error(`arcade.stages[${i}]: starting yetis need a tier and positive yetiSpeedPercent`);
+    if (stage.missYetis > 0 && stage.missTier === 'none') throw new Error(`arcade.stages[${i}]: missed-gate yetis need a missTier`);
   }
   if (config.wildlife.packMin > config.wildlife.packMax) throw new Error('packMin must not exceed packMax');
   for (const id of [...config.race.entryChoices, ...config.race.villageChoices]) if (!config.courses[id]) throw new Error(`Unknown course ${id}`);

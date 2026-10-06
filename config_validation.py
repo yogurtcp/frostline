@@ -30,8 +30,8 @@ def validate(value, schema, path='config'):
         for course, target in value['timing']['targets'].items():
             if target['goldSeconds'] >= target['parSeconds']: fail(f'{course}: goldSeconds must be below parSeconds')
         for i, stage in enumerate(value['arcade']['stages']):
-            if stage['yetis'] > 0 and (stage['yetiTier'] == 'none' or stage['yetiGatePacePercent'] <= 0): fail(f'arcade.stages[{i}]: starting yetis need a tier and positive yetiGatePacePercent')
-            if stage['missYetis'] > 0 and (stage['missTier'] == 'none' or stage['missYetiGatePacePercent'] <= 0): fail(f'arcade.stages[{i}]: missed-gate yetis need a missTier and positive missYetiGatePacePercent')
+            if stage['yetis'] > 0 and (stage['yetiTier'] == 'none' or stage['yetiSpeedPercent'] <= 0): fail(f'arcade.stages[{i}]: starting yetis need a tier and positive yetiSpeedPercent')
+            if stage['missYetis'] > 0 and stage['missTier'] == 'none': fail(f'arcade.stages[{i}]: missed-gate yetis need a missTier')
         if value['wildlife']['packMin'] > value['wildlife']['packMax']: fail('packMin must not exceed packMax')
         for course in value['race']['entryChoices'] + value['race']['villageChoices']:
             if course not in value['courses']: fail(f'unknown course {course}')
