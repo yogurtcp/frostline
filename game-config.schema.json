@@ -26,7 +26,8 @@
     "houseAnimation",
     "pedestrians",
     "mushroomHunt",
-    "politePursuit"
+    "politePursuit",
+    "arcade"
   ],
   "properties": {
     "$schema": {
@@ -91,7 +92,8 @@
         "mushroom",
         "polite",
         "panic",
-        "free"
+        "free",
+        "arcade"
       ],
       "properties": {
         "slalom": {
@@ -452,6 +454,57 @@
           }
         },
         "free": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "name",
+            "sub",
+            "length",
+            "fee",
+            "pace",
+            "spacing",
+            "density",
+            "color",
+            "kind"
+          ],
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "sub": {
+              "type": "string"
+            },
+            "length": {
+              "type": "number",
+              "minimum": 0,
+              "exclusiveMinimum": 0
+            },
+            "fee": {
+              "type": "number",
+              "minimum": 0
+            },
+            "pace": {
+              "type": "number",
+              "minimum": 0,
+              "exclusiveMinimum": 0
+            },
+            "spacing": {
+              "type": "number",
+              "minimum": 0
+            },
+            "density": {
+              "type": "number",
+              "minimum": 0
+            },
+            "color": {
+              "type": "string"
+            },
+            "kind": {
+              "type": "string"
+            }
+          }
+        },
+        "arcade": {
           "type": "object",
           "additionalProperties": false,
           "required": [
@@ -4656,6 +4709,264 @@
           "type": "number",
           "exclusiveMinimum": 0,
           "maximum": 1
+        }
+      }
+    },
+    "arcade": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "stages",
+        "yetiRatios",
+        "yetiColors",
+        "yetiTints",
+        "spawnBehind",
+        "missSpawnAbove",
+        "spawnSpread",
+        "maxActiveYetis",
+        "featureIntervalGates",
+        "featureClearance",
+        "resultSeconds",
+        "fastSpawnBaseSeconds",
+        "entranceSpacing",
+        "landingClearanceLength",
+        "landingClearanceHalfWidth",
+        "rampSeconds",
+        "rampOffsetX"
+      ],
+      "properties": {
+        "stages": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "name",
+              "length",
+              "pace",
+              "spacing",
+              "trees",
+              "density",
+              "fastChance",
+              "yetiTier",
+              "yetis",
+              "missYetis",
+              "missTier",
+              "gateScale",
+              "swayScale",
+              "ice",
+              "jumps",
+              "mixed"
+            ],
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "length": {
+                "type": "number",
+                "minimum": 0,
+                "exclusiveMinimum": 0
+              },
+              "pace": {
+                "type": "number",
+                "minimum": 0,
+                "exclusiveMinimum": 0
+              },
+              "spacing": {
+                "type": "number",
+                "minimum": 0,
+                "exclusiveMinimum": 0
+              },
+              "trees": {
+                "type": "boolean"
+              },
+              "density": {
+                "type": "number",
+                "minimum": 0
+              },
+              "fastChance": {
+                "type": "number",
+                "minimum": 0
+              },
+              "yetiTier": {
+                "type": "string",
+                "enum": [
+                  "none",
+                  "slow",
+                  "fast",
+                  "elite"
+                ]
+              },
+              "yetis": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "missYetis": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "missTier": {
+                "type": "string",
+                "enum": [
+                  "none",
+                  "slow",
+                  "fast",
+                  "elite"
+                ]
+              },
+              "gateScale": {
+                "type": "number",
+                "minimum": 0,
+                "exclusiveMinimum": 0
+              },
+              "swayScale": {
+                "type": "number",
+                "minimum": 0,
+                "exclusiveMinimum": 0
+              },
+              "ice": {
+                "type": "boolean"
+              },
+              "jumps": {
+                "type": "boolean"
+              },
+              "mixed": {
+                "type": "boolean"
+              }
+            }
+          }
+        },
+        "yetiRatios": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "slow",
+            "fast",
+            "elite"
+          ],
+          "properties": {
+            "slow": {
+              "type": "number",
+              "minimum": 0
+            },
+            "fast": {
+              "type": "number",
+              "minimum": 0
+            },
+            "elite": {
+              "type": "number",
+              "minimum": 0
+            }
+          }
+        },
+        "yetiColors": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "slow",
+            "fast",
+            "elite"
+          ],
+          "properties": {
+            "slow": {
+              "type": "string"
+            },
+            "fast": {
+              "type": "string"
+            },
+            "elite": {
+              "type": "string"
+            }
+          }
+        },
+        "yetiTints": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "slow",
+            "fast",
+            "elite"
+          ],
+          "properties": {
+            "slow": {
+              "type": "array",
+              "minItems": 3,
+              "items": {
+                "type": "number",
+                "minimum": 0
+              }
+            },
+            "fast": {
+              "type": "array",
+              "minItems": 3,
+              "items": {
+                "type": "number",
+                "minimum": 0
+              }
+            },
+            "elite": {
+              "type": "array",
+              "minItems": 3,
+              "items": {
+                "type": "number",
+                "minimum": 0
+              }
+            }
+          }
+        },
+        "spawnBehind": {
+          "type": "number",
+          "minimum": 0
+        },
+        "missSpawnAbove": {
+          "type": "number",
+          "minimum": 0
+        },
+        "spawnSpread": {
+          "type": "number",
+          "minimum": 0
+        },
+        "maxActiveYetis": {
+          "type": "integer",
+          "minimum": 0,
+          "exclusiveMinimum": 0
+        },
+        "featureIntervalGates": {
+          "type": "integer",
+          "minimum": 0,
+          "exclusiveMinimum": 0
+        },
+        "featureClearance": {
+          "type": "number",
+          "minimum": 0
+        },
+        "resultSeconds": {
+          "type": "number",
+          "minimum": 0
+        },
+        "fastSpawnBaseSeconds": {
+          "type": "number",
+          "minimum": 0
+        },
+        "entranceSpacing": {
+          "type": "number",
+          "minimum": 0
+        },
+        "landingClearanceLength": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "landingClearanceHalfWidth": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "rampSeconds": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "rampOffsetX": {
+          "type": "number"
         }
       }
     }

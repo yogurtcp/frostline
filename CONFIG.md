@@ -10,6 +10,7 @@ World coordinates increase rightward and downhill. `world.unitsPerMetre` default
 
 | Section | What it controls |
 | --- | --- |
+| `arcade` | All 32 numbered stage definitions, terrain, traffic, pursuit tiers/colors, missed-gate penalties, landing clearances and run-result duration |
 | `courses` | Names, fees, lengths in metres, pace, gate spacing, obstacle density and type |
 | `race` | Gate widths, required success fraction, point rewards, finish bonuses, choice rows and scenery placement |
 | `mushroomHunt` | Mushroom count, required fraction, points, pickup size, spread, spacing clearances and glints in Spore Decisions |
@@ -34,6 +35,7 @@ World coordinates increase rightward and downhill. `world.unitsPerMetre` default
 
 ## Useful examples
 
+- Arcade difficulty: edit `arcade.stages` in order. `yetis` / `yetiTier` specify initial pursuers; `missYetis` / `missTier` specify the penalty per missed gate. `trees`, `ice`, `jumps`, and `mixed` select terrain; `gateScale`, `swayScale`, `spacing`, `pace`, `density` and `fastChance` tune the route. `yetiRatios` sets pursuit speed relative to the stage top speed. See `ARCADE.md` for all stages.
 - Make regular slalom timing more forgiving: increase `timing.targets.slalom.goldSeconds` and `parSeconds`, keeping gold below par.
 - Reduce all speed prizes: lower `timing.maxBonus` (60 by default).
 - Slow recovery: `physics.minimumCollisionKmh` (8) disables obstacle impacts at or below that HUD speed. Objects touched while creeping stay harmless until you fully clear them, even if you accelerate. Chasing predators can still catch a stopped player.
