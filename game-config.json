@@ -32,7 +32,7 @@
         "itemSpreadMetres": 32,
         "endTrafficMultiplier": 1.4,
         "tierRates": {
-          "common": 0.2,
+          "common": 0.05,
           "slightlyRare": 0,
           "veryRare": 0
         },
@@ -69,8 +69,8 @@
         "itemSpreadMetres": 32,
         "endTrafficMultiplier": 1.4,
         "tierRates": {
-          "common": 2.0,
-          "slightlyRare": 0.15,
+          "common": 1.0,
+          "slightlyRare": 0.05,
           "veryRare": 0
         },
         "itemRates": {
@@ -98,7 +98,7 @@
         "yeti": {
           "count": 1,
           "color": "teal",
-          "speedKmh": 72.1
+          "speedKmh": 52.1
         },
         "missedGateYetis": {
           "count": 0,
@@ -145,7 +145,7 @@
         "itemSpreadMetres": 32,
         "endTrafficMultiplier": 1.5,
         "tierRates": {
-          "common": 1.5,
+          "common": 1.0,
           "slightlyRare": 0.15,
           "veryRare": 0
         },
@@ -174,7 +174,7 @@
         "yeti": {
           "count": 3,
           "color": "orange",
-          "speedKmh": 90
+          "speedKmh": 82
         },
         "missedGateYetis": {
           "count": 0,
@@ -184,7 +184,7 @@
         "itemSpreadMetres": 32,
         "endTrafficMultiplier": 1.5,
         "tierRates": {
-          "common": 1.0,
+          "common": 0.15,
           "slightlyRare": 0.2,
           "veryRare": 0
         },
@@ -274,7 +274,14 @@
           "skier": 4.0,
           "fastSkier": 3.0,
           "boarder": 1.3,
-          "overtakingSkier": 0.25
+          "overtakingSkier": 0.25,
+          "pine": 0,
+          "fir": 0,
+          "smallPine": 0,
+          "spruceTree": 0,
+          "crookedTree": 0,
+          "cedarTree": 0,
+          "alpineTree": 0
         }
       },
       {
