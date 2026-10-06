@@ -32,7 +32,7 @@
         "itemSpreadMetres": 32,
         "endTrafficMultiplier": 1.4,
         "tierRates": {
-          "common": 0.5,
+          "common": 0.2,
           "slightlyRare": 0,
           "veryRare": 0
         },
@@ -96,7 +96,7 @@
           "icePercent": 0
         },
         "yeti": {
-          "count": 3,
+          "count": 1,
           "color": "teal",
           "speedKmh": 72.1
         },

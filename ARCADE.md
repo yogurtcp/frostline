@@ -116,7 +116,7 @@ Densities are placement attempts, not exact counts: gates, finish openings, lake
 | --- | --- | ---: | ---: | ---: | --- | ---: |
 | 1 | First Tracks | 90 | 12 | 30 | 4 teal | 0 |
 | 2 | Mind the Pines | 90 | 15 | 30 | 0 teal | 0 |
-| 3 | Polite Pursuit | 103 | 19 | 30 | 3 teal | 72.1 |
+| 3 | Polite Pursuit | 103 | 19 | 30 | 1 teal | 72.1 |
 | 4 | Forest Company | 103 | 20 | 30 | 3 teal | 76.22 |
 | 5 | Orange Alert | 115 | 17 | 40 | 3 orange | 90 |
 | 6 | Timber Express | 115 | 18 | 40 | 3 orange | 88 |
