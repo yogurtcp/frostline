@@ -4730,6 +4730,7 @@
       "additionalProperties": false,
       "required": [
         "stages",
+        "itemTiers",
         "yetiColors",
         "yetiTints",
         "missSpawnAbove",
@@ -4768,7 +4769,7 @@
               "missedGateYetis",
               "itemSpreadMetres",
               "endTrafficMultiplier",
-              "itemsPer100m"
+              "tierRates"
             ],
             "properties": {
               "name": {
@@ -4906,367 +4907,938 @@
                 "minimum": 1,
                 "maximum": 3
               },
-              "itemsPer100m": {
+              "tierRates": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "common",
+                  "slightlyRare",
+                  "veryRare"
+                ],
+                "description": "Default placement attempts per 100 metres for each rarity tier on this stage.",
+                "properties": {
+                  "common": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres for common objects; 0 disables the tier unless overridden."
+                  },
+                  "slightlyRare": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres for slightlyRare objects; 0 disables the tier unless overridden."
+                  },
+                  "veryRare": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres for veryRare objects; 0 disables the tier unless overridden."
+                  }
+                }
+              },
+              "itemRates": {
                 "type": "object",
                 "additionalProperties": false,
                 "required": [],
+                "description": "Per-object spawn-rate overrides. Omitted objects use their tier rate; 0 disables the object.",
                 "properties": {
                   "pine": {
                     "type": "number",
                     "minimum": 0,
                     "maximum": 30,
-                    "description": "Placement attempts per 100 metres of course; 0 disables this object. Safe gate openings and landing zones can reduce placement."
+                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
                   },
                   "fir": {
                     "type": "number",
                     "minimum": 0,
                     "maximum": 30,
-                    "description": "Placement attempts per 100 metres of course; 0 disables this object. Safe gate openings and landing zones can reduce placement."
+                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
                   },
                   "smallPine": {
                     "type": "number",
                     "minimum": 0,
                     "maximum": 30,
-                    "description": "Placement attempts per 100 metres of course; 0 disables this object. Safe gate openings and landing zones can reduce placement."
+                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
                   },
                   "spruceTree": {
                     "type": "number",
                     "minimum": 0,
                     "maximum": 30,
-                    "description": "Placement attempts per 100 metres of course; 0 disables this object. Safe gate openings and landing zones can reduce placement."
+                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
                   },
                   "crookedTree": {
                     "type": "number",
                     "minimum": 0,
                     "maximum": 30,
-                    "description": "Placement attempts per 100 metres of course; 0 disables this object. Safe gate openings and landing zones can reduce placement."
+                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
                   },
                   "cedarTree": {
                     "type": "number",
                     "minimum": 0,
                     "maximum": 30,
-                    "description": "Placement attempts per 100 metres of course; 0 disables this object. Safe gate openings and landing zones can reduce placement."
+                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
                   },
                   "alpineTree": {
                     "type": "number",
                     "minimum": 0,
                     "maximum": 30,
-                    "description": "Placement attempts per 100 metres of course; 0 disables this object. Safe gate openings and landing zones can reduce placement."
+                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
                   },
                   "rock": {
                     "type": "number",
                     "minimum": 0,
                     "maximum": 30,
-                    "description": "Placement attempts per 100 metres of course; 0 disables this object. Safe gate openings and landing zones can reduce placement."
+                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
                   },
                   "pebble": {
                     "type": "number",
                     "minimum": 0,
                     "maximum": 30,
-                    "description": "Placement attempts per 100 metres of course; 0 disables this object. Safe gate openings and landing zones can reduce placement."
+                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
                   },
                   "stump": {
                     "type": "number",
                     "minimum": 0,
                     "maximum": 30,
-                    "description": "Placement attempts per 100 metres of course; 0 disables this object. Safe gate openings and landing zones can reduce placement."
+                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
                   },
                   "bush": {
                     "type": "number",
                     "minimum": 0,
                     "maximum": 30,
-                    "description": "Placement attempts per 100 metres of course; 0 disables this object. Safe gate openings and landing zones can reduce placement."
+                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
                   },
                   "mushroom": {
                     "type": "number",
                     "minimum": 0,
                     "maximum": 30,
-                    "description": "Placement attempts per 100 metres of course; 0 disables this object. Safe gate openings and landing zones can reduce placement."
-                  },
-                  "snowball": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 30,
-                    "description": "Placement attempts per 100 metres of course; 0 disables this object. Safe gate openings and landing zones can reduce placement."
-                  },
-                  "ramp": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 30,
-                    "description": "Placement attempts per 100 metres of course; 0 disables this object. Safe gate openings and landing zones can reduce placement."
-                  },
-                  "mogul": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 30,
-                    "description": "Placement attempts per 100 metres of course; 0 disables this object. Safe gate openings and landing zones can reduce placement."
-                  },
-                  "rainbow": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 30,
-                    "description": "Placement attempts per 100 metres of course; 0 disables this object. Safe gate openings and landing zones can reduce placement."
-                  },
-                  "smallLake": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 30,
-                    "description": "Placement attempts per 100 metres of course; 0 disables this object. Safe gate openings and landing zones can reduce placement."
-                  },
-                  "largeLake": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 30,
-                    "description": "Placement attempts per 100 metres of course; 0 disables this object. Safe gate openings and landing zones can reduce placement."
-                  },
-                  "skier": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 30,
-                    "description": "Placement attempts per 100 metres of course; 0 disables this object. Safe gate openings and landing zones can reduce placement."
-                  },
-                  "fastSkier": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 30,
-                    "description": "Placement attempts per 100 metres of course; 0 disables this object. Safe gate openings and landing zones can reduce placement."
-                  },
-                  "overtakingSkier": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 30,
-                    "description": "Placement attempts per 100 metres of course; 0 disables this object. Safe gate openings and landing zones can reduce placement."
-                  },
-                  "boarder": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 30,
-                    "description": "Placement attempts per 100 metres of course; 0 disables this object. Safe gate openings and landing zones can reduce placement."
-                  },
-                  "personRed": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 30,
-                    "description": "Placement attempts per 100 metres of course; 0 disables this object. Safe gate openings and landing zones can reduce placement."
-                  },
-                  "personYellow": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 30,
-                    "description": "Placement attempts per 100 metres of course; 0 disables this object. Safe gate openings and landing zones can reduce placement."
-                  },
-                  "personGreen": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 30,
-                    "description": "Placement attempts per 100 metres of course; 0 disables this object. Safe gate openings and landing zones can reduce placement."
-                  },
-                  "dog": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 30,
-                    "description": "Placement attempts per 100 metres of course; 0 disables this object. Safe gate openings and landing zones can reduce placement."
-                  },
-                  "hostileDog": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 30,
-                    "description": "Placement attempts per 100 metres of course; 0 disables this object. Safe gate openings and landing zones can reduce placement."
-                  },
-                  "cat": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 30,
-                    "description": "Placement attempts per 100 metres of course; 0 disables this object. Safe gate openings and landing zones can reduce placement."
-                  },
-                  "rabbit": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 30,
-                    "description": "Placement attempts per 100 metres of course; 0 disables this object. Safe gate openings and landing zones can reduce placement."
-                  },
-                  "fox": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 30,
-                    "description": "Placement attempts per 100 metres of course; 0 disables this object. Safe gate openings and landing zones can reduce placement."
-                  },
-                  "wolf": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 30,
-                    "description": "Placement attempts per 100 metres of course; 0 disables this object. Safe gate openings and landing zones can reduce placement."
-                  },
-                  "bear": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 30,
-                    "description": "Placement attempts per 100 metres of course; 0 disables this object. Safe gate openings and landing zones can reduce placement."
-                  },
-                  "wolfPack": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 30,
-                    "description": "Placement attempts per 100 metres of course; 0 disables this object. Safe gate openings and landing zones can reduce placement."
-                  },
-                  "yetiTeal": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 30,
-                    "description": "Placement attempts per 100 metres of course; 0 disables this object. Safe gate openings and landing zones can reduce placement."
-                  },
-                  "yetiOrange": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 30,
-                    "description": "Placement attempts per 100 metres of course; 0 disables this object. Safe gate openings and landing zones can reduce placement."
-                  },
-                  "yetiViolet": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 30,
-                    "description": "Placement attempts per 100 metres of course; 0 disables this object. Safe gate openings and landing zones can reduce placement."
-                  },
-                  "lodge": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 30,
-                    "description": "Placement attempts per 100 metres of course; 0 disables this object. Safe gate openings and landing zones can reduce placement."
-                  },
-                  "rental": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 30,
-                    "description": "Placement attempts per 100 metres of course; 0 disables this object. Safe gate openings and landing zones can reduce placement."
-                  },
-                  "cottage": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 30,
-                    "description": "Placement attempts per 100 metres of course; 0 disables this object. Safe gate openings and landing zones can reduce placement."
-                  },
-                  "chalet": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 30,
-                    "description": "Placement attempts per 100 metres of course; 0 disables this object. Safe gate openings and landing zones can reduce placement."
-                  },
-                  "inn": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 30,
-                    "description": "Placement attempts per 100 metres of course; 0 disables this object. Safe gate openings and landing zones can reduce placement."
-                  },
-                  "cafe": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 30,
-                    "description": "Placement attempts per 100 metres of course; 0 disables this object. Safe gate openings and landing zones can reduce placement."
-                  },
-                  "hotel": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 30,
-                    "description": "Placement attempts per 100 metres of course; 0 disables this object. Safe gate openings and landing zones can reduce placement."
-                  },
-                  "skiShop": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 30,
-                    "description": "Placement attempts per 100 metres of course; 0 disables this object. Safe gate openings and landing zones can reduce placement."
-                  },
-                  "lamp": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 30,
-                    "description": "Placement attempts per 100 metres of course; 0 disables this object. Safe gate openings and landing zones can reduce placement."
-                  },
-                  "bench": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 30,
-                    "description": "Placement attempts per 100 metres of course; 0 disables this object. Safe gate openings and landing zones can reduce placement."
-                  },
-                  "snowman": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 30,
-                    "description": "Placement attempts per 100 metres of course; 0 disables this object. Safe gate openings and landing zones can reduce placement."
-                  },
-                  "bunting": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 30,
-                    "description": "Placement attempts per 100 metres of course; 0 disables this object. Safe gate openings and landing zones can reduce placement."
-                  },
-                  "powderPile": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 30,
-                    "description": "Placement attempts per 100 metres of course; 0 disables this object. Safe gate openings and landing zones can reduce placement."
-                  },
-                  "pigeons": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 30,
-                    "description": "Placement attempts per 100 metres of course; 0 disables this object. Safe gate openings and landing zones can reduce placement."
-                  },
-                  "breadStand": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 30,
-                    "description": "Placement attempts per 100 metres of course; 0 disables this object. Safe gate openings and landing zones can reduce placement."
-                  },
-                  "skiRack": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 30,
-                    "description": "Placement attempts per 100 metres of course; 0 disables this object. Safe gate openings and landing zones can reduce placement."
-                  },
-                  "lift": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 30,
-                    "description": "Placement attempts per 100 metres of course; 0 disables this object. Safe gate openings and landing zones can reduce placement."
-                  },
-                  "sign": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 30,
-                    "description": "Placement attempts per 100 metres of course; 0 disables this object. Safe gate openings and landing zones can reduce placement."
-                  },
-                  "flag": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 30,
-                    "description": "Placement attempts per 100 metres of course; 0 disables this object. Safe gate openings and landing zones can reduce placement."
-                  },
-                  "star": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 30,
-                    "description": "Placement attempts per 100 metres of course; 0 disables this object. Safe gate openings and landing zones can reduce placement."
-                  },
-                  "snowPath": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 30,
-                    "description": "Placement attempts per 100 metres of course; 0 disables this object. Safe gate openings and landing zones can reduce placement."
-                  },
-                  "pavedPath": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 30,
-                    "description": "Placement attempts per 100 metres of course; 0 disables this object. Safe gate openings and landing zones can reduce placement."
+                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
                   },
                   "sled": {
                     "type": "number",
                     "minimum": 0,
                     "maximum": 30,
-                    "description": "Sled placement attempts per 100 metres. High-speed impacts shove it downhill."
+                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                  },
+                  "snowball": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                  },
+                  "ramp": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                  },
+                  "mogul": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                  },
+                  "rainbow": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                  },
+                  "smallLake": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                  },
+                  "largeLake": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                  },
+                  "skier": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                  },
+                  "fastSkier": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                  },
+                  "overtakingSkier": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                  },
+                  "boarder": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                  },
+                  "personRed": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                  },
+                  "personYellow": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                  },
+                  "personGreen": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                  },
+                  "dog": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                  },
+                  "hostileDog": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                  },
+                  "cat": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                  },
+                  "rabbit": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                  },
+                  "fox": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                  },
+                  "wolf": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                  },
+                  "wolfPack": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                  },
+                  "bear": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                  },
+                  "yetiTeal": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                  },
+                  "yetiOrange": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                  },
+                  "yetiViolet": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                  },
+                  "lodge": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                  },
+                  "rental": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                  },
+                  "cottage": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                  },
+                  "chalet": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                  },
+                  "inn": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                  },
+                  "cafe": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                  },
+                  "hotel": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                  },
+                  "skiShop": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                  },
+                  "lamp": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                  },
+                  "bench": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                  },
+                  "snowman": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                  },
+                  "bunting": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                  },
+                  "powderPile": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                  },
+                  "pigeons": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                  },
+                  "breadStand": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                  },
+                  "skiRack": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                  },
+                  "lift": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                  },
+                  "sign": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                  },
+                  "flag": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                  },
+                  "star": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                  },
+                  "snowPath": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                  },
+                  "pavedPath": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
                   }
                 }
               }
+            }
+          }
+        },
+        "itemTiers": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "pine",
+            "fir",
+            "smallPine",
+            "spruceTree",
+            "crookedTree",
+            "cedarTree",
+            "alpineTree",
+            "rock",
+            "pebble",
+            "stump",
+            "bush",
+            "mushroom",
+            "sled",
+            "snowball",
+            "ramp",
+            "mogul",
+            "rainbow",
+            "smallLake",
+            "largeLake",
+            "skier",
+            "fastSkier",
+            "overtakingSkier",
+            "boarder",
+            "personRed",
+            "personYellow",
+            "personGreen",
+            "dog",
+            "hostileDog",
+            "cat",
+            "rabbit",
+            "fox",
+            "wolf",
+            "wolfPack",
+            "bear",
+            "yetiTeal",
+            "yetiOrange",
+            "yetiViolet",
+            "lodge",
+            "rental",
+            "cottage",
+            "chalet",
+            "inn",
+            "cafe",
+            "hotel",
+            "skiShop",
+            "lamp",
+            "bench",
+            "snowman",
+            "bunting",
+            "powderPile",
+            "pigeons",
+            "breadStand",
+            "skiRack",
+            "lift",
+            "sign",
+            "flag",
+            "star",
+            "snowPath",
+            "pavedPath"
+          ],
+          "description": "Rarity tier of each Arcade object. Per-stage tierRates set the default spawn rate; itemRates overrides single objects.",
+          "properties": {
+            "pine": {
+              "type": "string",
+              "enum": [
+                "common",
+                "slightlyRare",
+                "veryRare"
+              ]
+            },
+            "fir": {
+              "type": "string",
+              "enum": [
+                "common",
+                "slightlyRare",
+                "veryRare"
+              ]
+            },
+            "smallPine": {
+              "type": "string",
+              "enum": [
+                "common",
+                "slightlyRare",
+                "veryRare"
+              ]
+            },
+            "spruceTree": {
+              "type": "string",
+              "enum": [
+                "common",
+                "slightlyRare",
+                "veryRare"
+              ]
+            },
+            "crookedTree": {
+              "type": "string",
+              "enum": [
+                "common",
+                "slightlyRare",
+                "veryRare"
+              ]
+            },
+            "cedarTree": {
+              "type": "string",
+              "enum": [
+                "common",
+                "slightlyRare",
+                "veryRare"
+              ]
+            },
+            "alpineTree": {
+              "type": "string",
+              "enum": [
+                "common",
+                "slightlyRare",
+                "veryRare"
+              ]
+            },
+            "rock": {
+              "type": "string",
+              "enum": [
+                "common",
+                "slightlyRare",
+                "veryRare"
+              ]
+            },
+            "pebble": {
+              "type": "string",
+              "enum": [
+                "common",
+                "slightlyRare",
+                "veryRare"
+              ]
+            },
+            "stump": {
+              "type": "string",
+              "enum": [
+                "common",
+                "slightlyRare",
+                "veryRare"
+              ]
+            },
+            "bush": {
+              "type": "string",
+              "enum": [
+                "common",
+                "slightlyRare",
+                "veryRare"
+              ]
+            },
+            "mushroom": {
+              "type": "string",
+              "enum": [
+                "common",
+                "slightlyRare",
+                "veryRare"
+              ]
+            },
+            "sled": {
+              "type": "string",
+              "enum": [
+                "common",
+                "slightlyRare",
+                "veryRare"
+              ]
+            },
+            "snowball": {
+              "type": "string",
+              "enum": [
+                "common",
+                "slightlyRare",
+                "veryRare"
+              ]
+            },
+            "ramp": {
+              "type": "string",
+              "enum": [
+                "common",
+                "slightlyRare",
+                "veryRare"
+              ]
+            },
+            "mogul": {
+              "type": "string",
+              "enum": [
+                "common",
+                "slightlyRare",
+                "veryRare"
+              ]
+            },
+            "rainbow": {
+              "type": "string",
+              "enum": [
+                "common",
+                "slightlyRare",
+                "veryRare"
+              ]
+            },
+            "smallLake": {
+              "type": "string",
+              "enum": [
+                "common",
+                "slightlyRare",
+                "veryRare"
+              ]
+            },
+            "largeLake": {
+              "type": "string",
+              "enum": [
+                "common",
+                "slightlyRare",
+                "veryRare"
+              ]
+            },
+            "skier": {
+              "type": "string",
+              "enum": [
+                "common",
+                "slightlyRare",
+                "veryRare"
+              ]
+            },
+            "fastSkier": {
+              "type": "string",
+              "enum": [
+                "common",
+                "slightlyRare",
+                "veryRare"
+              ]
+            },
+            "overtakingSkier": {
+              "type": "string",
+              "enum": [
+                "common",
+                "slightlyRare",
+                "veryRare"
+              ]
+            },
+            "boarder": {
+              "type": "string",
+              "enum": [
+                "common",
+                "slightlyRare",
+                "veryRare"
+              ]
+            },
+            "personRed": {
+              "type": "string",
+              "enum": [
+                "common",
+                "slightlyRare",
+                "veryRare"
+              ]
+            },
+            "personYellow": {
+              "type": "string",
+              "enum": [
+                "common",
+                "slightlyRare",
+                "veryRare"
+              ]
+            },
+            "personGreen": {
+              "type": "string",
+              "enum": [
+                "common",
+                "slightlyRare",
+                "veryRare"
+              ]
+            },
+            "dog": {
+              "type": "string",
+              "enum": [
+                "common",
+                "slightlyRare",
+                "veryRare"
+              ]
+            },
+            "hostileDog": {
+              "type": "string",
+              "enum": [
+                "common",
+                "slightlyRare",
+                "veryRare"
+              ]
+            },
+            "cat": {
+              "type": "string",
+              "enum": [
+                "common",
+                "slightlyRare",
+                "veryRare"
+              ]
+            },
+            "rabbit": {
+              "type": "string",
+              "enum": [
+                "common",
+                "slightlyRare",
+                "veryRare"
+              ]
+            },
+            "fox": {
+              "type": "string",
+              "enum": [
+                "common",
+                "slightlyRare",
+                "veryRare"
+              ]
+            },
+            "wolf": {
+              "type": "string",
+              "enum": [
+                "common",
+                "slightlyRare",
+                "veryRare"
+              ]
+            },
+            "wolfPack": {
+              "type": "string",
+              "enum": [
+                "common",
+                "slightlyRare",
+                "veryRare"
+              ]
+            },
+            "bear": {
+              "type": "string",
+              "enum": [
+                "common",
+                "slightlyRare",
+                "veryRare"
+              ]
+            },
+            "yetiTeal": {
+              "type": "string",
+              "enum": [
+                "common",
+                "slightlyRare",
+                "veryRare"
+              ]
+            },
+            "yetiOrange": {
+              "type": "string",
+              "enum": [
+                "common",
+                "slightlyRare",
+                "veryRare"
+              ]
+            },
+            "yetiViolet": {
+              "type": "string",
+              "enum": [
+                "common",
+                "slightlyRare",
+                "veryRare"
+              ]
+            },
+            "lodge": {
+              "type": "string",
+              "enum": [
+                "common",
+                "slightlyRare",
+                "veryRare"
+              ]
+            },
+            "rental": {
+              "type": "string",
+              "enum": [
+                "common",
+                "slightlyRare",
+                "veryRare"
+              ]
+            },
+            "cottage": {
+              "type": "string",
+              "enum": [
+                "common",
+                "slightlyRare",
+                "veryRare"
+              ]
+            },
+            "chalet": {
+              "type": "string",
+              "enum": [
+                "common",
+                "slightlyRare",
+                "veryRare"
+              ]
+            },
+            "inn": {
+              "type": "string",
+              "enum": [
+                "common",
+                "slightlyRare",
+                "veryRare"
+              ]
+            },
+            "cafe": {
+              "type": "string",
+              "enum": [
+                "common",
+                "slightlyRare",
+                "veryRare"
+              ]
+            },
+            "hotel": {
+              "type": "string",
+              "enum": [
+                "common",
+                "slightlyRare",
+                "veryRare"
+              ]
+            },
+            "skiShop": {
+              "type": "string",
+              "enum": [
+                "common",
+                "slightlyRare",
+                "veryRare"
+              ]
+            },
+            "lamp": {
+              "type": "string",
+              "enum": [
+                "common",
+                "slightlyRare",
+                "veryRare"
+              ]
+            },
+            "bench": {
+              "type": "string",
+              "enum": [
+                "common",
+                "slightlyRare",
+                "veryRare"
+              ]
+            },
+            "snowman": {
+              "type": "string",
+              "enum": [
+                "common",
+                "slightlyRare",
+                "veryRare"
+              ]
+            },
+            "bunting": {
+              "type": "string",
+              "enum": [
+                "common",
+                "slightlyRare",
+                "veryRare"
+              ]
+            },
+            "powderPile": {
+              "type": "string",
+              "enum": [
+                "common",
+                "slightlyRare",
+                "veryRare"
+              ]
+            },
+            "pigeons": {
+              "type": "string",
+              "enum": [
+                "common",
+                "slightlyRare",
+                "veryRare"
+              ]
+            },
+            "breadStand": {
+              "type": "string",
+              "enum": [
+                "common",
+                "slightlyRare",
+                "veryRare"
+              ]
+            },
+            "skiRack": {
+              "type": "string",
+              "enum": [
+                "common",
+                "slightlyRare",
+                "veryRare"
+              ]
+            },
+            "lift": {
+              "type": "string",
+              "enum": [
+                "common",
+                "slightlyRare",
+                "veryRare"
+              ]
+            },
+            "sign": {
+              "type": "string",
+              "enum": [
+                "common",
+                "slightlyRare",
+                "veryRare"
+              ]
+            },
+            "flag": {
+              "type": "string",
+              "enum": [
+                "common",
+                "slightlyRare",
+                "veryRare"
+              ]
+            },
+            "star": {
+              "type": "string",
+              "enum": [
+                "common",
+                "slightlyRare",
+                "veryRare"
+              ]
+            },
+            "snowPath": {
+              "type": "string",
+              "enum": [
+                "common",
+                "slightlyRare",
+                "veryRare"
+              ]
+            },
+            "pavedPath": {
+              "type": "string",
+              "enum": [
+                "common",
+                "slightlyRare",
+                "veryRare"
+              ]
             }
           }
         },

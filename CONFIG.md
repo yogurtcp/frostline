@@ -40,9 +40,9 @@ World coordinates increase rightward and downhill. `world.unitsPerMetre` default
 
 ## Useful examples
 
-- Arcade stage editor: `arcade.stages` is in play order, with arbitrary names. Each entry explicitly sets player speed, gate layout, two yeti groups and 59 independent item densities. See `ARCADE.md` for a complete copyable stage and all keys.
+- Arcade stage editor: `arcade.stages` is in play order, with arbitrary names. Each entry explicitly sets player speed, gate layout, two yeti groups, three rarity-tier spawn rates and optional per-object overrides. See `ARCADE.md` for a complete copyable stage and all keys.
 - Arcade equipment: each stage’s `gates.swordGateCount` selects the number of sword gates. `arcade.gear.shieldsPerStage` controls shield yield, `swordGatesPerSword` controls sword charge, and `maxShields` / `maxSwords` cap inventory.
-- Arcade item density: `itemsPer100m` sets independent rates for every course object; zero or omission disables it. `skier`, `fastSkier`, `boarder` and `overtakingSkier` are separate, and `endTrafficMultiplier` increases their density toward the finish. Other object densities stay constant. Safe gate openings and landing clearances can reduce actual placement.
+- Arcade item density: `arcade.itemTiers` assigns each of the 59 objects to `common`, `slightlyRare` or `veryRare`; each stage's `tierRates` sets the per-100m rate for each tier, and `itemRates` overrides single objects (0 disables; omission uses the tier rate). `skier`, `fastSkier`, `boarder` and `overtakingSkier` are separate, and `endTrafficMultiplier` increases their density toward the finish. Other object densities stay constant. Safe gate openings and landing clearances can reduce actual placement.
 - Make regular slalom timing more forgiving: increase `timing.targets.slalom.goldSeconds` and `parSeconds`, keeping gold below par.
 - Reduce all speed prizes: lower `timing.maxBonus` (60 by default).
 - Slow recovery: `physics.minimumCollisionKmh` (8) disables obstacle impacts at or below that HUD speed. Objects touched while creeping stay harmless until you fully clear them, even if you accelerate. Chasing predators can still catch a stopped player.

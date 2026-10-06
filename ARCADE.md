@@ -21,7 +21,7 @@ For live local tuning, run `python3 serve.py`, open http://127.0.0.1:8765/, then
 
 ## Add or edit a stage
 
-Copy any entry in `arcade.stages`, change `name`, and insert it where you want. Array order defines progression; there is no fixed stage count or hardcoded name list. A compact complete stage can look like this (omitted item densities mean zero):
+Copy any entry in `arcade.stages`, change `name`, and insert it where you want. Array order defines progression; there is no fixed stage count or hardcoded name list. A compact complete stage can look like this (objects missing from `itemRates` use their tier rate):
 
 ```json
 {
@@ -41,18 +41,20 @@ Copy any entry in `arcade.stages`, change `name`, and insert it where you want. 
   "missedGateYetis": { "count": 0, "color": "orange", "speedKmh": 75 },
   "itemSpreadMetres": 32,
   "endTrafficMultiplier": 1.5,
-  "itemsPer100m": {
+  "tierRates": {
+    "common": 1.5,
+    "slightlyRare": 0.3,
+    "veryRare": 0
+  },
+  "itemRates": {
     "pine": 2,
-    "rock": 0.5,
     "skier": 3,
-    "fastSkier": 0.5,
-    "overtakingSkier": 0.2,
-    "boarder": 1,
-    "ramp": 0.2,
-    "rabbit": 0.1
+    "rock": 0
   }
 }
 ```
+
+Here `pine` spawns at 2 instead of the common 1.5, `rock` stays disabled despite being common, and everything else uses its tier rate.
 
 ### Gates
 
@@ -82,7 +84,7 @@ Start-line yetis remain visible before the race, react when you cross, and chase
 
 ### Item density
 
-`itemsPer100m` gives each item its own independent placement rate per 100 m of course. The supplied stages list all 59 keys explicitly. Zero or omission disables that item’s stage spawns. There are no random mixed item tables, automatic tree substitutions, mandatory terrain features, or hidden Arcade overtaker timers.
+Each stage sets one spawn rate per rarity tier in `tierRates` (`common`, `slightlyRare`, `veryRare`), in placement attempts per 100 m of course. Every catalog object spawns at its tier’s rate unless that stage lists it in `itemRates` with an explicit number; `0` disables the object. Omit `itemRates` keys — or the whole object — to run on tier defaults. The tier of each object lives in the single global map `arcade.itemTiers`. There are no random mixed item tables, automatic tree substitutions, mandatory terrain features, or hidden Arcade overtaker timers.
 
 Densities are placement attempts, not exact counts: gates, finish openings, lakes, other objects and jump landing zones remain clear. `itemSpreadMetres` controls how far from the centreline items can be placed. Increasing it gives large objects more room. Rare rates may yield no objects on a short stage. Towns, finish spectators, structural start/finish flags, the connecting lift cable and off-piste scenery retain their separate existing config sections; they are not counted as course item spawns.
 
@@ -99,6 +101,12 @@ Densities are placement attempts, not exact counts: gates, finish openings, lake
 | Sleeping yetis | `yetiTeal`, `yetiOrange`, `yetiViolet` |
 | Buildings | `lodge`, `rental`, `cottage`, `chalet`, `inn`, `cafe`, `hotel`, `skiShop` |
 | Props | `lamp`, `bench`, `snowman`, `bunting`, `powderPile`, `pigeons`, `breadStand`, `skiRack`, `lift`, `sign`, `flag`, `star` |
+
+| Tier | Members |
+| --- | --- |
+| `common` | pine, fir, smallPine, spruceTree, crookedTree, cedarTree, alpineTree, rock, pebble, stump, bush, skier, boarder, personRed, personYellow, personGreen |
+| `slightlyRare` | ramp, mogul, rainbow, mushroom, sled, snowball, fastSkier, overtakingSkier, dog, cat, rabbit, fox, lamp, bench, snowman, sign, flag, star, snowPath, pavedPath, bunting, powderPile, pigeons, skiRack, breadStand |
+| `veryRare` | smallLake, largeLake, hostileDog, wolf, bear, wolfPack, yetiTeal, yetiOrange, yetiViolet, lodge, rental, cottage, chalet, inn, cafe, hotel, skiShop, lift |
 
 `wolf` counts individuals; `wolfPack` counts packs of the configured 3–4 wolves. Explicitly placed course predators can chase/hunt on the piste; protected towns remain safe. House variants share existing collision footprints. `star`, `sign`, and the standalone `flag` are decorative, not currency or extra scoring gates. The stage `lift` is a prop during Arcade; it cannot exit the run. Animation poses (running/left/falling sprites), UI icons, and labels are not separate gameplay items.
 

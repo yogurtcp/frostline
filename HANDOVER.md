@@ -210,7 +210,7 @@ Each `arcade.stages[]` entry has:
 | `gates.icePercent` | 0–100 percent of gates covered by ice, rounded to a whole gate count |
 | `yeti` | Start group: independent count, color and absolute speedKmh |
 | `missedGateYetis` | Per-miss releases: independent count, color and speedKmh |
-| `itemsPer100m` | Independent placement rates for each catalog entry |
+| `tierRates` / `itemRates` | Per-tier default spawn rates plus optional per-object overrides (tiers defined once in global `arcade.itemTiers`) |
 | `itemSpreadMetres` | Horizontal placement range about centreline |
 | `endTrafficMultiplier` | Gradual increase in skier/boarder density toward finish |
 
@@ -218,7 +218,7 @@ Course length is first gate distance + `(count − 1) × vertical spacing` + fin
 
 Yeti colors teal/orange/violet map to internal slow/fast/elite visual tiers. Speeds are absolute and independent of color. Zero count disables a group; zero speed makes it stationary. Waiting start-line yetis wake when the start is crossed. Pursuers belong to their run and have no distance leash; retire at its end. Sleeping Yeti item entries use the stage's `yeti.speedKmh`.
 
-`itemsPer100m` has 59 supported keys listed in `ARCADE.md` and `ARCADE_ITEMS` in `game.js`. Zero or omitted entries disable that item. Rates are placement attempts, not guaranteed exact counts: collision, gate and landing clearances can reject a placement. `wolfPack` counts packs; `wolf` counts individuals. Town/ambient scenery has separate settings. Do not add a hidden background spawn stream inside Arcade that defeats these controls.
+Global `arcade.itemTiers` maps each of the 59 catalog keys (listed in `ARCADE.md` and `ARCADE_ITEMS` in `game.js`) to `common`, `slightlyRare` or `veryRare`. Each stage's `tierRates` sets the per-100m default for each tier; `itemRates` overrides single objects, with explicit `0` disabling one and omission using the tier rate. Rates are placement attempts, not guaranteed exact counts: collision, gate and landing clearances can reject a placement. `wolfPack` counts packs; `wolf` counts individuals. Town/ambient scenery has separate settings. Do not add a hidden background spawn stream inside Arcade that defeats these controls.
 
 Gate ice is separate from randomly placed `smallLake` and `largeLake`. At handover, stages 8 and 12 use 25% gate ice; others use 0%. Selected gates vary per run. Their patches span the opening and intentionally bypass the ordinary gate-clearance restriction for lakes.
 

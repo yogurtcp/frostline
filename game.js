@@ -135,11 +135,12 @@ window.FROSTLINE_READY = (async () => {
     "pavedPath":{"type":"path","width":56,"r":0,"surface":"paved"}
   };
   const yetiTierForColor={teal:'slow',orange:'fast',violet:'elite'};
+  function arcadeItemRate(stage,key){const override=stage.itemRates?.[key];return override!==undefined?override:stage.tierRates[S.arcade.itemTiers[key]];}
   function arcadeStage(index){
     const a=S.arcade.stages[index],g=a.gates;
     return {...a,length:g.firstGateMetres+(g.count-1)*g.verticalDistanceMetres+g.finishAfterLastGateMetres,
       pace:a.topSpeedKmh/(S.physics.speedMultiplier*S.physics.hudKmhPerSpeed),spacing:g.verticalDistanceMetres*PX_PER_M,
-      trees:Object.entries(a.itemsPer100m).some(([key,n])=>n>0&&ARCADE_ITEMS[key].treeVariant),
+      trees:Object.keys(ARCADE_ITEMS).some(key=>arcadeItemRate(a,key)>0&&ARCADE_ITEMS[key].treeVariant),
       yetiTier:yetiTierForColor[a.yeti.color],yetis:a.yeti.count,missTier:yetiTierForColor[a.missedGateYetis.color],missYetis:a.missedGateYetis.count};
   }
   function arcadeTrafficMultiplier(run,y){return mix(1,run.arcade.endTrafficMultiplier,clamp((y-run.startY)/(run.endY-run.startY),0,1));}
@@ -257,7 +258,7 @@ window.FROSTLINE_READY = (async () => {
     const iceGates=[...gates];for(let i=iceGates.length-1;i>0;i--){const j=Math.floor(random()*(i+1));[iceGates[i],iceGates[j]]=[iceGates[j],iceGates[i]];}
     for(const g of iceGates.slice(0,Math.round(gates.length*(run.arcade.gates.icePercent||0)/100)))entity('ice',g.x,g.y,{gateIce:true,arcadeFeature:true,arcadeRun:run,rx:g.half+45,ry:Math.min(run.arcade.spacing*.25,80),width:(g.half+45)*2,r:0});
     const openings=[...gates,{x:run.x,y:run.startY,half:run.arcade.gates.openingWidthMetres*PX_PER_M/2},{x:run.x,y:run.endY,half:run.finishHalf}];
-    const entries=Object.entries(run.arcade.itemsPer100m).filter(([,n])=>n>0).sort(([a],[b])=>Number(!!ARCADE_ITEMS[b].arcadeFeature)-Number(!!ARCADE_ITEMS[a].arcadeFeature));
+    const entries=Object.keys(ARCADE_ITEMS).map(key=>[key,arcadeItemRate(run.arcade,key)]).filter(([,n])=>n>0).sort(([a],[b])=>Number(!!ARCADE_ITEMS[b].arcadeFeature)-Number(!!ARCADE_ITEMS[a].arcadeFeature));
     for(const [key,density] of entries){
       const spec=ARCADE_ITEMS[key],spacing=100*PX_PER_M/density,traffic=['skier','fastSkier','overtakingSkier','boarder'].includes(key);
       let y=run.startY+S.race.terrainStartOffset+spacing*range(.25,.75);
