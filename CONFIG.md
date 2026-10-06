@@ -36,9 +36,9 @@ World coordinates increase rightward and downhill. `world.unitsPerMetre` default
 
 ## Useful examples
 
-- Arcade difficulty: `arcade.stages` is at the top of the file. Entries are in play order and use metres, km/h, object counts per 100 m, and percentages. `treesPer100m`, `skierGroupsPer100m`, `endTrafficMultiplier`, `yetiSpeedPercent`, and `featureEveryGates` are the main tuning controls. See `ARCADE.md` for the field reference and condensed stage list.
-- Arcade equipment: `arcade.gear.shieldsPerStage` defaults to 1.5. `swordGatesPerStage` is 4 and `swordGatesPerSword` is 8. Inventory caps are `maxShields` and `maxSwords` (2 each). The same object sets protection/effect duration and icon colors. Charges carry across stages; only successful gates add charge.
-- Arcade traffic uses a separate schedule without ambient spawns in its corridor. `skierGroupsPer100m` sets opening traffic density, `skierPairPercent` adds pairs, and `endTrafficMultiplier` gradually raises density and overtaker frequency. `fastSkierPercent` chooses fast skiers; `snowboarderPercent` chooses snowboarders from the remaining traffic. `overtakeSeconds` is the opening overtaker interval. `treesPer100m` controls tree density; `featureEveryGates` places occasional forest features or the stage’s selected ice/jumps, with clear landing corridors.
+- Arcade stage editor: `arcade.stages` is in play order, with arbitrary names. Each entry explicitly sets player speed, gate layout, two yeti groups and 59 independent item densities. See `ARCADE.md` for a complete copyable stage and all keys.
+- Arcade equipment: each stage’s `gates.swordGateCount` selects the number of sword gates. `arcade.gear.shieldsPerStage` controls shield yield, `swordGatesPerSword` controls sword charge, and `maxShields` / `maxSwords` cap inventory.
+- Arcade item density: `itemsPer100m` sets independent rates for every course object; zero or omission disables it. `skier`, `fastSkier`, `boarder` and `overtakingSkier` are separate, and `endTrafficMultiplier` increases their density toward the finish. Other object densities stay constant. Safe gate openings and landing clearances can reduce actual placement.
 - Make regular slalom timing more forgiving: increase `timing.targets.slalom.goldSeconds` and `parSeconds`, keeping gold below par.
 - Reduce all speed prizes: lower `timing.maxBonus` (60 by default).
 - Slow recovery: `physics.minimumCollisionKmh` (8) disables obstacle impacts at or below that HUD speed. Objects touched while creeping stay harmless until you fully clear them, even if you accelerate. Chasing predators can still catch a stopped player.
@@ -58,6 +58,6 @@ Saved data uses the browser's `frostline-v2` local-storage key. `times[courseId]
 
 Local-file and hosted versions have separate browser storage origins. Publishing does not move the offline wallet or records to the hosted site.
 
-Arcade gear uses `calmSwordGatesPerStage` (1) for stages without starting or missed-gate yetis, and `swordGatesPerStage` (4) when either threat is present. `swordGatesPerSword` (8) controls the charge needed for one sword. Stage order is the order of `arcade.stages`.
 
-Starting Arcade yetis wait beside the visible start line. `startLineSideOffsetMetres`, `startLineRowOffsetMetres`, `startLineDownhillOffsetMetres`, and `wakeSeconds` control staging. Each stage’s `yetiSpeedPercent` controls its starting pursuers; `yetiRatios` controls missed-gate pursuers. `campaignVersion` separates records after major redesigns while retaining the previous record.
+
+Arcade starts: `startStage` is 1-based; `autoStart: true` loads directly above that stage’s start. Starts above 1 are practice and do not overwrite records. `yeti` and `missedGateYetis` each specify `count`, `color` and absolute `speedKmh`; no automatic speed calculation applies.

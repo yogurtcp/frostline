@@ -1,70 +1,119 @@
-# Arcade: 12 stages, one descent
+# Arcade stage editor
 
-## Design brief
+## Rollback and design intent
 
-Player feedback behind this layout: two warmups are enough; stage 2 needs more objects; stage 3 needs visible pursuing yetis and sparse trees; stage 4 needs a much denser forest; stage 5 needs sparse trees, stage 6 dense trees, and stage 7 clearly heavier traffic. Later stages must introduce distinct hazards instead of repeating similar courses. Traffic should build toward each finish. Towns provide safe pauses without menus. Sword gates should be rare before threats appear. This replaces the repetitive 32-stage campaign.
+The gate-pace pursuit calculation and the faster/wider changes to stages 3–4 were reverted. Their defaults are back to 103 km/h and 30 m vertical gate spacing. Yeti speeds are now explicit absolute values; there are no calculated chase-speed caps or automatic adjustments.
 
-## Stage list
+Player feedback to preserve: two warmups are enough; stage 2 needs more objects; stage 3 needs visible start-line yetis and sparse trees; stage 4 needs denser trees; stage 5 sparse trees, stage 6 dense trees and stage 7 heavier traffic. There are 12 stages, editable in order, with safe towns between them. No menus. Missing the finish fails Arcade in place; death returns to the summit.
 
-Tree and traffic columns are placement attempts per 100 metres. Clear gate openings, lakes and landing corridors can reduce actual placement. Traffic includes skiers, snowboarders and fast skiers; groups can contain two people.
+## Quick start
 
-| # | Name | Length | Terrain | Trees / 100 m | Traffic groups / 100 m at start | Yeti pressure (% of top speed) |
-| --- | --- | --- | --- | --- | --- | --- |
-| 1 | First Tracks | 400 m | Open | 0 | 2 | None |
-| 2 | Mind the Pines | 500 m | Dense forest | 5 | 3.3 | None |
-| 3 | Polite Pursuit | 600 m | Sparse forest | 2.5 | 3.4 | 3 slow (70%) |
-| 4 | Forest Company | 650 m | Dense forest | 6 | 3.6 | 3 slow (74%) |
-| 5 | Orange Alert | 700 m | Sparse forest | 2.5 | 3.8 | 3 fast (86%) |
-| 6 | Timber Express | 750 m | Dense forest | 6.5 | 4 | 3 fast (88%) |
-| 7 | Rush Hour | 800 m | Dense forest | 5 | 6 | 3 fast (88%) |
-| 8 | Frozen Assets | 850 m | Forest + ice | 2.5 | 4.4 | 3 fast (88%) |
-| 9 | Air Mail | 900 m | Forest + jumps | 4 | 4.5 | 3 fast (90%) |
-| 10 | Flag Consequences | 1000 m | Dense forest | 6 | 4.8 | 3 fast (90%); +1 fast per miss |
-| 11 | Violet Warning | 1100 m | Dense forest | 6 | 5 | 2 elite (95%); +2 fast per miss |
-| 12 | Last Tracks | 1400 m | Mixed forest / ice / jumps | 7 | 5.5 | 2 elite (97%); +2 fast per miss |
+Edit `game-config.json`, at the top under `arcade`.
 
-Traffic builds linearly to 1.4× at the finish of stages 1–2 and 1.5× in stages 3–12. Overtakers arrive more frequently using the same multiplier. Rush Hour raises its baseline to 6 groups per 100 m, 45% pairs, 40% fast skiers and a 7-second opening overtaker interval. Snowboarders are explicitly included in every stage.
+```json
+"startStage": 8,
+"autoStart": true
+```
 
-## Pursuit and finish rules
+This loads you just above stage 8’s start line, waiting for your input. Death/reset starts there again. `autoStart: false` keeps the summit; the Arcade entrance still uses `startStage`. Set `startStage: 1` for a complete run. Starts above 1 are visibly marked PRACTICE and do not overwrite the full-run record. Completion is based on reaching the last configured stage, including in practice.
 
-Starting yetis are placed beside the actual start line before it enters view. They wait with a visible idle pose. Crossing the start makes them react with an exclamation mark and snow burst, then start chasing after 0.8 seconds. They start 11 metres to the side, with additional pairs spread farther out, leaving the centre skiable. There is no teleporting or distance-based catch-up. Starting chase speed is set per stage, from 70% to 97% of downhill top speed; slow yetis can catch a hesitant or crashed player while clean skiing can pull away. Teal, orange and violet identify slow, fast and elite tiers.
+For local `file://` play, run `python3 build.py` from this folder after editing, then reload `index.html`. Hosted play reads the JSON on refresh. Validation reports unknown item names, out-of-range values, an invalid start stage, or more sword gates than total gates.
 
-Missed-gate yetis appear just uphill of that gate; their speeds use `arcade.yetiRatios` (slow 42%, fast 82%, elite 94%). Pursuers follow off piste and retire when their course ends. Villages remain safe. There is no time limit.
+## Add or edit a stage
 
-Cross downhill between finish flags to advance; Arcade does not require the regular 90% gate quota. Missing the finish immediately ends Arcade in place, preserving position, speed, controls and the world. Keep skiing into the same town with normal course choices. Getting eaten returns to the summit. Completing stage 12 wins Arcade. All results appear on the snow without menus.
+Copy any entry in `arcade.stages`, change `name`, and insert it where you want. Array order defines progression; there is no fixed stage count or hardcoded name list. A compact complete stage can look like this (omitted item densities mean zero):
 
-## Shields and swords
+```json
+{
+  "name": "My snowy disaster",
+  "topSpeedKmh": 103,
+  "gates": {
+    "count": 18,
+    "horizontalDistanceMetres": 26,
+    "verticalDistanceMetres": 30,
+    "openingWidthMetres": 15.6,
+    "firstGateMetres": 40,
+    "finishAfterLastGateMetres": 50,
+    "swordGateCount": 4
+  },
+  "yeti": { "count": 3, "color": "teal", "speedKmh": 60 },
+  "missedGateYetis": { "count": 0, "color": "orange", "speedKmh": 75 },
+  "itemSpreadMetres": 32,
+  "endTrafficMultiplier": 1.5,
+  "itemsPer100m": {
+    "pine": 2,
+    "rock": 0.5,
+    "skier": 3,
+    "fastSkier": 0.5,
+    "overtakingSkier": 0.2,
+    "boarder": 1,
+    "ramp": 0.2,
+    "rabbit": 0.1
+  }
+}
+```
 
-Ordinary successful gates total 1.5 shield charges per stage. Calm stages have one purple sword gate; threatened stages have four. Eight successful sword gates earn one sword. Clearing every sword gate gives 2/8 charge after stage 2, 6/8 after stage 3, and the first sword during stage 4. Inventory and partial charges carry through towns; each attempt starts empty, with at most two of each item. A full inventory pauses charging.
+### Gates
 
-Shields prevent obstacle/skier crashes. Swords defeat contacting hostile animals when an ordinary high-speed impact would not already defeat them. Harmless contacts do not spend items. Filling icons at the top brighten when ready, and activation shows a shield/slash effect.
+- `count`: exact total number of gates, including sword gates.
+- `horizontalDistanceMetres`: exact horizontal distance between alternating gate centres. 26 means centres alternate at −13 m and +13 m. There is no added course sway.
+- `verticalDistanceMetres`: exact downhill distance between consecutive gates.
+- `openingWidthMetres`: total skiable opening between each pair of flags.
+- `firstGateMetres`: distance from the start to the first gate.
+- `finishAfterLastGateMetres`: distance from the last gate to the finish.
+- `swordGateCount`: exact number of sword gates, distributed along the course. Zero disables them; all gates can be sword gates if desired.
 
-## Editing stages
+Course length is `firstGateMetres + (count − 1) × verticalDistanceMetres + finishAfterLastGateMetres`. Changing count or spacing moves the finish and following town together. The finish opening still uses the global `race.finishWidthMultiplier` (2).
 
-`game-config.json` now puts `arcade.stages` at the top. Array order is stage order. Each stage explicitly lists its own length, speed, density, traffic build, pursuit and features. Schema hover descriptions explain units and limits.
+### Yetis
 
-| Field | Meaning |
+`yeti` controls the waiting start-line group. `missedGateYetis` controls each missed-gate release. Both accept an independent `count`, `color` (teal/orange/violet), and **absolute `speedKmh`**. An orange yeti can be slower than a teal one if you set it that way. Zero count disables the group. No percentage of player speed, gate-pace calculation, catch-up boost, or hidden color-speed multiplier applies.
+
+Start-line yetis remain visible before the race, react when you cross, and chase after `arcade.wakeSeconds`. Pursuers follow off piste and retire at course end. The separately placed sleeping yeti items use their named color and the stage’s `yeti.speedKmh`, even if its start-line count is zero.
+
+### Item density
+
+`itemsPer100m` gives each item its own independent placement rate per 100 m of course. The supplied stages list all 59 keys explicitly. Zero or omission disables that item’s stage spawns. There are no random mixed item tables, automatic tree substitutions, mandatory terrain features, or hidden Arcade overtaker timers.
+
+Densities are placement attempts, not exact counts: gates, finish openings, lakes, other objects and jump landing zones remain clear. `itemSpreadMetres` controls how far from the centreline items can be placed. Increasing it gives large objects more room. Rare rates may yield no objects on a short stage. Towns, finish spectators, structural start/finish flags, the connecting lift cable and off-piste scenery retain their separate existing config sections; they are not counted as course item spawns.
+
+`endTrafficMultiplier` scales the four skier/boarder entries gradually from 1× at the start to the configured finish multiplier. Set it to 1 for constant density. Overtakers are scheduled by distance along the course: passing their hidden trigger brings a fast skier from uphill. Ahead-of-player `fastSkier` traffic remains catchable, as before.
+
+| Group | Individual keys |
 | --- | --- |
-| `lengthMetres` | Course length in metres |
-| `topSpeedKmh` | Straight-down top speed on the HUD |
-| `gateSpacingMetres` | Distance between gates; larger means fewer |
-| `treesPer100m` | More means denser trees; 0 means none |
-| `skierGroupsPer100m` | Opening traffic density; more means busier |
-| `endTrafficMultiplier` | Finish density divided by opening density; 1 disables the build |
-| `fastSkierPercent` | Percentage of traffic that is fast skiers |
-| `snowboarderPercent` | Percentage of remaining traffic that is snowboarders |
-| `skierPairPercent` | Percentage of traffic groups containing two people |
-| `overtakeSeconds` | Opening interval between uphill overtakers; lower means more |
-| `yetis`, `yetiTier`, `yetiSpeedPercent` | Starting pursuer count, color tier and speed relative to player top speed |
-| `missYetis`, `missTier` | Number/tier spawned for every missed gate |
-| `gateScale`, `swayScale` | Opening width / turn width multipliers |
-| `ice`, `jumps`, `mixed` | Enable terrain features; mixed alternates six sections |
-| `featureEveryGates` | Interval for ice/jumps or occasional forest ramps/moguls/bushes |
+| Trees | `pine`, `fir`, `smallPine`, `spruceTree`, `crookedTree`, `cedarTree`, `alpineTree` |
+| Obstacles | `rock`, `pebble`, `stump`, `bush`, `mushroom`, `sled`, `snowball` |
+| Jumps and surfaces | `ramp`, `mogul`, `rainbow`, `smallLake`, `largeLake`, `snowPath`, `pavedPath` |
+| Skiers | `skier`, `fastSkier`, `overtakingSkier`, `boarder` |
+| Pedestrians | `personRed`, `personYellow`, `personGreen` |
+| Animals | `dog`, `hostileDog`, `cat`, `rabbit`, `fox`, `wolf`, `wolfPack`, `bear` |
+| Sleeping yetis | `yetiTeal`, `yetiOrange`, `yetiViolet` |
+| Buildings | `lodge`, `rental`, `cottage`, `chalet`, `inn`, `cafe`, `hotel`, `skiShop` |
+| Props | `lamp`, `bench`, `snowman`, `bunting`, `powderPile`, `pigeons`, `breadStand`, `skiRack`, `lift`, `sign`, `flag`, `star` |
 
-For example, change stage 4's `treesPer100m` from 6 to 8 for more trees, or `endTrafficMultiplier` from 1.5 to 1.2 for a gentler finish. Gate and landing clearances remain enforced. Very short courses may contain fewer sword gates than requested because one ordinary gate is reserved.
+`wolf` counts individuals; `wolfPack` counts packs of the configured 3–4 wolves. Explicitly placed course predators can chase/hunt on the piste; protected towns remain safe. House variants share existing collision footprints. `star`, `sign`, and the standalone `flag` are decorative, not currency or extra scoring gates. The stage `lift` is a prop during Arcade; it cannot exit the run. Animation poses (running/left/falling sprites), UI icons, and labels are not separate gameplay items.
 
-After editing for the local `file://` game, run `python3 build.py`, then reload `index.html`. Hosted play loads the JSON on refresh. No JavaScript edits are needed for these settings.
+## Current defaults
 
-## Saved records
+| # | Name | Top speed km/h | Gates | Vertical gap m | Starting yetis | Yeti speed km/h |
+| --- | --- | ---: | ---: | ---: | --- | ---: |
+| 1 | First Tracks | 90 | 12 | 30 | 0 teal | 0.0 |
+| 2 | Mind the Pines | 90 | 15 | 30 | 0 teal | 0.0 |
+| 3 | Polite Pursuit | 103 | 19 | 30 | 3 teal | 72.1 |
+| 4 | Forest Company | 103 | 20 | 30 | 3 teal | 76.22 |
+| 5 | Orange Alert | 132 | 17 | 40 | 3 orange | 113.52 |
+| 6 | Timber Express | 132 | 18 | 40 | 3 orange | 116.16 |
+| 7 | Rush Hour | 132 | 19 | 40 | 3 orange | 116.16 |
+| 8 | Frozen Assets | 132 | 20 | 40 | 3 orange | 116.16 |
+| 9 | Air Mail | 132 | 18 | 48 | 3 orange | 118.8 |
+| 10 | Flag Consequences | 132 | 24 | 40 | 3 orange | 118.8 |
+| 11 | Violet Warning | 132 | 27 | 40 | 2 violet | 125.4 |
+| 12 | Last Tracks | 132 | 28 | 48 | 2 violet | 128.04 |
 
-Records use browser local storage `frostline-v2`. `arcadeRecord` saves furthest distance/stage and the last run, not a resumable run. This condensed campaign uses `arcade.campaignVersion: 2`; the old 32-stage record is retained under `previousCampaign` and is not compared against this layout. Wallet and regular-course records are preserved. Increment the version after another substantial redesign if records would no longer be comparable.
+## Gear, towns and records
+
+Ordinary successful gates provide 1.5 shield charges per fully cleared stage; eight successful sword gates earn one sword. These global amounts remain in `arcade.gear`. Charge and up to two of each item carry through towns. An attempt starts empty. If every gate is a sword gate, that stage awards no shield charge.
+
+Towns are safe intermissions and the next stage starts automatically at their exit. No money or timed qualification applies. Crossing outside the finish fails Arcade without teleporting; death returns to the summit (or the configured automatic start). Completing the final configured stage ends the run.
+
+`frostline-v2` browser storage keeps wallet, regular-course times and Arcade records. Practice starts do not update Arcade records. `campaignVersion` can be incremented after a substantial redesign to retain the previous record separately. Refresh starts a new attempt rather than resuming one.

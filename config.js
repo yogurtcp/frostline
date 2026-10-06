@@ -29,9 +29,12 @@ window.loadFrostlineConfig = async function () {
   for (const [id, target] of Object.entries(config.timing.targets)) {
     if (!(target.goldSeconds < target.parSeconds)) throw new Error(`timing.targets.${id}: goldSeconds must be below parSeconds`);
   }
-  for (const [i, stage] of config.arcade.stages.entries()) {
-    if (stage.yetis > 0 && (stage.yetiTier === 'none' || stage.yetiSpeedPercent <= 0)) throw new Error(`arcade.stages[${i}]: starting yetis need a tier and positive yetiSpeedPercent`);
-    if (stage.missYetis > 0 && stage.missTier === 'none') throw new Error(`arcade.stages[${i}]: missed-gate yetis need a missTier`);
+  if(config.arcade.startStage>config.arcade.stages.length)throw new Error('arcade.startStage exceeds the number of stages');
+  for(const [i,stage] of config.arcade.stages.entries()){
+    if(!stage.name.trim())throw new Error(`arcade.stages[${i}]: name cannot be empty`);
+    if(stage.gates.swordGateCount>stage.gates.count)throw new Error(`arcade.stages[${i}]: swordGateCount exceeds gate count`);
+    for(const key of ['yeti','missedGateYetis'])if(stage[key].count>0&&stage[key].speedKmh<=0)throw new Error(`arcade.stages[${i}].${key}: positive speedKmh is required when count > 0`);
+    if(['yetiTeal','yetiOrange','yetiViolet'].some(k=>stage.itemsPer100m[k]>0)&&stage.yeti.speedKmh<=0)throw new Error(`arcade.stages[${i}]: sleeping yeti items use yeti.speedKmh; set it above zero`);
   }
   if (config.wildlife.packMin > config.wildlife.packMax) throw new Error('packMin must not exceed packMax');
   for (const id of [...config.race.entryChoices, ...config.race.villageChoices]) if (!config.courses[id]) throw new Error(`Unknown course ${id}`);

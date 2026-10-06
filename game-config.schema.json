@@ -4718,7 +4718,6 @@
       "additionalProperties": false,
       "required": [
         "stages",
-        "yetiRatios",
         "yetiColors",
         "yetiTints",
         "missSpawnAbove",
@@ -4730,21 +4729,17 @@
         "landingClearanceLength",
         "landingClearanceHalfWidth",
         "rampSeconds",
-        "rampOffsetX",
         "spawnJitter",
-        "forestFeatureOffsetX",
-        "forestFeatures",
         "gear",
-        "trafficHalfWidth",
-        "trafficGroupOffsetX",
-        "trafficGroupOffsetY",
         "trafficFastSpeedRatio",
         "trafficGateClearanceY",
         "campaignVersion",
         "startLineSideOffsetMetres",
         "startLineRowOffsetMetres",
         "startLineDownhillOffsetMetres",
-        "wakeSeconds"
+        "wakeSeconds",
+        "startStage",
+        "autoStart"
       ],
       "properties": {
         "stages": {
@@ -4755,178 +4750,505 @@
             "additionalProperties": false,
             "required": [
               "name",
-              "lengthMetres",
               "topSpeedKmh",
-              "gateSpacingMetres",
-              "treesPer100m",
-              "skierGroupsPer100m",
+              "gates",
+              "yeti",
+              "missedGateYetis",
+              "itemSpreadMetres",
               "endTrafficMultiplier",
-              "fastSkierPercent",
-              "snowboarderPercent",
-              "skierPairPercent",
-              "overtakeSeconds",
-              "yetiTier",
-              "yetis",
-              "yetiSpeedPercent",
-              "missYetis",
-              "missTier",
-              "gateScale",
-              "swayScale",
-              "ice",
-              "jumps",
-              "mixed",
-              "featureEveryGates"
+              "itemsPer100m"
             ],
             "properties": {
               "name": {
                 "type": "string"
               },
-              "lengthMetres": {
-                "type": "number",
-                "minimum": 100,
-                "description": "Course length in metres.",
-                "maximum": 5000
-              },
               "topSpeedKmh": {
                 "type": "number",
                 "minimum": 10,
-                "description": "Straight-down top speed shown on the HUD.",
                 "maximum": 250
               },
-              "gateSpacingMetres": {
+              "gates": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "count",
+                  "horizontalDistanceMetres",
+                  "verticalDistanceMetres",
+                  "openingWidthMetres",
+                  "firstGateMetres",
+                  "finishAfterLastGateMetres",
+                  "swordGateCount"
+                ],
+                "properties": {
+                  "count": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 500
+                  },
+                  "horizontalDistanceMetres": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 200,
+                    "description": "Exact horizontal separation of alternating gate centres. No hidden sway."
+                  },
+                  "verticalDistanceMetres": {
+                    "type": "number",
+                    "minimum": 5,
+                    "maximum": 200
+                  },
+                  "openingWidthMetres": {
+                    "type": "number",
+                    "minimum": 2,
+                    "maximum": 100
+                  },
+                  "firstGateMetres": {
+                    "type": "number",
+                    "minimum": 5,
+                    "maximum": 200
+                  },
+                  "finishAfterLastGateMetres": {
+                    "type": "number",
+                    "minimum": 5,
+                    "maximum": 500
+                  },
+                  "swordGateCount": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 500
+                  }
+                }
+              },
+              "yeti": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "count",
+                  "color",
+                  "speedKmh"
+                ],
+                "properties": {
+                  "count": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 12
+                  },
+                  "color": {
+                    "type": "string",
+                    "enum": [
+                      "teal",
+                      "orange",
+                      "violet"
+                    ]
+                  },
+                  "speedKmh": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 250,
+                    "description": "Absolute chase speed in game km/h. Color does not affect speed."
+                  }
+                }
+              },
+              "missedGateYetis": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "count",
+                  "color",
+                  "speedKmh"
+                ],
+                "properties": {
+                  "count": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 12
+                  },
+                  "color": {
+                    "type": "string",
+                    "enum": [
+                      "teal",
+                      "orange",
+                      "violet"
+                    ]
+                  },
+                  "speedKmh": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 250,
+                    "description": "Absolute chase speed in game km/h. Color does not affect speed."
+                  }
+                }
+              },
+              "itemSpreadMetres": {
                 "type": "number",
-                "minimum": 10,
-                "description": "Distance between gates in metres; larger = fewer gates.",
+                "minimum": 5,
                 "maximum": 100
-              },
-              "treesPer100m": {
-                "type": "number",
-                "minimum": 0,
-                "description": "Tree placement attempts per 100 metres; 0 disables forest. Safe landings and gates remain clear.",
-                "maximum": 30
-              },
-              "skierGroupsPer100m": {
-                "type": "number",
-                "minimum": 0.1,
-                "description": "Traffic group placement attempts per 100 metres at the start; includes skiers and snowboarders.",
-                "maximum": 20
               },
               "endTrafficMultiplier": {
                 "type": "number",
                 "minimum": 1,
-                "description": "Traffic ramps linearly from 1x at the start to this multiplier at the finish, including overtakers.",
                 "maximum": 3
               },
-              "fastSkierPercent": {
-                "type": "number",
-                "minimum": 0,
-                "description": "Percent of traffic that is fast skiers.",
-                "maximum": 100
-              },
-              "snowboarderPercent": {
-                "type": "number",
-                "minimum": 0,
-                "description": "Percent of non-fast traffic that is snowboarders.",
-                "maximum": 100
-              },
-              "skierPairPercent": {
-                "type": "number",
-                "minimum": 0,
-                "description": "Percent of traffic groups containing two people.",
-                "maximum": 100
-              },
-              "overtakeSeconds": {
-                "type": "number",
-                "minimum": 2,
-                "description": "Seconds between overtakers at the start; falls as traffic builds.",
-                "maximum": 120
-              },
-              "yetiTier": {
-                "type": "string",
-                "enum": [
-                  "none",
-                  "slow",
-                  "fast",
-                  "elite"
-                ]
-              },
-              "yetis": {
-                "type": "integer",
-                "minimum": 0,
-                "description": "Number waiting beside the start.",
-                "maximum": 12
-              },
-              "yetiSpeedPercent": {
-                "type": "number",
-                "minimum": 0,
-                "description": "Starting pursuer speed as a percentage of this stage top speed.",
-                "maximum": 120
-              },
-              "missYetis": {
-                "type": "integer",
-                "minimum": 0,
-                "description": "New yetis released per missed gate.",
-                "maximum": 4
-              },
-              "missTier": {
-                "type": "string",
-                "enum": [
-                  "none",
-                  "slow",
-                  "fast",
-                  "elite"
-                ]
-              },
-              "gateScale": {
-                "type": "number",
-                "minimum": 0.5,
-                "description": "Gate opening width multiplier.",
-                "maximum": 2
-              },
-              "swayScale": {
-                "type": "number",
-                "minimum": 0.5,
-                "description": "Width of course turns; larger = wider turns.",
-                "maximum": 2
-              },
-              "ice": {
-                "type": "boolean"
-              },
-              "jumps": {
-                "type": "boolean"
-              },
-              "mixed": {
-                "type": "boolean"
-              },
-              "featureEveryGates": {
-                "type": "integer",
-                "minimum": 2,
-                "description": "Spacing of occasional ramps/moguls/bushes or the selected ice/jump feature, measured in gates.",
-                "maximum": 30
+              "itemsPer100m": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [],
+                "properties": {
+                  "pine": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres of course; 0 disables this object. Safe gate openings and landing zones can reduce placement."
+                  },
+                  "fir": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres of course; 0 disables this object. Safe gate openings and landing zones can reduce placement."
+                  },
+                  "smallPine": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres of course; 0 disables this object. Safe gate openings and landing zones can reduce placement."
+                  },
+                  "spruceTree": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres of course; 0 disables this object. Safe gate openings and landing zones can reduce placement."
+                  },
+                  "crookedTree": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres of course; 0 disables this object. Safe gate openings and landing zones can reduce placement."
+                  },
+                  "cedarTree": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres of course; 0 disables this object. Safe gate openings and landing zones can reduce placement."
+                  },
+                  "alpineTree": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres of course; 0 disables this object. Safe gate openings and landing zones can reduce placement."
+                  },
+                  "rock": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres of course; 0 disables this object. Safe gate openings and landing zones can reduce placement."
+                  },
+                  "pebble": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres of course; 0 disables this object. Safe gate openings and landing zones can reduce placement."
+                  },
+                  "stump": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres of course; 0 disables this object. Safe gate openings and landing zones can reduce placement."
+                  },
+                  "bush": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres of course; 0 disables this object. Safe gate openings and landing zones can reduce placement."
+                  },
+                  "mushroom": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres of course; 0 disables this object. Safe gate openings and landing zones can reduce placement."
+                  },
+                  "snowball": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres of course; 0 disables this object. Safe gate openings and landing zones can reduce placement."
+                  },
+                  "ramp": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres of course; 0 disables this object. Safe gate openings and landing zones can reduce placement."
+                  },
+                  "mogul": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres of course; 0 disables this object. Safe gate openings and landing zones can reduce placement."
+                  },
+                  "rainbow": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres of course; 0 disables this object. Safe gate openings and landing zones can reduce placement."
+                  },
+                  "smallLake": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres of course; 0 disables this object. Safe gate openings and landing zones can reduce placement."
+                  },
+                  "largeLake": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres of course; 0 disables this object. Safe gate openings and landing zones can reduce placement."
+                  },
+                  "skier": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres of course; 0 disables this object. Safe gate openings and landing zones can reduce placement."
+                  },
+                  "fastSkier": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres of course; 0 disables this object. Safe gate openings and landing zones can reduce placement."
+                  },
+                  "overtakingSkier": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres of course; 0 disables this object. Safe gate openings and landing zones can reduce placement."
+                  },
+                  "boarder": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres of course; 0 disables this object. Safe gate openings and landing zones can reduce placement."
+                  },
+                  "personRed": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres of course; 0 disables this object. Safe gate openings and landing zones can reduce placement."
+                  },
+                  "personYellow": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres of course; 0 disables this object. Safe gate openings and landing zones can reduce placement."
+                  },
+                  "personGreen": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres of course; 0 disables this object. Safe gate openings and landing zones can reduce placement."
+                  },
+                  "dog": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres of course; 0 disables this object. Safe gate openings and landing zones can reduce placement."
+                  },
+                  "hostileDog": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres of course; 0 disables this object. Safe gate openings and landing zones can reduce placement."
+                  },
+                  "cat": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres of course; 0 disables this object. Safe gate openings and landing zones can reduce placement."
+                  },
+                  "rabbit": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres of course; 0 disables this object. Safe gate openings and landing zones can reduce placement."
+                  },
+                  "fox": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres of course; 0 disables this object. Safe gate openings and landing zones can reduce placement."
+                  },
+                  "wolf": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres of course; 0 disables this object. Safe gate openings and landing zones can reduce placement."
+                  },
+                  "bear": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres of course; 0 disables this object. Safe gate openings and landing zones can reduce placement."
+                  },
+                  "wolfPack": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres of course; 0 disables this object. Safe gate openings and landing zones can reduce placement."
+                  },
+                  "yetiTeal": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres of course; 0 disables this object. Safe gate openings and landing zones can reduce placement."
+                  },
+                  "yetiOrange": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres of course; 0 disables this object. Safe gate openings and landing zones can reduce placement."
+                  },
+                  "yetiViolet": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres of course; 0 disables this object. Safe gate openings and landing zones can reduce placement."
+                  },
+                  "lodge": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres of course; 0 disables this object. Safe gate openings and landing zones can reduce placement."
+                  },
+                  "rental": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres of course; 0 disables this object. Safe gate openings and landing zones can reduce placement."
+                  },
+                  "cottage": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres of course; 0 disables this object. Safe gate openings and landing zones can reduce placement."
+                  },
+                  "chalet": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres of course; 0 disables this object. Safe gate openings and landing zones can reduce placement."
+                  },
+                  "inn": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres of course; 0 disables this object. Safe gate openings and landing zones can reduce placement."
+                  },
+                  "cafe": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres of course; 0 disables this object. Safe gate openings and landing zones can reduce placement."
+                  },
+                  "hotel": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres of course; 0 disables this object. Safe gate openings and landing zones can reduce placement."
+                  },
+                  "skiShop": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres of course; 0 disables this object. Safe gate openings and landing zones can reduce placement."
+                  },
+                  "lamp": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres of course; 0 disables this object. Safe gate openings and landing zones can reduce placement."
+                  },
+                  "bench": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres of course; 0 disables this object. Safe gate openings and landing zones can reduce placement."
+                  },
+                  "snowman": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres of course; 0 disables this object. Safe gate openings and landing zones can reduce placement."
+                  },
+                  "bunting": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres of course; 0 disables this object. Safe gate openings and landing zones can reduce placement."
+                  },
+                  "powderPile": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres of course; 0 disables this object. Safe gate openings and landing zones can reduce placement."
+                  },
+                  "pigeons": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres of course; 0 disables this object. Safe gate openings and landing zones can reduce placement."
+                  },
+                  "breadStand": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres of course; 0 disables this object. Safe gate openings and landing zones can reduce placement."
+                  },
+                  "skiRack": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres of course; 0 disables this object. Safe gate openings and landing zones can reduce placement."
+                  },
+                  "lift": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres of course; 0 disables this object. Safe gate openings and landing zones can reduce placement."
+                  },
+                  "sign": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres of course; 0 disables this object. Safe gate openings and landing zones can reduce placement."
+                  },
+                  "flag": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres of course; 0 disables this object. Safe gate openings and landing zones can reduce placement."
+                  },
+                  "star": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres of course; 0 disables this object. Safe gate openings and landing zones can reduce placement."
+                  },
+                  "snowPath": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres of course; 0 disables this object. Safe gate openings and landing zones can reduce placement."
+                  },
+                  "pavedPath": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres of course; 0 disables this object. Safe gate openings and landing zones can reduce placement."
+                  },
+                  "sled": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Sled placement attempts per 100 metres. High-speed impacts shove it downhill."
+                  }
+                }
               }
-            }
-          }
-        },
-        "yetiRatios": {
-          "type": "object",
-          "additionalProperties": false,
-          "required": [
-            "slow",
-            "fast",
-            "elite"
-          ],
-          "properties": {
-            "slow": {
-              "type": "number",
-              "minimum": 0
-            },
-            "fast": {
-              "type": "number",
-              "minimum": 0
-            },
-            "elite": {
-              "type": "number",
-              "minimum": 0
             }
           }
         },
@@ -5022,52 +5344,27 @@
           "type": "number",
           "exclusiveMinimum": 0
         },
-        "rampOffsetX": {
-          "type": "number"
-        },
         "spawnJitter": {
           "type": "number",
           "minimum": 0,
           "maximum": 0.5
-        },
-        "forestFeatureOffsetX": {
-          "type": "number",
-          "minimum": 0
-        },
-        "forestFeatures": {
-          "type": "array",
-          "minItems": 1,
-          "items": {
-            "type": "string",
-            "enum": [
-              "ramp",
-              "mogul",
-              "bush"
-            ]
-          }
         },
         "gear": {
           "type": "object",
           "additionalProperties": false,
           "required": [
             "shieldsPerStage",
-            "swordGatesPerStage",
             "swordGatesPerSword",
             "maxShields",
             "maxSwords",
             "protectionSeconds",
             "effectSeconds",
             "shieldColor",
-            "swordColor",
-            "calmSwordGatesPerStage"
+            "swordColor"
           ],
           "properties": {
             "shieldsPerStage": {
               "type": "number",
-              "exclusiveMinimum": 0
-            },
-            "swordGatesPerStage": {
-              "type": "integer",
               "exclusiveMinimum": 0
             },
             "swordGatesPerSword": {
@@ -5095,24 +5392,8 @@
             },
             "swordColor": {
               "type": "string"
-            },
-            "calmSwordGatesPerStage": {
-              "type": "integer",
-              "minimum": 1
             }
           }
-        },
-        "trafficHalfWidth": {
-          "type": "number",
-          "exclusiveMinimum": 0
-        },
-        "trafficGroupOffsetX": {
-          "type": "number",
-          "exclusiveMinimum": 0
-        },
-        "trafficGroupOffsetY": {
-          "type": "number",
-          "exclusiveMinimum": 0
         },
         "trafficFastSpeedRatio": {
           "type": "array",
@@ -5156,6 +5437,15 @@
           "minimum": 0.2,
           "description": "Visible reaction before waiting yetis begin chasing.",
           "maximum": 3
+        },
+        "startStage": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "1-based stage to begin at. Later starts are practice and do not overwrite records."
+        },
+        "autoStart": {
+          "type": "boolean",
+          "description": "Enter configured start stage on load/reset without skiing into the Arcade entrance."
         }
       }
     },

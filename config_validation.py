@@ -29,9 +29,13 @@ def validate(value, schema, path='config'):
     if path == 'config':
         for course, target in value['timing']['targets'].items():
             if target['goldSeconds'] >= target['parSeconds']: fail(f'{course}: goldSeconds must be below parSeconds')
+        if value['arcade']['startStage'] > len(value['arcade']['stages']): fail('arcade.startStage exceeds the number of stages')
         for i, stage in enumerate(value['arcade']['stages']):
-            if stage['yetis'] > 0 and (stage['yetiTier'] == 'none' or stage['yetiSpeedPercent'] <= 0): fail(f'arcade.stages[{i}]: starting yetis need a tier and positive yetiSpeedPercent')
-            if stage['missYetis'] > 0 and stage['missTier'] == 'none': fail(f'arcade.stages[{i}]: missed-gate yetis need a missTier')
+            if not stage['name'].strip(): fail(f'arcade.stages[{i}]: name cannot be empty')
+            if stage['gates']['swordGateCount'] > stage['gates']['count']: fail(f'arcade.stages[{i}]: swordGateCount exceeds gate count')
+            for key in ['yeti', 'missedGateYetis']:
+                if stage[key]['count'] > 0 and stage[key]['speedKmh'] <= 0: fail(f'arcade.stages[{i}].{key}: positive speedKmh required when count > 0')
+            if any(stage['itemsPer100m'].get(k, 0) > 0 for k in ['yetiTeal', 'yetiOrange', 'yetiViolet']) and stage['yeti']['speedKmh'] <= 0: fail(f'arcade.stages[{i}]: sleeping yeti items need positive yeti.speedKmh')
         if value['wildlife']['packMin'] > value['wildlife']['packMax']: fail('packMin must not exceed packMax')
         for course in value['race']['entryChoices'] + value['race']['villageChoices']:
             if course not in value['courses']: fail(f'unknown course {course}')
