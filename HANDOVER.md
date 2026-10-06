@@ -143,6 +143,7 @@ These have been repeatedly requested; preserve them unless explicitly changed.
 - Wolves are relatively rare, often in packs; predators hunt rabbits and wolves can threaten other skiers. Fast skiers taunt and aim somewhat toward the player.
 - Cats, rabbits, foxes, pedestrians and harmless props have social interactions. Avoid breaking their state transitions when editing wildlife.
 - A dog changing into a chaser must cease to exist as its original scenery entity. The duplicate-dog bug was fixed this way.
+- Dog contacts at or below `physics.walkingBumpLimit` don't crash: the dog joins as a harmless chaser until separation. Faster tackles still crash.
 - Yeti/bear high-speed knockout thresholds already exist. Inspect current config and collision logic before changing them; the desired distinction is near-straight full-speed Yeti hits versus easier bear knockouts.
 
 ## 6. Modes, rewards and failure behavior
