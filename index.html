@@ -248,7 +248,21 @@ window.FROSTLINE_READY = (async () => {
     const distance=Number.isFinite(old.distance)?old.distance:0,completed=Number.isFinite(old.completed)?old.completed:0;
     state.arcadeRecord={distance:Math.max(distance,result.distance),completed:Math.max(completed,result.completed),stage:Math.max(Number.isFinite(old.stage)?old.stage:0,result.stage),last:{...result,date:new Date().toISOString()}};save();
   }
-  function endArcade(reason){if(!state.arcade)return;state.arcade.endReason=reason;resetSummit();announce('ARCADE RUN OVER',reason,C.red,4);}
+  function endArcade(reason){
+    if(!state.arcade)return;
+    const run=state.course,town=state.plannedTown;
+    recordArcade(reason);state.arcadeResult.stayOnSlope=true;
+    state.arcade=null;state.course=null;state.results=null;state.plannedTown=null;
+    for(const c of state.chasers)if(c.chaseRun===run)c.leaving=true;
+    if(town){
+      state.zone={kind:'village',origin:town.origin,x:town.x,end:town.end};
+      // Reuse the existing town; restore normal choices at its still-unseen downhill exit.
+      const choiceY=town.end-S.village.endOffset+S.village.choiceY;
+      if(choiceY>viewBounds().bottom)S.race.villageChoices.forEach((id,i)=>entrance(id,town.x+(i-(S.race.villageChoices.length-1)/2)*S.village.choiceSpacing,choiceY));
+      for(const o of state.objects)if(o.type==='trailChoices'&&o.arcadeNext&&o.y>town.origin&&o.y<town.end)o.arcadeNext=0;
+    }else state.zone={kind:'free',origin:state.p.y};
+    announce('ARCADE FAILED',reason+' - KEEP SKIING',C.red,4);
+  }
   function finishArcadeStage(run){
     if(!run.finishPassed){endArcade('MISSED THE FINISH');return;}
     const a=state.arcade;a.completed++;a.cleared+=run.cleared;a.missed+=run.missed;a.hits+=run.hits;a.furthestY=Math.max(a.furthestY,state.p.y);
@@ -1548,7 +1562,7 @@ window.FROSTLINE_READY = (async () => {
       text('STAGE '+ar.stage+' - '+ar.name,W/2,y+39,9,C.ink);
       text(ar.distance+' m  |  '+ar.cleared+' FLAGS  |  '+ar.missed+' MISSED',W/2,y+58,9,C.ink);
       text(ar.hits+' CRASHES  |  BEST '+(state.arcadeRecord.distance||0)+' m',W/2,y+77,9,C.ink);
-      text(ar.ended?'SKI THROUGH ARCADE TO TRY AGAIN':'NEXT STAGE BEYOND THE VILLAGE',W/2,y+97,9,C.teal);
+      text(ar.stayOnSlope?'KEEP SKIING - LIFT RETURNS TO SUMMIT':ar.ended?'SKI THROUGH ARCADE TO TRY AGAIN':'NEXT STAGE BEYOND THE VILLAGE',W/2,y+97,9,C.teal);
     }
     const result=state.results;
     if(result&&result.until>clock){
