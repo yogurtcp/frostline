@@ -5098,9 +5098,6 @@
       "type": "object",
       "additionalProperties": false,
       "required": [
-        "districts",
-        "districtNames",
-        "districtColors",
         "rabbitsPerTown",
         "foxVisitChance",
         "mischiefCooldownSeconds",
@@ -5118,64 +5115,9 @@
         "npcAnimalRadius",
         "npcAnimalApproachSpeed",
         "dialogue",
-        "districtProps"
+        "buildings"
       ],
       "properties": {
-        "districts": {
-          "type": "array",
-          "minItems": 1,
-          "items": {
-            "type": "string"
-          }
-        },
-        "districtNames": {
-          "type": "object",
-          "additionalProperties": false,
-          "required": [
-            "bakery",
-            "rental",
-            "market",
-            "lift"
-          ],
-          "properties": {
-            "bakery": {
-              "type": "string"
-            },
-            "rental": {
-              "type": "string"
-            },
-            "market": {
-              "type": "string"
-            },
-            "lift": {
-              "type": "string"
-            }
-          }
-        },
-        "districtColors": {
-          "type": "object",
-          "additionalProperties": false,
-          "required": [
-            "bakery",
-            "rental",
-            "market",
-            "lift"
-          ],
-          "properties": {
-            "bakery": {
-              "type": "string"
-            },
-            "rental": {
-              "type": "string"
-            },
-            "market": {
-              "type": "string"
-            },
-            "lift": {
-              "type": "string"
-            }
-          }
-        },
         "rabbitsPerTown": {
           "type": "integer",
           "minimum": 0
@@ -5313,81 +5255,36 @@
             }
           }
         },
-        "districtProps": {
+        "buildings": {
           "type": "object",
           "additionalProperties": false,
           "required": [
-            "bakery",
-            "rental",
-            "market",
-            "lift"
+            "hotelsPerTown",
+            "hotelFloors",
+            "variants"
           ],
           "properties": {
-            "bakery": {
-              "type": "array",
-              "minItems": 1,
-              "items": {
-                "type": "string",
-                "enum": [
-                  "bakeryOven",
-                  "breadStand",
-                  "rentalBoard",
-                  "skiRack",
-                  "waxBench",
-                  "marketStall",
-                  "parcelStack",
-                  "clockTower"
-                ]
-              }
+            "hotelsPerTown": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 12
             },
-            "rental": {
-              "type": "array",
-              "minItems": 1,
-              "items": {
-                "type": "string",
-                "enum": [
-                  "bakeryOven",
-                  "breadStand",
-                  "rentalBoard",
-                  "skiRack",
-                  "waxBench",
-                  "marketStall",
-                  "parcelStack",
-                  "clockTower"
-                ]
-              }
+            "hotelFloors": {
+              "type": "integer",
+              "minimum": 2,
+              "maximum": 3
             },
-            "market": {
+            "variants": {
               "type": "array",
               "minItems": 1,
               "items": {
                 "type": "string",
                 "enum": [
-                  "bakeryOven",
-                  "breadStand",
-                  "rentalBoard",
-                  "skiRack",
-                  "waxBench",
-                  "marketStall",
-                  "parcelStack",
-                  "clockTower"
-                ]
-              }
-            },
-            "lift": {
-              "type": "array",
-              "minItems": 1,
-              "items": {
-                "type": "string",
-                "enum": [
-                  "bakeryOven",
-                  "breadStand",
-                  "rentalBoard",
-                  "skiRack",
-                  "waxBench",
-                  "marketStall",
-                  "parcelStack",
-                  "clockTower"
+                  "cottage",
+                  "chalet",
+                  "inn",
+                  "cafe",
+                  "rental"
                 ]
               }
             }

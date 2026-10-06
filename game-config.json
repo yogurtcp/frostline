@@ -1964,24 +1964,6 @@
     "trafficGateClearanceY": 55
   },
   "villageLife": {
-    "districts": [
-      "bakery",
-      "rental",
-      "market",
-      "lift"
-    ],
-    "districtNames": {
-      "bakery": "BAKERY QUARTER",
-      "rental": "RENTAL ROW",
-      "market": "MARKET SQUARE",
-      "lift": "LIFT PLAZA"
-    },
-    "districtColors": {
-      "bakery": "#ae815b",
-      "rental": "#558894",
-      "market": "#92728b",
-      "lift": "#65856e"
-    },
     "rabbitsPerTown": 2,
     "foxVisitChance": 0.18,
     "mischiefCooldownSeconds": 8,
@@ -2032,28 +2014,16 @@
         "A gentle skier. How unusual."
       ]
     },
-    "districtProps": {
-      "bakery": [
-        "bakeryOven",
-        "breadStand",
-        "breadStand"
-      ],
-      "rental": [
-        "rentalBoard",
-        "skiRack",
-        "waxBench",
-        "skiRack"
-      ],
-      "market": [
-        "marketStall",
-        "marketStall",
-        "marketStall",
-        "parcelStack"
-      ],
-      "lift": [
-        "clockTower",
-        "skiRack",
-        "parcelStack"
+    "buildings": {
+      "hotelsPerTown": 3,
+      "hotelFloors": 2,
+      "variants": [
+        "cottage",
+        "chalet",
+        "inn",
+        "cottage",
+        "cafe",
+        "rental"
       ]
     }
   }

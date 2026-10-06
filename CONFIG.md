@@ -20,7 +20,7 @@ World coordinates increase rightward and downhill. `world.unitsPerMetre` default
 | `jump` | Manual/ramp/mushroom/rainbow airtime, height scaling, spin, boosts and cooldown |
 | `world` | Random seed, terrain density, chunk sizes, cleanup distance, course sway, ice sizes and predator frequency |
 | `village` | House count, corridor offsets, layout randomization, building bands, footprints, path widths/routing, squares, walkers, pets, lift and entry positions |
-| `villageLife` | District names/colors and `districtProps` landmark lists, rabbit and rare fox visits, harmless prop cooldowns, animal curiosity/fleeing, NPC social timing and dialogue |
+| `villageLife` | `buildings` (hotel count/floors and mixed building variants), rabbit and rare fox visits, harmless prop cooldowns, animal curiosity/fleeing, NPC social timing and dialogue |
 | `houseAnimation` | Chimney smoke, opening doors, roof snow, awning movement, window flicker and muted trim palettes |
 | `wildlife` | Impact speed/angle thresholds, defeated-predator fade duration, pack sizes, detection distances, chase/flee speeds, predator meals, avoidance, rescue reactions, impact thresholds and cat behavior |
 | `pedestrians` | Stroll radius, walking speeds and durations, pauses, obstacle clearance, spectator range and step animation |
