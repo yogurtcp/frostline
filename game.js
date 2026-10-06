@@ -79,6 +79,25 @@ window.FROSTLINE_READY = (async () => {
       trees:a.treesPer100m>0,treeSpacing:a.treesPer100m>0?100*PX_PER_M/a.treesPer100m:Infinity,
       skierSpacing:100*PX_PER_M/a.skierGroupsPer100m,fastChance:a.fastSkierPercent/100,boarderChance:a.snowboarderPercent/100,skierGroupChance:a.skierPairPercent/100};
   }
+  function arcadeGatePace(run){
+    const top=topSpeed(),P=S.physics,step=S.controls.stepDegrees*Math.PI/180;
+    const velocities=[0,step,2*step].filter(t=>t<Math.PI/2).map(t=>{
+      const speed=top*(P.acrossSpeedFraction+P.downhillSpeedFraction*Math.cos(t)**2);
+      return {x:Math.sin(t)*speed,y:Math.cos(t)*speed};
+    });
+    velocities.push({x:P.traverseSpeed,y:0});
+    // Aim through gate centres: their usable width gives the player extra margin.
+    const points=[{x:run.x,y:run.startY},...state.objects.filter(o=>o.type==='gate'&&o.run===run),{x:run.x,y:run.endY}];
+    let pace=top;
+    for(let i=1;i<points.length;i++){
+      const dx=Math.abs(points[i].x-points[i-1].x),dy=points[i].y-points[i-1].y;
+      let j=1;while(j<velocities.length-1&&dx*velocities[j].y>dy*velocities[j].x)j++;
+      const a=velocities[j-1],b=velocities[j],det=a.x*b.y-b.x*a.y;
+      const seconds=(dx*b.y-b.x*dy+a.x*dy-dx*a.y)/det+S.arcade.pursuitTurnAllowanceSeconds;
+      pace=Math.min(pace,dy/seconds);
+    }
+    return pace;
+  }
   function arcadeTrafficMultiplier(run,y){return mix(1,run.arcade.endTrafficMultiplier,clamp((y-run.startY)/(run.endY-run.startY),0,1));}
   function startCourse(id,gate) {
     if(state.course||state.arcade&&id!=='arcade')return false;
@@ -94,11 +113,12 @@ window.FROSTLINE_READY = (async () => {
     if(run.arcade)state.arcadeResult=null;
     state.results=null;state.safeTrails.push(run);state.course=run;state.zone={kind:'course',origin:startY};state.generated=startY+S.race.terrainStartOffset;state.gateCount=0;
     for(const o of state.objects)if(o.type==='entrance')o.selected=o===gate;
-    if(run.objective!=='mushrooms'&&s.spacing){let count=0;for(let y=startY+S.race.gateStartOffset;y<endY-S.race.gateFinishClearance;y+=s.spacing){
+    const finishClearance=run.arcade?Math.max(S.race.gateFinishClearance,s.spacing*S.arcade.finishApproachGateSpacings):S.race.gateFinishClearance;
+    if(run.objective!=='mushrooms'&&s.spacing){let count=0;for(let y=startY+S.race.gateStartOffset;y<endY-finishClearance;y+=s.spacing){
       const x=centerAt(y,run)+(count%2===0?-1:1)*(s.kind==='forest'?S.race.forestGateSwing:S.race.gateSwing);
       entity('gate',x,y,{half:(s.kind==='forest'?S.race.forestGateHalfWidth:S.race.gateHalfWidth)*(s.gateScale||1),width:180,r:0,number:++count,color:count%2?C.red:C.blue,checked:false,run});
     }run.totalGates=count;}
-    if(run.arcade)markArcadeGearGates(run);
+    if(run.arcade){run.gatePace=arcadeGatePace(run);markArcadeGearGates(run);}
     entity('courseStart',run.x,startY,{r:0,width:700,name:s.name});entity('finish',run.x,endY,{r:0,width:run.finishHalf*2,half:run.finishHalf});
     // Spectators exist before the finish comes into view; a perfect run activates their celebration.
     for(let i=0;i<S.race.spectators;i++)entity(i%2?'personYellow':'personRed',run.x+(i%2?1:-1)*(run.finishHalf+65+(i%3)*20),endY+80+Math.floor(i/2)*105,{width:30,r:10,cheerRun:run});
@@ -189,8 +209,8 @@ window.FROSTLINE_READY = (async () => {
       const waiting=!missedGate,side=i%2?1:-1,row=Math.floor(i/2);
       const kind=tier==='slow'?'slow':'fast',x=waiting?run.x+side*(S.arcade.startLineSideOffsetMetres+row*S.arcade.startLineRowOffsetMetres)*PX_PER_M:missedGate.x+range(-S.arcade.spawnSpread,S.arcade.spawnSpread);
       const y=waiting?run.startY+S.arcade.startLineDownhillOffsetMetres*PX_PER_M:missedGate.y-S.arcade.missSpawnAbove;
-      const ratio=waiting?run.arcade.yetiSpeedPercent/100:S.arcade.yetiRatios[tier];
-      state.chasers.push({kind,arcadeTier:tier,x,y,waiting,speed:topSpeed()*ratio,chaseRun:run,id:random(),phase:range(0,6),expires:Infinity,leaving:false,talkAt:clock+6});
+      const ratio=(waiting?run.arcade.yetiGatePacePercent:run.arcade.missYetiGatePacePercent)/100;
+      state.chasers.push({kind,arcadeTier:tier,x,y,waiting,speed:run.gatePace*ratio,chaseRun:run,id:random(),phase:range(0,6),expires:Infinity,leaving:false,talkAt:clock+6});
       if(missedGate)burst(x,y,S.arcade.yetiColors[tier],12);
     }
   }

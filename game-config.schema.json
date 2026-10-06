@@ -4718,7 +4718,6 @@
       "additionalProperties": false,
       "required": [
         "stages",
-        "yetiRatios",
         "yetiColors",
         "yetiTints",
         "missSpawnAbove",
@@ -4744,7 +4743,9 @@
         "startLineSideOffsetMetres",
         "startLineRowOffsetMetres",
         "startLineDownhillOffsetMetres",
-        "wakeSeconds"
+        "wakeSeconds",
+        "pursuitTurnAllowanceSeconds",
+        "finishApproachGateSpacings"
       ],
       "properties": {
         "stages": {
@@ -4767,7 +4768,6 @@
               "overtakeSeconds",
               "yetiTier",
               "yetis",
-              "yetiSpeedPercent",
               "missYetis",
               "missTier",
               "gateScale",
@@ -4775,7 +4775,9 @@
               "ice",
               "jumps",
               "mixed",
-              "featureEveryGates"
+              "featureEveryGates",
+              "yetiGatePacePercent",
+              "missYetiGatePacePercent"
             ],
             "properties": {
               "name": {
@@ -4856,12 +4858,6 @@
                 "description": "Number waiting beside the start.",
                 "maximum": 12
               },
-              "yetiSpeedPercent": {
-                "type": "number",
-                "minimum": 0,
-                "description": "Starting pursuer speed as a percentage of this stage top speed.",
-                "maximum": 120
-              },
               "missYetis": {
                 "type": "integer",
                 "minimum": 0,
@@ -4903,30 +4899,19 @@
                 "minimum": 2,
                 "description": "Spacing of occasional ramps/moguls/bushes or the selected ice/jump feature, measured in gates.",
                 "maximum": 30
+              },
+              "yetiGatePacePercent": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 99,
+                "description": "Starting yeti speed as percent of the calculated slowest clean gate leg, NOT straight-down top speed."
+              },
+              "missYetiGatePacePercent": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 99,
+                "description": "Missed-gate pursuer speed as percent of calculated clean gate pace."
               }
-            }
-          }
-        },
-        "yetiRatios": {
-          "type": "object",
-          "additionalProperties": false,
-          "required": [
-            "slow",
-            "fast",
-            "elite"
-          ],
-          "properties": {
-            "slow": {
-              "type": "number",
-              "minimum": 0
-            },
-            "fast": {
-              "type": "number",
-              "minimum": 0
-            },
-            "elite": {
-              "type": "number",
-              "minimum": 0
             }
           }
         },
@@ -5156,6 +5141,18 @@
           "minimum": 0.2,
           "description": "Visible reaction before waiting yetis begin chasing.",
           "maximum": 3
+        },
+        "pursuitTurnAllowanceSeconds": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 3,
+          "description": "Extra time per gate leg for steering/settling in the clean-line pursuit calculation."
+        },
+        "finishApproachGateSpacings": {
+          "type": "number",
+          "minimum": 1,
+          "maximum": 3,
+          "description": "Minimum finish approach measured in gate spacings; prevents a forced sharp final turn."
         }
       }
     },
