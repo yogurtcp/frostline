@@ -4727,7 +4727,6 @@
         "featureIntervalGates",
         "featureClearance",
         "resultSeconds",
-        "fastSpawnBaseSeconds",
         "entranceSpacing",
         "landingClearanceLength",
         "landingClearanceHalfWidth",
@@ -4737,7 +4736,12 @@
         "forestFeatureIntervalGates",
         "forestFeatureOffsetX",
         "forestFeatures",
-        "gear"
+        "gear",
+        "trafficHalfWidth",
+        "trafficGroupOffsetX",
+        "trafficGroupOffsetY",
+        "trafficFastSpeedRatio",
+        "trafficGateClearanceY"
       ],
       "properties": {
         "stages": {
@@ -4763,7 +4767,9 @@
               "jumps",
               "mixed",
               "skierSpacing",
-              "treeSpacing"
+              "treeSpacing",
+              "overtakeSeconds",
+              "skierGroupChance"
             ],
             "properties": {
               "name": {
@@ -4843,6 +4849,15 @@
               "treeSpacing": {
                 "type": "number",
                 "exclusiveMinimum": 0
+              },
+              "overtakeSeconds": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              },
+              "skierGroupChance": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
               }
             }
           }
@@ -4955,10 +4970,6 @@
           "type": "number",
           "minimum": 0
         },
-        "fastSpawnBaseSeconds": {
-          "type": "number",
-          "minimum": 0
-        },
         "entranceSpacing": {
           "type": "number",
           "minimum": 0
@@ -5053,6 +5064,32 @@
               "type": "string"
             }
           }
+        },
+        "trafficHalfWidth": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "trafficGroupOffsetX": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "trafficGroupOffsetY": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "trafficFastSpeedRatio": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          }
+        },
+        "trafficGateClearanceY": {
+          "type": "number",
+          "exclusiveMinimum": 0
         }
       }
     }

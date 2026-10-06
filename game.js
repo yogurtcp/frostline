@@ -100,7 +100,7 @@ window.FROSTLINE_READY = (async () => {
     entity('ice',run.x-240,startY+1940,{rx:85,ry:105,width:170,r:0});
     for(let y=startY+S.race.rainbowFirstOffset;y<endY-300;y+=s.kind==='freestyle'?S.race.freestyleRainbowSpacing:S.race.rainbowSpacing)entity('rainbow',centerAt(y,run)-90,y,{width:115,r:25});}
     if(run.objective==='mushrooms')plantMushrooms(run);
-    if(run.arcade){prepareArcadeTerrain(run);state.nextFastSkier=clock+S.arcade.fastSpawnBaseSeconds/Math.max(.05,run.arcade.fastChance);}
+    if(run.arcade){prepareArcadeTerrain(run);state.nextFastSkier=clock+run.arcade.overtakeSeconds;}
     if(id==='slalom')state.objects=state.objects.filter(o=>!classicArea(o.x,o.y,70)||['gate','courseStart','finish','entrance','skier','boarder','personRed','personGreen','personYellow'].includes(o.type));
     const oldRoute=state.liftRoutes[state.liftRoutes.length-1];
     if(oldRoute&&oldRoute.y1>startY)oldRoute.y1=startY;
@@ -449,7 +449,7 @@ window.FROSTLINE_READY = (async () => {
   }
   function spawnFastSkier(){
     if(!state.started||state.p.awaitingInput||insideTown(state.p.x,state.p.y)||clock<state.nextFastSkier)return;
-    state.nextFastSkier=clock+(state.course?.arcade?S.arcade.fastSpawnBaseSeconds/Math.max(.05,state.course.arcade.fastChance):range(...S.skiers.fastSpawnSeconds));
+    state.nextFastSkier=clock+(state.course?.arcade?state.course.arcade.overtakeSeconds:range(...S.skiers.fastSpawnSeconds));
     const y=viewBounds().top-S.skiers.fastSpawnAbove,x=state.p.x+pick([-1,1])*range(...S.skiers.fastSpawnOffsetX);
     if(insideTown(x,y))return;
     entity('skier',x,y,{width:44,r:12,fast:true,vy:topSpeed()*S.skiers.fastSpeedRatio,vx:range(-13,13)});
@@ -533,13 +533,20 @@ window.FROSTLINE_READY = (async () => {
       while(run[key]<limit){
         const y=run[key];run[key]+=spacing*range(1-S.arcade.spawnJitter,1+S.arcade.spawnJitter);
         if(stream==='tree'&&!arcadeTerrainAt(run,y).trees)continue;
-        const gate=state.objects.find(o=>o.type==='gate'&&o.run===run&&Math.abs(o.y-y)<135);
-        let x=centerAt(y,run)+range(-S.world.terrainOffsetX,S.world.terrainOffsetX);
+        const gate=state.objects.find(o=>o.type==='gate'&&o.run===run&&Math.abs(o.y-y)<(stream==='skier'?S.arcade.trafficGateClearanceY:135));
+        const spread=stream==='skier'?S.arcade.trafficHalfWidth:S.world.terrainOffsetX;
+        let x=centerAt(y,run)+range(-spread,spread);
         if(gate&&Math.abs(x-gate.x)<gate.half+40)x=gate.x+Math.sign(x-gate.x||1)*range(gate.half+65,gate.half+160);
         if(nearArcadeFeature(x,y)||patchAt(x,y))continue;
         if(stream==='skier'){
-          const fast=random()<a.fastChance;
-          entity('skier',x,y,{width:42,r:12,fast,vy:range(...(fast?S.skiers.fastSpeed:S.skiers.slowSpeed))});
+          const count=random()<a.skierGroupChance?2:1;
+          for(let i=0;i<count;i++){
+            const nx=x+(i?(x>centerAt(y,run)?-1:1)*S.arcade.trafficGroupOffsetX:0),ny=y+i*S.arcade.trafficGroupOffsetY;
+            if(ny>=run.endY-100||nearArcadeFeature(nx,ny)||patchAt(nx,ny)||state.objects.some(o=>o.type==='gate'&&o.run===run&&Math.abs(o.y-ny)<S.arcade.trafficGateClearanceY&&Math.abs(o.x-nx)<o.half+40))continue;
+            const fast=random()<a.fastChance;
+            // Ahead-of-player traffic stays catchable; dedicated uphill spawns overtake the player.
+            entity('skier',nx,ny,{width:42,r:12,fast,vy:fast?topSpeed()*range(...S.arcade.trafficFastSpeedRatio):range(...S.skiers.slowSpeed)});
+          }
         }else entity(pick(['pine','fir']),x,y,{width:range(55,85),r:17});
       }
     }

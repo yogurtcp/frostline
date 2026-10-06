@@ -55,7 +55,7 @@ All levels and tuning live in `game-config.json` under `arcade`. Normal-speed st
 
 ## Traffic and forest variety
 
-Arcade uses separate controlled skier and tree schedules; ambient world generation is excluded from its course corridor. Stage 1 spaces skiers about 110 m apart; stage 2 about 65 m apart, with more aggressive overtakers. Wooded stages also include occasional short ramps, moguls, and bushes, roughly one feature every eight gates. Jump/ice-focused stages keep their own feature schedule.
+Arcade uses separate controlled skier and tree schedules; ambient world generation is excluded from its course corridor. Stage 1 spaces solo skiers about 65 m apart; stage 2 uses 38 m spacing with occasional pairs. Rush Hour uses 26 m spacing with frequent staggered pairs and an overtaker roughly every seven seconds. All stages have individual traffic spacing, group probability and overtaking intervals. Faster skiers generated ahead remain catchable; genuinely faster overtakers arrive from uphill. Wooded stages also include occasional short ramps, moguls, and bushes, roughly one feature every eight gates. Jump/ice-focused stages keep their own feature schedule.
 
 ## Shields and swords
 
