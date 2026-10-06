@@ -28,7 +28,7 @@ Wolves spawn in packs of 3–4, stay together, and chase nearby players slowly o
 
 ## Arcade
 
-The purple Arcade entrance at the summit starts a separate 32-stage survival descent: no fees, coin rewards, time limits, or repeated course choices. Safe randomized towns connect stages automatically. Missed gates create escalating yeti penalties in later stages; missing the finish or getting eaten ends the attempt. Teal, orange and violet distinguish slow, fast and elite yetis. Furthest stage and downhill distance save on this device; the ordinary wallet is preserved. See [ARCADE.md](ARCADE.md) for the full level list and rules. Arcade uses finish crossings rather than the regular 90% gate quota, and the summit lift cannot exit an active Arcade attempt.
+The purple Arcade entrance at the summit starts a separate 32-stage survival descent: no fees, coin rewards, time limits, or repeated course choices. Safe randomized towns connect stages automatically. Missed gates create escalating yeti penalties in later stages; missing the finish or getting eaten ends the attempt. Teal, orange and violet distinguish slow, fast and elite yetis. Ordinary gates charge obstacle shields, while purple sword-marked gates charge weapons against hostile animals. Separate HUD meters show progress and stock; both trigger automatically with pixel block/slash effects. Furthest stage and downhill distance save on this device; the ordinary wallet is preserved. See [ARCADE.md](ARCADE.md) for the full level list and rules. Arcade uses finish crossings rather than the regular 90% gate quota, and the summit lift cannot exit an active Arcade attempt.
 
 ## Snowdrift Village
 

@@ -4736,7 +4736,8 @@
         "spawnJitter",
         "forestFeatureIntervalGates",
         "forestFeatureOffsetX",
-        "forestFeatures"
+        "forestFeatures",
+        "gear"
       ],
       "properties": {
         "stages": {
@@ -5000,6 +5001,57 @@
               "mogul",
               "bush"
             ]
+          }
+        },
+        "gear": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "shieldsPerStage",
+            "swordGatesPerStage",
+            "swordGatesPerSword",
+            "maxShields",
+            "maxSwords",
+            "protectionSeconds",
+            "effectSeconds",
+            "shieldColor",
+            "swordColor"
+          ],
+          "properties": {
+            "shieldsPerStage": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "swordGatesPerStage": {
+              "type": "integer",
+              "exclusiveMinimum": 0
+            },
+            "swordGatesPerSword": {
+              "type": "integer",
+              "exclusiveMinimum": 0
+            },
+            "maxShields": {
+              "type": "integer",
+              "exclusiveMinimum": 0
+            },
+            "maxSwords": {
+              "type": "integer",
+              "exclusiveMinimum": 0
+            },
+            "protectionSeconds": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "effectSeconds": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "shieldColor": {
+              "type": "string"
+            },
+            "swordColor": {
+              "type": "string"
+            }
           }
         }
       }

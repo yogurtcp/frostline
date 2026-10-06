@@ -75,7 +75,7 @@ window.FROSTLINE_READY = (async () => {
   function startCourse(id,gate) {
     if(state.course||state.arcade&&id!=='arcade')return false;
     if(id==='arcade'){
-      if(!state.arcade){state.arcade={stage:1,completed:0,startY:state.p.y,furthestY:state.p.y,cleared:0,missed:0,hits:0};state.patrolPenalty=null;state.chasers=[];state.arcadeResult=null;}
+      if(!state.arcade){state.arcade={stage:1,completed:0,startY:state.p.y,furthestY:state.p.y,cleared:0,missed:0,hits:0,shields:0,swords:0,shieldCharge:0,swordCharge:0,shieldsUsed:0,swordsUsed:0};state.patrolPenalty=null;state.chasers=[];state.arcadeResult=null;}
       const level=S.arcade.stages[state.arcade.stage-1];
       stages.arcade={...S.courses.slalom,...level,fee:0,kind:level.trees?'forest':'slalom',color:S.arcade.yetiColors[level.yetiTier]||C.teal,name:state.arcade.stage+'. '+level.name};
     }
@@ -90,6 +90,7 @@ window.FROSTLINE_READY = (async () => {
       const x=centerAt(y,run)+(count%2===0?-1:1)*(s.kind==='forest'?S.race.forestGateSwing:S.race.gateSwing);
       entity('gate',x,y,{half:(s.kind==='forest'?S.race.forestGateHalfWidth:S.race.gateHalfWidth)*(s.gateScale||1),width:180,r:0,number:++count,color:count%2?C.red:C.blue,checked:false,run});
     }run.totalGates=count;}
+    if(run.arcade)markArcadeGearGates(run);
     entity('courseStart',run.x,startY,{r:0,width:700,name:s.name});entity('finish',run.x,endY,{r:0,width:run.finishHalf*2,half:run.finishHalf});
     // Spectators exist before the finish comes into view; a perfect run activates their celebration.
     for(let i=0;i<S.race.spectators;i++)entity(i%2?'personYellow':'personRed',run.x+(i%2?1:-1)*(run.finishHalf+65+(i%3)*20),endY+80+Math.floor(i/2)*105,{width:30,r:10,cheerRun:run});
@@ -109,6 +110,45 @@ window.FROSTLINE_READY = (async () => {
     if(run.arcade)announce(stages.arcade.name.toUpperCase(),'REACH THE FINISH - NO FEES, NO TIME LIMIT',stages.arcade.color,5);
     if(!paid)triggerAmbush();else if(s.kind==='slow'){addChasers('slow',S.politePursuit.count,run);announce('POLITE PURSUIT',`${S.politePursuit.count} SLOW YETIS - THEY FOLLOW YOU OFF PISTE`,s.color,5);}else if(s.kind==='fast')addChasers('fast',1);
     state.transitions.push({kind:'start',id,y:p.y,paid});beep(650,.14);return true;
+  }
+
+  function markArcadeGearGates(run){
+    const gates=state.objects.filter(o=>o.type==='gate'&&o.run===run),G=S.arcade.gear;
+    const count=Math.min(G.swordGatesPerStage,Math.max(0,gates.length-1));
+    for(let i=0;i<count;i++)gates[Math.floor((i+1)*gates.length/(count+1))].gear='sword';
+    run.shieldGateCharge=G.shieldsPerStage/Math.max(1,gates.length-count);
+  }
+  function collectArcadeGear(gate){
+    const a=state.arcade,G=S.arcade.gear,kind=gate.gear==='sword'?'sword':'shield',stock=kind+'s',charge=kind+'Charge',cap=kind==='sword'?G.maxSwords:G.maxShields;
+    if(!a||a[stock]>=cap)return;
+    a[charge]+=kind==='sword'?1:gate.run.shieldGateCharge;
+    const needed=kind==='sword'?G.swordGatesPerSword:1;
+    if(a[charge]+1e-9>=needed){
+      a[stock]++;a[charge]=a[stock]>=cap?0:Math.max(0,a[charge]-needed);
+      say(kind.toUpperCase()+' READY!',state.p,1.5);burst(state.p.x,state.p.y,kind==='sword'?G.swordColor:G.shieldColor,12);beep(kind==='sword'?980:820,.12);
+    }
+    a.gearFlash={kind,until:clock+.4};
+  }
+  function useObstacleShield(obstacle){
+    const a=state.arcade,p=state.p,G=S.arcade.gear;
+    if(!a||!a.shields||p.awaitingInput||tooSlowToCrash()||['dog','bear','lurker','wolf','fox','rabbit','cat'].includes(obstacle?.type))return false;
+    a.shields--;a.shieldsUsed++;p.shield=Math.max(p.shield,G.protectionSeconds);
+    if(obstacle)p.slowContacts.add(obstacle);
+    a.gearEffect={kind:'shield',start:clock,until:clock+G.effectSeconds};
+    burst(p.x,p.y,G.shieldColor,20);beep(620,.14,'triangle');return true;
+  }
+  function useArcadeSword(target){
+    const a=state.arcade,p=state.p,G=S.arcade.gear;
+    if(!a||!a.swords||target.dead||p.air>0||state.deathTimer||p.shield>0)return false;
+    a.swords--;a.swordsUsed++;target.dead=true;target.animal=false;target.running=false;target.r=0;target.vx=target.vy=target.roam=0;
+    target.fadeUntil=clock+(target.type==='wolf'?S.wildlife.wolfFadeSeconds:S.wildlife.predatorFadeSeconds);
+    p.shield=G.protectionSeconds;
+    a.gearEffect={kind:'sword',start:clock,until:clock+G.effectSeconds,angle:Math.atan2(target.y-p.y,target.x-p.x)};
+    burst(target.x,target.y,G.swordColor,20);beep(980,.1,'triangle');
+    if(target.type==='wolf')for(const skier of state.objects){
+      if(skier.threat===target){skier.threat=null;skier.fearUntil=0;skier.npcFallUntil=0;say(pick(S.dialogue.rescued),skier,2);}
+    }
+    return true;
   }
 
   function arcadeTerrainAt(run,y){
@@ -535,13 +575,14 @@ window.FROSTLINE_READY = (async () => {
     if(p.awaitingInput){p.awaitingInput=false;p.onIce=false;p.icePushPending=!!patchAt(p.x,p.y);p.shield=S.physics.resumeShieldSeconds;p.desiredHeading=0;p.mode='slide';state.keyboardStep=0;}
     if(!state.started){state.started=true;state.activeTime=0;}state.soundReady=true;return true;
   }
-  function crash(obstacle=null,duration=S.physics.crashSeconds){
+  function crash(obstacle=null,duration=S.physics.crashSeconds,animal=false){
     const p=state.p;if(p.awaitingInput)return;
+    if(!animal&&useObstacleShield(obstacle))return false;
     if(state.course)state.course.hits++;
     p.awaitingInput=true;p.crashObstacle=obstacle;p.fall=duration;p.shield=duration;
     p.speed=p.vx=p.vy=0;p.air=p.airTotal=0;p.mode='still';state.lastTrack=null;
     state.input={left:false,right:false,up:false,down:false,pointer:null,jump:false};
-    state.screenShake=.2;burst(p.x,p.y,'#b9d2d8',15);beep(140,.12,'triangle');
+    state.screenShake=.2;burst(p.x,p.y,'#b9d2d8',15);beep(140,.12,'triangle');return true;
   }
   function launch(duration=S.jump.baseSeconds) {
     const p=state.p;if(p.fall||p.air||p.jumpLock>0)return;
@@ -567,6 +608,7 @@ window.FROSTLINE_READY = (async () => {
     if(p.awaitingInput||p.shield>0||o===p.crashObstacle)return;
     if(o.type==='wolf'&&killWolf(o))return;
     if(['bear','lurker'].includes(o.type)&&knockOut(o,o.type))return;
+    if(['bear','lurker','dog'].includes(o.type)&&!tooSlowToCrash()&&useArcadeSword(o))return;
     if(o.touched&&['ramp','mogul','mushroom','rainbow','sled','bush','cat'].includes(o.type))return;
     const uphill=p.vy<0,fast=p.speed>S.physics.fastImpactSpeed;
     if(o.type==='cat'){
@@ -691,7 +733,7 @@ window.FROSTLINE_READY = (async () => {
       if(o.roam)o.x+=Math.cos(clock*.8+o.phase)*o.roam*dt*.3;
 
       if(state.started&&!(o.stunnedUntil>clock)&&o.type==='lurker'&&!humanArea(o.x,o.y)&&!humanArea(p.x,p.y)&&Math.hypot(o.x-p.x,o.y-p.y)<S.wildlife.yetiWakeDistance){o.type='awakened';o.r=0;state.chasers.push({kind:'fast',x:o.x,y:o.y,speed:topSpeed()*S.wildlife.yetiWildSpeedRatio,phase:o.phase,expires:p.y+S.wildlife.yetiWildChaseDistance,talkAt:clock+6});say('Oh. Breakfast.',o);}
-      if(o.type==='gate'&&o.run===state.course&&!o.checked&&previous.y<o.y&&p.y>=o.y){o.checked=true;const ratio=(o.y-previous.y)/(p.y-previous.y||1),crossX=mix(previous.x,p.x,ratio);if(state.course){if(Math.abs(crossX-o.x)<o.half){state.course.points+=S.race.gatePoints;state.course.cleared++;o.good=true;burst(o.x,o.y,C.gold,9);beep(710,.04);}else{state.course.missed++;o.good=false;beep(210,.045);if(state.course.arcade?.missYetis)spawnArcadeYetis(state.course,state.course.arcade.missTier,state.course.arcade.missYetis,o);}}}
+      if(o.type==='gate'&&o.run===state.course&&!o.checked&&previous.y<o.y&&p.y>=o.y){o.checked=true;const ratio=(o.y-previous.y)/(p.y-previous.y||1),crossX=mix(previous.x,p.x,ratio);if(state.course){if(Math.abs(crossX-o.x)<o.half){state.course.points+=S.race.gatePoints;state.course.cleared++;o.good=true;if(state.course.arcade)collectArcadeGear(o);burst(o.x,o.y,C.gold,9);beep(710,.04);}else{state.course.missed++;o.good=false;beep(210,.045);if(state.course.arcade?.missYetis)spawnArcadeYetis(state.course,state.course.arcade.missTier,state.course.arcade.missYetis,o);}}}
       if(o.type==='entrance'&&!state.course&&previous.y<o.y&&p.y>=o.y&&Math.abs(p.x-o.x)<o.half){startCourse(o.stage,o);break;}
       if(!state.arcade&&o.type==='lift'&&!o.used&&previous.y<o.y&&p.y>=o.y&&Math.abs(p.x-o.x)<o.half){o.used=true;state.liftTimer=S.lift.rideSeconds;p.speed=0;announce('UP WE GO','Next stop: the summit.',C.teal,3);}
       if(o.r>0&&Math.abs(o.y-p.y)<Math.max(130,o.width)){const d=Math.hypot(p.x-o.x,(p.y-o.y)*.85);if(obstacleClearance(o,p.x,p.y)<S.physics.playerRadius)hit(o);else if(o.type.startsWith('person')&&!o.greeted&&d<85){o.greeted=true;say(pick(S.dialogue.greetings),o);}}
@@ -860,7 +902,7 @@ window.FROSTLINE_READY = (async () => {
         if(leader&&leader!==o&&Math.hypot(leader.x-o.x,leader.y-o.y)>A.packFollowDistance){o.angle=Math.atan2(leader.y-o.y,leader.x-o.x);speed=A.packFollowSpeed;}
       }
       if(target){o.angle=Math.atan2(target.y-o.y,target.x-o.x);if(Math.hypot(target.x-o.x,target.y-o.y)<A.captureDistance){
-        if(target===p){if(killWolf(o))continue;if(p.shield<=0&&p.air<=0){die('WOLF');return;}}
+        if(target===p){if(killWolf(o))continue;if(p.shield<=0&&p.air<=0){if(useArcadeSword(o))continue;die('WOLF');return;}}
         else if(target.type==='skier'||target.type==='boarder'){target.npcFallUntil=clock+A.npcWolfFallSeconds;say(pick(S.dialogue.wolfCaught),target);o.feedingUntil=clock+A.feedingSeconds;continue;}
         else {target.eaten=true;target.r=0;o.hunting=false;o.feedingUntil=clock+A.feedingSeconds;o.nextAI=clock+A.satedSeconds;burst(target.x,target.y,C.ice,9);say('CHOMP!',o,1.2);continue;}
       }}
@@ -940,8 +982,9 @@ window.FROSTLINE_READY = (async () => {
       if(contactDistance<S.chasers.knockoutDistance&&knockOut(c,c.kind))continue;
       if(contactDistance<S.chasers.captureDistance&&p.shield<=0&&p.air<=0){
         if(!lethal&&(p.awaitingInput||tooSlowToCrash()))continue;
+        if(['fast','slow','bear','dog'].includes(c.kind)&&useArcadeSword(c))continue;
         if(['fast','slow','bear'].includes(c.kind)){if(state.course&&!p.awaitingInput)state.course.hits++;burst(p.x,p.y,C.ice,12);die(c.kind==='bear'?'BEAR':'YETI');break;}
-        crash(null,S.chasers.patrolFallSeconds);announce(c.kind==='dog'?'AGGRESSIVELY LOVED':'A WORD FROM SKI PATROL',c.kind==='dog'?'Covered in slobber. Wallet intact.':'They are very disappointed.',C.red,3);for(const other of state.chasers)if(!other.patrolPass&&(!other.chaseRun||other.chaseRun!==state.course))other.expires=p.y-1;burst(p.x,p.y,C.ice,20);break;
+        crash(null,S.chasers.patrolFallSeconds,c.kind==='dog');announce(c.kind==='dog'?'AGGRESSIVELY LOVED':'A WORD FROM SKI PATROL',c.kind==='dog'?'Covered in slobber. Wallet intact.':'They are very disappointed.',C.red,3);for(const other of state.chasers)if(!other.patrolPass&&(!other.chaseRun||other.chaseRun!==state.course))other.expires=p.y-1;burst(p.x,p.y,C.ice,20);break;
       }
     }
     state.chasers=state.chasers.filter(c=>(!c.patrolPass||c.remaining>0)&&(!c.dead||clock<c.fadeUntil)&&(!c.leaving||Math.abs(c.y-p.y)<H*.7));
@@ -1064,7 +1107,7 @@ window.FROSTLINE_READY = (async () => {
     if(o.feedingUntil>clock)text('...',s.x,s.y-22,9,C.ink);
   }
   function drawKnockedOut(o,s,kind){
-    sprite(kind==='bear'?'bearRun':'yeti',s.x,s.y,kind==='bear'?44:52,{rotate:Math.PI/2});
+    sprite(kind==='bear'?'bearRun':kind==='dog'?'dog':kind==='wolf'?'wolf':'yeti',s.x,s.y,kind==='bear'?44:52,{rotate:Math.PI/2});
     for(let i=0;i<3;i++){const a=clock*4+i*TAU/3;box(s.x+Math.cos(a)*12,s.y-17+Math.sin(a)*4,2,2,C.gold);}
   }
   function drawHouse(o,s){
@@ -1138,8 +1181,10 @@ window.FROSTLINE_READY = (async () => {
 
     if(o.type==='gate'){
       const a=o.checked?.6:1;ctx.globalAlpha=a;
-      flag(s.x-o.half*ZOOM,s.y,o.color,1,o.good);flag(s.x+o.half*ZOOM,s.y,o.color,-1,o.good);
-      if(o.checked){text(o.good?'+'+S.race.gatePoints:'×',s.x,s.y-15,10,o.good?C.teal:C.red);}else text(String(o.number).padStart(2,'0'),s.x,s.y+9,8,'#8eaaa5');
+      const color=o.gear==='sword'?S.arcade.gear.swordColor:o.color;
+      flag(s.x-o.half*ZOOM,s.y,color,1,o.good);flag(s.x+o.half*ZOOM,s.y,color,-1,o.good);
+      if(o.gear==='sword'){gearIcon('sword',s.x-o.half*ZOOM,s.y-31,2);gearIcon('sword',s.x+o.half*ZOOM,s.y-31,2);}
+      if(o.checked){text(o.good?(o.run.arcade?(o.gear==='sword'?'+SWORD':'+SHIELD'):'+'+S.race.gatePoints):'×',s.x,s.y-15,10,o.good?C.teal:C.red);}else text(String(o.number).padStart(2,'0'),s.x,s.y+9,8,'#8eaaa5');
       ctx.globalAlpha=1;return;
     }
     if(o.type==='finish'){
@@ -1201,6 +1246,42 @@ window.FROSTLINE_READY = (async () => {
     sprite('skier',lean,bob,S.render.playerWidth,{bodyOnly:true});
     ctx.restore();
   }
+  const gearPixels={
+    shield:['011111110','122222221','122323221','122333221','122323221','122222221','012222210','001222100','000111000'],
+    sword:['000000110','000001210','000012100','000121000','101210000','011100000','001110000','012001000','110000000']
+  };
+  function gearIcon(kind,x,y,scale=2){
+    const pixels=gearPixels[kind],color=kind==='shield'?S.arcade.gear.shieldColor:S.arcade.gear.swordColor;
+    for(let row=0;row<pixels.length;row++)for(let col=0;col<pixels[row].length;col++){
+      const pixel=pixels[row][col];if(pixel!=='0')box(x+(col-4)*scale,y+(row-4)*scale,scale,scale,pixel==='1'?C.ink:pixel==='3'?C.gold:color);
+    }
+  }
+  function drawGearHUD(){
+    const a=state.arcade,G=S.arcade.gear,width=(W-50)/2,y=H-99;
+    for(const [i,kind] of ['shield','sword'].entries()){
+      const x=18+i*(width+14),stock=a[kind+'s'],cap=kind==='shield'?G.maxShields:G.maxSwords;
+      const progress=kind==='shield'?a.shieldCharge:a.swordCharge/G.swordGatesPerSword,color=kind==='shield'?G.shieldColor:G.swordColor;
+      box(x-4,y-16,width+4,45,'#f3f7f0');gearIcon(kind,x+9,y-2,2);
+      text(kind.toUpperCase()+' '+stock+'/'+cap,x+26,y-7,9,C.ink,'left');
+      const label=stock>=cap?'FULL':kind==='shield'?Math.floor(progress*100)+'/100 SHIELD CHARGE':a.swordCharge+'/'+G.swordGatesPerSword+' SWORD GATES';
+      text(label,x+26,y+6,8,C.muted,'left');
+      box(x+26,y+17,width-31,5,'#d2e0dc');box(x+26,y+17,(width-31)*(stock>=cap?1:progress),5,a.gearFlash?.kind===kind&&a.gearFlash.until>clock?C.gold:color);
+    }
+  }
+  function drawGearEffect(){
+    const fx=state.arcade?.gearEffect;if(!fx||clock>=fx.until)return;
+    const t=(clock-fx.start)/S.arcade.gear.effectSeconds,s=screen(state.p.x,state.p.y),G=S.arcade.gear;
+    ctx.save();ctx.globalAlpha=1-t*.8;
+    if(fx.kind==='shield'){
+      const radius=20+t*25;for(let i=0;i<16;i++){const angle=i*TAU/16;box(s.x+Math.cos(angle)*radius,s.y-10+Math.sin(angle)*radius,3,3,G.shieldColor);}
+      gearIcon('shield',s.x,s.y-15,3);text('BLOCKED!',s.x,s.y-53,10,G.shieldColor);
+    }else{
+      for(let i=0;i<7;i++){const angle=fx.angle-1+t*2.5-i*.09;box(s.x+Math.cos(angle)*30,s.y-12+Math.sin(angle)*30,4,4,i<3?C.gold:G.swordColor);}
+      ctx.save();ctx.translate(s.x,s.y-12);ctx.rotate(fx.angle+t*2-.5);gearIcon('sword',20,0,3);ctx.restore();text('SLASH!',s.x,s.y-53,10,G.swordColor);
+    }
+    ctx.restore();
+  }
+
   function drawPlayer(){
     const p=state.p,s=screen(p.x,p.y),jump=p.airTotal?Math.sin((1-p.air/p.airTotal)*Math.PI)*p.jumpHeight*ZOOM:0,pose=playerPose();
     shadow(s.x,s.y+7,16,4,p.air?.12:.08);
@@ -1243,11 +1324,12 @@ window.FROSTLINE_READY = (async () => {
     else if(state.activeTime>15){text(state.arcade?'NEXT STAGE AT THE END OF TOWN':'SKI THROUGH A GATE TO ENTER',W/2,H-23,9,C.muted);}
     if(run&&!run.arcade&&S.timing.enabled&&(run.totalGates||run.totalMushrooms)){const best=courseRecord(run.id)?.bestSeconds;text(`TIME ${formatTime(run.time)}${best?'  BEST '+formatTime(best):'  SET A BEST TIME'}`,20,H-40,10,C.ink,'left');}
     if(state.arcade)text('DISTANCE '+Math.floor((state.arcade.furthestY-state.arcade.startY)/PX_PER_M)+' m  -  BEST '+(state.arcadeRecord.distance||0)+' m',20,H-40,10,C.ink,'left');
-    if(!state.started||state.activeTime<10&&!run?.timingStarted){const alpha=state.activeTime>7?(10-state.activeTime)/3:1;ctx.globalAlpha=alpha;text('DRAG TO SKI - SECOND FINGER TO JUMP',W/2,H-64,11,C.ink);text('ARROWS: SKI  ·  SPACE: JUMP  ·  M: SOUND',W/2,H-46,9,C.muted);ctx.globalAlpha=1;}
+    if(!state.started||state.activeTime<10&&!run?.timingStarted){const alpha=state.activeTime>7?(10-state.activeTime)/3:1;ctx.globalAlpha=alpha;text('DRAG TO SKI - SECOND FINGER TO JUMP',W/2,H-(state.arcade?155:64),11,C.ink);text('ARROWS: SKI  ·  SPACE: JUMP  ·  M: SOUND',W/2,H-(state.arcade?137:46),9,C.muted);ctx.globalAlpha=1;}
     if(p.awaitingInput&&p.fall===0){text('TAKE A BREATH.',W/2,91,12,C.teal);text('PRESS AN ARROW OR TOUCH TO SKI AGAIN',W/2,109,9,C.ink);}
+    if(state.arcade)drawGearHUD();
     const ar=state.arcadeResult;
     if(ar&&ar.until>clock){
-      const y=H-190;box(35,y,W-70,112,'#fbf7e9');box(35,y,3,112,C.teal);
+      const y=H-245;box(35,y,W-70,112,'#fbf7e9');box(35,y,3,112,C.teal);
       text(ar.reason,W/2,y+18,12,C.teal);
       text('STAGE '+ar.stage+' - '+ar.name,W/2,y+39,9,C.ink);
       text(ar.distance+' m  |  '+ar.cleared+' FLAGS  |  '+ar.missed+' MISSED',W/2,y+58,9,C.ink);
@@ -1274,7 +1356,7 @@ window.FROSTLINE_READY = (async () => {
   }
   function touchControl() {
     const t=state.input.pointer;if(!t)return;
-    text('TAP WITH ANOTHER FINGER TO JUMP',W/2,H-78,9,C.teal);
+    text('TAP WITH ANOTHER FINGER TO JUMP',W/2,H-(state.arcade?125:78),9,C.teal);
     const sx=t.sx,sy=t.sy,dx=clamp(t.x-sx,-42,42),dy=clamp(t.y-sy,-42,42);
     ctx.globalAlpha=.6;ctx.strokeStyle='#527f8c';ctx.lineWidth=1.5;ctx.setLineDash([3,4]);ctx.beginPath();ctx.arc(sx,sy,43,0,TAU);ctx.stroke();ctx.setLineDash([]);
     for(const [x,y,label] of [[sx,sy-58,'↑'],[sx-58,sy,'←'],[sx+58,sy,'→'],[sx,sy+58,'↓']]){box(x-10,y-10,20,20,'#e1eee7');text(label,x,y,15,C.teal);}
@@ -1291,7 +1373,7 @@ window.FROSTLINE_READY = (async () => {
     layers.push({y:state.p.y,draw:drawPlayer});for(const c of state.chasers)layers.push({y:c.y,draw:()=>drawChaser(c)});
     layers.sort((a,b)=>a.y-b.y);for(const layer of layers)layer.draw();
     for(const q of state.particles){const s=screen(q.x,q.y);box(s.x,s.y,3,3,q.color);}
-    drawSpeech();ctx.restore();hud();touchControl();
+    drawGearEffect();drawSpeech();ctx.restore();hud();touchControl();
     if(state.deathTimer>0&&state.deathTimer<.5){ctx.globalAlpha=1-state.deathTimer/.5;box(0,0,W,H,C.snow);ctx.globalAlpha=1;}
   }
   function resize() {

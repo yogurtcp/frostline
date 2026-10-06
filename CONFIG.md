@@ -36,6 +36,7 @@ World coordinates increase rightward and downhill. `world.unitsPerMetre` default
 ## Useful examples
 
 - Arcade difficulty: edit `arcade.stages` in order. `yetis` / `yetiTier` specify initial pursuers; `missYetis` / `missTier` specify the penalty per missed gate. `trees`, `ice`, `jumps`, and `mixed` select terrain; `gateScale`, `swayScale`, `spacing`, `pace`, `skierSpacing`, `treeSpacing` and `fastChance` tune the route. `yetiRatios` sets pursuit speed relative to the stage top speed. See `ARCADE.md` for all stages.
+- Arcade equipment: `arcade.gear.shieldsPerStage` defaults to 1.5. `swordGatesPerStage` is 4 and `swordGatesPerSword` is 8. Inventory caps are `maxShields` and `maxSwords` (2 each). The same object sets protection/effect duration and icon colors. Charges carry across stages; only successful gates add charge.
 - Arcade traffic uses its own schedule, without ambient world spawns inside the course. `skierSpacing` / `treeSpacing` are world-unit gaps (larger means fewer objects), with `arcade.spawnJitter` variation. Opening skier spacing is 1100 (110 m), then 650 (65 m) in stage 2. `forestFeatureIntervalGates` (8) places occasional ramps, moguls and bushes from `forestFeatures` in wooded sections; landing corridors stay clear.
 - Make regular slalom timing more forgiving: increase `timing.targets.slalom.goldSeconds` and `parSeconds`, keeping gold below par.
 - Reduce all speed prizes: lower `timing.maxBonus` (60 by default).

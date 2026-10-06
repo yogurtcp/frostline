@@ -1879,6 +1879,17 @@
       "ramp",
       "mogul",
       "bush"
-    ]
+    ],
+    "gear": {
+      "shieldsPerStage": 1.5,
+      "swordGatesPerStage": 4,
+      "swordGatesPerSword": 8,
+      "maxShields": 2,
+      "maxSwords": 2,
+      "protectionSeconds": 1.1,
+      "effectSeconds": 0.85,
+      "shieldColor": "#55abb7",
+      "swordColor": "#ae85bb"
+    }
   }
 }

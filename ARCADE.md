@@ -56,3 +56,9 @@ All levels and tuning live in `game-config.json` under `arcade`. Normal-speed st
 ## Traffic and forest variety
 
 Arcade uses separate controlled skier and tree schedules; ambient world generation is excluded from its course corridor. Stage 1 spaces skiers about 110 m apart; stage 2 about 65 m apart, with more aggressive overtakers. Wooded stages also include occasional short ramps, moguls, and bushes, roughly one feature every eight gates. Jump/ice-focused stages keep their own feature schedule.
+
+## Shields and swords
+
+Ordinary correct gates charge obstacle shields; four evenly spaced purple gates per stage carry pixel sword symbols and charge swords instead. Ordinary gates provide 1.5 shields per fully cleared stage, and eight sword gates provide one sword (two fully cleared stages). Both charge meters and up to two shields/two swords carry through towns. Missing gates forfeits that gate's charge but does not erase accumulated progress. Charge pauses when inventory is full. A new Arcade attempt starts empty.
+
+A shield automatically prevents one obstacle/skier crash, preserves movement, and shows a cyan pixel shield with an expanding block ring. A sword automatically defeats one contacting yeti, bear, wolf, or threatening dog, with a violet/gold slash animation. Swords are not spent when an ordinary high-speed impact already kills the animal. Harmless pet interactions do not spend swords. Shields do not substitute for swords against animal attacks. Neither item is spent on protected low-speed obstacle contacts. The HUD shows stocked items, shield charge out of 100, and sword-gate progress out of eight.
