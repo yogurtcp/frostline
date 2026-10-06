@@ -44,13 +44,13 @@ This handover itself was written by the preceding model, so its commit should no
 
 The user explicitly authorized publishing the current changes, including the current practice settings:
 
-| Field | Earlier campaign default | Current published setting |
+| Field | Earlier campaign default | Current setting |
 | --- | ---: | ---: |
-| `arcade.startStage` | 1 | 2 |
-| `arcade.autoStart` | false | true |
-| `arcade.stages[0].yeti.count` | 0 | 4 |
+| `arcade.startStage` | 1 | 1 |
+| `arcade.autoStart` | false | false |
+| `arcade.stages[0].yeti.count` | 0 | 0 |
 
-Stage 1's `yeti.speedKmh` remains **0**, so those four yetis are stationary. Zero speed is explicitly permitted. Starting at stage 2 means stage 1 will not be seen in that practice run. Do not silently restore the earlier defaults.
+At handover time the practice settings were `startStage` 2, `autoStart` true, and 4 stationary stage-1 yetis. The user has since returned to a summit start (`startStage` 1, `autoStart` false) and removed the stage-1 yetis entirely. Zero Yeti speed remains explicitly permitted. Treat the current JSON as authoritative; do not silently reintroduce earlier overrides.
 
 The user's standing instruction is: **publish new versions freely; this is experimental, and unwanted changes can be reverted.** Commit and push completed changes to `main` without asking for another publishing confirmation. Continue marking the incoming model's commits `[muse]`. Keep source, JSON and generated HTML consistent.
 
