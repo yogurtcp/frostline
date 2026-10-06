@@ -28,7 +28,7 @@ Wolves spawn in packs of 3–4, stay together, and chase nearby players slowly o
 
 ## Village life
 
-Every town has bakery, rental, market, and lift districts. The first three change order; the lift plaza sits near the downhill end. Small shop badges, striped stalls with bread/produce, ski racks, parcel stacks, shopkeepers, and a lift queue distinguish them. Solid props avoid the main snow road and house footprints.
+Every town has bakery, rental, market, and lift districts. The first three change order; the lift plaza sits near the downhill end. Each district has a reserved open plaza and a raised entrance sign. A smoking bread oven and bread stalls mark the bakery; a large ski sign, racks and waxing bench mark rental; several striped produce stalls form the market; and a clock tower, parcels and a queue mark the lift plaza. The HUD names the current district as you ski through it. Shop-front badges and vendors reinforce each theme. Solid props avoid the main snow road and house footprints.
 
 Snowmen lose and recover their hats, powder piles burst into snow, and pigeon flocks scatter and return. These interactions are harmless and never spend shields. Nearby residents comment with cooldowns. Approach rabbits and foxes slowly and they may sniff around you; rushing close sends them fleeing. Residents feed rabbits, pet cats and dogs, and shoo foxes. Foxes chased away by bakery/market vendors carry a stolen pastry. Ordinary predator hunting still takes priority over rabbit curiosity. Two rabbits are added per village, with rare fox visits; bears and wolves are not added to town.
 

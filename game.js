@@ -359,11 +359,14 @@ window.FROSTLINE_READY = (async () => {
     const station={x:town.stationX,y:town.stationY};
     const nearest=main.points.reduce((a,b)=>Math.hypot(a.x-station.x,a.y-station.y)<Math.hypot(b.x-station.x,b.y-station.y)?a:b);
     const branch={surface:V.mainRoadSurface,width:V.mainRoadWidth,points:[nearest,{x:station.x,y:nearest.y},station]},roads=[main,branch],houses=[];
+    town.districtOrder=[...shuffled(S.villageLife.districts.filter(k=>k!=='lift')),'lift'];
+    town.districtRows=town.districtOrder.map((_,i)=>Math.min(rowYs.length-1,Math.floor((i+.5)*rowYs.length/town.districtOrder.length)));
     const houseCount=Math.round(V.houseCount*(varied?between(...R.houseCountScale):1));
     // Fill the inner walls along the whole route first, then grow outward into blocks.
     const rings=Math.ceil(V.halfWidth*2/V.housePitch);
     for(let ring=0;ring<rings&&houses.length<houseCount;ring++)for(const row of (varied?shuffled(Array.from({length:V.rows},(_,i)=>i)):Array.from({length:V.rows},(_,i)=>i)))for(const side of [-1,1]){
       if(houses.length>=houseCount)break;
+      if(ring===0&&town.districtRows.includes(row))continue; // Reserve a plaza beside the ski corridor.
       if(varied&&ring>0&&rand()<R.outerGapChance)continue;
       const style=varied?(rand()<.7?styles[row]:Math.floor(rand()*S.houseAnimation.trimRGB.length)):(row+ring+(side>0?1:0))%4;
       const width=varied?between(...V.houseWidth):mix(V.houseWidth[0],V.houseWidth[1],((row*7+ring*3+(side>0?2:0))%5)/4);
@@ -404,16 +407,21 @@ window.FROSTLINE_READY = (async () => {
     entity('trailChoices',base,origin+V.choiceTitleY+lengthChange,{r:0,width:400,arcadeNext:state.arcade?state.arcade.stage+1:0});return town;
   }
   function makeVillageDistricts(town,houses,rowYs,centers,decorate,shuffle){
-    const L=S.villageLife,order=[...shuffle(L.districts.filter(k=>k!=='lift')),'lift'];town.districts=[];
+    const L=S.villageLife,order=town.districtOrder;town.districts=[];
     for(const h of houses)h.district=order[Math.min(order.length-1,Math.floor(h.band/rowYs.length*order.length))];
     for(let i=0;i<order.length;i++){
-      const kind=order[i],row=Math.min(rowYs.length-1,Math.floor((i+.5)*rowYs.length/order.length)),x=centers[row],y=rowYs[row]+S.village.corridorExitOffset;
+      const kind=order[i],row=town.districtRows[i],x=centers[row],y=rowYs[row]+S.village.corridorExitOffset;
       town.districts.push({kind,x,y});entity('districtSign',x,y-95,{r:0,width:150,town,villageDetail:true,district:kind});
-      const prop=kind==='bakery'?'breadStand':kind==='rental'?'skiRack':kind==='market'?'marketStall':'parcelStack';
-      let placed=null;
-      for(const offset of [100,-100,150,-150,210,-210]){for(const dy of [40,95,150]){placed=decorate(prop,x+offset,y+dy,{width:70,r:22,villageDetail:true,district:kind});if(placed)break;}if(placed)break;}
-      const anchor=placed||{x:x+70,y:y+80};
-      entity('personYellow',anchor.x+35,anchor.y+25,{width:30,r:10,town,job:kind,homeX:anchor.x+35,homeY:anchor.y+25});
+      const placedProps=[];
+      for(const [index,prop] of L.districtProps[kind].entries()){
+        const side=index%2?1:-1;let placed=null;
+        for(const dx of [115,190,265]){for(const dy of [-25,50,125]){
+          const px=x+side*dx,py=y+dy;
+          if(placedProps.some(o=>Math.hypot(o.x-px,o.y-py)<90))continue;
+          placed=decorate(prop,px,py,{width:80,r:26,villageDetail:true,district:kind});if(placed)break;
+        }if(placed)break;}
+        if(placed){placedProps.push(placed);entity('personYellow',placed.x+38,placed.y+30,{width:30,r:10,town,job:kind});}
+      }
       // Mischief has no solid footprint and never spends shields.
       entity('powderPile',x+58,y+145,{width:45,r:23,town,mischief:true,villageDetail:true});
       entity('pigeons',x-60,y+100,{width:50,r:25,town,mischief:true,villageDetail:true});
@@ -479,13 +487,36 @@ window.FROSTLINE_READY = (async () => {
   }
   function drawVillageDetail(o,s){
     const x=s.x,y=s.y;
-    if(o.type==='districtSign'){text(S.villageLife.districtNames[o.district],x,y,9,S.villageLife.districtColors[o.district]);return;}
+    if(o.type==='districtSign'){
+      const color=S.villageLife.districtColors[o.district],half=64;
+      for(const side of [-1,1]){box(x+side*half-2,y-39,4,43,'#766d5b');box(x+side*half-4,y-41,8,3,'#edf4ec');}
+      line(x-half,y-34,x+half,y-34,'#716854',2);box(x-60,y-39,120,18,'#e8dfc9');box(x-60,y-23,120,3,color);box(x-62,y-41,124,3,'#f8faf0');
+      text(S.villageLife.districtNames[o.district],x,y-31,9,C.ink);districtBadge(o.district,x,y-53);return;
+    }
     if(o.type==='powderPile'){const flat=o.puffedUntil>clock;box(x-10,y-3,21,4,'#d9e7e5');box(x-7,y-(flat?3:7),15,flat?3:7,'#fdfef5');box(x-3,y-(flat?3:9),8,2,'#edf4ec');return;}
     if(o.type==='pigeons'){
       const flight=o.flyingUntil>clock?1-(o.flyingUntil-clock)/S.villageLife.pigeonFlightSeconds:0;
       for(let i=0;i<4;i++){const px=x+(i-1.5)*7+(flight?(i-1.5)*flight*48:Math.sin(clock+o.phase+i)*2),py=y+(i%2)*5-(flight?Math.sin(flight*Math.PI)*40:0);box(px-2,py-3,5,3,'#849195');box(px+2,py-5,3,3,'#516a75');box(px+5,py-4,2,1,'#b29468');if(flight){const wing=Math.sin(clock*23+i)>0?-5:1;box(px-3,py+wing,3,4,'#afbbbc');}else box(px,py,1,2,'#ac8064');}return;
     }
     shadow(x,y,18,4);
+    if(o.type==='bakeryOven'){
+      box(x-16,y-29,32,30,'#a88975');for(let row=0;row<4;row++)for(let col=0;col<4;col++)box(x-15+col*8+(row%2)*2,y-28+row*6,6,4,'#bd9a7b');
+      box(x-9,y-15,18,15,'#695851');box(x-6,y-11,12,10,Math.sin(clock*6+o.phase)>0?'#d4a268':'#b98b57');box(x-16,y-31,32,4,'#f1f5e9');box(x+7,y-47,7,17,'#9f8472');box(x+5,y-49,11,3,'#e9eee3');
+      for(let i=0;i<3;i++){const t=(clock*.35+i/3+o.phase)%1;ctx.globalAlpha=(1-t)*.45;box(x+8+Math.sin(t*5)*4,y-51-t*19,3+t*3,3+t*3,'#9ba8a7');}ctx.globalAlpha=1;
+      box(x-23,y-6,15,3,'#7f6c54');box(x-21,y-9,10,3,'#d0aa70');return;
+    }
+    if(o.type==='rentalBoard'){
+      box(x-16,y-37,32,26,'#66868b');box(x-18,y-39,36,3,'#e9efdf');for(const side of [-1,1])box(x+side*11,y-12,3,13,'#7c705b');
+      for(const side of [-1,1]){line(x+side*5,y-34,x-side*6,y-17,'#ecd8ad',3);box(x+side*5-1,y-35,3,2,'#f7f2df');}text('SKIS',x,y-7,8,C.ink);return;
+    }
+    if(o.type==='waxBench'){
+      box(x-18,y-12,36,5,'#ab8863');for(const side of [-1,1])box(x+side*14,y-7,3,9,'#736e5d');
+      line(x-17,y-15,x+16,y-13,'#547f90',2);line(x-17,y-18,x+16,y-16,'#ad806a',2);box(x+9,y-23,5,6,'#b5bbaa');return;
+    }
+    if(o.type==='clockTower'){
+      box(x-9,y-49,18,50,'#8d856c');box(x-12,y-53,24,21,'#638273');box(x-14,y-56,28,4,'#f1f4e6');box(x-8,y-51,16,15,'#ede6cf');
+      line(x,y-44,x,y-49,C.ink,1);line(x,y-44,x+4,y-42,C.ink,1);box(x-11,y-5,22,6,'#a39b81');box(x-2,y-62,4,6,'#638273');return;
+    }
     if(o.type==='skiRack'){
       box(x-17,y-13,34,3,'#92734e');for(const side of [-1,1])box(x+side*14,y-14,2,15,'#6c6254');
       for(let i=0;i<6;i++){const px=x-12+i*5;line(px,y-25,px+3,y-1,['#66848b','#aa8064','#879471'][i%3],2);box(px,y-25,3,2,'#dce8e3');}return;
@@ -862,7 +893,7 @@ window.FROSTLINE_READY = (async () => {
   }
   function updatePedestrians(dt){
     const P=S.pedestrians,people=state.objects.filter(o=>o.type.startsWith('person'));
-    const solids=state.objects.filter(o=>o.r>0&&['pine','fir','rock','pebble','lodge','rental','lift','bench','lamp','snowman','stump','breadStand','marketStall','skiRack','parcelStack'].includes(o.type));
+    const solids=state.objects.filter(o=>o.r>0&&['pine','fir','rock','pebble','lodge','rental','lift','bench','lamp','snowman','stump','breadStand','marketStall','skiRack','parcelStack','bakeryOven','rentalBoard','waxBench','clockTower'].includes(o.type));
     const flags=state.objects.filter(o=>['gate','entrance','finish'].includes(o.type));
     for(const o of people){
       o.walking=false;
@@ -1427,13 +1458,19 @@ window.FROSTLINE_READY = (async () => {
       ctx.globalAlpha=clamp((q.until-clock)*3,0,1);box(x+2,y+3,width,height,'#c6d6d0');box(x,y,width,height,'#fffcef');box(clamp(s.x,x+4,x+width-8),y+height,5,4,'#fffcef');lines.forEach((l,i)=>text(l.trim(),x+width/2,y+12+i*12,9,C.ink));ctx.globalAlpha=1;
     }
   }
+  function currentVillageName(){
+    const p=state.p,town=state.villages.find(t=>p.y>=t.origin&&p.y<=t.end);
+    if(!town?.districts?.length)return 'Snowdrift Village';
+    const d=town.districts.reduce((a,b)=>Math.abs(a.y-p.y)<Math.abs(b.y-p.y)?a:b);
+    return S.villageLife.districtNames[d.kind];
+  }
   function hud() {
     const p=state.p,run=state.course;
     ctx.fillStyle='rgba(243,247,240,.93)';ctx.fillRect(0,0,W,67);
     line(18,66,W-18,66,'#cfdfd7');
     text('FROSTLINE',20,24,12,C.ink,'left');
     if(state.arcade)text('ARCADE '+state.arcade.stage+'/'+S.arcade.stages.length,W-19,24,12,C.teal,'right');else{sprite('star',W-96,31,15,{ui:true});text(state.bank.toLocaleString(),W-19,24,15,C.ink,'right');}
-    const name=run?stages[run.id].name+(p.y<run.startY?' · approach':''):state.zone.kind==='village'?'Snowdrift Village':'Choose your first trail';
+    const name=run?stages[run.id].name+(p.y<run.startY?' · approach':''):state.zone.kind==='village'?currentVillageName():'Choose your first trail';
     text(name,20,48,10,C.teal,'left');
     const right=run?`${Math.max(0,Math.floor((p.y-run.startY)/PX_PER_M))} / ${stages[run.id].length} m`:`${Math.round(S.world.summitAltitude+state.elevated-p.y/PX_PER_M)} m altitude`;
     text(right,W-20,48,10,C.muted,'right','normal');

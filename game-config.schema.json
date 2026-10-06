@@ -5117,7 +5117,8 @@
         "animalCooldownSeconds",
         "npcAnimalRadius",
         "npcAnimalApproachSpeed",
-        "dialogue"
+        "dialogue",
+        "districtProps"
       ],
       "properties": {
         "districts": {
@@ -5308,6 +5309,86 @@
               "minItems": 1,
               "items": {
                 "type": "string"
+              }
+            }
+          }
+        },
+        "districtProps": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "bakery",
+            "rental",
+            "market",
+            "lift"
+          ],
+          "properties": {
+            "bakery": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "string",
+                "enum": [
+                  "bakeryOven",
+                  "breadStand",
+                  "rentalBoard",
+                  "skiRack",
+                  "waxBench",
+                  "marketStall",
+                  "parcelStack",
+                  "clockTower"
+                ]
+              }
+            },
+            "rental": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "string",
+                "enum": [
+                  "bakeryOven",
+                  "breadStand",
+                  "rentalBoard",
+                  "skiRack",
+                  "waxBench",
+                  "marketStall",
+                  "parcelStack",
+                  "clockTower"
+                ]
+              }
+            },
+            "market": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "string",
+                "enum": [
+                  "bakeryOven",
+                  "breadStand",
+                  "rentalBoard",
+                  "skiRack",
+                  "waxBench",
+                  "marketStall",
+                  "parcelStack",
+                  "clockTower"
+                ]
+              }
+            },
+            "lift": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "string",
+                "enum": [
+                  "bakeryOven",
+                  "breadStand",
+                  "rentalBoard",
+                  "skiRack",
+                  "waxBench",
+                  "marketStall",
+                  "parcelStack",
+                  "clockTower"
+                ]
               }
             }
           }

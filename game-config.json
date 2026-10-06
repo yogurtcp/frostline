@@ -2031,6 +2031,30 @@
         "They like you!",
         "A gentle skier. How unusual."
       ]
+    },
+    "districtProps": {
+      "bakery": [
+        "bakeryOven",
+        "breadStand",
+        "breadStand"
+      ],
+      "rental": [
+        "rentalBoard",
+        "skiRack",
+        "waxBench",
+        "skiRack"
+      ],
+      "market": [
+        "marketStall",
+        "marketStall",
+        "marketStall",
+        "parcelStack"
+      ],
+      "lift": [
+        "clockTower",
+        "skiRack",
+        "parcelStack"
+      ]
     }
   }
 }
