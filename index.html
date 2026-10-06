@@ -1313,8 +1313,8 @@ window.FROSTLINE_READY = (async () => {
     }
   }
   function drawGearHUD(){
-    const a=state.arcade,G=S.arcade.gear,scale=2,y=H-79;
-    let x=28;
+    const a=state.arcade,G=S.arcade.gear,scale=2,y=24;
+    let x=(W-((G.maxShields+G.maxSwords-1)*25+14))/2;
     for(const kind of ['shield','sword']){
       const stock=a[kind+'s'],cap=kind==='shield'?G.maxShields:G.maxSwords;
       const progress=clamp(kind==='shield'?a.shieldCharge:a.swordCharge/G.swordGatesPerSword,0,1);
