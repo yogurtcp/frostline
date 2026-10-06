@@ -10,7 +10,7 @@ World coordinates increase rightward and downhill. `world.unitsPerMetre` default
 
 | Section | What it controls |
 | --- | --- |
-| `arcade` | All 32 numbered stage definitions, terrain, traffic, pursuit tiers/colors, missed-gate penalties, landing clearances and run-result duration |
+| `arcade` | All 12 numbered stage definitions, terrain, traffic, pursuit tiers/colors, missed-gate penalties, landing clearances and run-result duration |
 | `courses` | Names, fees, lengths in metres, pace, gate spacing, obstacle density and type |
 | `race` | Gate widths, required success fraction, point rewards, finish bonuses, choice rows and scenery placement |
 | `mushroomHunt` | Mushroom count, required fraction, points, pickup size, spread, spacing clearances and glints in Spore Decisions |
@@ -36,9 +36,9 @@ World coordinates increase rightward and downhill. `world.unitsPerMetre` default
 
 ## Useful examples
 
-- Arcade difficulty: edit `arcade.stages` in order. `yetis` / `yetiTier` specify initial pursuers; `missYetis` / `missTier` specify the penalty per missed gate. `trees`, `ice`, `jumps`, and `mixed` select terrain; `gateScale`, `swayScale`, `spacing`, `pace`, `skierSpacing`, `treeSpacing` and `fastChance` tune the route. `yetiRatios` sets pursuit speed relative to the stage top speed. See `ARCADE.md` for all stages.
+- Arcade difficulty: `arcade.stages` is at the top of the file. Entries are in play order and use metres, km/h, object counts per 100 m, and percentages. `treesPer100m`, `skierGroupsPer100m`, `endTrafficMultiplier`, `yetiSpeedPercent`, and `featureEveryGates` are the main tuning controls. See `ARCADE.md` for the field reference and condensed stage list.
 - Arcade equipment: `arcade.gear.shieldsPerStage` defaults to 1.5. `swordGatesPerStage` is 4 and `swordGatesPerSword` is 8. Inventory caps are `maxShields` and `maxSwords` (2 each). The same object sets protection/effect duration and icon colors. Charges carry across stages; only successful gates add charge.
-- Arcade traffic uses its own schedule, without ambient world spawns inside the course. `skierSpacing` / `treeSpacing` are world-unit gaps (larger means fewer objects), with `arcade.spawnJitter` variation. Opening skier spacing is 650 (65 m), then 380 (38 m) in stage 2 and 260 (26 m) in Rush Hour. `skierGroupChance` adds staggered pairs, while `overtakeSeconds` controls skiers arriving from behind. Ahead-of-player traffic uses `trafficFastSpeedRatio` to remain catchable. `forestFeatureIntervalGates` (8) places occasional ramps, moguls and bushes from `forestFeatures` in wooded sections; landing corridors stay clear.
+- Arcade traffic uses a separate schedule without ambient spawns in its corridor. `skierGroupsPer100m` sets opening traffic density, `skierPairPercent` adds pairs, and `endTrafficMultiplier` gradually raises density and overtaker frequency. `fastSkierPercent` chooses fast skiers; `snowboarderPercent` chooses snowboarders from the remaining traffic. `overtakeSeconds` is the opening overtaker interval. `treesPer100m` controls tree density; `featureEveryGates` places occasional forest features or the stage’s selected ice/jumps, with clear landing corridors.
 - Make regular slalom timing more forgiving: increase `timing.targets.slalom.goldSeconds` and `parSeconds`, keeping gold below par.
 - Reduce all speed prizes: lower `timing.maxBonus` (60 by default).
 - Slow recovery: `physics.minimumCollisionKmh` (8) disables obstacle impacts at or below that HUD speed. Objects touched while creeping stay harmless until you fully clear them, even if you accelerate. Chasing predators can still catch a stopped player.
@@ -59,3 +59,5 @@ Saved data uses the browser's `frostline-v2` local-storage key. `times[courseId]
 Local-file and hosted versions have separate browser storage origins. Publishing does not move the offline wallet or records to the hosted site.
 
 Arcade gear uses `calmSwordGatesPerStage` (1) for stages without starting or missed-gate yetis, and `swordGatesPerStage` (4) when either threat is present. `swordGatesPerSword` (8) controls the charge needed for one sword. Stage order is the order of `arcade.stages`.
+
+Starting Arcade yetis wait beside the visible start line. `startLineSideOffsetMetres`, `startLineRowOffsetMetres`, `startLineDownhillOffsetMetres`, and `wakeSeconds` control staging. Each stage’s `yetiSpeedPercent` controls its starting pursuers; `yetiRatios` controls missed-gate pursuers. `campaignVersion` separates records after major redesigns while retaining the previous record.

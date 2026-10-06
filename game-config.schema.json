@@ -4721,11 +4721,9 @@
         "yetiRatios",
         "yetiColors",
         "yetiTints",
-        "spawnBehind",
         "missSpawnAbove",
         "spawnSpread",
         "maxActiveYetis",
-        "featureIntervalGates",
         "featureClearance",
         "resultSeconds",
         "entranceSpacing",
@@ -4734,7 +4732,6 @@
         "rampSeconds",
         "rampOffsetX",
         "spawnJitter",
-        "forestFeatureIntervalGates",
         "forestFeatureOffsetX",
         "forestFeatures",
         "gear",
@@ -4742,7 +4739,12 @@
         "trafficGroupOffsetX",
         "trafficGroupOffsetY",
         "trafficFastSpeedRatio",
-        "trafficGateClearanceY"
+        "trafficGateClearanceY",
+        "campaignVersion",
+        "startLineSideOffsetMetres",
+        "startLineRowOffsetMetres",
+        "startLineDownhillOffsetMetres",
+        "wakeSeconds"
       ],
       "properties": {
         "stages": {
@@ -4753,13 +4755,19 @@
             "additionalProperties": false,
             "required": [
               "name",
-              "length",
-              "pace",
-              "spacing",
-              "trees",
-              "fastChance",
+              "lengthMetres",
+              "topSpeedKmh",
+              "gateSpacingMetres",
+              "treesPer100m",
+              "skierGroupsPer100m",
+              "endTrafficMultiplier",
+              "fastSkierPercent",
+              "snowboarderPercent",
+              "skierPairPercent",
+              "overtakeSeconds",
               "yetiTier",
               "yetis",
+              "yetiSpeedPercent",
               "missYetis",
               "missTier",
               "gateScale",
@@ -4767,36 +4775,71 @@
               "ice",
               "jumps",
               "mixed",
-              "skierSpacing",
-              "treeSpacing",
-              "overtakeSeconds",
-              "skierGroupChance"
+              "featureEveryGates"
             ],
             "properties": {
               "name": {
                 "type": "string"
               },
-              "length": {
+              "lengthMetres": {
+                "type": "number",
+                "minimum": 100,
+                "description": "Course length in metres.",
+                "maximum": 5000
+              },
+              "topSpeedKmh": {
+                "type": "number",
+                "minimum": 10,
+                "description": "Straight-down top speed shown on the HUD.",
+                "maximum": 250
+              },
+              "gateSpacingMetres": {
+                "type": "number",
+                "minimum": 10,
+                "description": "Distance between gates in metres; larger = fewer gates.",
+                "maximum": 100
+              },
+              "treesPer100m": {
                 "type": "number",
                 "minimum": 0,
-                "exclusiveMinimum": 0
+                "description": "Tree placement attempts per 100 metres; 0 disables forest. Safe landings and gates remain clear.",
+                "maximum": 30
               },
-              "pace": {
+              "skierGroupsPer100m": {
+                "type": "number",
+                "minimum": 0.1,
+                "description": "Traffic group placement attempts per 100 metres at the start; includes skiers and snowboarders.",
+                "maximum": 20
+              },
+              "endTrafficMultiplier": {
+                "type": "number",
+                "minimum": 1,
+                "description": "Traffic ramps linearly from 1x at the start to this multiplier at the finish, including overtakers.",
+                "maximum": 3
+              },
+              "fastSkierPercent": {
                 "type": "number",
                 "minimum": 0,
-                "exclusiveMinimum": 0
+                "description": "Percent of traffic that is fast skiers.",
+                "maximum": 100
               },
-              "spacing": {
+              "snowboarderPercent": {
                 "type": "number",
                 "minimum": 0,
-                "exclusiveMinimum": 0
+                "description": "Percent of non-fast traffic that is snowboarders.",
+                "maximum": 100
               },
-              "trees": {
-                "type": "boolean"
-              },
-              "fastChance": {
+              "skierPairPercent": {
                 "type": "number",
-                "minimum": 0
+                "minimum": 0,
+                "description": "Percent of traffic groups containing two people.",
+                "maximum": 100
+              },
+              "overtakeSeconds": {
+                "type": "number",
+                "minimum": 2,
+                "description": "Seconds between overtakers at the start; falls as traffic builds.",
+                "maximum": 120
               },
               "yetiTier": {
                 "type": "string",
@@ -4809,11 +4852,21 @@
               },
               "yetis": {
                 "type": "integer",
-                "minimum": 0
+                "minimum": 0,
+                "description": "Number waiting beside the start.",
+                "maximum": 12
+              },
+              "yetiSpeedPercent": {
+                "type": "number",
+                "minimum": 0,
+                "description": "Starting pursuer speed as a percentage of this stage top speed.",
+                "maximum": 120
               },
               "missYetis": {
                 "type": "integer",
-                "minimum": 0
+                "minimum": 0,
+                "description": "New yetis released per missed gate.",
+                "maximum": 4
               },
               "missTier": {
                 "type": "string",
@@ -4826,13 +4879,15 @@
               },
               "gateScale": {
                 "type": "number",
-                "minimum": 0,
-                "exclusiveMinimum": 0
+                "minimum": 0.5,
+                "description": "Gate opening width multiplier.",
+                "maximum": 2
               },
               "swayScale": {
                 "type": "number",
-                "minimum": 0,
-                "exclusiveMinimum": 0
+                "minimum": 0.5,
+                "description": "Width of course turns; larger = wider turns.",
+                "maximum": 2
               },
               "ice": {
                 "type": "boolean"
@@ -4843,22 +4898,11 @@
               "mixed": {
                 "type": "boolean"
               },
-              "skierSpacing": {
-                "type": "number",
-                "exclusiveMinimum": 0
-              },
-              "treeSpacing": {
-                "type": "number",
-                "exclusiveMinimum": 0
-              },
-              "overtakeSeconds": {
-                "type": "number",
-                "exclusiveMinimum": 0
-              },
-              "skierGroupChance": {
-                "type": "number",
-                "minimum": 0,
-                "maximum": 1
+              "featureEveryGates": {
+                "type": "integer",
+                "minimum": 2,
+                "description": "Spacing of occasional ramps/moguls/bushes or the selected ice/jump feature, measured in gates.",
+                "maximum": 30
               }
             }
           }
@@ -4941,10 +4985,6 @@
             }
           }
         },
-        "spawnBehind": {
-          "type": "number",
-          "minimum": 0
-        },
         "missSpawnAbove": {
           "type": "number",
           "minimum": 0
@@ -4954,11 +4994,6 @@
           "minimum": 0
         },
         "maxActiveYetis": {
-          "type": "integer",
-          "minimum": 0,
-          "exclusiveMinimum": 0
-        },
-        "featureIntervalGates": {
           "type": "integer",
           "minimum": 0,
           "exclusiveMinimum": 0
@@ -4994,10 +5029,6 @@
           "type": "number",
           "minimum": 0,
           "maximum": 0.5
-        },
-        "forestFeatureIntervalGates": {
-          "type": "integer",
-          "minimum": 1
         },
         "forestFeatureOffsetX": {
           "type": "number",
@@ -5096,6 +5127,35 @@
         "trafficGateClearanceY": {
           "type": "number",
           "exclusiveMinimum": 0
+        },
+        "campaignVersion": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Increment after major stage changes to archive incomparable records."
+        },
+        "startLineSideOffsetMetres": {
+          "type": "number",
+          "minimum": 5,
+          "description": "Clear lane between waiting yetis and the centre of the start.",
+          "maximum": 20
+        },
+        "startLineRowOffsetMetres": {
+          "type": "number",
+          "minimum": 3,
+          "description": "Spacing between additional pairs of waiting yetis.",
+          "maximum": 15
+        },
+        "startLineDownhillOffsetMetres": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Waiting location below the start line.",
+          "maximum": 10
+        },
+        "wakeSeconds": {
+          "type": "number",
+          "minimum": 0.2,
+          "description": "Visible reaction before waiting yetis begin chasing.",
+          "maximum": 3
         }
       }
     },
