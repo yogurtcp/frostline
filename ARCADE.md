@@ -52,3 +52,7 @@ Starting pursuers arrive when you cross the actual stage start. Miss penalties s
 | 32 | Last Tracks | 3000 m | Alternating forest / open / ice / jumps; narrow gates, wider turns, heavy fast-skier traffic | 2 elite yetis; each miss: +2 fast |
 
 All levels and tuning live in `game-config.json` under `arcade`. Normal-speed stages use pace 156 or 178; fast stages use 228. Short ramps have reserved landing corridors, and ice patches leave an alternate snow line. Mixed stages alternate six sections, ending on open snow.
+
+## Traffic and forest variety
+
+Arcade uses separate controlled skier and tree schedules; ambient world generation is excluded from its course corridor. Stage 1 spaces skiers about 110 m apart; stage 2 about 65 m apart, with more aggressive overtakers. Wooded stages also include occasional short ramps, moguls, and bushes, roughly one feature every eight gates. Jump/ice-focused stages keep their own feature schedule.

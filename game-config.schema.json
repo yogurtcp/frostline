@@ -4732,7 +4732,11 @@
         "landingClearanceLength",
         "landingClearanceHalfWidth",
         "rampSeconds",
-        "rampOffsetX"
+        "rampOffsetX",
+        "spawnJitter",
+        "forestFeatureIntervalGates",
+        "forestFeatureOffsetX",
+        "forestFeatures"
       ],
       "properties": {
         "stages": {
@@ -4747,7 +4751,6 @@
               "pace",
               "spacing",
               "trees",
-              "density",
               "fastChance",
               "yetiTier",
               "yetis",
@@ -4757,7 +4760,9 @@
               "swayScale",
               "ice",
               "jumps",
-              "mixed"
+              "mixed",
+              "skierSpacing",
+              "treeSpacing"
             ],
             "properties": {
               "name": {
@@ -4780,10 +4785,6 @@
               },
               "trees": {
                 "type": "boolean"
-              },
-              "density": {
-                "type": "number",
-                "minimum": 0
               },
               "fastChance": {
                 "type": "number",
@@ -4833,6 +4834,14 @@
               },
               "mixed": {
                 "type": "boolean"
+              },
+              "skierSpacing": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              },
+              "treeSpacing": {
+                "type": "number",
+                "exclusiveMinimum": 0
               }
             }
           }
@@ -4967,6 +4976,31 @@
         },
         "rampOffsetX": {
           "type": "number"
+        },
+        "spawnJitter": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 0.5
+        },
+        "forestFeatureIntervalGates": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "forestFeatureOffsetX": {
+          "type": "number",
+          "minimum": 0
+        },
+        "forestFeatures": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "enum": [
+              "ramp",
+              "mogul",
+              "bush"
+            ]
+          }
         }
       }
     }

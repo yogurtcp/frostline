@@ -99,7 +99,7 @@ window.FROSTLINE_READY = (async () => {
     entity('ice',run.x-240,startY+1940,{rx:85,ry:105,width:170,r:0});
     for(let y=startY+S.race.rainbowFirstOffset;y<endY-300;y+=s.kind==='freestyle'?S.race.freestyleRainbowSpacing:S.race.rainbowSpacing)entity('rainbow',centerAt(y,run)-90,y,{width:115,r:25});}
     if(run.objective==='mushrooms')plantMushrooms(run);
-    if(run.arcade)prepareArcadeTerrain(run);
+    if(run.arcade){prepareArcadeTerrain(run);state.nextFastSkier=clock+S.arcade.fastSpawnBaseSeconds/Math.max(.05,run.arcade.fastChance);}
     if(id==='slalom')state.objects=state.objects.filter(o=>!classicArea(o.x,o.y,70)||['gate','courseStart','finish','entrance','skier','boarder','personRed','personGreen','personYellow'].includes(o.type));
     const oldRoute=state.liftRoutes[state.liftRoutes.length-1];
     if(oldRoute&&oldRoute.y1>startY)oldRoute.y1=startY;
@@ -117,15 +117,19 @@ window.FROSTLINE_READY = (async () => {
     const section=Math.min(5,Math.floor(clamp((y-run.startY)/(run.endY-run.startY),0,.999)*6));
     return {trees:a.trees&&[0,2,4].includes(section),ice:a.ice&&[1,3].includes(section),jumps:a.jumps&&[2,3].includes(section)};
   }
-  function nearArcadeFeature(x,y){return state.objects.some(o=>o.arcadeFeature&&(Math.hypot(o.x-x,o.y-y)<S.arcade.featureClearance||o.type==='ramp'&&y>o.y&&y<o.y+S.arcade.landingClearanceLength&&Math.abs(x-o.x)<S.arcade.landingClearanceHalfWidth));}
+  function nearArcadeFeature(x,y){return state.objects.some(o=>o.arcadeFeature&&(Math.hypot(o.x-x,o.y-y)<S.arcade.featureClearance||['ramp','mogul'].includes(o.type)&&y>o.y&&y<o.y+S.arcade.landingClearanceLength&&Math.abs(x-o.x)<S.arcade.landingClearanceHalfWidth));}
   function prepareArcadeTerrain(run){
     // Planned features and landing pockets are reserved before this course enters view.
-    state.objects=state.objects.filter(o=>o.y<run.startY-100||o.y>run.endY||Math.abs(o.x-centerAt(o.y,run))>S.world.safeCourseHalfWidth+100||['gate','courseStart','finish','entrance','skier','boarder','personRed','personGreen','personYellow'].includes(o.type));
+    state.objects=state.objects.filter(o=>o.y<run.startY-100||o.y>run.endY||Math.abs(o.x-centerAt(o.y,run))>S.world.safeCourseHalfWidth+100||!o.worldChunk&&['gate','courseStart','finish','entrance','personRed','personGreen','personYellow'].includes(o.type));
     const gates=state.objects.filter(o=>o.type==='gate'&&o.run===run);
-    for(let i=1;i<gates.length;i+=S.arcade.featureIntervalGates){
+    for(let i=1;i<gates.length;i++){
       const a=gates[i-1],b=gates[i],y=(a.y+b.y)/2,x=(a.x+b.x)/2,terrain=arcadeTerrainAt(run,y);
-      if(terrain.ice)entity('ice',x+140,y,{rx:105,ry:Math.min(95,(b.y-a.y)*.22),width:210,r:0,arcadeFeature:true});
-      else if(terrain.jumps)entity('ramp',x+S.arcade.rampOffsetX,y,{width:65,r:22,arcadeFeature:true});
+      if(terrain.ice&&(i-1)%S.arcade.featureIntervalGates===0)entity('ice',x+140,y,{rx:105,ry:Math.min(95,(b.y-a.y)*.22),width:210,r:0,arcadeFeature:true});
+      else if(terrain.jumps&&(i-1)%S.arcade.featureIntervalGates===0)entity('ramp',x+S.arcade.rampOffsetX,y,{width:65,r:22,arcadeFeature:true});
+      else if(terrain.trees&&!terrain.ice&&!terrain.jumps&&i%S.arcade.forestFeatureIntervalGates===Math.floor(S.arcade.forestFeatureIntervalGates/2)){
+        const n=Math.floor(i/S.arcade.forestFeatureIntervalGates),type=S.arcade.forestFeatures[n%S.arcade.forestFeatures.length];
+        entity(type,x+(n%2?1:-1)*S.arcade.forestFeatureOffsetX,y,{width:type==='ramp'?65:40,r:type==='bush'?10:20,arcadeFeature:true});
+      }
     }
     state.objects=state.objects.filter(o=>o.arcadeFeature||!o.worldChunk||!nearArcadeFeature(o.x,o.y));
   }
@@ -466,6 +470,8 @@ window.FROSTLINE_READY = (async () => {
       const key=tx+','+ty;if(state.chunks.has(key))continue;state.chunks.set(key,{tx,ty});
       for(let i=0;i<(ty<0?S.world.uphillCount:S.world.ambientCount);i++){
         const x=tx*size+range(65,size-65),y=ty*size+range(80,size-60);
+        // Arcade owns all in-course scenery; ambient chunks only populate the surrounding forest.
+        if(state.safeTrails.some(r=>r.arcade&&y>r.startY-120&&y<r.endY+60&&Math.abs(x-centerAt(y,r))<S.world.safeCourseHalfWidth+100))continue;
         if(nearArcadeFeature(x,y)||nearMushroom(x,y)||patchAt(x,y)||insideTown(x,y)||(!state.course&&state.zone.kind==='start'&&Math.abs(x)<S.world.meadowHalfWidth&&y>S.world.meadowTop&&y<S.world.meadowBottom))continue;
         if(state.objects.some(o=>(o.type==='gate'||o.type==='entrance')&&Math.abs(o.x-x)<o.half+60&&Math.abs(o.y-y)<140))continue;
         const type=ambientType(x,y);
@@ -479,17 +485,38 @@ window.FROSTLINE_READY = (async () => {
     for(const [key,t] of state.chunks)if(Math.abs(t.ty*size-state.p.y) >S.world.chunkRetention||Math.abs(t.tx*size-state.p.x) >S.world.chunkRetention){state.chunks.delete(key);state.objects=state.objects.filter(o=>o.worldChunk!==key);}
   }
 
+  function spawnArcadeTerrain(run,limit){
+    const a=run.arcade;
+    for(const stream of ['skier','tree']){
+      const key=stream==='skier'?'nextArcadeSkier':'nextArcadeTree',spacing=stream==='skier'?a.skierSpacing:a.treeSpacing;
+      run[key]??=run.startY+S.race.terrainStartOffset+spacing*.5;
+      while(run[key]<limit){
+        const y=run[key];run[key]+=spacing*range(1-S.arcade.spawnJitter,1+S.arcade.spawnJitter);
+        if(stream==='tree'&&!arcadeTerrainAt(run,y).trees)continue;
+        const gate=state.objects.find(o=>o.type==='gate'&&o.run===run&&Math.abs(o.y-y)<135);
+        let x=centerAt(y,run)+range(-S.world.terrainOffsetX,S.world.terrainOffsetX);
+        if(gate&&Math.abs(x-gate.x)<gate.half+40)x=gate.x+Math.sign(x-gate.x||1)*range(gate.half+65,gate.half+160);
+        if(nearArcadeFeature(x,y)||patchAt(x,y))continue;
+        if(stream==='skier'){
+          const fast=random()<a.fastChance;
+          entity('skier',x,y,{width:42,r:12,fast,vy:range(...(fast?S.skiers.fastSpeed:S.skiers.slowSpeed))});
+        }else entity(pick(['pine','fir']),x,y,{width:range(55,85),r:17});
+      }
+    }
+  }
+
   function spawnTerrain() {
     const run=state.course;if(!run)return;
     const s=stages[run.id],limit=Math.min(run.endY-100,viewBounds().bottom+680);
+    if(run.arcade){spawnArcadeTerrain(run,limit);return;}
     while(state.generated<limit){
       const y=state.generated,center=centerAt(y),nearGate=state.objects.find(o=>o.type==='gate'&&Math.abs(o.y-y)<135);
       const amount=random()<s.density*S.world.terrainDensityChance?2:1;
       for(let i=0;i<amount;i++){
         let x=center+range(-S.world.terrainOffsetX,S.world.terrainOffsetX);if(nearGate&&Math.abs(x-nearGate.x)<nearGate.half+40)x=nearGate.x+(x<nearGate.x?-1:1)*range(145,270);
         if(nearArcadeFeature(x,y)||patchAt(x,y)||nearMushroom(x,y,S.mushroomHunt.obstacleClearance+35))continue;
-        const kinds=run.arcade?(arcadeTerrainAt(run,y).trees?['skier','skier','pine','fir']:['skier']):s.kind==='slalom'?S.spawnTables.classic:s.kind==='mushroom'?S.spawnTables.mushroom:s.kind==='forest'?S.spawnTables.forest:S.spawnTables.mixed;
-        const type=pick(kinds),fast=type==='skier'&&random()<(run.arcade?.fastChance??S.skiers.courseFastChance),sizes={personGreen:30,personYellow:30,pine:range(63,93),fir:range(49,70),rock:47,dog:34,skier:42,boarder:43,mushroom:37,ramp:61,mogul:40,sled:45,cat:25,rainbow:130,bush:35};
+        const kinds=s.kind==='slalom'?S.spawnTables.classic:s.kind==='mushroom'?S.spawnTables.mushroom:s.kind==='forest'?S.spawnTables.forest:S.spawnTables.mixed;
+        const type=pick(kinds),fast=type==='skier'&&random()<S.skiers.courseFastChance,sizes={personGreen:30,personYellow:30,pine:range(63,93),fir:range(49,70),rock:47,dog:34,skier:42,boarder:43,mushroom:37,ramp:61,mogul:40,sled:45,cat:25,rainbow:130,bush:35};
         entity(type,x,y+range(-30,30),{fast,width:sizes[type],r:type==='pine'?18:type==='ramp'||type==='rainbow'?25:13,animal:type==='cat',ai:'idle',climb:0,nextAI:clock+3,vx:type==='dog'?range(-15,15):0,vy:type==='skier'?(fast?range(...S.skiers.fastSpeed):range(...S.skiers.slowSpeed)):type==='boarder'?range(...S.skiers.boarderSpeed):0});
       }
       if(s.kind==='freestyle'&&Math.floor(y/180)%2===0)entity('ramp',center+range(-105,105),y+55,{width:100,r:24});
@@ -564,7 +591,7 @@ window.FROSTLINE_READY = (async () => {
     }
     if(o.type==='ramp'||o.type==='mogul'||o.type==='mushroom'||o.type==='rainbow'){
       if(p.air>0)return;o.touched=true;
-      launch(o.arcadeFeature&&o.type==='ramp'?S.arcade.rampSeconds:o.type==='rainbow'?S.jump.rainbowSeconds:o.type==='mushroom'?S.jump.mushroomSeconds:o.type==='ramp'?S.jump.rampSeconds:S.jump.mogulSeconds);
+      launch(o.arcadeFeature&&['ramp','mogul'].includes(o.type)?S.arcade.rampSeconds:o.type==='rainbow'?S.jump.rainbowSeconds:o.type==='mushroom'?S.jump.mushroomSeconds:o.type==='ramp'?S.jump.rampSeconds:S.jump.mogulSeconds);
       if(o.type==='rainbow'){p.rainbow=S.jump.rainbowTrailSeconds;p.boost=S.jump.rainbowBoostSeconds;announce('SOMEWHERE OVER THE RAINBOW','A spectacularly impractical shortcut.',C.blue,2.5);}
       if(o.type==='mushroom'){p.boost=S.jump.mushroomBoostSeconds;say('BOING. Bad decisions, good airtime.',o,2.1);}
       return;

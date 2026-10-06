@@ -35,7 +35,8 @@ World coordinates increase rightward and downhill. `world.unitsPerMetre` default
 
 ## Useful examples
 
-- Arcade difficulty: edit `arcade.stages` in order. `yetis` / `yetiTier` specify initial pursuers; `missYetis` / `missTier` specify the penalty per missed gate. `trees`, `ice`, `jumps`, and `mixed` select terrain; `gateScale`, `swayScale`, `spacing`, `pace`, `density` and `fastChance` tune the route. `yetiRatios` sets pursuit speed relative to the stage top speed. See `ARCADE.md` for all stages.
+- Arcade difficulty: edit `arcade.stages` in order. `yetis` / `yetiTier` specify initial pursuers; `missYetis` / `missTier` specify the penalty per missed gate. `trees`, `ice`, `jumps`, and `mixed` select terrain; `gateScale`, `swayScale`, `spacing`, `pace`, `skierSpacing`, `treeSpacing` and `fastChance` tune the route. `yetiRatios` sets pursuit speed relative to the stage top speed. See `ARCADE.md` for all stages.
+- Arcade traffic uses its own schedule, without ambient world spawns inside the course. `skierSpacing` / `treeSpacing` are world-unit gaps (larger means fewer objects), with `arcade.spawnJitter` variation. Opening skier spacing is 1100 (110 m), then 650 (65 m) in stage 2. `forestFeatureIntervalGates` (8) places occasional ramps, moguls and bushes from `forestFeatures` in wooded sections; landing corridors stay clear.
 - Make regular slalom timing more forgiving: increase `timing.targets.slalom.goldSeconds` and `parSeconds`, keeping gold below par.
 - Reduce all speed prizes: lower `timing.maxBonus` (60 by default).
 - Slow recovery: `physics.minimumCollisionKmh` (8) disables obstacle impacts at or below that HUD speed. Objects touched while creeping stay harmless until you fully clear them, even if you accelerate. Chasing predators can still catch a stopped player.
