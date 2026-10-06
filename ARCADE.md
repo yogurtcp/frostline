@@ -17,7 +17,7 @@ Edit `game-config.json`, at the top under `arcade`.
 
 This loads you just above stage 8’s start line, waiting for your input. Death/reset starts there again. `autoStart: false` keeps the summit; the Arcade entrance still uses `startStage`. Set `startStage: 1` for a complete run. Starts above 1 are visibly marked PRACTICE and do not overwrite the full-run record. Completion is based on reaching the last configured stage, including in practice.
 
-For local `file://` play, run `python3 build.py` from this folder after editing, then reload `index.html`. Hosted play reads the JSON on refresh. Validation reports unknown item names, out-of-range values, an invalid start stage, or more sword gates than total gates.
+For live local tuning, run `python3 serve.py`, open http://127.0.0.1:8765/, then edit JSON and reload. For standalone `file://` play, run `python3 build.py` from this folder after editing, then reload `index.html`. Hosted play reads the JSON on refresh. Validation reports unknown item names, out-of-range values, an invalid start stage, or more sword gates than total gates.
 
 ## Add or edit a stage
 
@@ -34,7 +34,8 @@ Copy any entry in `arcade.stages`, change `name`, and insert it where you want. 
     "openingWidthMetres": 15.6,
     "firstGateMetres": 40,
     "finishAfterLastGateMetres": 50,
-    "swordGateCount": 4
+    "swordGateCount": 4,
+    "icePercent": 25
   },
   "yeti": { "count": 3, "color": "teal", "speedKmh": 60 },
   "missedGateYetis": { "count": 0, "color": "orange", "speedKmh": 75 },
@@ -65,9 +66,17 @@ Copy any entry in `arcade.stages`, change `name`, and insert it where you want. 
 
 Course length is `firstGateMetres + (count − 1) × verticalDistanceMetres + finishAfterLastGateMetres`. Changing count or spacing moves the finish and following town together. The finish opening still uses the global `race.finishWidthMultiplier` (2).
 
+`icePercent` (0–100, default 0) selects that percentage of gates, rounded to a whole number, for ice spanning the opening. Selected gates vary each run. These patches are independent of `smallLake`/`largeLake` density; use zero for both if you only want gate ice.
+
+### Gate combos and gear
+
+All correct gates share one streak, regardless of shield/sword type. They award 1, then 2, then 3 points per gate; missing a gate resets the streak. Three points equal the previous full gate charge (one sword-gate unit or `shieldsPerStage / ordinaryGateCount` shield charge). Thus the first two gates charge at one-third and two-thirds speed. `swordGatesPerSword` still counts full-charge equivalents. The streak carries through towns and continues even when an inventory is full, but full inventories gain no charge.
+
+Gate labels and the top CHAIN indicator use three increasing text weights and `arcade.gear.comboColors`. Shields are not consumed in towns or their safe approach paths. Death/new Arcade run resets the streak.
+
 ### Yetis
 
-`yeti` controls the waiting start-line group. `missedGateYetis` controls each missed-gate release. Both accept an independent `count`, `color` (teal/orange/violet), and **absolute `speedKmh`**. An orange yeti can be slower than a teal one if you set it that way. Zero count disables the group. No percentage of player speed, gate-pace calculation, catch-up boost, or hidden color-speed multiplier applies.
+`yeti` controls the waiting start-line group. `missedGateYetis` controls each missed-gate release. Both accept an independent `count`, `color` (teal/orange/violet), and **absolute `speedKmh`**. An orange yeti can be slower than a teal one if you set it that way. Zero count disables the group. Zero speed leaves it stationary. No percentage of player speed, gate-pace calculation, catch-up boost, or hidden color-speed multiplier applies.
 
 Start-line yetis remain visible before the race, react when you cross, and chase after `arcade.wakeSeconds`. Pursuers follow off piste and retire at course end. The separately placed sleeping yeti items use their named color and the stage’s `yeti.speedKmh`, even if its start-line count is zero.
 

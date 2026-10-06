@@ -16,7 +16,8 @@
           "openingWidthMetres": 18,
           "firstGateMetres": 40,
           "finishAfterLastGateMetres": 30,
-          "swordGateCount": 1
+          "swordGateCount": 1,
+          "icePercent": 0
         },
         "yeti": {
           "count": 0,
@@ -102,7 +103,8 @@
           "openingWidthMetres": 15.6,
           "firstGateMetres": 40,
           "finishAfterLastGateMetres": 40,
-          "swordGateCount": 1
+          "swordGateCount": 1,
+          "icePercent": 0
         },
         "yeti": {
           "count": 0,
@@ -188,7 +190,8 @@
           "openingWidthMetres": 15.6,
           "firstGateMetres": 40,
           "finishAfterLastGateMetres": 20,
-          "swordGateCount": 4
+          "swordGateCount": 4,
+          "icePercent": 0
         },
         "yeti": {
           "count": 3,
@@ -274,7 +277,8 @@
           "openingWidthMetres": 15.6,
           "firstGateMetres": 40,
           "finishAfterLastGateMetres": 40,
-          "swordGateCount": 4
+          "swordGateCount": 4,
+          "icePercent": 0
         },
         "yeti": {
           "count": 3,
@@ -360,7 +364,8 @@
           "openingWidthMetres": 15.6,
           "firstGateMetres": 40,
           "finishAfterLastGateMetres": 20,
-          "swordGateCount": 4
+          "swordGateCount": 4,
+          "icePercent": 0
         },
         "yeti": {
           "count": 3,
@@ -446,7 +451,8 @@
           "openingWidthMetres": 15.6,
           "firstGateMetres": 40,
           "finishAfterLastGateMetres": 30,
-          "swordGateCount": 4
+          "swordGateCount": 4,
+          "icePercent": 0
         },
         "yeti": {
           "count": 3,
@@ -532,7 +538,8 @@
           "openingWidthMetres": 15.6,
           "firstGateMetres": 40,
           "finishAfterLastGateMetres": 40,
-          "swordGateCount": 4
+          "swordGateCount": 4,
+          "icePercent": 0
         },
         "yeti": {
           "count": 3,
@@ -618,7 +625,8 @@
           "openingWidthMetres": 15.6,
           "firstGateMetres": 40,
           "finishAfterLastGateMetres": 50,
-          "swordGateCount": 4
+          "swordGateCount": 4,
+          "icePercent": 25
         },
         "yeti": {
           "count": 3,
@@ -704,7 +712,8 @@
           "openingWidthMetres": 15.6,
           "firstGateMetres": 40,
           "finishAfterLastGateMetres": 44,
-          "swordGateCount": 4
+          "swordGateCount": 4,
+          "icePercent": 0
         },
         "yeti": {
           "count": 3,
@@ -790,7 +799,8 @@
           "openingWidthMetres": 13.728,
           "firstGateMetres": 40,
           "finishAfterLastGateMetres": 40,
-          "swordGateCount": 4
+          "swordGateCount": 4,
+          "icePercent": 0
         },
         "yeti": {
           "count": 3,
@@ -876,7 +886,8 @@
           "openingWidthMetres": 13.728,
           "firstGateMetres": 40,
           "finishAfterLastGateMetres": 20,
-          "swordGateCount": 4
+          "swordGateCount": 4,
+          "icePercent": 0
         },
         "yeti": {
           "count": 2,
@@ -962,7 +973,8 @@
           "openingWidthMetres": 13.728,
           "firstGateMetres": 40,
           "finishAfterLastGateMetres": 64,
-          "swordGateCount": 4
+          "swordGateCount": 4,
+          "icePercent": 25
         },
         "yeti": {
           "count": 2,
@@ -1079,7 +1091,12 @@
       "protectionSeconds": 1.1,
       "effectSeconds": 0.85,
       "shieldColor": "#55abb7",
-      "swordColor": "#ae85bb"
+      "swordColor": "#ae85bb",
+      "comboColors": [
+        "#739391",
+        "#327f91",
+        "#bd7041"
+      ]
     },
     "trafficFastSpeedRatio": [
       0.55,
@@ -2000,7 +2017,10 @@
       "speechSeconds": 2.7,
       "speechSpacingSeconds": 0.85,
       "despawnMargin": 220
-    }
+    },
+    "yetiCelebrationSeconds": 2.2,
+    "yetiCelebrationHopsPerSecond": 2.4,
+    "yetiCelebrationJumpPixels": 14
   },
   "skiers": {
     "slowSpeed": [

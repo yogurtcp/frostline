@@ -3947,6 +3947,18 @@
               "exclusiveMinimum": 0
             }
           }
+        },
+        "yetiCelebrationSeconds": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "yetiCelebrationHopsPerSecond": {
+          "type": "number",
+          "minimum": 0
+        },
+        "yetiCelebrationJumpPixels": {
+          "type": "number",
+          "minimum": 0
         }
       }
     },
@@ -4815,6 +4827,12 @@
                     "type": "integer",
                     "minimum": 0,
                     "maximum": 500
+                  },
+                  "icePercent": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 100,
+                    "description": "Percentage of gates with a frozen patch covering the opening (rounded to whole gates)."
                   }
                 }
               },
@@ -5392,6 +5410,14 @@
             },
             "swordColor": {
               "type": "string"
+            },
+            "comboColors": {
+              "type": "array",
+              "minItems": 3,
+              "maxItems": 3,
+              "items": {
+                "type": "string"
+              }
             }
           }
         },

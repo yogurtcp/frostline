@@ -6,6 +6,10 @@ window.loadFrostlineConfig = async function () {
     if (!response.ok) throw new Error(`Cannot load game-config.json (${response.status})`);
     config = await response.json();
   }
+  config.arcade.gear.comboColors ??= ['#739391','#327f91','#bd7041'];
+  config.chasers.yetiCelebrationSeconds ??= 2.2;
+  config.chasers.yetiCelebrationHopsPerSecond ??= 2.4;
+  config.chasers.yetiCelebrationJumpPixels ??= 14;
   function validate(value, schema, path) {
     if (schema.type === 'object') {
       if (!value || typeof value !== 'object' || Array.isArray(value)) throw new Error(`${path} must be an object`);
@@ -33,8 +37,6 @@ window.loadFrostlineConfig = async function () {
   for(const [i,stage] of config.arcade.stages.entries()){
     if(!stage.name.trim())throw new Error(`arcade.stages[${i}]: name cannot be empty`);
     if(stage.gates.swordGateCount>stage.gates.count)throw new Error(`arcade.stages[${i}]: swordGateCount exceeds gate count`);
-    for(const key of ['yeti','missedGateYetis'])if(stage[key].count>0&&stage[key].speedKmh<=0)throw new Error(`arcade.stages[${i}].${key}: positive speedKmh is required when count > 0`);
-    if(['yetiTeal','yetiOrange','yetiViolet'].some(k=>stage.itemsPer100m[k]>0)&&stage.yeti.speedKmh<=0)throw new Error(`arcade.stages[${i}]: sleeping yeti items use yeti.speedKmh; set it above zero`);
   }
   if (config.wildlife.packMin > config.wildlife.packMax) throw new Error('packMin must not exceed packMax');
   for (const id of [...config.race.entryChoices, ...config.race.villageChoices]) if (!config.courses[id]) throw new Error(`Unknown course ${id}`);

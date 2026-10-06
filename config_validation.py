@@ -33,9 +33,6 @@ def validate(value, schema, path='config'):
         for i, stage in enumerate(value['arcade']['stages']):
             if not stage['name'].strip(): fail(f'arcade.stages[{i}]: name cannot be empty')
             if stage['gates']['swordGateCount'] > stage['gates']['count']: fail(f'arcade.stages[{i}]: swordGateCount exceeds gate count')
-            for key in ['yeti', 'missedGateYetis']:
-                if stage[key]['count'] > 0 and stage[key]['speedKmh'] <= 0: fail(f'arcade.stages[{i}].{key}: positive speedKmh required when count > 0')
-            if any(stage['itemsPer100m'].get(k, 0) > 0 for k in ['yetiTeal', 'yetiOrange', 'yetiViolet']) and stage['yeti']['speedKmh'] <= 0: fail(f'arcade.stages[{i}]: sleeping yeti items need positive yeti.speedKmh')
         if value['wildlife']['packMin'] > value['wildlife']['packMax']: fail('packMin must not exceed packMax')
         for course in value['race']['entryChoices'] + value['race']['villageChoices']:
             if course not in value['courses']: fail(f'unknown course {course}')

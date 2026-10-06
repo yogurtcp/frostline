@@ -1,6 +1,10 @@
 # Frostline configuration
 
-Edit `game-config.json`. The hosted game loads it on each refresh. For offline play, run `python3 build.py` after editing and reload `index.html`.
+Edit `game-config.json`. For local tuning, run `python3 serve.py` in this folder and open http://127.0.0.1:8765/. Every reload reads the JSON directly; no rebuild is needed for config edits. The hosted game also reads it on refresh.
+
+Opening `index.html` through `file://` uses its embedded snapshot: browsers restrict reading adjacent local files. To update that standalone snapshot, run `python3 build.py`, then reload. Localhost and file URLs have separate browser saves (wallet and records); switching addresses does not transfer them. Code/schema edits still require a build.
+
+Zero Yeti speed is allowed and means stationary. A nonzero count does not automatically assign a chase speed.
 
 The file contains tuning data; collision algorithms, AI logic, pixel glyph shapes and renderer drawing instructions remain in JavaScript. Structural changes such as inventing a new object type still require code.
 
