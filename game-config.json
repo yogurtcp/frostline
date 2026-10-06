@@ -2,8 +2,8 @@
   "$schema": "./game-config.schema.json",
   "version": 1,
   "arcade": {
-    "startStage": 2,
-    "autoStart": true,
+    "startStage": 1,
+    "autoStart": false,
     "campaignVersion": 2,
     "stages": [
       {
