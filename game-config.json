@@ -2,8 +2,8 @@
   "$schema": "./game-config.schema.json",
   "version": 1,
   "arcade": {
-    "startStage": 1,
-    "autoStart": false,
+    "startStage": 2,
+    "autoStart": true,
     "campaignVersion": 2,
     "stages": [
       {
@@ -20,7 +20,7 @@
           "icePercent": 0
         },
         "yeti": {
-          "count": 0,
+          "count": 4,
           "color": "teal",
           "speedKmh": 0.0
         },
