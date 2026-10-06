@@ -5027,7 +5027,8 @@
             "protectionSeconds",
             "effectSeconds",
             "shieldColor",
-            "swordColor"
+            "swordColor",
+            "calmSwordGatesPerStage"
           ],
           "properties": {
             "shieldsPerStage": {
@@ -5063,6 +5064,10 @@
             },
             "swordColor": {
               "type": "string"
+            },
+            "calmSwordGatesPerStage": {
+              "type": "integer",
+              "minimum": 1
             }
           }
         },

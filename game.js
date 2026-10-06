@@ -114,7 +114,8 @@ window.FROSTLINE_READY = (async () => {
 
   function markArcadeGearGates(run){
     const gates=state.objects.filter(o=>o.type==='gate'&&o.run===run),G=S.arcade.gear;
-    const count=Math.min(G.swordGatesPerStage,Math.max(0,gates.length-1));
+    const threatened=run.arcade.yetis>0||run.arcade.missYetis>0;
+    const count=Math.min(threatened?G.swordGatesPerStage:G.calmSwordGatesPerStage,Math.max(0,gates.length-1));
     for(let i=0;i<count;i++)gates[Math.floor((i+1)*gates.length/(count+1))].gear='sword';
     run.shieldGateCharge=G.shieldsPerStage/Math.max(1,gates.length-count);
   }

@@ -19,12 +19,12 @@ Starting pursuers arrive when you cross the actual stage start. Miss penalties s
 | # | Name | Length | Terrain / traffic | Pressure |
 | --- | --- | --- | --- | --- |
 | 1 | First Tracks | 540 m | Open | No starting pursuers |
-| 2 | Personal Space | 650 m | Open; heavy fast-skier traffic | No starting pursuers |
-| 3 | Mind the Pines | 650 m | Trees | No starting pursuers |
-| 4 | Rush Hour | 650 m | Trees; heavy fast-skier traffic | No starting pursuers |
-| 5 | Polite Pursuit | 850 m | Open | 3 slow yetis |
-| 6 | Please Keep Moving | 850 m | Open; wider turns | 3 slow yetis |
-| 7 | Guests in the Forest | 850 m | Trees | 3 slow yetis |
+| 2 | Mind the Pines | 650 m | Trees | No starting pursuers |
+| 3 | Polite Pursuit | 850 m | Open | 3 slow yetis |
+| 4 | Guests in the Forest | 850 m | Trees | 3 slow yetis |
+| 5 | Please Keep Moving | 850 m | Open; wider turns | 3 slow yetis |
+| 6 | Personal Space | 650 m | Open; heavy fast-skier traffic | 3 slow yetis |
+| 7 | Rush Hour | 650 m | Trees; heavy fast-skier traffic | 3 slow yetis |
 | 8 | No Loitering | 850 m | Trees; heavy fast-skier traffic | 3 slow yetis |
 | 9 | Express Lane | 1100 m | Open | No starting pursuers |
 | 10 | Orange Alert | 1100 m | Open | 3 fast yetis |
@@ -59,6 +59,8 @@ Arcade uses separate controlled skier and tree schedules; ambient world generati
 
 ## Shields and swords
 
-Ordinary correct gates charge obstacle shields; four evenly spaced purple gates per stage carry pixel sword symbols and charge swords instead. Ordinary gates provide 1.5 shields per fully cleared stage, and eight sword gates provide one sword (two fully cleared stages). Both charge meters and up to two shields/two swords carry through towns. Missing gates forfeits that gate's charge but does not erase accumulated progress. Charge pauses when inventory is full. A new Arcade attempt starts empty.
+Ordinary correct gates charge obstacle shields. Calm stages (no starting yetis or missed-gate pursuers) have one purple sword gate; threatened stages have four evenly spaced sword gates. The two warmups each introduce one sword gate, and the first three-yeti chase begins at stage 3. Ordinary gates provide 1.5 shields per fully cleared stage, and eight sword gates provide one sword (two fully cleared threatened stages). Both charge meters and up to two shields/two swords carry through towns. Missing gates forfeits that gate's charge but does not erase accumulated progress. Charge pauses when inventory is full. A new Arcade attempt starts empty.
 
 A shield automatically prevents one obstacle/skier crash, preserves movement, and shows a cyan pixel shield with an expanding block ring. A sword automatically defeats one contacting yeti, bear, wolf, or threatening dog, with a violet/gold slash animation. Swords are not spent when an ordinary high-speed impact already kills the animal. Harmless pet interactions do not spend swords. Shields do not substitute for swords against animal attacks. Neither item is spent on protected low-speed obstacle contacts. The HUD shows two shield and two sword silhouettes. Each fills from the bottom as gates charge it and becomes bright when ready; there are no numeric meters or progress bars.
+
+Sword gate counts are configured in `arcade.gear.calmSwordGatesPerStage` and `swordGatesPerStage`; the threat check follows each stage’s `yetis` and `missYetis` settings. Clearing every sword gate gives 2/8 charge after stage 2, 6/8 after stage 3, and the first sword during stage 4. Shield yield stays at 1.5 per fully cleared stage.

@@ -57,3 +57,5 @@ World coordinates increase rightward and downhill. `world.unitsPerMetre` default
 Saved data uses the browser's `frostline-v2` local-storage key. `times[courseId]` contains the personal best, last attempt, and bounded attempt history; each history item has time, gate or mushroom results, crashes, payment status, speed bonus, date, and rules signature. Failed/unpaid attempts are recorded but never become qualifying best times.
 
 Local-file and hosted versions have separate browser storage origins. Publishing does not move the offline wallet or records to the hosted site.
+
+Arcade gear uses `calmSwordGatesPerStage` (1) for stages without starting or missed-gate yetis, and `swordGatesPerStage` (4) when either threat is present. `swordGatesPerSword` (8) controls the charge needed for one sword. Stage order is the order of `arcade.stages`.
