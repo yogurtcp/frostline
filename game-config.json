@@ -1962,5 +1962,75 @@
       0.78
     ],
     "trafficGateClearanceY": 55
+  },
+  "villageLife": {
+    "districts": [
+      "bakery",
+      "rental",
+      "market",
+      "lift"
+    ],
+    "districtNames": {
+      "bakery": "BAKERY QUARTER",
+      "rental": "RENTAL ROW",
+      "market": "MARKET SQUARE",
+      "lift": "LIFT PLAZA"
+    },
+    "districtColors": {
+      "bakery": "#ae815b",
+      "rental": "#558894",
+      "market": "#92728b",
+      "lift": "#65856e"
+    },
+    "rabbitsPerTown": 2,
+    "foxVisitChance": 0.18,
+    "mischiefCooldownSeconds": 8,
+    "hatFlightSeconds": 2.2,
+    "pigeonFlightSeconds": 3,
+    "reactionRadius": 180,
+    "npcCooldownSeconds": 12,
+    "socialSeconds": 3,
+    "animalNoticeRadius": 115,
+    "animalSpookSpeed": 95,
+    "animalFleeSeconds": 2.5,
+    "animalFleeSpeed": 150,
+    "animalVisitSpeed": 25,
+    "animalCooldownSeconds": 9,
+    "npcAnimalRadius": 90,
+    "npcAnimalApproachSpeed": 18,
+    "dialogue": {
+      "snowman": [
+        "His hat! Come back!",
+        "Snow fashion emergency!"
+      ],
+      "powder": [
+        "Fresh powder delivery!",
+        "I just shoveled that!"
+      ],
+      "pigeons": [
+        "There goes the breakfast club!",
+        "Mind the birds!"
+      ],
+      "rabbit": [
+        "Hello, little snowball.",
+        "A carrot for our guest!"
+      ],
+      "fox": [
+        "Oi! Leave the pastries!",
+        "Shoo, you fluffy thief!"
+      ],
+      "pet": [
+        "Who is a good mountain dog?",
+        "There is our little mascot."
+      ],
+      "spooked": [
+        "Easy! You scared the little one!",
+        "Slow down around the animals!"
+      ],
+      "gentle": [
+        "They like you!",
+        "A gentle skier. How unusual."
+      ]
+    }
   }
 }
