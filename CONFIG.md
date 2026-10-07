@@ -40,9 +40,9 @@ World coordinates increase rightward and downhill. `world.unitsPerMetre` default
 
 ## Useful examples
 
-- Arcade stage editor: `arcade.stages` is in play order, with arbitrary names. Each entry explicitly sets player speed, gate layout, two yeti groups, three rarity-tier spawn rates and optional per-object overrides. See `ARCADE.md` for a complete copyable stage and all keys.
+- Arcade stage editor: `arcade.stages` is in play order, with arbitrary names. Each entry sets four difficulty levels in `knobs` ([obstacles, start chase, miss guards, speed], 1–4 each, resolved through the central `arcade.knobLevels` table), plus gate count/swords/ice, two rarity-tier spawn rates and optional per-object overrides. See `ARCADE.md` for a complete copyable stage and all keys.
 - Arcade equipment: each stage’s `gates.swordGateCount` selects the number of sword gates. `arcade.gear.shieldsPerStage` controls shield yield, `swordGatesPerSword` controls sword charge, and `maxShields` / `maxSwords` cap inventory.
-- Arcade item density: `arcade.itemTiers` assigns each of the 59 objects to `common`, `slightlyRare` or `veryRare`; each stage's `tierRates` sets the per-100m rate for each tier, and `itemRates` overrides single objects (0 disables; omission uses the tier rate). `skier`, `fastSkier`, `boarder` and `overtakingSkier` are separate, and `endTrafficMultiplier` increases their density toward the finish. Other object densities stay constant. Safe gate openings and landing clearances can reduce actual placement.
+- Arcade item density: `arcade.itemTiers` assigns each of the 59 objects to `common`, `slightlyRare` or `veryRare`; the obstacle knob sets the `common` per-100m rate, each stage's `tierRates` sets the other two, and `itemRates` overrides single objects (0 disables; omission uses the tier/knob rate). `skier`, `fastSkier`, `boarder` and `overtakingSkier` are separate, and `endTrafficMultiplier` increases their density toward the finish. Other object densities stay constant. Safe gate openings and landing clearances can reduce actual placement.
 - Make regular slalom timing more forgiving: increase `timing.targets.slalom.goldSeconds` and `parSeconds`, keeping gold below par.
 - Reduce all speed prizes: lower `timing.maxBonus` (60 by default).
 - Slow recovery: `physics.minimumCollisionKmh` (8) disables obstacle impacts at or below that HUD speed. Objects touched while creeping stay harmless until you fully clear them, even if you accelerate. Chasing predators can still catch a stopped player.
@@ -64,4 +64,4 @@ Local-file and hosted versions have separate browser storage origins. Publishing
 
 
 
-Arcade starts: `startStage` is 1-based; `autoStart: true` loads directly above that stage’s start. Starts above 1 are practice and do not overwrite records. `yeti` specifies `count`, `color` and absolute `speedKmh`; `missedGateYetis` specifies `gatePercent` (share of gates guarded by one sleeping penalty yeti), `color` and absolute `speedKmh`; no automatic speed calculation applies.
+Arcade starts: `startStage` is 1-based; `autoStart: true` loads directly above that stage’s start. Starts above 1 are practice and do not overwrite records. start-line yetis and penalty wolves resolve from the stage's `knobs` via `arcade.knobLevels` (counts, chase speed as percent of top, guarded-gate share); no other automatic speed calculation applies.

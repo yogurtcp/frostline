@@ -135,13 +135,19 @@ window.FROSTLINE_READY = (async () => {
     "pavedPath":{"type":"path","width":56,"r":0,"surface":"paved"}
   };
   const yetiTierForColor={teal:'slow',orange:'fast',violet:'elite'};
-  function arcadeItemRate(stage,key){const override=stage.itemRates?.[key];return override!==undefined?override:stage.tierRates[S.arcade.itemTiers[key]];}
+  function arcadeItemRate(stage,key){const override=stage.itemRates?.[key];if(override!==undefined)return override;const tier=S.arcade.itemTiers[key];return tier==='common'?S.arcade.knobLevels.obstacles[stage.knobs[0]-1]:stage.tierRates[tier];}
   function arcadeStage(index){
-    const a=S.arcade.stages[index],g=a.gates;
-    return {...a,length:g.firstGateMetres+(g.count-1)*g.verticalDistanceMetres+g.finishAfterLastGateMetres,
-      pace:a.topSpeedKmh/(S.physics.speedMultiplier*S.physics.hudKmhPerSpeed),spacing:g.verticalDistanceMetres*PX_PER_M,
+    const a=S.arcade.stages[index],K=S.arcade.knobLevels,[,lc,lm,ls]=a.knobs;
+    const top=K.speed[ls-1],chaseSpeed=K.chaseSpeedPercent[lc-1]*top/100,gs=K.gateSpacing;
+    const g={count:a.gates.count,swordGateCount:a.gates.swordGateCount,icePercent:a.gates.icePercent,
+      horizontalDistanceMetres:top*gs.horizontalPercent/100,verticalDistanceMetres:top*gs.verticalPercent/100,
+      openingWidthMetres:top*gs.openingPercent/100,firstGateMetres:top*gs.firstPercent/100,
+      finishAfterLastGateMetres:top*gs.finishPercent/100};
+    return {...a,gates:g,length:g.firstGateMetres+(g.count-1)*g.verticalDistanceMetres+g.finishAfterLastGateMetres,
+      pace:top/(S.physics.speedMultiplier*S.physics.hudKmhPerSpeed),spacing:g.verticalDistanceMetres*PX_PER_M,
       trees:Object.keys(ARCADE_ITEMS).some(key=>arcadeItemRate(a,key)>0&&ARCADE_ITEMS[key].treeVariant),
-      yetiTier:yetiTierForColor[a.yeti.color],yetis:a.yeti.count,missTier:yetiTierForColor[a.missedGateYetis.color],missPercent:a.missedGateYetis.gatePercent};
+      yetiTier:yetiTierForColor[a.yetiColor],yetis:K.chaseCount[lc-1],yetiSpeedKmh:chaseSpeed,
+      missPercent:K.missGatePercent[lm-1],missWolves:K.missWolves,wolfSpeedKmh:chaseSpeed};
   }
   function arcadeTrafficMultiplier(run,y){return mix(1,run.arcade.endTrafficMultiplier,clamp((y-run.startY)/(run.endY-run.startY),0,1));}
   function startCourse(id,gate) {
@@ -245,7 +251,7 @@ window.FROSTLINE_READY = (async () => {
       for(let i=0;i<count;i++)entity('wolf',x+(i%2?1:-1)*i*18,y+Math.floor(i/2)*25,{...extra,packId,packIndex:i});return;
     }
     if(key==='wolf'){extra.packId=random();extra.packIndex=0;}
-    if(spec.type==='lurker')extra.yetiSpeedKmh=run.arcade.yeti.speedKmh;
+    if(spec.type==='lurker')extra.yetiSpeedKmh=run.arcade.yetiSpeedKmh;
     if(spec.type==='skier')extra.vy=extra.fast?topSpeed()*range(...S.arcade.trafficFastSpeedRatio):range(...S.skiers.slowSpeed);
     if(spec.type==='boarder')extra.vy=range(...S.skiers.boarderSpeed);
     if(spec.type==='lodge'||spec.type==='rental')extra.houseStyle=Math.floor(random()*S.houseAnimation.trimRGB.length);
@@ -284,24 +290,24 @@ window.FROSTLINE_READY = (async () => {
       const side=i%2?1:-1,row=Math.floor(i/2);
       const kind=tier==='slow'?'slow':'fast',x=run.x+side*(S.arcade.startLineSideOffsetMetres+row*S.arcade.startLineRowOffsetMetres)*PX_PER_M;
       const y=run.startY+S.arcade.startLineDownhillOffsetMetres*PX_PER_M;
-      state.chasers.push({kind,arcadeTier:tier,x,y,waiting:true,speed:run.arcade.yeti.speedKmh/S.physics.hudKmhPerSpeed,chaseRun:run,id:random(),phase:range(0,6),expires:Infinity,leaving:false,talkAt:clock+6});
+      state.chasers.push({kind,arcadeTier:tier,x,y,waiting:true,speed:run.arcade.yetiSpeedKmh/S.physics.hudKmhPerSpeed,chaseRun:run,id:random(),phase:range(0,6),expires:Infinity,leaving:false,talkAt:clock+6});
     }
   }
   function armPenaltyGates(run){
     const gates=state.objects.filter(o=>o.type==='gate'&&o.run===run),armed=[...gates];
     for(let i=armed.length-1;i>0;i--){const j=Math.floor(random()*(i+1));[armed[i],armed[j]]=[armed[j],armed[i]];}
     for(const gate of armed.slice(0,Math.round(gates.length*(run.arcade.missPercent||0)/100))){
-      const side=random()<.5?-1:1;
-      gate.penaltyArmed=true;gate.penaltyTier=run.arcade.missTier;
-      gate.penaltyLurker=entity('lurker',gate.x+side*(gate.half+70),gate.y,{width:55,r:18,arcadeTier:run.arcade.missTier,arcadeRun:run,yetiSpeedKmh:run.arcade.missedGateYetis.speedKmh,penaltyGate:gate});
+      const side=random()<.5?-1:1;gate.penaltyArmed=true;gate.penaltyWolves=[];
+      for(let i=0;i<run.arcade.missWolves;i++){
+        gate.penaltyWolves.push(entity('wolf',gate.x+side*(gate.half+55+i*40),gate.y-10+i*35,{width:43,r:11,animal:true,ai:'idle',climb:0,arcadeRun:run,penaltyGate:gate,wolfSpeedKmh:run.arcade.wolfSpeedKmh,packId:'penalty'+gate.number,packIndex:i,nextAI:clock+range(1,2.5),humanVisitor:true}));
+      }
     }
   }
-  function wakePenaltyYeti(gate){
-    const o=gate.penaltyLurker;
-    if(!o||o.dead||o.type!=='lurker')return;
-    o.type='awakened';o.r=0;
-    state.chasers.push({kind:o.arcadeTier==='slow'?'slow':'fast',arcadeTier:o.arcadeTier,chaseRun:o.arcadeRun,x:o.x,y:o.y,speed:o.yetiSpeedKmh/S.physics.hudKmhPerSpeed,phase:o.phase,expires:Infinity,talkAt:clock+6});
-    say('Oh. Breakfast.',o);burst(o.x,o.y,S.arcade.yetiColors[o.arcadeTier]||C.teal,12);
+  function wakePenaltyWolves(gate){
+    if(!gate.penaltyWolves)return;
+    for(const o of gate.penaltyWolves){if(o.dead||o.type!=='wolf')continue;o.wolfAwake=true;o.nextAI=clock+2;burst(o.x,o.y,'#8a8f98',10);}
+    const live=gate.penaltyWolves.find(o=>!o.dead&&o.type==='wolf');
+    if(live)say('Awrooo!',live);
   }
   function arcadeSnapshot(reason,ended=false){
     const a=state.arcade,r=state.course;
@@ -837,7 +843,7 @@ window.FROSTLINE_READY = (async () => {
       return;
     }
     if(['rabbit','fox'].includes(o.type)){greetSmallAnimal(o,true);return;}
-    if(o.type==='wolf'){o.angle=Math.atan2(o.y-p.y,o.x-p.x);o.nextAI=clock+2;o.running=true;return;}
+    if(o.type==='wolf'){o.wolfAwake=true;o.angle=Math.atan2(o.y-p.y,o.x-p.x);o.nextAI=clock+2;o.running=true;return;}
 
     // Accelerating inside an existing slow contact must not cause another fall.
     if(p.slowContacts.has(o))return;
@@ -955,8 +961,8 @@ window.FROSTLINE_READY = (async () => {
       if(o.type==='arcadeOvertaker'&&o.arcadeRun===state.course&&p.y>=o.y&&!o.collected){
         o.collected=true;entity('skier',p.x+pick([-1,1])*range(...S.skiers.fastSpawnOffsetX),viewBounds().top-S.skiers.fastSpawnAbove,{width:44,r:12,fast:true,vy:topSpeed()*S.skiers.fastSpeedRatio,vx:range(-13,13),arcadeRun:o.arcadeRun});
       }
-      if(state.started&&!(o.stunnedUntil>clock)&&o.type==='lurker'&&!o.penaltyGate&&(courseCreature(o,p.x,p.y)||!humanArea(o.x,o.y)&&!humanArea(p.x,p.y))&&Math.hypot(o.x-p.x,o.y-p.y)<S.wildlife.yetiWakeDistance){o.type='awakened';o.r=0;state.chasers.push({kind:o.arcadeTier==='slow'?'slow':'fast',arcadeTier:o.arcadeTier,chaseRun:o.arcadeRun,x:o.x,y:o.y,speed:o.arcadeRun?o.yetiSpeedKmh/S.physics.hudKmhPerSpeed:topSpeed()*S.wildlife.yetiWildSpeedRatio,phase:o.phase,expires:p.y+S.wildlife.yetiWildChaseDistance,talkAt:clock+6});say('Oh. Breakfast.',o);}
-      if(o.type==='gate'&&o.run===state.course&&!o.checked&&previous.y<o.y&&p.y>=o.y){o.checked=true;const ratio=(o.y-previous.y)/(p.y-previous.y||1),crossX=mix(previous.x,p.x,ratio);if(state.course){if(Math.abs(crossX-o.x)<o.half){state.course.points+=S.race.gatePoints;state.course.cleared++;o.good=true;if(state.course.arcade)collectArcadeGear(o);burst(o.x,o.y,C.gold,9);beep(710,.04);}else{state.course.missed++;o.good=false;if(state.course.arcade)state.arcade.combo=0;beep(210,.045);if(state.course.arcade)wakePenaltyYeti(o);}}}
+      if(state.started&&!(o.stunnedUntil>clock)&&o.type==='lurker'&&(courseCreature(o,p.x,p.y)||!humanArea(o.x,o.y)&&!humanArea(p.x,p.y))&&Math.hypot(o.x-p.x,o.y-p.y)<S.wildlife.yetiWakeDistance){o.type='awakened';o.r=0;state.chasers.push({kind:o.arcadeTier==='slow'?'slow':'fast',arcadeTier:o.arcadeTier,chaseRun:o.arcadeRun,x:o.x,y:o.y,speed:o.arcadeRun?o.yetiSpeedKmh/S.physics.hudKmhPerSpeed:topSpeed()*S.wildlife.yetiWildSpeedRatio,phase:o.phase,expires:p.y+S.wildlife.yetiWildChaseDistance,talkAt:clock+6});say('Oh. Breakfast.',o);}
+      if(o.type==='gate'&&o.run===state.course&&!o.checked&&previous.y<o.y&&p.y>=o.y){o.checked=true;const ratio=(o.y-previous.y)/(p.y-previous.y||1),crossX=mix(previous.x,p.x,ratio);if(state.course){if(Math.abs(crossX-o.x)<o.half){state.course.points+=S.race.gatePoints;state.course.cleared++;o.good=true;if(state.course.arcade)collectArcadeGear(o);burst(o.x,o.y,C.gold,9);beep(710,.04);}else{state.course.missed++;o.good=false;if(state.course.arcade)state.arcade.combo=0;beep(210,.045);if(state.course.arcade)wakePenaltyWolves(o);}}}
       if(o.type==='entrance'&&!state.course&&previous.y<o.y&&p.y>=o.y&&Math.abs(p.x-o.x)<o.half){startCourse(o.stage,o);break;}
       if(!state.arcade&&o.type==='lift'&&!o.used&&previous.y<o.y&&p.y>=o.y&&Math.abs(p.x-o.x)<o.half){o.used=true;state.liftTimer=S.lift.rideSeconds;p.speed=0;announce('UP WE GO','Next stop: the summit.',C.teal,3);}
       if(o.r>0&&Math.abs(o.y-p.y)<Math.max(130,o.width)){const d=Math.hypot(p.x-o.x,(p.y-o.y)*.85);if(obstacleClearance(o,p.x,p.y)<S.physics.playerRadius)hit(o);else if(o.type.startsWith('person')&&!o.greeted&&d<85){o.greeted=true;say(pick(S.dialogue.greetings),o);}}
@@ -1092,7 +1098,7 @@ window.FROSTLINE_READY = (async () => {
   }
   function updateWildlife(dt){
     const p=state.p,A=S.wildlife,rabbits=state.objects.filter(o=>o.type==='rabbit'&&!o.eaten),cats=state.objects.filter(o=>o.type==='cat'),skis=state.objects.filter(o=>o.type==='skier'||o.type==='boarder');
-    for(const o of state.objects){if(o.eaten||o.dead||o.stunnedUntil>clock||!o.animal||Math.hypot(o.x-p.x,o.y-p.y)>A.activeRadius)continue;
+    for(const o of state.objects){if(o.eaten||o.dead||o.stunnedUntil>clock||!o.animal||o.penaltyGate&&!o.wolfAwake||Math.hypot(o.x-p.x,o.y-p.y)>A.activeRadius)continue;
       if(state.started&&o.type==='bear'&&(courseCreature(o,p.x,p.y)||!humanArea(o.x,o.y)&&!humanArea(p.x,p.y))&&Math.hypot(o.x-p.x,o.y-p.y)<A.bearWakeDistance){o.animal=false;o.type='awakened';o.r=0;state.chasers.push({kind:'bear',chaseRun:o.arcadeRun,x:o.x,y:o.y,speed:A.bearChaseSpeed,phase:o.phase,expires:p.y+A.bearChaseDistance,talkAt:Infinity});continue;}
       if(['rabbit','fox'].includes(o.type)&&moveSocialAnimal(o,dt))continue;
       if(o.feedingUntil>clock){o.running=false;continue;}
@@ -1109,7 +1115,7 @@ window.FROSTLINE_READY = (async () => {
       if(o.type==='wolf'&&(courseCreature(o,p.x,p.y)||!humanArea(p.x,p.y)&&!humanArea(o.x,o.y))&&Math.hypot(o.x-p.x,o.y-p.y)<A.wolfAlertDistance){for(const mate of state.objects)if(mate.type==='wolf'&&!mate.dead&&mate.packId===o.packId)mate.alertUntil=clock+A.wolfAlertSeconds;}
       if(o.type==='wolf'){
         const nearby=skis.filter(n=>(courseCreature(o,n.x,n.y)||!humanArea(n.x,n.y))&&!(n.npcFallUntil>clock)&&Math.hypot(n.x-o.x,n.y-o.y)<A.wolfSkierDetection).sort((a,b)=>Math.hypot(a.x-o.x,a.y-o.y)-Math.hypot(b.x-o.x,b.y-o.y))[0];
-        if(o.alertUntil>clock&&(courseCreature(o,p.x,p.y)||!humanArea(p.x,p.y))){target=p;speed=A.wolfPlayerChaseSpeed;}
+        if(o.alertUntil>clock&&(courseCreature(o,p.x,p.y)||!humanArea(p.x,p.y))){target=p;speed=o.wolfSpeedKmh?o.wolfSpeedKmh/S.physics.hudKmhPerSpeed:A.wolfPlayerChaseSpeed;}
         if(nearby&&(!target||Math.hypot(nearby.x-o.x,nearby.y-o.y)<Math.hypot(p.x-o.x,p.y-o.y))){target=nearby;speed=A.wolfSkierChaseSpeed;}
         o.targetSkier=target&&target!==p?target:null;
         for(const skier of skis)if((courseCreature(o,skier.x,skier.y)||!humanArea(skier.x,skier.y))&&Math.hypot(skier.x-o.x,skier.y-o.y)<A.npcFearDistance)frighten(skier,o);
@@ -1445,7 +1451,7 @@ window.FROSTLINE_READY = (async () => {
       const a=o.checked?.6:1;ctx.globalAlpha=a;
       const color=o.gear==='sword'?S.arcade.gear.swordColor:o.color;
       flag(s.x-o.half*ZOOM,s.y,color,1,o.good);flag(s.x+o.half*ZOOM,s.y,color,-1,o.good);
-      if(o.penaltyArmed)text('!',s.x,s.y-44,14,S.arcade.yetiColors[o.penaltyTier]||C.red);
+      if(o.penaltyArmed)text('!',s.x,s.y-44,14,C.red);
       if(o.gear==='sword'){gearIcon('sword',s.x-o.half*ZOOM,s.y-31,2);gearIcon('sword',s.x+o.half*ZOOM,s.y-31,2);}
       if(o.checked){if(o.good&&o.run.arcade)comboText(o.gearFull?'FULL':'+'+o.comboLevel+' '+(o.gear==='sword'?'SWORD':'SHIELD'),s.x,s.y-15,o.comboLevel);else text(o.good?'+'+S.race.gatePoints:'×',s.x,s.y-15,10,o.good?C.teal:C.red);}else text(String(o.number).padStart(2,'0'),s.x,s.y+9,8,'#8eaaa5');
       ctx.globalAlpha=1;return;

@@ -21,28 +21,21 @@ For live local tuning, run `python3 serve.py`, open http://127.0.0.1:8765/, then
 
 ## Add or edit a stage
 
-Copy any entry in `arcade.stages`, change `name`, and insert it where you want. Array order defines progression; there is no fixed stage count or hardcoded name list. A compact complete stage can look like this (objects missing from `itemRates` use their tier rate):
+Copy any entry in `arcade.stages`, change `name`, and insert it where you want. Array order defines progression; there is no fixed stage count or hardcoded name list. A compact complete stage can look like this (objects missing from `itemRates` use their knob or tier rate):
 
 ```json
 {
   "name": "My snowy disaster",
-  "topSpeedKmh": 103,
+  "knobs": [2, 2, 2, 2],
+  "yetiColor": "teal",
   "gates": {
     "count": 18,
-    "horizontalDistanceMetres": 26,
-    "verticalDistanceMetres": 30,
-    "openingWidthMetres": 15.6,
-    "firstGateMetres": 40,
-    "finishAfterLastGateMetres": 50,
     "swordGateCount": 4,
     "icePercent": 25
   },
-  "yeti": { "count": 3, "color": "teal", "speedKmh": 60 },
-  "missedGateYetis": { "gatePercent": 50, "color": "orange", "speedKmh": 75 },
   "itemSpreadMetres": 32,
   "endTrafficMultiplier": 1.5,
   "tierRates": {
-    "common": 1.5,
     "slightlyRare": 0.3,
     "veryRare": 0
   },
@@ -54,19 +47,16 @@ Copy any entry in `arcade.stages`, change `name`, and insert it where you want. 
 }
 ```
 
-Here `pine` spawns at 2 instead of the common 1.5, `rock` stays disabled despite being common, and everything else uses its tier rate.
+Knobs read `[obstacles, chase, miss, speed]`, levels 1–4 each, resolved through the central `arcade.knobLevels` table. Here the common rate comes from obstacle level 2 (0.5); `pine` overrides to 2, `skier` to 3, and `rock` stays disabled despite being common.
 
 ### Gates
 
 - `count`: exact total number of gates, including sword gates.
-- `horizontalDistanceMetres`: exact horizontal distance between alternating gate centres. 26 means centres alternate at −13 m and +13 m. There is no added course sway.
-- `verticalDistanceMetres`: exact downhill distance between consecutive gates.
-- `openingWidthMetres`: total skiable opening between each pair of flags.
-- `firstGateMetres`: distance from the start to the first gate.
-- `finishAfterLastGateMetres`: distance from the last gate to the finish.
 - `swordGateCount`: exact number of sword gates, distributed along the course. Zero disables them; all gates can be sword gates if desired.
 
-Course length is `firstGateMetres + (count − 1) × verticalDistanceMetres + finishAfterLastGateMetres`. Changing count or spacing moves the finish and following town together. The finish opening still uses the global `race.finishWidthMultiplier` (2).
+Geometry (horizontal/vertical distance, opening, first-gate and finish run-outs) derives from the speed knob: each is a fixed percentage of the stage top speed from `arcade.knobLevels.gateSpacing`. Centres alternate at plus/minus half the derived horizontal distance. There is no added course sway.
+
+Course length is the derived first run-out + `(count − 1) × derived vertical spacing` + derived finish run-out. Changing count moves the finish and following town together. The finish opening still uses the global `race.finishWidthMultiplier` (2).
 
 `icePercent` (0–100, default 0) selects that percentage of gates, rounded to a whole number, for ice spanning the opening. Selected gates vary each run. These patches are independent of `smallLake`/`largeLake` density; use zero for both if you only want gate ice.
 
@@ -80,13 +70,13 @@ Gate labels and the top CHAIN indicator use three increasing text weights and `a
 
 ### Yetis
 
-`yeti` controls the waiting start-line group with `count`, `color` (teal/orange/violet), and **absolute `speedKmh`**. `missedGateYetis` instead takes `gatePercent` (0–100), `color`, and absolute `speedKmh`: that percentage of gates, rounded to whole gates, gets one sleeping penalty yeti beside the opening, marked with a `!`. Missing an armed gate wakes its yeti; clearing it leaves the sleeper snoring. An orange yeti can be slower than a teal one if you set it that way. Zero count/percent disables the group. Zero speed leaves it stationary. No percentage of player speed, gate-pace calculation, catch-up boost, or hidden color-speed multiplier applies.
+The chase knob sets the waiting start-line group from `knobLevels.chaseCount` and `chaseSpeedPercent` (percent of stage top); `yetiColor` (teal/orange/violet) paints it. The miss knob arms that share of gates (`knobLevels.missGatePercent`, rounded) with `knobLevels.missWolves` sleeping wolves each, marked with a red `!`; they wake at the chase speed when their gate is missed. Clearing an armed gate leaves its wolves asleep. Bumping one wakes it. Colors select visual tiers only. Zero count/percent disables the group. No gate-pace calculation, catch-up boost, or hidden color-speed multiplier applies.
 
-Start-line yetis remain visible before the race, react when you cross, and chase after `arcade.wakeSeconds`. Pursuers follow off piste and retire at course end. The separately placed sleeping yeti items use their named color and the stage’s `yeti.speedKmh`, even if its start-line count is zero.
+Start-line yetis remain visible before the race, react when you cross, and chase after `arcade.wakeSeconds`. Pursuers follow off piste and retire at course end. The separately placed sleeping yeti items use their named color and the stage’s knob-derived chase speed, even if its start-line count is zero.
 
 ### Item density
 
-Each stage sets one spawn rate per rarity tier in `tierRates` (`common`, `slightlyRare`, `veryRare`), in placement attempts per 100 m of course. Every catalog object spawns at its tier’s rate unless that stage lists it in `itemRates` with an explicit number; `0` disables the object. Omit `itemRates` keys — or the whole object — to run on tier defaults. The tier of each object lives in the single global map `arcade.itemTiers`. There are no random mixed item tables, automatic tree substitutions, mandatory terrain features, or hidden Arcade overtaker timers.
+The obstacle knob sets the `common` spawn rate from `knobLevels.obstacles`; each stage sets `slightlyRare`/`veryRare` in `tierRates`, in placement attempts per 100 m of course. Every catalog object spawns at its tier’s rate unless that stage lists it in `itemRates` with an explicit number; `0` disables the object. Omit `itemRates` keys — or the whole object — to run on tier defaults. The tier of each object lives in the single global map `arcade.itemTiers`. There are no random mixed item tables, automatic tree substitutions, mandatory terrain features, or hidden Arcade overtaker timers.
 
 Densities are placement attempts, not exact counts: gates, finish openings, lakes, other objects and jump landing zones remain clear. `itemSpreadMetres` controls how far from the centreline items can be placed. Increasing it gives large objects more room. Rare rates may yield no objects on a short stage. Towns, finish spectators, structural start/finish flags, the connecting lift cable and off-piste scenery retain their separate existing config sections; they are not counted as course item spawns.
 
@@ -114,20 +104,22 @@ Densities are placement attempts, not exact counts: gates, finish openings, lake
 
 ## Current defaults
 
-| # | Name | Top speed km/h | Gates | Vertical gap m | Starting yetis | Yeti speed km/h |
-| --- | --- | ---: | ---: | ---: | --- | ---: |
-| 1 | First Tracks | 90 | 12 | 30 | 0 teal | 0 |
-| 2 | Mind the Pines | 90 | 15 | 30 | 0 teal | 0 |
-| 3 | Polite Pursuit | 103 | 19 | 30 | 1 teal | 52.1 |
-| 4 | Forest Company | 103 | 20 | 30 | 3 teal | 76.22 |
-| 5 | Orange Alert | 115 | 17 | 40 | 3 orange | 82 |
-| 6 | Timber Express | 115 | 18 | 40 | 3 orange | 88 |
-| 7 | Rush Hour | 115 | 19 | 40 | 2 teal | 80 |
-| 8 | Frozen Assets | 115 | 20 | 40 | 3 orange | 92 |
-| 9 | Air Mail | 132 | 18 | 48 | 2 orange | 95 |
-| 10 | Flag Consequences | 132 | 24 | 40 | 3 orange | 110 |
-| 11 | Violet Warning | 132 | 27 | 40 | 2 violet | 120 |
-| 12 | Last Tracks | 132 | 28 | 48 | 2 violet | 128 |
+| # | Name | Knobs O/C/M/S | Top | Chase | Guarded |
+| --- | --- | ---: | ---: | --- | ---: |
+| 1 | First Tracks | 1111 | 90 | none | 0% |
+| 2 | Mind the Pines | 2111 | 90 | none | 0% |
+| 3 | Polite Pursuit | 2211 | 90 | 1 teal @45 | 0% |
+| 4 | Forest Company | 2221 | 90 | 1 teal @45 | 25% |
+| 5 | Orange Alert | 2222 | 105 | 1 orange @52 | 25% |
+| 6 | Timber Express | 3222 | 105 | 1 orange @52 | 25% |
+| 7 | Rush Hour | 3322 | 105 | 2 teal @74 | 25% |
+| 8 | Frozen Assets | 3332 | 105 | 2 orange @74 | 50% |
+| 9 | Air Mail | 3333 | 120 | 2 orange @84 | 50% |
+| 10 | Flag Consequences | 4333 | 120 | 2 orange @84 | 50% |
+| 11 | Violet Warning | 4433 | 120 | 3 violet @108 | 50% |
+| 12 | Last Tracks | 4443 | 120 | 3 violet @108 | 100% |
+
+Knobs read `[obstacles, chase, miss, speed]`, levels 1–4. Chase shows resolved count, color and km/h; guarded shows the share of gates with a 3-wolf pack. Common rate per obstacle level lives in `knobLevels`.
 
 ## Gear, towns and records
 

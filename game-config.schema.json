@@ -4730,11 +4730,10 @@
       "additionalProperties": false,
       "required": [
         "stages",
+        "knobLevels",
         "itemTiers",
         "yetiColors",
         "yetiTints",
-        "missSpawnAbove",
-        "spawnSpread",
         "maxActiveYetis",
         "featureClearance",
         "resultSeconds",
@@ -4763,65 +4762,28 @@
             "additionalProperties": false,
             "required": [
               "name",
-              "topSpeedKmh",
               "gates",
-              "yeti",
-              "missedGateYetis",
               "itemSpreadMetres",
               "endTrafficMultiplier",
-              "tierRates"
+              "tierRates",
+              "knobs",
+              "yetiColor"
             ],
             "properties": {
               "name": {
                 "type": "string"
-              },
-              "topSpeedKmh": {
-                "type": "number",
-                "minimum": 10,
-                "maximum": 250
               },
               "gates": {
                 "type": "object",
                 "additionalProperties": false,
                 "required": [
                   "count",
-                  "horizontalDistanceMetres",
-                  "verticalDistanceMetres",
-                  "openingWidthMetres",
-                  "firstGateMetres",
-                  "finishAfterLastGateMetres",
                   "swordGateCount"
                 ],
                 "properties": {
                   "count": {
                     "type": "integer",
                     "minimum": 1,
-                    "maximum": 500
-                  },
-                  "horizontalDistanceMetres": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 200,
-                    "description": "Exact horizontal separation of alternating gate centres. No hidden sway."
-                  },
-                  "verticalDistanceMetres": {
-                    "type": "number",
-                    "minimum": 5,
-                    "maximum": 200
-                  },
-                  "openingWidthMetres": {
-                    "type": "number",
-                    "minimum": 2,
-                    "maximum": 100
-                  },
-                  "firstGateMetres": {
-                    "type": "number",
-                    "minimum": 5,
-                    "maximum": 200
-                  },
-                  "finishAfterLastGateMetres": {
-                    "type": "number",
-                    "minimum": 5,
                     "maximum": 500
                   },
                   "swordGateCount": {
@@ -4834,67 +4796,6 @@
                     "minimum": 0,
                     "maximum": 100,
                     "description": "Percentage of gates with a frozen patch covering the opening (rounded to whole gates)."
-                  }
-                }
-              },
-              "yeti": {
-                "type": "object",
-                "additionalProperties": false,
-                "required": [
-                  "count",
-                  "color",
-                  "speedKmh"
-                ],
-                "properties": {
-                  "count": {
-                    "type": "integer",
-                    "minimum": 0,
-                    "maximum": 12
-                  },
-                  "color": {
-                    "type": "string",
-                    "enum": [
-                      "teal",
-                      "orange",
-                      "violet"
-                    ]
-                  },
-                  "speedKmh": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 250,
-                    "description": "Absolute chase speed in game km/h. Color does not affect speed."
-                  }
-                }
-              },
-              "missedGateYetis": {
-                "type": "object",
-                "additionalProperties": false,
-                "required": [
-                  "gatePercent",
-                  "color",
-                  "speedKmh"
-                ],
-                "properties": {
-                  "gatePercent": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 100,
-                    "description": "Percentage of gates guarded by one sleeping penalty yeti (rounded to whole gates). Missing an armed gate wakes its yeti."
-                  },
-                  "color": {
-                    "type": "string",
-                    "enum": [
-                      "teal",
-                      "orange",
-                      "violet"
-                    ]
-                  },
-                  "speedKmh": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 250,
-                    "description": "Absolute chase speed in game km/h. Color does not affect speed."
                   }
                 }
               },
@@ -4912,18 +4813,11 @@
                 "type": "object",
                 "additionalProperties": false,
                 "required": [
-                  "common",
                   "slightlyRare",
                   "veryRare"
                 ],
                 "description": "Default placement attempts per 100 metres for each rarity tier on this stage.",
                 "properties": {
-                  "common": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 30,
-                    "description": "Placement attempts per 100 metres for common objects; 0 disables the tier unless overridden."
-                  },
                   "slightlyRare": {
                     "type": "number",
                     "minimum": 0,
@@ -5298,6 +5192,142 @@
                     "maximum": 30,
                     "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
                   }
+                }
+              },
+              "knobs": {
+                "type": "array",
+                "minItems": 4,
+                "maxItems": 4,
+                "description": "Difficulty levels 1-4 for [obstacles, start chase, miss guards, speed].",
+                "items": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 4
+                }
+              },
+              "yetiColor": {
+                "type": "string",
+                "enum": [
+                  "teal",
+                  "orange",
+                  "violet"
+                ],
+                "description": "Visual tier of the start-line yetis."
+              }
+            }
+          }
+        },
+        "knobLevels": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "obstacles",
+            "chaseCount",
+            "chaseSpeedPercent",
+            "missGatePercent",
+            "missWolves",
+            "speed",
+            "gateSpacing"
+          ],
+          "description": "Central level tables for the four difficulty knobs. Stages pick one level (1-4) per knob.",
+          "properties": {
+            "obstacles": {
+              "type": "array",
+              "minItems": 4,
+              "maxItems": 4,
+              "description": "Common-tier spawn rate per 100m for obstacle levels 1-4.",
+              "items": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 30
+              }
+            },
+            "chaseCount": {
+              "type": "array",
+              "minItems": 4,
+              "maxItems": 4,
+              "description": "Start-line yeti count for chase levels 1-4.",
+              "items": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 12
+              }
+            },
+            "chaseSpeedPercent": {
+              "type": "array",
+              "minItems": 4,
+              "maxItems": 4,
+              "description": "Start-yeti and penalty-wolf chase speed, percent of stage top, for chase levels 1-4.",
+              "items": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 250
+              }
+            },
+            "missGatePercent": {
+              "type": "array",
+              "minItems": 4,
+              "maxItems": 4,
+              "description": "Share of gates guarded by penalty wolves for miss levels 1-4.",
+              "items": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 100
+              }
+            },
+            "missWolves": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 12,
+              "description": "Wolves guarding each armed gate."
+            },
+            "speed": {
+              "type": "array",
+              "minItems": 4,
+              "maxItems": 4,
+              "description": "Player top speed km/h for speed levels 1-4.",
+              "items": {
+                "type": "number",
+                "minimum": 10,
+                "maximum": 250
+              }
+            },
+            "gateSpacing": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "horizontalPercent",
+                "verticalPercent",
+                "openingPercent",
+                "firstPercent",
+                "finishPercent"
+              ],
+              "description": "Gate geometry as percent of stage top speed, so reaction time survives higher speeds.",
+              "properties": {
+                "horizontalPercent": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 250
+                },
+                "verticalPercent": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 250
+                },
+                "openingPercent": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 250
+                },
+                "firstPercent": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 250
+                },
+                "finishPercent": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 250
                 }
               }
             }
@@ -5897,14 +5927,6 @@
               }
             }
           }
-        },
-        "missSpawnAbove": {
-          "type": "number",
-          "minimum": 0
-        },
-        "spawnSpread": {
-          "type": "number",
-          "minimum": 0
         },
         "maxActiveYetis": {
           "type": "integer",

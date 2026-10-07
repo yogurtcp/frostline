@@ -162,7 +162,7 @@ Timing begins at the actual start line. A qualifying fast finish gains a bounded
 - No entry fees, money rewards, or time-based qualification. Creatures create urgency.
 - Towns connect stages automatically; no course selection between stages.
 - **Missing the finish fails Arcade in place. Do not teleport or reset the world.** The player can continue skiing normally.
-- Missing ordinary gates does not itself invoke the regular 90% failure rule. It breaks the combo and wakes that gate's sleeping penalty yeti, if it has one.
+- Missing ordinary gates does not itself invoke the regular 90% failure rule. It breaks the combo and wakes that gate's penalty wolves, if it has any.
 - Death ends the run and resets to the summit/configured automatic practice start, preserving the wallet.
 - Completing the final stage ends the campaign; current code resets to the summit.
 - `arcade.startStage` is one-based. Values above 1 are practice and do not replace full-run records. `autoStart` skips the summit approach and places the skier just above the stage's start, awaiting input.
@@ -200,26 +200,20 @@ Each `arcade.stages[]` entry has:
 | Setting | Meaning |
 | --- | --- |
 | `name` | Display name; array position supplies stage number |
-| `topSpeedKmh` | Stage player top speed |
+| `knobs` | Four levels 1–4: [obstacles, start chase, miss guards, speed] |
+| `yetiColor` | Visual tier (teal/orange/violet) of the knob-driven start group |
 | `gates.count` | Total gate count, including sword gates |
-| `gates.horizontalDistanceMetres` | Distance between alternate gate centres, not offset from centreline |
-| `gates.verticalDistanceMetres` | Downhill gate spacing |
-| `gates.openingWidthMetres` | Full opening width |
-| `gates.firstGateMetres` | Start-to-first-gate distance |
-| `gates.finishAfterLastGateMetres` | Last-gate-to-finish distance |
 | `gates.swordGateCount` | Exact number distributed across the course |
 | `gates.icePercent` | 0–100 percent of gates covered by ice, rounded to a whole gate count |
-| `yeti` | Start group: independent count, color and absolute speedKmh |
-| `missedGateYetis` | `gatePercent` of gates guarded by one sleeping penalty yeti (color, absolute speedKmh); a miss wakes that gate's yeti |
-| `tierRates` / `itemRates` | Per-tier default spawn rates plus optional per-object overrides (tiers defined once in global `arcade.itemTiers`) |
+| `tierRates` / `itemRates` | slightlyRare/veryRare defaults plus per-object overrides (tiers in `arcade.itemTiers`; common rate from obstacle knob) |
 | `itemSpreadMetres` | Horizontal placement range about centreline |
 | `endTrafficMultiplier` | Gradual increase in skier/boarder density toward finish |
 
-Course length is first gate distance + `(count − 1) × vertical spacing` + finish offset. Horizontal gate centres alternate at plus/minus half the configured horizontal distance. No extra Arcade gate sway is added.
+`arcade.knobLevels` holds the four level tables (obstacle rates, chase counts/speeds as percent of top, guarded-gate shares, top speeds) plus gate geometry as percents of top speed. Course length is the derived first run-out + `(count − 1) × derived vertical spacing` + derived finish run-out. Horizontal gate centres alternate at plus/minus half the derived horizontal distance. No extra Arcade gate sway is added.
 
-Yeti colors teal/orange/violet map to internal slow/fast/elite visual tiers. Speeds are absolute and independent of color. Zero count disables a group; zero speed makes it stationary. Waiting start-line yetis wake when the start is crossed. Pursuers belong to their run and have no distance leash; retire at its end. Sleeping Yeti item entries use the stage's `yeti.speedKmh`.
+Start groups resolve from the chase knob; `yetiColor` (teal/orange/violet) maps to internal slow/fast/elite visual tiers. Zero count disables the group. Waiting start-line yetis wake when the start is crossed. Pursuers belong to their run and have no distance leash; retire at its end. Sleeping Yeti item entries use the stage's knob-derived chase speed. Penalty wolves (`missWolves` per armed gate, at chase speed) sleep until their gate is missed or bumped.
 
-Global `arcade.itemTiers` maps each of the 59 catalog keys (listed in `ARCADE.md` and `ARCADE_ITEMS` in `game.js`) to `common`, `slightlyRare` or `veryRare`. Each stage's `tierRates` sets the per-100m default for each tier; `itemRates` overrides single objects, with explicit `0` disabling one and omission using the tier rate. Rates are placement attempts, not guaranteed exact counts: collision, gate and landing clearances can reject a placement. `wolfPack` counts packs; `wolf` counts individuals. Town/ambient scenery has separate settings. Do not add a hidden background spawn stream inside Arcade that defeats these controls.
+Global `arcade.itemTiers` maps each of the 59 catalog keys (listed in `ARCADE.md` and `ARCADE_ITEMS` in `game.js`) to `common`, `slightlyRare` or `veryRare`. Each stage's `tierRates` sets the per-100m default for `slightlyRare`/`veryRare` while the obstacle knob sets `common`; `itemRates` overrides single objects, with explicit `0` disabling one and omission using the tier/knob rate. Rates are placement attempts, not guaranteed exact counts: collision, gate and landing clearances can reject a placement. `wolfPack` counts packs; `wolf` counts individuals. Town/ambient scenery has separate settings. Do not add a hidden background spawn stream inside Arcade that defeats these controls.
 
 Gate ice is separate from randomly placed `smallLake` and `largeLake`. At handover, stages 8 and 12 use 25% gate ice; others use 0%. Selected gates vary per run. Their patches span the opening and intentionally bypass the ordinary gate-clearance restriction for lakes.
 
