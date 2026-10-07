@@ -1427,7 +1427,39 @@ window.FROSTLINE_READY = (async () => {
     if(Math.abs(o.y-state.p.y)<165)text(o.stage==='arcade'?S.arcade.stages.length+' STAGES - ONE RUN':st.sub,s.x,s.y+24,7,C.muted);
     const best=courseRecord(o.stage)?.bestSeconds;if(S.timing.enabled&&best)text('BEST '+formatTime(best),s.x,s.y+39,8,C.teal);
   }
+  // Curled-up gate wolves breathe slowly until their existing wake trigger fires.
+  const sleepingWolfPixels=[
+    '........................',
+    '....oo..........o.......',
+    '...oggo........ogo......',
+    '..oggggooooo..oggo......',
+    '.oghhgggggggooogggo.....',
+    'oghhhhhgggggggghhggo....',
+    'oghhlhhhgggggghlhggo....',
+    'oghlhhhgggggghhohhggo...',
+    'oghhhhgggggghhllhhhoo...',
+    '.oghhgggggggghllllhno...',
+    '..oggggggggggghllhho....',
+    '...oohhhhhhhhhhhoo......',
+    '.....oooooooooo.........'
+  ];
+  function drawSleepingWolf(o,s){
+    const colors={o:'#465765',g:'#77858d',h:'#a3adb0',l:'#d1d7d1',n:'#293e49'};
+    const unit=Math.max(1,Math.round(o.width*ZOOM/24)),breath=Math.sin(clock*1.8+o.phase)>.35?1:0;
+    const left=s.x-12*unit,top=s.y-12*unit;
+    shadow(s.x,s.y,19,4);
+    for(let row=0;row<sleepingWolfPixels.length;row++)for(let col=0;col<24;col++){
+      const color=colors[sleepingWolfPixels[row][col]];if(!color)continue;
+      box(left+col*unit,top+row*unit-(row<8?breath:0),unit,unit+(row===7?breath:0),color);
+    }
+    // A closed eyelid, tucked muzzle and drifting Zs distinguish sleep from idling.
+    box(left+17*unit,top+8*unit,2*unit,unit,colors.o);
+    const alpha=ctx.globalAlpha;
+    for(let i=0;i<2;i++){const t=(clock*.35+o.phase/TAU+i*.5)%1;ctx.globalAlpha=alpha*Math.sin(t*Math.PI)*.75;text('Z',s.x+10+t*8,s.y-18-t*17,9,C.muted);}
+    ctx.globalAlpha=alpha;
+  }
   function drawPredator(o,s){
+    if(o.type==='wolf'&&o.penaltyGate&&!o.wolfAwake){drawSleepingWolf(o,s);return;}
     const moving=o.running||o.hunting||o.alertUntil>clock,cycle=(clock*(moving?10:3)+o.phase)%4,runFrame=moving&&cycle<2;
     const left=Math.cos(o.angle||0)<0,flip=o.type==='wolf'&&runFrame?!left:left;
     const bob=moving?[0,-1,-2,-1][Math.floor(cycle)]:0;
