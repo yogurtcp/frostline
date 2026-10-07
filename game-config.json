@@ -6,140 +6,140 @@
     "autoStart": false,
     "campaignVersion": 2,
     "stages": {
-      "First Wobble": [
+      "Just Warming Up": [
         1,
         1,
         1,
         1,
         1
       ],
-      "Pine Curious": [
+      "Mind the Dog": [
         2,
         1,
         1,
         1,
         1
       ],
-      "Tag, You're It": [
+      "Don't Look Back": [
         2,
         2,
         1,
         1,
         1
       ],
-      "Nap Patrol": [
+      "Let Sleeping Wolves Lie": [
         2,
         2,
         2,
         1,
         1
       ],
-      "Double Trouble": [
+      "Run.": [
         1,
         3,
         1,
         1,
         1
       ],
-      "Two-Yeti Minimum": [
+      "Door to Door": [
         2,
         3,
         1,
         1,
         1
       ],
-      "Sleeping on the Job": [
+      "Bumper to Bumper": [
         2,
         3,
         2,
         1,
         1
       ],
-      "Lumber Party": [
+      "So Many Trees": [
         3,
         1,
         1,
         1,
         2
       ],
-      "Zoom School": [
+      "Whee": [
         2,
         1,
         1,
         2,
         1
       ],
-      "Fast and Flurrious": [
+      "New Follower": [
         2,
         2,
         1,
         2,
         1
       ],
-      "Double Jeopardy": [
+      "Bear Country": [
         2,
         3,
         1,
         2,
         2
       ],
-      "Crowded House": [
+      "One of Everything": [
         3,
         3,
         1,
         2,
         2
       ],
-      "Speed Run": [
+      "Nothing to Hit": [
         1,
         2,
         1,
         3,
         1
       ],
-      "Cruise Control": [
+      "Business as Usual": [
         2,
         2,
         2,
         3,
         2
       ],
-      "Hot Pursuit": [
+      "Don't Stop": [
         2,
         3,
         3,
         3,
         3
       ],
-      "Peak Suspicion": [
+      "Pop Quiz": [
         3,
         3,
         3,
         3,
         3
       ],
-      "Tree Jail": [
+      "Mostly Trees Now": [
         4,
         1,
         1,
         1,
         2
       ],
-      "Peekaboo": [
+      "In No Hurry": [
         4,
         2,
         1,
         1,
         3
       ],
-      "Hide and Seek": [
+      "Something in the Trees": [
         4,
         3,
         1,
         1,
         3
       ],
-      "Nowhere to Hide": [
+      "No Excuses": [
         1,
         4,
         1,
@@ -323,7 +323,7 @@
       "endTrafficMultiplier": 1.5
     },
     "stageOverrides": {
-      "First Wobble": {
+      "Just Warming Up": {
         "yetiColor": "teal",
         "gates": {
           "count": 12,
@@ -340,7 +340,7 @@
         },
         "endTrafficMultiplier": 1.4
       },
-      "Pine Curious": {
+      "Mind the Dog": {
         "yetiColor": "teal",
         "gates": {
           "count": 15,
@@ -359,7 +359,7 @@
         },
         "endTrafficMultiplier": 1.4
       },
-      "Tag, You're It": {
+      "Don't Look Back": {
         "yetiColor": "teal",
         "gates": {
           "count": 19,
@@ -375,7 +375,7 @@
           "overtakingSkier": 0.1
         }
       },
-      "Nap Patrol": {
+      "Let Sleeping Wolves Lie": {
         "yetiColor": "teal",
         "gates": {
           "swordGateCount": 3
@@ -392,7 +392,7 @@
           "personGreen": 0.2
         }
       },
-      "Double Trouble": {
+      "Run.": {
         "gates": {
           "count": 17
         },
@@ -406,7 +406,7 @@
           "personGreen": 0.2
         }
       },
-      "Two-Yeti Minimum": {
+      "Door to Door": {
         "gates": {
           "count": 18
         },
@@ -425,7 +425,7 @@
           "personGreen": 0.2
         }
       },
-      "Sleeping on the Job": {
+      "Bumper to Bumper": {
         "yetiColor": "teal",
         "gates": {
           "count": 19,
@@ -446,7 +446,7 @@
         },
         "endTrafficMultiplier": 2.0
       },
-      "Lumber Party": {
+      "So Many Trees": {
         "gates": {},
         "tierRates": {
           "slightlyRare": 0.15
@@ -462,7 +462,7 @@
           "personGreen": 0.3
         }
       },
-      "Zoom School": {
+      "Whee": {
         "gates": {
           "count": 18,
           "swordGateCount": 3
@@ -483,7 +483,7 @@
           "personGreen": 0.3
         }
       },
-      "Fast and Flurrious": {
+      "New Follower": {
         "gates": {
           "count": 24
         },
@@ -497,7 +497,7 @@
         },
         "itemSpreadMetres": 28
       },
-      "Double Jeopardy": {
+      "Bear Country": {
         "yetiColor": "violet",
         "gates": {
           "count": 27,
@@ -519,7 +519,7 @@
           "personGreen": 0.2
         }
       },
-      "Crowded House": {
+      "One of Everything": {
         "yetiColor": "violet",
         "gates": {
           "count": 28,
@@ -545,32 +545,32 @@
           "personGreen": 0.3
         }
       },
-      "Speed Run": {
+      "Nothing to Hit": {
         "gates": {
           "count": 24
         }
       },
-      "Cruise Control": {
+      "Business as Usual": {
         "gates": {
           "count": 22
         }
       },
-      "Hot Pursuit": {
+      "Don't Stop": {
         "gates": {
           "count": 24
         }
       },
-      "Peak Suspicion": {
+      "Pop Quiz": {
         "gates": {
           "count": 26
         }
       },
-      "Tree Jail": {
+      "Mostly Trees Now": {
         "gates": {
           "count": 24
         }
       },
-      "Peekaboo": {
+      "In No Hurry": {
         "yetiColor": "violet",
         "gates": {
           "count": 24
@@ -580,7 +580,7 @@
           "largeLake": 0.25
         }
       },
-      "Hide and Seek": {
+      "Something in the Trees": {
         "yetiColor": "violet",
         "gates": {
           "count": 26,
@@ -593,7 +593,7 @@
           "hostileDog": 0.2
         }
       },
-      "Nowhere to Hide": {
+      "No Excuses": {
         "yetiColor": "violet",
         "gates": {
           "count": 28
