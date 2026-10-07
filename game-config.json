@@ -241,8 +241,8 @@
     "gear": {
       "shieldsPerStage": 1.5,
       "swordGatesPerSword": 4,
-      "maxShields": 2,
-      "maxSwords": 2,
+      "maxShields": 4,
+      "maxSwords": 4,
       "protectionSeconds": 1.1,
       "effectSeconds": 0.85,
       "shieldColor": "#55abb7",
