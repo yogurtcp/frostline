@@ -3,7 +3,7 @@
   "version": 1,
   "arcade": {
     "startStage": 1,
-    "autoStart": true,
+    "autoStart": false,
     "campaignVersion": 2,
     "stages": {
       "First Tracks": [
