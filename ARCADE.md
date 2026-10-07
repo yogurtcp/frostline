@@ -123,7 +123,7 @@ Knobs read `[obstacles, chase, miss, speed, ice]`, levels 1–4. Chase shows res
 
 ## Gear, towns and records
 
-Ordinary successful gates provide 1.5 shield charges per fully cleared stage; four successful sword gates earn one sword. These global amounts remain in `arcade.gear`. Charge and up to two of each item carry through towns. An attempt starts empty. If every gate is a sword gate, that stage awards no shield charge. Touching an enemy slows you down instead of crashing you, and spends no sword or shield; ramming one dead at speed keeps that clean kill, and sleeping yetis die on any touch above a creep. Dogs and people still knock you down (shields apply). Chaser catches and wolf attacks stay lethal, with swords working as before.
+Ordinary successful gates provide 1.5 shield charges per fully cleared stage; four successful sword gates earn one sword. These global amounts remain in `arcade.gear`. Charge and up to two of each item carry through towns. An attempt starts empty. If every gate is a sword gate, that stage awards no shield charge. Touching an enemy (bear, sleeping yeti, wolf) slows you down instead of crashing you, and spends no sword or shield; ramming one dead at speed keeps that clean kill, and sleeping yetis die on any touch above a creep. Dogs and people still knock you down (shields apply). Chaser catches and wolf attacks stay lethal, with swords working as before.
 
 Towns are safe intermissions and the next stage starts automatically at their exit. No money or timed qualification applies. Crossing outside the finish fails Arcade without teleporting; death returns to the summit (or the configured automatic start). Completing the final configured stage ends the run.
 

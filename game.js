@@ -825,6 +825,7 @@ window.FROSTLINE_READY = (async () => {
     burst(o.x,o.y,C.gold,12);say(kind==='bear'?'BEAR DOWN!':'YETI DOWN!',o);beep(190,.12,'triangle');return true;
   }
   function tooSlowToCrash(){return state.p.speed*S.physics.hudKmhPerSpeed<=S.physics.minimumCollisionKmh;}
+  function slowForEnemy(o){const p=state.p;if(p.air>0||p.slowContacts.has(o))return false;p.slowContacts.add(o);p.speed*=S.physics.enemySlowRetention;return true;}
   function hit(o) {
     if(o.mischief||o.type==='snowman'){if(!state.p.fall&&state.p.air<=0)touchVillageProp(o);return;}
     if(o.collectible){collectMushroom(o);return;}
@@ -843,7 +844,7 @@ window.FROSTLINE_READY = (async () => {
       return;
     }
     if(['rabbit','fox'].includes(o.type)){greetSmallAnimal(o,true);return;}
-    if(o.type==='wolf'){o.wolfAwake=true;o.angle=Math.atan2(o.y-p.y,o.x-p.x);o.nextAI=clock+2;o.running=true;return;}
+    if(o.type==='wolf'){o.wolfAwake=true;o.angle=Math.atan2(o.y-p.y,o.x-p.x);o.nextAI=clock+2;o.running=true;if(slowForEnemy(o)){burst(p.x,p.y,C.ice,10);beep(150,.1,'triangle');}return;}
 
     // Accelerating inside an existing slow contact must not cause another fall.
     if(p.slowContacts.has(o))return;
@@ -871,8 +872,8 @@ window.FROSTLINE_READY = (async () => {
     }
     if(o.type==='sled'&&fast){o.vx=90*Math.sign(p.vx||1);o.vy=240;p.speed*=S.physics.sledSpeedRetention;say('Express delivery!',o);return;}
     if(o.type==='bush'){o.flatten=true;p.speed*=S.physics.bushSpeedRetention;burst(o.x,o.y,C.gold,7);return;}
-    if(o.type==='lurker'){o.dead=true;o.r=0;o.fadeUntil=clock+S.wildlife.predatorFadeSeconds;o.running=false;p.slowContacts.add(o);p.speed*=S.physics.enemySlowRetention;burst(o.x,o.y,C.gold,12);say('YETI DOWN!',o);beep(190,.12,'triangle');return;}
-    if(o.type==='bear'){p.slowContacts.add(o);p.speed*=S.physics.enemySlowRetention;burst(p.x,p.y,C.ice,10);beep(150,.1,'triangle');return;}
+    if(o.type==='lurker'){o.dead=true;o.r=0;o.fadeUntil=clock+S.wildlife.predatorFadeSeconds;o.running=false;slowForEnemy(o);burst(o.x,o.y,C.gold,12);say('YETI DOWN!',o);beep(190,.12,'triangle');return;}
+    if(o.type==='bear'){if(slowForEnemy(o)){burst(p.x,p.y,C.ice,10);beep(150,.1,'triangle');}return;}
     if(['personRed','personGreen','personYellow'].includes(o.type))say(uphill?'BACKWARDS? Seriously?':pick(S.dialogue.personBumps),o);
     else if(o.type==='dog'){const dog={kind:'dog',x:o.x,y:o.y,speed:S.chasers.dogContactSpeed,phase:0,expires:p.y+S.chasers.dogContactChaseDistance,talkAt:clock+7};state.chasers.push(dog);o.eaten=true;o.r=0;say('WOOF. WOOF. WOOF.',dog);if(p.speed<=S.physics.walkingBumpLimit)return;}
     else if(o.type==='skier'||o.type==='boarder'){say(pick(o.fast?S.dialogue.fastBumps:S.dialogue.skierBumps),o);o.speakAt=clock+S.skiers.bumpSpeechCooldownSeconds;}

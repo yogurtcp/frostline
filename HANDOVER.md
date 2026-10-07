@@ -187,7 +187,7 @@ charge gained = old per-gate charge × combo / 3
 - Inventory and partial charges persist across towns. So does the combo until a miss. New attempts start empty.
 - Even a correct gate whose inventory is full advances the shared combo, but awards no stored charge.
 - Gate labels show `+N% SHIELD/SWORD` (that gate's share of one full item) in three chain-tier weights/colors; no top CHAIN indicator exists. Top inventory icons fill gradually and brighten when ready.
-- Shields automatically protect from falls (obstacles, dogs, people) outside towns. Swords automatically defeat lethal animal threats only: yeti/bear chaser catches and wolf attacks. Enemy bumps (bear, sleeping yeti) slow you (`physics.enemySlowRetention`) instead of crashing and spend nothing; sleeping yetis die on any above-creep touch; fast ramming kills stay clean (kill plus slowdown, no fall, no spend). Dog tackles and people bumps still knock you down. See the exclusion/eligibility guards rather than assuming every collision spends gear.
+- Shields automatically protect from falls (obstacles, dogs, people) outside towns. Swords automatically defeat lethal animal threats only: yeti/bear chaser catches and wolf attacks. Enemy bumps (bear, sleeping yeti, wolf) slow you via the shared `slowForEnemy` helper (`physics.enemySlowRetention`) instead of crashing and spend nothing; sleeping yetis die on any above-creep touch; fast ramming kills stay clean (kill plus slowdown, no fall, no spend). Dog tackles and people bumps still knock you down. See the exclusion/eligibility guards rather than assuming every collision spends gear.
 
 ## 7. Stage config: explicit tuning, no hidden balancing
 
