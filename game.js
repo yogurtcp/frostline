@@ -449,7 +449,7 @@ window.FROSTLINE_READY = (async () => {
     const dx=Math.abs(x-o.x)-hw,dy=Math.abs(y-(o.y-hh))-hh;
     return Math.hypot(Math.max(dx,0),Math.max(dy,0))+Math.min(Math.max(dx,dy),0);
   }
-  function obstacleClearance(o,x,y){return ['lodge','rental'].includes(o.type)?houseClearance(o,x,y):Math.hypot(x-o.x,(y-o.y)*S.physics.collisionYScale)-o.r;}
+  function obstacleClearance(o,x,y){return o.type==='lodge'||o.type==='rental'?houseClearance(o,x,y):Math.hypot(x-o.x,(y-o.y)*S.physics.collisionYScale)-o.r;}
   function laneRoute(start,goal,houses,town){
     const V=S.village,g=V.pathGrid,key=(x,y)=>x+','+y,cell=p=>({x:Math.round((p.x-town.x)/g),y:Math.round((p.y-town.origin)/g)}),world=n=>({x:town.x+n.x*g,y:town.origin+n.y*g});
     const a=cell(start),b=cell(goal),open=[],seen=new Map([[key(a.x,a.y),0]]),parents=new Map();
@@ -744,9 +744,10 @@ window.FROSTLINE_READY = (async () => {
     return polygonContains(g.points,dx,dy)&&!g.holes.some(h=>polygonContains(h,dx,dy));
   }
   function patchAt(x,y){return state.objects.find(o=>o.type==='ice'&&lakeContains(o,x,y));}
+  function roadBBox(r){let x0=Infinity,y0=Infinity,x1=-Infinity,y1=-Infinity;for(const p of r.points){if(p.x<x0)x0=p.x;if(p.x>x1)x1=p.x;if(p.y<y0)y0=p.y;if(p.y>y1)y1=p.y;}return r.bbox={x0,y0,x1,y1};}
   function onRoad(x,y){
     // Only exposed paving slows skis. A snow-covered main road wins at intersections.
-    const roads=state.roads.filter(r=>roadDistance(r,x,y)<r.width/2);
+    const roads=state.roads.filter(r=>{const b=r.bbox||roadBBox(r),hw=r.width/2;return x>b.x0-hw&&x<b.x1+hw&&y>b.y0-hw&&y<b.y1+hw&&roadDistance(r,x,y)<hw;});
     return !roads.some(r=>r.surface==='snow')&&roads.some(r=>r.surface!=='snow');
   }
   function ensureWorld(initial=false){
@@ -957,7 +958,7 @@ window.FROSTLINE_READY = (async () => {
     if(state.course){const run=state.course;if(!run.timingStarted&&p.y>=run.startY){run.timingStarted=true;run.time+=dt*clamp((p.y-run.startY)/(p.y-previous.y||1),0,1);}else if(run.timingStarted)run.time+=dt;spawnTerrain();}
     updateVillageLife(dt);updateWildlife(dt);updateSkiers(dt);updatePedestrians(dt);
     for(const o of state.objects){
-      if(!['skier','boarder'].includes(o.type)){if(o.vx&&!o.animal)o.x+=o.vx*dt;if(o.vy&&!o.animal)o.y+=o.vy*dt;}
+      if(o.type!=='skier'&&o.type!=='boarder'){if(o.vx&&!o.animal)o.x+=o.vx*dt;if(o.vy&&!o.animal)o.y+=o.vy*dt;}
       if(o.cheerUntil>clock&&clock>=(o.nextCheer||0)&&Math.hypot(o.x-p.x,o.y-p.y)<650){say(pick(o.cheerRun?.objective==='mushrooms'?S.dialogue.mushroomCheers:S.dialogue.cheers),o,2.2);o.nextCheer=clock+3.4+o.phase*.2;}
       if(o.roam&&!(o.socialUntil>clock))o.x+=Math.cos(clock*.8+o.phase)*o.roam*dt*.3;
 
@@ -968,7 +969,7 @@ window.FROSTLINE_READY = (async () => {
       if(o.type==='gate'&&o.run===state.course&&!o.checked&&previous.y<o.y&&p.y>=o.y){o.checked=true;o.checkedAt=clock;const ratio=(o.y-previous.y)/(p.y-previous.y||1),crossX=mix(previous.x,p.x,ratio);if(state.course){if(Math.abs(crossX-o.x)<o.half){state.course.points+=S.race.gatePoints;state.course.cleared++;o.good=true;if(state.course.arcade)collectArcadeGear(o);burst(o.x,o.y,C.gold,9);beep(710,.04);}else{state.course.missed++;o.good=false;if(state.course.arcade)state.arcade.combo=0;beep(210,.045);if(state.course.arcade)wakePenaltyWolves(o);}}}
       if(o.type==='entrance'&&!state.course&&previous.y<o.y&&p.y>=o.y&&Math.abs(p.x-o.x)<o.half){startCourse(o.stage,o);break;}
       if(!state.arcade&&o.type==='lift'&&!o.used&&previous.y<o.y&&p.y>=o.y&&Math.abs(p.x-o.x)<o.half){o.used=true;state.liftTimer=S.lift.rideSeconds;p.speed=0;announce('UP WE GO','Next stop: the summit.',C.teal,3);}
-      if(o.r>0&&Math.abs(o.y-p.y)<Math.max(130,o.width)){const d=Math.hypot(p.x-o.x,(p.y-o.y)*.85);if(obstacleClearance(o,p.x,p.y)<S.physics.playerRadius)hit(o);else if(o.type.startsWith('person')&&!o.greeted&&d<85){o.greeted=true;say(pick(S.dialogue.greetings),o);}}
+      if(o.r>0&&Math.abs(o.y-p.y)<Math.max(130,o.width)&&Math.abs(p.x-o.x)<Math.max(130+o.r,o.width)){const d=Math.hypot(p.x-o.x,(p.y-o.y)*.85);if((o.type==='lodge'||o.type==='rental'?houseClearance(o,p.x,p.y):d-o.r)<S.physics.playerRadius)hit(o);else if(o.type.startsWith('person')&&!o.greeted&&d<85){o.greeted=true;say(pick(S.dialogue.greetings),o);}}
     }
     if(state.course){const off=Math.abs(p.x-centerAt(p.y))>S.race.offPisteDistance;if(off&&!state.course.left){state.course.left=true;for(const c of state.chasers)if(!c.patrolPass&&c.chaseRun!==state.course)c.expires=p.y+(c.kind==='dog'?2100:220);if(state.course.violation)announce('OFF PISTE',state.course.ambush==='dog'?'The dogs are still very interested.':state.course.ambush==='patrol'?'Ski patrol follows you off piste. Pay next time!':'You left the marked course.',C.blue,3);}const run=state.course;
       if(previous.y<run.endY&&p.y>=run.endY){
@@ -988,10 +989,10 @@ window.FROSTLINE_READY = (async () => {
     for(const q of state.particles){q.x+=q.vx*dt;q.y+=q.vy*dt;q.vy+=80*dt;q.life-=dt;}state.particles=state.particles.filter(q=>q.life>0);state.speech=state.speech.filter(q=>q.until>clock);state.messages=state.messages.filter(q=>q.until>clock);
     state.cam.x=ease(state.cam.x,p.x,S.render.cameraXFollow,dt);state.cam.y=ease(state.cam.y,p.y-H*S.render.playerScreenY/ZOOM,S.render.cameraYFollow,dt);state.screenShake=Math.max(0,state.screenShake-dt);
   }
+  const PED_SOLIDS=new Set(['pine','fir','rock','pebble','lodge','rental','lift','bench','lamp','snowman','stump','breadStand','skiRack']),PED_FLAGS=new Set(['gate','entrance','finish']);
   function updatePedestrians(dt){
-    const P=S.pedestrians,people=state.objects.filter(o=>o.type.startsWith('person'));
-    const solids=state.objects.filter(o=>o.r>0&&['pine','fir','rock','pebble','lodge','rental','lift','bench','lamp','snowman','stump','breadStand','skiRack'].includes(o.type));
-    const flags=state.objects.filter(o=>['gate','entrance','finish'].includes(o.type));
+    const P=S.pedestrians,people=[],solids=[],flags=[];
+    for(const o of state.objects){if(o.type.startsWith('person'))people.push(o);if(o.r>0&&PED_SOLIDS.has(o.type))solids.push(o);if(PED_FLAGS.has(o.type))flags.push(o);}
     for(const o of people){
       o.walking=false;
       if(o.socialUntil>clock)continue;
@@ -1010,7 +1011,7 @@ window.FROSTLINE_READY = (async () => {
       }else{
         const radius=o.cheerRun?P.spectatorRadius:P.roamRadius;
         const clear=(x,y)=>{
-          if(Math.hypot(x-o.homeX,y-o.homeY)>radius||patchAt(x,y))return false;
+          if(Math.hypot(x-o.homeX,y-o.homeY)>radius||freshIceCache().some(h=>lakeContains(h,x,y)))return false;
           if(solids.some(h=>obstacleClearance(h,x,y)<o.r+P.obstacleMargin))return false;
           if(flags.some(f=>Math.abs(y-f.y)<P.gateClearance&&Math.abs(x-f.x)<(f.half||0)+o.r+P.obstacleMargin))return false;
           if(o.cheerRun){const run=o.cheerRun;if((x-run.x)*Math.sign(o.homeX-run.x)<run.finishHalf+o.r+P.obstacleMargin)return false;}
@@ -1041,24 +1042,29 @@ window.FROSTLINE_READY = (async () => {
     }
   }
   let houseCacheTime=-1,houseCache=[],houseGrid=new Map(),iceCacheTime=-1,iceCache=[];
-  // Grid cell must exceed max house half-extent + traveller rm (~120px); 3x3 query then covers every house in reach.
-  const HOUSE_CELL=256,houseCell=(x,y)=>Math.floor(x/HOUSE_CELL)+','+Math.floor(y/HOUSE_CELL);
+  // Houses are inserted into every cell overlapped by their footprint inflated by HOUSE_REACH, so a
+  // single-cell query finds every house in reach. Exact for any house size while traveller rm<=REACH.
+  const HOUSE_CELL=128,HOUSE_REACH=64;
+  function freshIceCache(){if(iceCacheTime!==clock){iceCache=state.objects.filter(h=>h.type==='ice');iceCacheTime=clock;}return iceCache;}
   function travel(o,angle,speed,dt,animal=false,avoidTowns=false){
     if(houseCacheTime!==clock){
       houseCache=state.objects.filter(h=>h.type==='lodge'||h.type==='rental');houseCacheTime=clock;houseGrid=new Map();
-      for(const h of houseCache){const k=houseCell(h.x,h.y-h.width*S.village.houseFootHeightRatio);let a=houseGrid.get(k);if(!a)houseGrid.set(k,a=[]);a.push(h);}
+      for(const h of houseCache){
+        const hw=h.width*S.village.houseFootWidthRatio,hh=h.width*S.village.houseFootHeightRatio,yc=h.y-hh;
+        const x0=Math.floor((h.x-hw-HOUSE_REACH)/HOUSE_CELL),x1=Math.floor((h.x+hw+HOUSE_REACH)/HOUSE_CELL);
+        const y0=Math.floor((yc-hh-HOUSE_REACH)/HOUSE_CELL),y1=Math.floor((yc+hh+HOUSE_REACH)/HOUSE_CELL);
+        for(let gx=x0;gx<=x1;gx++){let col=houseGrid.get(gx);if(!col)houseGrid.set(gx,col=new Map());for(let gy=y0;gy<=y1;gy++){let a=col.get(gy);if(!a)col.set(gy,a=[]);a.push(h);}}
+      }
     }
-    if(iceCacheTime!==clock){iceCache=state.objects.filter(h=>h.type==='ice');iceCacheTime=clock;}
+    const ice=freshIceCache();
     const A=S.wildlife,Vh=S.village,hwr=Vh.houseFootWidthRatio,hhr=Vh.houseFootHeightRatio,rm=(o.r||10)+5;
     const nearHouse=(x,y)=>{
-      const cx=Math.floor(x/HOUSE_CELL),cy=Math.floor(y/HOUSE_CELL);
-      for(let ix=cx-1;ix<=cx+1;ix++)for(let iy=cy-1;iy<=cy+1;iy++){
-        const a=houseGrid.get(ix+','+iy);
-        if(a)for(const h of a){const hw=h.width*hwr;if(Math.abs(x-h.x)>hw+rm)continue;const dy=h.y-y;if(dy>-rm&&dy<h.width*hhr*2+rm&&houseClearance(h,x,y)<rm)return true;}
-      }
+      const col=houseGrid.get(Math.floor(x/HOUSE_CELL));if(!col)return false;
+      const a=col.get(Math.floor(y/HOUSE_CELL));if(!a)return false;
+      for(const h of a){const hw=h.width*hwr;if(Math.abs(x-h.x)>hw+rm)continue;const dy=h.y-y;if(dy>-rm&&dy<h.width*hhr*2+rm&&houseClearance(h,x,y)<rm)return true;}
       return false;
     };
-    const nearIce=(x,y)=>iceCache.some(h=>{const g=h.lake||lakeGeometry(h);return Math.abs(x-h.x)<=g.radius+rm&&Math.abs(y-h.y)<=g.radius+rm&&lakeContains(h,x,y);});
+    const nearIce=(x,y)=>ice.some(h=>{const g=h.lake||lakeGeometry(h);return Math.abs(x-h.x)<=g.radius+rm&&Math.abs(y-h.y)<=g.radius+rm&&lakeContains(h,x,y);});
     const valid=(x,y)=>(!avoidTowns||!insideTown(x,y))&&!nearIce(x,y)&&!nearHouse(x,y)&&(!animal||courseCreature(o,x,y)||!o.arcadeRun&&!classicArea(x,y,35)&&(!(o.type==='bear'||(['fox','wolf'].includes(o.type)&&!o.humanVisitor))||!humanArea(x,y)));
     const probe=Math.max(A.avoidProbeDistance,speed*A.avoidLookaheadSeconds);
     const clear=a=>[Math.min(probe,speed*dt),probe*.5,probe].every(d=>valid(o.x+Math.cos(a)*d,o.y+Math.sin(a)*d));
@@ -1096,7 +1102,7 @@ window.FROSTLINE_READY = (async () => {
   function updateSkiers(dt){
     const p=state.p,A=S.wildlife,K=S.skiers;
     for(const o of state.objects){
-      if(!['skier','boarder'].includes(o.type)||Math.hypot(o.x-p.x,o.y-p.y)>A.activeRadius)continue;
+      if((o.type!=='skier'&&o.type!=='boarder')||Math.hypot(o.x-p.x,o.y-p.y)>A.activeRadius)continue;
       if(o.npcFallUntil>clock||o.catInterest||o.socialUntil>clock)continue;
       let vx=o.vx||0,vy=o.vy||0;
       if(o.fearUntil>clock&&o.threat&&!o.threat.dead&&(courseCreature(o.threat,o.x,o.y)||!humanArea(o.x,o.y))){
@@ -1115,7 +1121,8 @@ window.FROSTLINE_READY = (async () => {
     }
   }
   function updateWildlife(dt){
-    const p=state.p,A=S.wildlife,rabbits=state.objects.filter(o=>o.type==='rabbit'&&!o.eaten),cats=state.objects.filter(o=>o.type==='cat'),skis=state.objects.filter(o=>o.type==='skier'||o.type==='boarder'),hunters=state.objects.filter(o=>o.type==='fox'||o.type==='wolf');
+    const p=state.p,A=S.wildlife,rabbits=[],cats=[],skis=[],hunters=[];
+    for(const o of state.objects){const t=o.type;if(t==='rabbit'){if(!o.eaten)rabbits.push(o);}else if(t==='cat')cats.push(o);else if(t==='skier'||t==='boarder')skis.push(o);else if(t==='fox'||t==='wolf')hunters.push(o);}
     for(const o of state.objects){if(o.eaten||o.dead||o.stunnedUntil>clock||!o.animal||o.penaltyGate&&!o.wolfAwake||Math.hypot(o.x-p.x,o.y-p.y)>A.activeRadius)continue;
       if(state.started&&o.type==='bear'&&(courseCreature(o,p.x,p.y)||!humanArea(o.x,o.y)&&!humanArea(p.x,p.y))&&Math.hypot(o.x-p.x,o.y-p.y)<A.bearWakeDistance){o.animal=false;o.type='awakened';o.r=0;state.chasers.push({kind:'bear',chaseRun:o.arcadeRun,x:o.x,y:o.y,speed:A.bearChaseSpeed,phase:o.phase,expires:p.y+A.bearChaseDistance,talkAt:Infinity});continue;}
       if(['rabbit','fox'].includes(o.type)&&moveSocialAnimal(o,dt,hunters))continue;
@@ -1708,7 +1715,7 @@ window.FROSTLINE_READY = (async () => {
     if(state.zone.kind==='start'){
       const s=screen(0,-128);text('S K I  I N T O  T R O U B L E',s.x,s.y,12,C.teal);text('four trails. absolutely no good judgement.',s.x,s.y+21,8,C.muted);
     }
-    const layers=state.objects.filter(o=>!['ramp','mogul'].includes(o.type)&&o.y>state.cam.y-200&&o.y<state.cam.y+H/ZOOM+200).map(o=>({y:o.y,draw:()=>drawObject(o)}));
+    const layers=state.objects.filter(o=>(o.type!=='ramp'&&o.type!=='mogul')&&o.y>state.cam.y-200&&o.y<state.cam.y+H/ZOOM+200).map(o=>({y:o.y,draw:()=>drawObject(o)}));
     layers.push({y:state.p.y,draw:drawPlayer});for(const c of state.chasers)layers.push({y:c.y,draw:()=>drawChaser(c)});
     layers.sort((a,b)=>a.y-b.y);for(const layer of layers)layer.draw();
     for(const q of state.particles){const s=screen(q.x,q.y);box(s.x,s.y,3,3,q.color);}
