@@ -58,7 +58,7 @@ Design guideline: keep gate geometry the same across stages except for speed —
 
 All correct gates share one streak, regardless of shield/sword type. They award 1, then 2, then 3 points per gate; missing a gate resets the streak. Three points equal the previous full gate charge (one sword-gate unit or `shieldsPerStage / ordinaryGateCount` shield charge). Thus the first two gates charge at one-third and two-thirds speed. `swordGatesPerSword` still counts full-charge equivalents. The streak carries through towns and continues even when an inventory is full, but full inventories gain no charge.
 
-Gate labels use three increasing text weights and `arcade.gear.comboColors`. There is no top CHAIN indicator; instead, each gate cleared at chain 2+ keeps a large `CHAIN n!` label floating above it in its chain color. Shields are not consumed in towns or their safe approach paths. Death/new Arcade run resets the streak.
+Gate labels use three increasing text weights and `arcade.gear.comboColors`. There is no top CHAIN indicator; instead, each gate cleared at chain 2+ shows a small semi-transparent `CHAIN n!` label above it in its chain color, fading out over ~2.5 s after you pass. Shields are not consumed in towns or their safe approach paths. Death/new Arcade run resets the streak.
 
 ### Yetis
 
