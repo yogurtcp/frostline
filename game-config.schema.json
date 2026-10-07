@@ -4761,16 +4761,16 @@
           "properties": {},
           "additionalProperties": {
             "type": "array",
-            "minItems": 4,
-            "maxItems": 4,
-            "description": "Difficulty levels 1-4 for [obstacles, start chase, miss guards, speed].",
+            "minItems": 5,
+            "maxItems": 5,
+            "description": "Difficulty levels 1-4 for [obstacles, start chase, miss guards, speed, ice].",
             "items": {
               "type": "integer",
               "minimum": 1,
               "maximum": 4
             }
           },
-          "description": "Compact stages: name to knobs [obstacles, chase, miss, speed], levels 1-4. Order is play order. Details come from stageDefaults plus stageOverrides."
+          "description": "Compact stages: name to knobs [obstacles, chase, miss, speed, ice], levels 1-4. Order is play order. Details come from stageDefaults plus stageOverrides."
         },
         "knobLevels": {
           "type": "object",
@@ -4781,10 +4781,11 @@
             "chaseSpeedPercent",
             "missGatePercent",
             "missWolves",
+            "iceGatePercent",
             "speed",
             "gateSpacing"
           ],
-          "description": "Central level tables for the four difficulty knobs. Stages pick one level (1-4) per knob.",
+          "description": "Central level tables for the five difficulty knobs. Stages pick one level (1-4) per knob.",
           "properties": {
             "obstacles": {
               "type": "array",
@@ -4835,6 +4836,17 @@
               "minimum": 0,
               "maximum": 12,
               "description": "Wolves guarding each armed gate."
+            },
+            "iceGatePercent": {
+              "type": "array",
+              "minItems": 4,
+              "maxItems": 4,
+              "description": "Share of gates with ice spanning the opening for ice levels 1-4.",
+              "items": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 100
+              }
             },
             "speed": {
               "type": "array",
@@ -5662,12 +5674,6 @@
                   "type": "integer",
                   "minimum": 0,
                   "maximum": 500
-                },
-                "icePercent": {
-                  "type": "number",
-                  "minimum": 0,
-                  "maximum": 100,
-                  "description": "Percentage of gates with a frozen patch covering the opening (rounded to whole gates)."
                 }
               }
             },
@@ -6100,12 +6106,6 @@
                     "type": "integer",
                     "minimum": 0,
                     "maximum": 500
-                  },
-                  "icePercent": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 100,
-                    "description": "Percentage of gates with a frozen patch covering the opening (rounded to whole gates)."
                   }
                 }
               },

@@ -195,23 +195,23 @@ The user wants direct control. **Do not introduce automatic Yeti speed math or r
 
 The previous attempt to make the first Yeti stages faster was rejected and reverted. Stages 3–4 were restored to normal 103 km/h and 30 m vertical gate spacing. Absolute Yeti speeds then became editable per stage.
 
-`arcade.stages` maps names to knob tuples `[obstacles, chase, miss, speed]` (levels 1–4); map order is play order (currently 20 stages). Effective fields resolve per stage as `stageDefaults` plus that name's `stageOverrides` entry (same verbose field names, all optional; unknown names fail validation):
+`arcade.stages` maps names to knob tuples `[obstacles, chase, miss, speed, ice]` (levels 1–4); map order is play order (currently 20 stages). Effective fields resolve per stage as `stageDefaults` plus that name's `stageOverrides` entry (same verbose field names, all optional; unknown names fail validation):
 
 | Setting | Meaning |
 | --- | --- |
-| `knobs` | Four levels 1–4 from the compact row |
+| `knobs` | Five levels 1–4 from the compact row |
 | `yetiColor` | Visual tier (teal/orange/violet) of the knob-driven start group |
-| `gates.count` / `.swordGateCount` / `.icePercent` | Gate totals (geometry derives from speed knob) |
+| `gates.count` / `.swordGateCount` | Gate totals (geometry derives from speed knob; ice share from ice knob) |
 | `tierRates` / `itemRates` | slightlyRare/veryRare defaults plus per-object overrides (tiers in `arcade.itemTiers`; common rate from obstacle knob) |
 | `itemSpreadMetres` / `endTrafficMultiplier` | Placement range; skier/boarder ramp toward finish |
 
-`arcade.knobLevels` holds the four level tables (obstacle rates, chase counts/speeds as percent of top, guarded-gate shares, top speeds) plus gate geometry as percents of top speed. Course length is the derived first run-out + `(count − 1) × derived vertical spacing` + derived finish run-out. Horizontal gate centres alternate at plus/minus half the derived horizontal distance. No extra Arcade gate sway is added.
+`arcade.knobLevels` holds the five level tables (obstacle rates, chase counts/speeds as percent of top, guarded-gate shares, ice-gate shares, top speeds) plus gate geometry as percents of top speed. Course length is the derived first run-out + `(count − 1) × derived vertical spacing` + derived finish run-out. Horizontal gate centres alternate at plus/minus half the derived horizontal distance. No extra Arcade gate sway is added.
 
 Start groups resolve from the chase knob; `yetiColor` (teal/orange/violet) maps to internal slow/fast/elite visual tiers. Zero count disables the group. Waiting start-line yetis wake when the start is crossed. Pursuers belong to their run and have no distance leash; retire at its end. Sleeping Yeti item entries use the stage's knob-derived chase speed. Penalty wolves (`missWolves` per armed gate, at chase speed) sleep until their gate is missed or bumped.
 
 Global `arcade.itemTiers` maps each of the 59 catalog keys (listed in `ARCADE.md` and `ARCADE_ITEMS` in `game.js`) to `common`, `slightlyRare` or `veryRare`. Each stage's `tierRates` sets the per-100m default for `slightlyRare`/`veryRare` while the obstacle knob sets `common`; `itemRates` overrides single objects, with explicit `0` disabling one and omission using the tier/knob rate. Rates are placement attempts, not guaranteed exact counts: collision, gate and landing clearances can reject a placement. `wolfPack` counts packs; `wolf` counts individuals. Town/ambient scenery has separate settings. Do not add a hidden background spawn stream inside Arcade that defeats these controls.
 
-Gate ice is separate from randomly placed `smallLake` and `largeLake`. Lumber Party (8) and Crowded House (12) use 25% gate ice, Peekaboo (18) uses 50%; the rest use the default 0%. Selected gates vary per run. Their patches span the opening and intentionally bypass the ordinary gate-clearance restriction for lakes.
+Gate ice is separate from randomly placed `smallLake` and `largeLake`. The ice knob sets the share of gates with ice from `knobLevels.iceGatePercent`, like the miss knob sets guarded shares. Selected gates vary per run. Their patches span the opening and intentionally bypass the ordinary gate-clearance restriction for lakes.
 
 ## 8. Code navigation and state ownership
 

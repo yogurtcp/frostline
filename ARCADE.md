@@ -21,13 +21,13 @@ For live local tuning, run `python3 serve.py`, open http://127.0.0.1:8765/, then
 
 ## Add or edit a stage
 
-Add one row per stage to `arcade.stages`: `"Name": [obstacles, chase, miss, speed]`, levels 1–4. Map order defines progression; there is no fixed stage count or hardcoded name list. Details resolve from `arcade.stageDefaults` plus `arcade.stageOverrides` (same field names as before, partial, keyed by stage name; unknown names fail validation). A compact pair looks like this (objects missing from `itemRates` use their knob or tier rate):
+Add one row per stage to `arcade.stages`: `"Name": [obstacles, chase, miss, speed, ice]`, levels 1–4. Map order defines progression; there is no fixed stage count or hardcoded name list. Details resolve from `arcade.stageDefaults` plus `arcade.stageOverrides` (same field names as before, partial, keyed by stage name; unknown names fail validation). A compact pair looks like this (objects missing from `itemRates` use their knob or tier rate):
 
 ```json
 {
 "stages": {
-  "First Tracks": [1, 1, 1, 1],
-  "My snowy disaster": [2, 2, 2, 2]
+  "First Wobble": [1, 1, 1, 1, 1],
+  "My snowy disaster": [2, 2, 2, 2, 2]
 },
 "stageOverrides": {
   "My snowy disaster": {
@@ -39,7 +39,7 @@ Add one row per stage to `arcade.stages`: `"Name": [obstacles, chase, miss, spee
 }
 ```
 
-Here `My snowy disaster` runs knobs [2,2,2,2] with 18 gates, teal yetis, slightlyRare 0.3, and `pine`/`skier`/`rock` item overrides; everything else comes from `stageDefaults`. `First Tracks` runs pure defaults. Level meanings live in `arcade.knobLevels`.
+Here `My snowy disaster` runs knobs [2,2,2,2,2] with 18 gates, teal yetis, slightlyRare 0.3, and `pine`/`skier`/`rock` item overrides; everything else comes from `stageDefaults`. `First Wobble` runs pure defaults. Level meanings live in `arcade.knobLevels`.
 
 ### Gates
 
@@ -50,7 +50,7 @@ Geometry (horizontal/vertical distance, opening, first-gate and finish run-outs)
 
 Course length is the derived first run-out + `(count − 1) × derived vertical spacing` + derived finish run-out. Changing count moves the finish and following town together. The finish opening still uses the global `race.finishWidthMultiplier` (2).
 
-`icePercent` (0–100, default 0) selects that percentage of gates, rounded to a whole number, for ice spanning the opening. Selected gates vary each run. These patches are independent of `smallLake`/`largeLake` density; use zero for both if you only want gate ice.
+The ice knob sets the share of gates with ice spanning the opening from `knobLevels.iceGatePercent` (rounded to whole gates, level 1 is none). Selected gates vary each run. These patches are independent of `smallLake`/`largeLake` density; use zero for both if you only want gate ice.
 
 Design guideline: keep gate geometry the same across stages except for speed — faster stages get more spread-out gates (larger vertical distance and wider openings) so reaction time stays fair.
 
@@ -96,30 +96,30 @@ Densities are placement attempts, not exact counts: gates, finish openings, lake
 
 ## Current defaults
 
-| # | Name | Knobs O/C/M/S | Top | Chase | Guarded |
-| --- | --- | ---: | ---: | --- | ---: |
-| 1 | First Wobble | 1111 | 90 | none | 0% |
-| 2 | Pine Curious | 2111 | 90 | none | 0% |
-| 3 | Tag, You're It | 2211 | 90 | 1 teal @45 | 0% |
-| 4 | Nap Patrol | 2221 | 90 | 1 teal @45 | 25% |
-| 5 | Double Trouble | 1311 | 90 | 2 orange @63 | 0% |
-| 6 | Two-Yeti Minimum | 2311 | 90 | 2 orange @63 | 0% |
-| 7 | Sleeping on the Job | 2321 | 90 | 2 teal @63 | 25% |
-| 8 | Lumber Party | 3111 | 90 | none | 0% |
-| 9 | Zoom School | 2112 | 105 | none | 0% |
-| 10 | Fast and Flurrious | 2212 | 105 | 1 orange @52 | 0% |
-| 11 | Double Jeopardy | 2312 | 105 | 2 violet @74 | 0% |
-| 12 | Crowded House | 3312 | 105 | 2 violet @74 | 0% |
-| 13 | Speed Run | 1213 | 120 | 1 orange @60 | 0% |
-| 14 | Cruise Control | 2223 | 120 | 1 orange @60 | 25% |
-| 15 | Hot Pursuit | 2333 | 120 | 2 orange @84 | 50% |
-| 16 | Peak Suspicion | 3333 | 120 | 2 orange @84 | 50% |
-| 17 | Tree Jail | 4111 | 90 | none | 0% |
-| 18 | Peekaboo | 4211 | 90 | 1 violet @45 | 0% |
-| 19 | Hide and Seek | 4311 | 90 | 2 violet @63 | 0% |
-| 20 | Nowhere to Hide | 1411 | 90 | 3 violet @81 | 0% |
+| # | Name | Knobs O/C/M/S/I | Top | Chase | Guarded | Ice |
+| --- | --- | ---: | ---: | --- | --- | ---: |
+| 1 | First Wobble | 11111 | 90 | none | 0% | 0% |
+| 2 | Pine Curious | 21111 | 90 | none | 0% | 0% |
+| 3 | Tag, You're It | 22111 | 90 | 1 teal @45 | 0% | 0% |
+| 4 | Nap Patrol | 22211 | 90 | 1 teal @45 | 25% | 0% |
+| 5 | Double Trouble | 13111 | 90 | 2 orange @63 | 0% | 0% |
+| 6 | Two-Yeti Minimum | 23111 | 90 | 2 orange @63 | 0% | 0% |
+| 7 | Sleeping on the Job | 23211 | 90 | 2 teal @63 | 25% | 0% |
+| 8 | Lumber Party | 31112 | 90 | none | 0% | 25% |
+| 9 | Zoom School | 21121 | 105 | none | 0% | 0% |
+| 10 | Fast and Flurrious | 22121 | 105 | 1 orange @52 | 0% | 0% |
+| 11 | Double Jeopardy | 23122 | 105 | 2 violet @74 | 0% | 25% |
+| 12 | Crowded House | 33122 | 105 | 2 violet @74 | 0% | 25% |
+| 13 | Speed Run | 12131 | 120 | 1 orange @60 | 0% | 0% |
+| 14 | Cruise Control | 22232 | 120 | 1 orange @60 | 25% | 25% |
+| 15 | Hot Pursuit | 23333 | 120 | 2 orange @84 | 50% | 50% |
+| 16 | Peak Suspicion | 33333 | 120 | 2 orange @84 | 50% | 50% |
+| 17 | Tree Jail | 41112 | 90 | none | 0% | 25% |
+| 18 | Peekaboo | 42113 | 90 | 1 violet @45 | 0% | 50% |
+| 19 | Hide and Seek | 43113 | 90 | 2 violet @63 | 0% | 50% |
+| 20 | Nowhere to Hide | 14114 | 90 | 3 violet @81 | 0% | 100% |
 
-Knobs read `[obstacles, chase, miss, speed]`, levels 1–4. Chase shows resolved count, color and km/h; guarded shows the share of gates with a 3-wolf pack. Common rate per obstacle level lives in `knobLevels`. The curve previews each tier in isolation before combining: 1–4 ramp 1s into 2s; 5–7 preview chase-3 at low speed; 8 is a dense-forest breather; 9–12 climb at speed 105 with chase rising to 3; 13 spotlights speed 120 on an empty piste; 14–16 run full 120-tier stages up to all-3s; 17–19 cross the max forest with rising chase; 20 empties the forest for a 3-yeti boss chase. Speed 150 and 100% guarding are currently unused; guards appear only on stages 4, 7 and 14–16.
+Knobs read `[obstacles, chase, miss, speed, ice]`, levels 1–4. Chase shows resolved count, color and km/h; guarded shows the share of gates with a 3-wolf pack; ice shows the share of gates with a frozen patch. Common rate per obstacle level lives in `knobLevels`. The curve previews each tier in isolation before combining: 1–4 ramp 1s into 2s; 5–7 preview chase-3 at low speed; 8 is a dense-forest breather and first ice (25%); 9–12 climb at speed 105 with chase rising to 3 and ice returning at 11; 13 spotlights speed 120 on an empty piste; 14–16 run full 120-tier stages up to all-3s with ice up to 50%; 17–19 cross the max forest with rising chase and 25–50% ice; 20 empties the forest for a 3-yeti boss chase on full ice. Speed 150 and 100% guarding are currently unused; guards appear only on stages 4, 7 and 14–16.
 
 ## Gear, towns and records
 

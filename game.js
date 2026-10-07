@@ -137,9 +137,9 @@ window.FROSTLINE_READY = (async () => {
   const yetiTierForColor={teal:'slow',orange:'fast',violet:'elite'};
   function arcadeItemRate(stage,key){const override=stage.itemRates?.[key];if(override!==undefined)return override;const tier=S.arcade.itemTiers[key];return tier==='common'?S.arcade.knobLevels.obstacles[stage.knobs[0]-1]:stage.tierRates[tier];}
   function arcadeStage(index){
-    const a=S.arcade.stages[index],K=S.arcade.knobLevels,[,lc,lm,ls]=a.knobs;
+    const a=S.arcade.stages[index],K=S.arcade.knobLevels,[,lc,lm,ls,li]=a.knobs;
     const top=K.speed[ls-1],chaseSpeed=K.chaseSpeedPercent[lc-1]*top/100,gs=K.gateSpacing;
-    const g={count:a.gates.count,swordGateCount:a.gates.swordGateCount,icePercent:a.gates.icePercent,
+    const g={count:a.gates.count,swordGateCount:a.gates.swordGateCount,icePercent:K.iceGatePercent[li-1],
       horizontalDistanceMetres:top*gs.horizontalPercent/100,verticalDistanceMetres:top*gs.verticalPercent/100,
       openingWidthMetres:top*gs.openingPercent/100,firstGateMetres:top*gs.firstPercent/100,
       finishAfterLastGateMetres:top*gs.finishPercent/100};
