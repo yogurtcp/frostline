@@ -1198,6 +1198,7 @@
     "deathSeconds": 1.4,
     "crashSeparation": 24,
     "bushSpeedRetention": 0.83,
+    "enemySlowRetention": 0.5,
     "sledSpeedRetention": 0.86,
     "iceTopSpeed": 1800,
     "iceAcceleration": 265,

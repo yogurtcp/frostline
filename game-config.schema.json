@@ -2546,6 +2546,7 @@
         "deathSeconds",
         "crashSeparation",
         "bushSpeedRetention",
+        "enemySlowRetention",
         "sledSpeedRetention",
         "iceTopSpeed",
         "iceAcceleration",
@@ -2686,6 +2687,10 @@
           "minimum": 0
         },
         "bushSpeedRetention": {
+          "type": "number",
+          "minimum": 0
+        },
+        "enemySlowRetention": {
           "type": "number",
           "minimum": 0
         },
