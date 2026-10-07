@@ -3,7 +3,7 @@
   "version": 1,
   "arcade": {
     "startStage": 1,
-    "autoStart": false,
+    "autoStart": true,
     "campaignVersion": 2,
     "stages": {
       "First Tracks": [
@@ -38,87 +38,87 @@
       ],
       "Timber Express": [
         3,
-        2,
-        2,
-        2
+        1,
+        1,
+        1
       ],
       "Rush Hour": [
         3,
+        2,
+        1,
+        1
+      ],
+      "Frozen Assets": [
+        3,
+        2,
+        2,
+        1
+      ],
+      "Air Mail": [
+        3,
+        2,
+        2,
+        2
+      ],
+      "Flag Consequences": [
+        3,
         3,
         2,
         2
       ],
-      "Frozen Assets": [
+      "Violet Warning": [
         3,
         3,
         3,
         2
       ],
-      "Air Mail": [
-        3,
-        3,
-        3,
-        3
-      ],
-      "Flag Consequences": [
-        4,
-        3,
-        3,
-        3
-      ],
-      "Violet Warning": [
-        4,
-        4,
-        3,
-        3
-      ],
       "False Summit": [
-        4,
-        4,
-        4,
+        3,
+        3,
+        3,
         3
       ],
-      "Apex": [
+      "Thicket": [
         4,
-        4,
-        4,
-        4
+        1,
+        1,
+        1
       ],
       "Thin Air": [
-        3,
         4,
-        4,
-        4
+        2,
+        1,
+        1
       ],
       "Long Shadows": [
         4,
-        3,
-        4,
-        4
+        2,
+        2,
+        1
       ],
       "Deep Snow": [
         4,
-        4,
-        3,
-        4
+        2,
+        2,
+        2
       ],
       "High Wind": [
         4,
-        4,
-        4,
-        3
+        3,
+        3,
+        2
       ],
       "Whiteout": [
         4,
-        4,
-        4,
-        4
+        3,
+        3,
+        3
       ],
       "Wolf Moon": [
         4,
         4,
         4,
-        4
+        3
       ],
       "Last Tracks": [
         4,
@@ -523,11 +523,6 @@
           "personGreen": 0.3
         }
       },
-      "Apex": {
-        "gates": {
-          "count": 24
-        }
-      },
       "Thin Air": {
         "gates": {
           "count": 22
@@ -576,6 +571,11 @@
         "yetiColor": "violet",
         "gates": {
           "count": 28
+        }
+      },
+      "Thicket": {
+        "gates": {
+          "count": 24
         }
       }
     }

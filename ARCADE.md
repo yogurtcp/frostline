@@ -103,23 +103,23 @@ Densities are placement attempts, not exact counts: gates, finish openings, lake
 | 3 | Polite Pursuit | 2211 | 90 | 1 teal @45 | 0% |
 | 4 | Forest Company | 2221 | 90 | 1 teal @45 | 25% |
 | 5 | Orange Alert | 2222 | 105 | 1 orange @52 | 25% |
-| 6 | Timber Express | 3222 | 105 | 1 orange @52 | 25% |
-| 7 | Rush Hour | 3322 | 105 | 2 teal @74 | 25% |
-| 8 | Frozen Assets | 3332 | 105 | 2 orange @74 | 50% |
-| 9 | Air Mail | 3333 | 120 | 2 orange @84 | 50% |
-| 10 | Flag Consequences | 4333 | 120 | 2 orange @84 | 50% |
-| 11 | Violet Warning | 4433 | 120 | 3 violet @108 | 50% |
-| 12 | False Summit | 4443 | 120 | 3 violet @108 | 100% |
-| 13 | Apex | 4444 | 150 | 3 orange @135 | 100% |
-| 14 | Thin Air | 3444 | 150 | 3 orange @135 | 100% |
-| 15 | Long Shadows | 4344 | 150 | 2 orange @105 | 100% |
-| 16 | Deep Snow | 4434 | 150 | 3 orange @135 | 50% |
-| 17 | High Wind | 4443 | 120 | 3 orange @108 | 100% |
-| 18 | Whiteout | 4444 | 150 | 3 violet @135 | 100% |
-| 19 | Wolf Moon | 4444 | 150 | 3 violet @135 | 100% |
+| 6 | Timber Express | 3111 | 90 | none | 0% |
+| 7 | Rush Hour | 3211 | 90 | 1 teal @45 | 0% |
+| 8 | Frozen Assets | 3221 | 90 | 1 orange @45 | 25% |
+| 9 | Air Mail | 3222 | 105 | 1 orange @52 | 25% |
+| 10 | Flag Consequences | 3322 | 105 | 2 orange @74 | 25% |
+| 11 | Violet Warning | 3332 | 105 | 2 violet @74 | 50% |
+| 12 | False Summit | 3333 | 120 | 2 violet @84 | 50% |
+| 13 | Thicket | 4111 | 90 | none | 0% |
+| 14 | Thin Air | 4211 | 90 | 1 orange @45 | 0% |
+| 15 | Long Shadows | 4221 | 90 | 1 orange @45 | 25% |
+| 16 | Deep Snow | 4222 | 105 | 1 orange @52 | 25% |
+| 17 | High Wind | 4332 | 105 | 2 orange @74 | 50% |
+| 18 | Whiteout | 4333 | 120 | 2 violet @84 | 50% |
+| 19 | Wolf Moon | 4443 | 120 | 3 violet @108 | 100% |
 | 20 | Last Tracks | 4444 | 150 | 3 violet @135 | 100% |
 
-Knobs read `[obstacles, chase, miss, speed]`, levels 1–4. Chase shows resolved count, color and km/h; guarded shows the share of gates with a 3-wolf pack. Common rate per obstacle level lives in `knobLevels`.
+Knobs read `[obstacles, chase, miss, speed]`, levels 1–4. Chase shows resolved count, color and km/h; guarded shows the share of gates with a 3-wolf pack. Common rate per obstacle level lives in `knobLevels`. The ladder is a staircase with resets: 1–5 climb to all-2s; 6 introduces obstacles 3 with the rest back at 1, then 7–12 rebuild to all-3s; 13 introduces obstacles 4 the same way, then 14–20 rebuild to the all-4 finale. Every step moves one knob except 16→17 and 18→19, which raise both monster knobs together so the full climb fits 20 stages. Speed 150 appears only on the final stage.
 
 ## Gear, towns and records
 
