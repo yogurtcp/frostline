@@ -208,7 +208,6 @@ window.FROSTLINE_READY = (async () => {
     const a=state.arcade,G=S.arcade.gear,kind=gate.gear==='sword'?'sword':'shield',stock=kind+'s',charge=kind+'Charge',cap=kind==='sword'?G.maxSwords:G.maxShields;
     if(!a)return;
     a.combo=Math.min(3,(a.combo||0)+1);gate.comboLevel=a.combo;
-    if(a.combo>=2)say('CHAIN '+a.combo+'!',state.p,1.5);
     if(a[stock]>=cap){gate.gearFull=true;return;}
     a[charge]+=(kind==='sword'?1:gate.run.shieldGateCharge)*a.combo/3;
     const needed=kind==='sword'?G.swordGatesPerSword:1;
@@ -1486,7 +1485,7 @@ window.FROSTLINE_READY = (async () => {
       flag(s.x-o.half*ZOOM,s.y,color,1,o.good);flag(s.x+o.half*ZOOM,s.y,color,-1,o.good);
       if(o.penaltyArmed)text('!',s.x,s.y-44,14,C.red);
       if(o.gear==='sword'){gearIcon('sword',s.x-o.half*ZOOM,s.y-31,2);gearIcon('sword',s.x+o.half*ZOOM,s.y-31,2);}
-      if(o.checked){if(o.good&&o.run.arcade)comboText(o.gearFull?'FULL':'+'+o.comboLevel+' '+(o.gear==='sword'?'SWORD':'SHIELD'),s.x,s.y-15,o.comboLevel);else text(o.good?'+'+S.race.gatePoints:'×',s.x,s.y-15,10,o.good?C.teal:C.red);}else text(String(o.number).padStart(2,'0'),s.x,s.y+9,8,'#8eaaa5');
+      if(o.checked){if(o.good&&o.run.arcade){comboText(o.gearFull?'FULL':'+'+o.comboLevel+' '+(o.gear==='sword'?'SWORD':'SHIELD'),s.x,s.y-15,o.comboLevel);if(o.comboLevel>=2)text('CHAIN '+o.comboLevel+'!',s.x,s.y-32,14,S.arcade.gear.comboColors[o.comboLevel-1],'center',2);}else text(o.good?'+'+S.race.gatePoints:'×',s.x,s.y-15,10,o.good?C.teal:C.red);}else text(String(o.number).padStart(2,'0'),s.x,s.y+9,8,'#8eaaa5');
       ctx.globalAlpha=1;return;
     }
     if(o.type==='finish'){
@@ -1563,7 +1562,6 @@ window.FROSTLINE_READY = (async () => {
   function comboText(label,x,y,level){text(label,x,y,10,S.arcade.gear.comboColors[Math.max(0,(level||1)-1)],'center',Math.max(0,(level||1)-1));}
   function drawGearHUD(){
     const a=state.arcade,G=S.arcade.gear,scale=2,y=24;
-    comboText('CHAIN '+(a.combo||0),W/2,48,a.combo);
     let x=(W-((G.maxShields+G.maxSwords-1)*25+14))/2;
     for(const kind of ['shield','sword']){
       const stock=a[kind+'s'],cap=kind==='shield'?G.maxShields:G.maxSwords;
