@@ -186,7 +186,7 @@ charge gained = old per-gate charge × combo / 3
 - Shield full-rate charge is `shieldsPerStage / ordinaryGateCount` (currently a 1.5-shield stage budget before combo ramp losses).
 - Inventory and partial charges persist across towns. So does the combo until a miss. New attempts start empty.
 - Even a correct gate whose inventory is full advances the shared combo, but awards no stored charge.
-- Gate labels and the top CHAIN indicator use three text weights/colors. Top inventory icons fill gradually and brighten when ready.
+- Gate labels show `+N% SHIELD/SWORD` (that gate's share of one full item) in three chain-tier weights/colors; no top CHAIN indicator exists. Top inventory icons fill gradually and brighten when ready.
 - Shields automatically protect from qualifying obstacles outside towns. Swords automatically defeat qualifying animal threats. See the exclusion/eligibility guards rather than assuming every collision spends gear.
 
 ## 7. Stage config: explicit tuning, no hidden balancing
