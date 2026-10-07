@@ -943,7 +943,7 @@ window.FROSTLINE_READY = (async () => {
       if(o.type==='mushroom'){p.boost=S.jump.mushroomBoostSeconds;say('BOING. Bad decisions, good airtime.',o,2.1);}
       return;
     }
-    if(p.air>0 && !['pine','fir','lodge','rental'].includes(o.type))return;
+    if(p.air>0 && !['lodge','rental'].includes(o.type))return;
     o.touched=true;
     if((o.type==='pine'||o.type==='fir')&&fast&&!uphill) {
       o.type='stump';o.width=65;o.r=15;burst(o.x,o.y,'#658479',24);say('TIMBERRR!',o);beep(115,.15,'sawtooth');

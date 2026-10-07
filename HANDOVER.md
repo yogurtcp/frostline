@@ -129,7 +129,7 @@ These have been repeatedly requested; preserve them unless explicitly changed.
 - From zero speed, left/right walks horizontally. Only Up climbs. Upright body while climbing; no upside-down skier.
 - Pointer control uses displacement from the initial touch/mouse position. Releasing a downhill slide points straight downhill. Releasing a walk/uphill movement stops with facing preserved.
 - Phone jump: keep the steering finger down, tap with a second finger. Space jumps on keyboard. M toggles sound.
-- Jumps lock heading and speed at takeoff. No steering in midair. Higher-speed jumps gain height/airtime.
+- Jumps lock heading and speed at takeoff. No steering in midair. Higher-speed jumps gain height/airtime. Airborne skiers clear trees SkiFree-style; only lodge/rental buildings still collide mid-air.
 - Ice preserves entry direction, including sideways/uphill entry. Downhill ice accelerates beyond normal top speed; sideways/uphill ice does not gain downhill acceleration.
 - Crashes wait for fresh input after the fall. A held key/finger must not automatically restart the player.
 - Very slow collisions are harmless, with contact tracking until separation, to prevent repeated crashes while escaping an object. Ice recovery must allow a fresh sideways/uphill push.
