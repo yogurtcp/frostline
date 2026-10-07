@@ -259,6 +259,8 @@ window.FROSTLINE_READY = (async () => {
     if(spec.type==='path')state.roads.push({surface:spec.surface,width:spec.width,points:[{x,y:y-70},{x,y:y+70}]});
     return entity(spec.type,x,y,extra);
   }
+  // Knob densities were tuned at +/-32m; placement counts scale with spread to hold per-area density.
+  const SPREAD_REFERENCE_METRES=32;
   function prepareArcadeTerrain(run){
     // Plan every configured object below the viewport; no hidden mixed spawn tables.
     state.objects=state.objects.filter(o=>o.y<run.startY-100||o.y>run.endY||Math.abs(o.x-centerAt(o.y,run))>S.world.safeCourseHalfWidth+100||o.penaltyGate||!o.worldChunk&&['gate','courseStart','finish','entrance','personRed','personGreen','personYellow'].includes(o.type));
@@ -267,8 +269,9 @@ window.FROSTLINE_READY = (async () => {
     for(const g of iceGates.slice(0,Math.round(gates.length*(run.arcade.gates.icePercent||0)/100)))entity('ice',g.x,g.y,{gateIce:true,arcadeFeature:true,arcadeRun:run,rx:g.half+45,ry:Math.min(run.arcade.spacing*.25,80),width:(g.half+45)*2,r:0});
     const openings=[...gates,{x:run.x,y:run.startY,half:run.arcade.gates.openingWidthMetres*PX_PER_M/2},{x:run.x,y:run.endY,half:run.finishHalf}];
     const entries=Object.keys(ARCADE_ITEMS).map(key=>[key,arcadeItemRate(run.arcade,key)]).filter(([,n])=>n>0).sort(([a],[b])=>Number(!!ARCADE_ITEMS[b].arcadeFeature)-Number(!!ARCADE_ITEMS[a].arcadeFeature));
+    const spreadScale=SPREAD_REFERENCE_METRES/run.arcade.itemSpreadMetres;
     for(const [key,density] of entries){
-      const spec=ARCADE_ITEMS[key],spacing=100*PX_PER_M/density,traffic=['skier','fastSkier','overtakingSkier','boarder'].includes(key);
+      const spec=ARCADE_ITEMS[key],spacing=100*PX_PER_M/density*spreadScale,traffic=['skier','fastSkier','overtakingSkier','boarder'].includes(key);
       let y=run.startY+S.race.terrainStartOffset+spacing*range(.25,.75);
       while(y<run.endY-100){
         const at=y;y+=spacing/(traffic?arcadeTrafficMultiplier(run,at):1)*range(1-S.arcade.spawnJitter,1+S.arcade.spawnJitter);
@@ -649,7 +652,7 @@ window.FROSTLINE_READY = (async () => {
     const V=S.village,unit=V.roadTileSize;
     // Snow covers side-path junctions, matching the surface priority used by physics.
     for(const r of [...state.roads].sort((a,b)=>Number(a.surface==='snow')-Number(b.surface==='snow'))){
-      r.bounds??={left:Math.min(...r.points.map(p=>p.x))-r.width,right:Math.max(...r.points.map(p=>p.x))+r.width,top:Math.min(...r.points.map(p=>p.y))-r.width,bottom:Math.max(...r.points.map(p=>p.y))+r.width};
+      r.bounds??=roadBBox(r);
       const view=viewBounds();if(r.bounds.right<view.left||r.bounds.left>view.right||r.bounds.bottom<view.top||r.bounds.top>view.bottom)continue;
       if(!r.tiles){const cells=new Map();for(let i=1;i<r.points.length;i++){
         const a=r.points[i-1],b=r.points[i],steps=Math.ceil(Math.hypot(b.x-a.x,b.y-a.y)/V.roadSampleSpacing);
@@ -744,10 +747,10 @@ window.FROSTLINE_READY = (async () => {
     return polygonContains(g.points,dx,dy)&&!g.holes.some(h=>polygonContains(h,dx,dy));
   }
   function patchAt(x,y){return state.objects.find(o=>o.type==='ice'&&lakeContains(o,x,y));}
-  function roadBBox(r){let x0=Infinity,y0=Infinity,x1=-Infinity,y1=-Infinity;for(const p of r.points){if(p.x<x0)x0=p.x;if(p.x>x1)x1=p.x;if(p.y<y0)y0=p.y;if(p.y>y1)y1=p.y;}return r.bbox={x0,y0,x1,y1};}
+  function roadBBox(r){let x0=Infinity,y0=Infinity,x1=-Infinity,y1=-Infinity;for(const p of r.points){if(p.x<x0)x0=p.x;if(p.x>x1)x1=p.x;if(p.y<y0)y0=p.y;if(p.y>y1)y1=p.y;}return r.bounds={left:x0-r.width,right:x1+r.width,top:y0-r.width,bottom:y1+r.width};}
   function onRoad(x,y){
     // Only exposed paving slows skis. A snow-covered main road wins at intersections.
-    const roads=state.roads.filter(r=>{const b=r.bbox||roadBBox(r),hw=r.width/2;return x>b.x0-hw&&x<b.x1+hw&&y>b.y0-hw&&y<b.y1+hw&&roadDistance(r,x,y)<hw;});
+    const roads=state.roads.filter(r=>{const b=r.bounds||roadBBox(r);return x>b.left&&x<b.right&&y>b.top&&y<b.bottom&&roadDistance(r,x,y)<r.width/2;});
     return !roads.some(r=>r.surface==='snow')&&roads.some(r=>r.surface!=='snow');
   }
   function ensureWorld(initial=false){

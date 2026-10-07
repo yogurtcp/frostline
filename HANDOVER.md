@@ -203,7 +203,7 @@ The previous attempt to make the first Yeti stages faster was rejected and rever
 | `yetiColor` | Visual tier (teal/orange/violet) of the knob-driven start group |
 | `gates.count` / `.swordGateCount` | Gate totals (geometry derives from speed knob; ice share from ice knob) |
 | `tierRates` / `itemRates` | slightlyRare/veryRare defaults plus per-object overrides (tiers in `arcade.itemTiers`; common rate from obstacle knob) |
-| `itemSpreadMetres` / `endTrafficMultiplier` | Placement range; skier/boarder ramp toward finish |
+| `itemSpreadMetres` / `endTrafficMultiplier` | Placement range (default ±55 m; counts scale vs the 32 m reference to hold per-area density); skier/boarder ramp toward finish |
 
 `arcade.knobLevels` holds the five level tables (obstacle rates, chase counts/speeds as percent of top, guarded-gate shares, ice-gate shares, top speeds) plus gate geometry as percents of top speed. Course length is the derived first run-out + `(count − 1) × derived vertical spacing` + derived finish run-out. Horizontal gate centres alternate at plus/minus half the derived horizontal distance. No extra Arcade gate sway is added.
 
