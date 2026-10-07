@@ -17,6 +17,7 @@ window.loadFrostlineConfig = async function () {
       for (const [key, item] of Object.entries(value)) {
         if (schema.properties[key]) validate(item, schema.properties[key], `${path}.${key}`);
         else if (schema.additionalProperties === false) throw new Error(`Unknown setting ${path}.${key}`);
+        else if (schema.additionalProperties) validate(item, schema.additionalProperties, `${path}.${key}`);
       }
     } else if (schema.type === 'array') {
       if (!Array.isArray(value) || value.length < (schema.minItems || 0) || value.length > (schema.maxItems ?? Infinity)) throw new Error(`${path} has an invalid length`);
@@ -30,6 +31,18 @@ window.loadFrostlineConfig = async function () {
     }
   }
   validate(config, window.FROSTLINE_SCHEMA, 'config');
+  if (!Object.keys(config.arcade.stages).length) throw new Error('arcade.stages needs at least one stage');
+  for (const name of Object.keys(config.arcade.stageOverrides)) if (!(name in config.arcade.stages)) throw new Error(`stageOverrides has no stage named ${name}`);
+  config.arcade.stages = Object.entries(config.arcade.stages).map(([name, knobs]) => {
+    const base = config.arcade.stageDefaults, over = config.arcade.stageOverrides[name] || {};
+    return { name, knobs,
+      yetiColor: over.yetiColor ?? base.yetiColor,
+      gates: { ...base.gates, ...(over.gates || {}) },
+      tierRates: { ...base.tierRates, ...(over.tierRates || {}) },
+      itemRates: { ...base.itemRates, ...(over.itemRates || {}) },
+      itemSpreadMetres: over.itemSpreadMetres ?? base.itemSpreadMetres,
+      endTrafficMultiplier: over.endTrafficMultiplier ?? base.endTrafficMultiplier };
+  });
   for (const [id, target] of Object.entries(config.timing.targets)) {
     if (!(target.goldSeconds < target.parSeconds)) throw new Error(`timing.targets.${id}: goldSeconds must be below parSeconds`);
   }

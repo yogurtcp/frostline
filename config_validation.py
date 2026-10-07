@@ -11,6 +11,7 @@ def validate(value, schema, path='config'):
             child = schema['properties'].get(key)
             if child: validate(item, child, f'{path}.{key}')
             elif schema.get('additionalProperties') is False: fail(f'unknown setting {key}')
+            elif isinstance(schema.get('additionalProperties'), dict): validate(item, schema['additionalProperties'], f'{path}.{key}')
     elif kind == 'array':
         if not isinstance(value, list): fail('expected array')
         if not schema.get('minItems', 0) <= len(value) <= schema.get('maxItems', float('inf')): fail('invalid array length')
@@ -29,10 +30,16 @@ def validate(value, schema, path='config'):
     if path == 'config':
         for course, target in value['timing']['targets'].items():
             if target['goldSeconds'] >= target['parSeconds']: fail(f'{course}: goldSeconds must be below parSeconds')
+        if not value['arcade']['stages']: fail('arcade.stages needs at least one stage')
+        for name in value['arcade']['stageOverrides']:
+            if name not in value['arcade']['stages']: fail(f'stageOverrides has no stage named {name}')
         if value['arcade']['startStage'] > len(value['arcade']['stages']): fail('arcade.startStage exceeds the number of stages')
-        for i, stage in enumerate(value['arcade']['stages']):
-            if not stage['name'].strip(): fail(f'arcade.stages[{i}]: name cannot be empty')
-            if stage['gates']['swordGateCount'] > stage['gates']['count']: fail(f'arcade.stages[{i}]: swordGateCount exceeds gate count')
+        base = value['arcade']['stageDefaults']
+        for name in value['arcade']['stages']:
+            if not name.strip(): fail('arcade.stages: name cannot be empty')
+            over = value['arcade']['stageOverrides'].get(name, {})
+            gates = {**base['gates'], **over.get('gates', {})}
+            if gates['swordGateCount'] > gates['count']: fail(f'arcade.stages.{name}: swordGateCount exceeds gate count')
         if value['wildlife']['packMin'] > value['wildlife']['packMax']: fail('packMin must not exceed packMax')
         for course in value['race']['entryChoices'] + value['race']['villageChoices']:
             if course not in value['courses']: fail(f'unknown course {course}')

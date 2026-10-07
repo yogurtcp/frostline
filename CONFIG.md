@@ -14,7 +14,7 @@ World coordinates increase rightward and downhill. `world.unitsPerMetre` default
 
 | Section | What it controls |
 | --- | --- |
-| `arcade` | All 12 numbered stage definitions, terrain, traffic, pursuit tiers/colors, missed-gate penalties, landing clearances and run-result duration |
+| `arcade` | 20 compact stage rows plus central knob tables, stage defaults/overrides, terrain, traffic, wolf-guard penalties and run-result duration |
 | `courses` | Names, fees, lengths in metres, pace, gate spacing, obstacle density and type |
 | `race` | Gate widths, required success fraction, point rewards, finish bonuses, choice rows and scenery placement |
 | `mushroomHunt` | Mushroom count, required fraction, points, pickup size, spread, spacing clearances and glints in Spore Decisions |
@@ -40,7 +40,7 @@ World coordinates increase rightward and downhill. `world.unitsPerMetre` default
 
 ## Useful examples
 
-- Arcade stage editor: `arcade.stages` is in play order, with arbitrary names. Each entry sets four difficulty levels in `knobs` ([obstacles, start chase, miss guards, speed], 1–4 each, resolved through the central `arcade.knobLevels` table), plus gate count/swords/ice, two rarity-tier spawn rates and optional per-object overrides. See `ARCADE.md` for a complete copyable stage and all keys.
+- Arcade stage editor: `arcade.stages` maps names to knob tuples (`"Name": [obstacles, chase, miss, speed]`, 1–4 each) in play order, with arbitrary names. Details resolve from `arcade.stageDefaults` plus per-name `arcade.stageOverrides` (gate count/swords/ice, yeti color, two rarity-tier rates, overrides). See `ARCADE.md` for a copyable pair and all keys.
 - Arcade equipment: each stage’s `gates.swordGateCount` selects the number of sword gates. `arcade.gear.shieldsPerStage` controls shield yield, `swordGatesPerSword` controls sword charge, and `maxShields` / `maxSwords` cap inventory.
 - Arcade item density: `arcade.itemTiers` assigns each of the 59 objects to `common`, `slightlyRare` or `veryRare`; the obstacle knob sets the `common` per-100m rate, each stage's `tierRates` sets the other two, and `itemRates` overrides single objects (0 disables; omission uses the tier/knob rate). `skier`, `fastSkier`, `boarder` and `overtakingSkier` are separate, and `endTrafficMultiplier` increases their density toward the finish. Other object densities stay constant. Safe gate openings and landing clearances can reduce actual placement.
 - Make regular slalom timing more forgiving: increase `timing.targets.slalom.goldSeconds` and `parSeconds`, keeping gold below par.

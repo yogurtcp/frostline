@@ -4,7 +4,7 @@
 
 The gate-pace pursuit calculation and the faster/wider changes to stages 3–4 were reverted. Their defaults are back to 103 km/h and 30 m vertical gate spacing. Yeti speeds are now explicit absolute values; there are no calculated chase-speed caps or automatic adjustments.
 
-Player feedback to preserve: two warmups are enough; stage 2 needs more objects; stage 3 needs visible start-line yetis and sparse trees; stage 4 needs denser trees; stage 5 sparse trees, stage 6 dense trees and stage 7 heavier traffic. There are 12 stages, editable in order, with safe towns between them. No menus. Missing the finish fails Arcade in place; death returns to the summit.
+Player feedback to preserve: two warmups are enough; stage 2 needs more objects; stage 3 needs visible start-line yetis and sparse trees; stage 4 needs denser trees; stage 5 sparse trees, stage 6 dense trees and stage 7 heavier traffic. There are 20 stages, editable in order, with safe towns between them. No menus. Missing the finish fails Arcade in place; death returns to the summit.
 
 ## Quick start
 
@@ -21,33 +21,25 @@ For live local tuning, run `python3 serve.py`, open http://127.0.0.1:8765/, then
 
 ## Add or edit a stage
 
-Copy any entry in `arcade.stages`, change `name`, and insert it where you want. Array order defines progression; there is no fixed stage count or hardcoded name list. A compact complete stage can look like this (objects missing from `itemRates` use their knob or tier rate):
+Add one row per stage to `arcade.stages`: `"Name": [obstacles, chase, miss, speed]`, levels 1–4. Map order defines progression; there is no fixed stage count or hardcoded name list. Details resolve from `arcade.stageDefaults` plus `arcade.stageOverrides` (same field names as before, partial, keyed by stage name; unknown names fail validation). A compact pair looks like this (objects missing from `itemRates` use their knob or tier rate):
 
 ```json
 {
-  "name": "My snowy disaster",
-  "knobs": [2, 2, 2, 2],
-  "yetiColor": "teal",
-  "gates": {
-    "count": 18,
-    "swordGateCount": 4,
-    "icePercent": 25
-  },
-  "itemSpreadMetres": 32,
-  "endTrafficMultiplier": 1.5,
-  "tierRates": {
-    "slightlyRare": 0.3,
-    "veryRare": 0
-  },
-  "itemRates": {
-    "pine": 2,
-    "skier": 3,
-    "rock": 0
+"stages": {
+  "First Tracks": [1, 1, 1, 1],
+  "My snowy disaster": [2, 2, 2, 2]
+},
+"stageOverrides": {
+  "My snowy disaster": {
+    "yetiColor": "teal",
+    "gates": { "count": 18 },
+    "tierRates": { "slightlyRare": 0.3 },
+    "itemRates": { "pine": 2, "skier": 3, "rock": 0 }
   }
 }
 ```
 
-Knobs read `[obstacles, chase, miss, speed]`, levels 1–4 each, resolved through the central `arcade.knobLevels` table. Here the common rate comes from obstacle level 2 (0.5); `pine` overrides to 2, `skier` to 3, and `rock` stays disabled despite being common.
+Here `My snowy disaster` runs knobs [2,2,2,2] with 18 gates, teal yetis, slightlyRare 0.3, and `pine`/`skier`/`rock` item overrides; everything else comes from `stageDefaults`. `First Tracks` runs pure defaults. Level meanings live in `arcade.knobLevels`.
 
 ### Gates
 
@@ -117,7 +109,15 @@ Densities are placement attempts, not exact counts: gates, finish openings, lake
 | 9 | Air Mail | 3333 | 120 | 2 orange @84 | 50% |
 | 10 | Flag Consequences | 4333 | 120 | 2 orange @84 | 50% |
 | 11 | Violet Warning | 4433 | 120 | 3 violet @108 | 50% |
-| 12 | Last Tracks | 4443 | 120 | 3 violet @108 | 100% |
+| 12 | False Summit | 4443 | 120 | 3 violet @108 | 100% |
+| 13 | Apex | 4444 | 150 | 3 orange @135 | 100% |
+| 14 | Thin Air | 3444 | 150 | 3 orange @135 | 100% |
+| 15 | Long Shadows | 4344 | 150 | 2 orange @105 | 100% |
+| 16 | Deep Snow | 4434 | 150 | 3 orange @135 | 50% |
+| 17 | High Wind | 4443 | 120 | 3 orange @108 | 100% |
+| 18 | Whiteout | 4444 | 150 | 3 violet @135 | 100% |
+| 19 | Wolf Moon | 4444 | 150 | 3 violet @135 | 100% |
+| 20 | Last Tracks | 4444 | 150 | 3 violet @135 | 100% |
 
 Knobs read `[obstacles, chase, miss, speed]`, levels 1–4. Chase shows resolved count, color and km/h; guarded shows the share of gates with a 3-wolf pack. Common rate per obstacle level lives in `knobLevels`.
 

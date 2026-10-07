@@ -4751,471 +4751,26 @@
         "startLineDownhillOffsetMetres",
         "wakeSeconds",
         "startStage",
-        "autoStart"
+        "autoStart",
+        "stageDefaults",
+        "stageOverrides"
       ],
       "properties": {
         "stages": {
-          "type": "array",
-          "minItems": 1,
-          "items": {
-            "type": "object",
-            "additionalProperties": false,
-            "required": [
-              "name",
-              "gates",
-              "itemSpreadMetres",
-              "endTrafficMultiplier",
-              "tierRates",
-              "knobs",
-              "yetiColor"
-            ],
-            "properties": {
-              "name": {
-                "type": "string"
-              },
-              "gates": {
-                "type": "object",
-                "additionalProperties": false,
-                "required": [
-                  "count",
-                  "swordGateCount"
-                ],
-                "properties": {
-                  "count": {
-                    "type": "integer",
-                    "minimum": 1,
-                    "maximum": 500
-                  },
-                  "swordGateCount": {
-                    "type": "integer",
-                    "minimum": 0,
-                    "maximum": 500
-                  },
-                  "icePercent": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 100,
-                    "description": "Percentage of gates with a frozen patch covering the opening (rounded to whole gates)."
-                  }
-                }
-              },
-              "itemSpreadMetres": {
-                "type": "number",
-                "minimum": 5,
-                "maximum": 100
-              },
-              "endTrafficMultiplier": {
-                "type": "number",
-                "minimum": 1,
-                "maximum": 3
-              },
-              "tierRates": {
-                "type": "object",
-                "additionalProperties": false,
-                "required": [
-                  "slightlyRare",
-                  "veryRare"
-                ],
-                "description": "Default placement attempts per 100 metres for each rarity tier on this stage.",
-                "properties": {
-                  "slightlyRare": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 30,
-                    "description": "Placement attempts per 100 metres for slightlyRare objects; 0 disables the tier unless overridden."
-                  },
-                  "veryRare": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 30,
-                    "description": "Placement attempts per 100 metres for veryRare objects; 0 disables the tier unless overridden."
-                  }
-                }
-              },
-              "itemRates": {
-                "type": "object",
-                "additionalProperties": false,
-                "required": [],
-                "description": "Per-object spawn-rate overrides. Omitted objects use their tier rate; 0 disables the object.",
-                "properties": {
-                  "pine": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 30,
-                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
-                  },
-                  "fir": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 30,
-                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
-                  },
-                  "smallPine": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 30,
-                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
-                  },
-                  "spruceTree": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 30,
-                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
-                  },
-                  "crookedTree": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 30,
-                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
-                  },
-                  "cedarTree": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 30,
-                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
-                  },
-                  "alpineTree": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 30,
-                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
-                  },
-                  "rock": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 30,
-                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
-                  },
-                  "pebble": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 30,
-                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
-                  },
-                  "stump": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 30,
-                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
-                  },
-                  "bush": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 30,
-                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
-                  },
-                  "mushroom": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 30,
-                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
-                  },
-                  "sled": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 30,
-                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
-                  },
-                  "snowball": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 30,
-                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
-                  },
-                  "ramp": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 30,
-                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
-                  },
-                  "mogul": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 30,
-                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
-                  },
-                  "rainbow": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 30,
-                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
-                  },
-                  "smallLake": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 30,
-                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
-                  },
-                  "largeLake": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 30,
-                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
-                  },
-                  "skier": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 30,
-                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
-                  },
-                  "fastSkier": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 30,
-                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
-                  },
-                  "overtakingSkier": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 30,
-                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
-                  },
-                  "boarder": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 30,
-                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
-                  },
-                  "personRed": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 30,
-                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
-                  },
-                  "personYellow": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 30,
-                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
-                  },
-                  "personGreen": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 30,
-                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
-                  },
-                  "dog": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 30,
-                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
-                  },
-                  "hostileDog": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 30,
-                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
-                  },
-                  "cat": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 30,
-                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
-                  },
-                  "rabbit": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 30,
-                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
-                  },
-                  "fox": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 30,
-                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
-                  },
-                  "wolf": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 30,
-                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
-                  },
-                  "wolfPack": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 30,
-                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
-                  },
-                  "bear": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 30,
-                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
-                  },
-                  "yetiTeal": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 30,
-                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
-                  },
-                  "yetiOrange": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 30,
-                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
-                  },
-                  "yetiViolet": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 30,
-                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
-                  },
-                  "lodge": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 30,
-                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
-                  },
-                  "rental": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 30,
-                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
-                  },
-                  "cottage": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 30,
-                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
-                  },
-                  "chalet": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 30,
-                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
-                  },
-                  "inn": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 30,
-                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
-                  },
-                  "cafe": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 30,
-                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
-                  },
-                  "hotel": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 30,
-                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
-                  },
-                  "skiShop": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 30,
-                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
-                  },
-                  "lamp": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 30,
-                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
-                  },
-                  "bench": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 30,
-                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
-                  },
-                  "snowman": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 30,
-                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
-                  },
-                  "bunting": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 30,
-                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
-                  },
-                  "powderPile": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 30,
-                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
-                  },
-                  "pigeons": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 30,
-                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
-                  },
-                  "breadStand": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 30,
-                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
-                  },
-                  "skiRack": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 30,
-                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
-                  },
-                  "lift": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 30,
-                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
-                  },
-                  "sign": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 30,
-                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
-                  },
-                  "flag": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 30,
-                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
-                  },
-                  "star": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 30,
-                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
-                  },
-                  "snowPath": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 30,
-                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
-                  },
-                  "pavedPath": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 30,
-                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
-                  }
-                }
-              },
-              "knobs": {
-                "type": "array",
-                "minItems": 4,
-                "maxItems": 4,
-                "description": "Difficulty levels 1-4 for [obstacles, start chase, miss guards, speed].",
-                "items": {
-                  "type": "integer",
-                  "minimum": 1,
-                  "maximum": 4
-                }
-              },
-              "yetiColor": {
-                "type": "string",
-                "enum": [
-                  "teal",
-                  "orange",
-                  "violet"
-                ],
-                "description": "Visual tier of the start-line yetis."
-              }
+          "type": "object",
+          "properties": {},
+          "additionalProperties": {
+            "type": "array",
+            "minItems": 4,
+            "maxItems": 4,
+            "description": "Difficulty levels 1-4 for [obstacles, start chase, miss guards, speed].",
+            "items": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 4
             }
-          }
+          },
+          "description": "Compact stages: name to knobs [obstacles, chase, miss, speed], levels 1-4. Order is play order. Details come from stageDefaults plus stageOverrides."
         },
         "knobLevels": {
           "type": "object",
@@ -6067,6 +5622,888 @@
         "autoStart": {
           "type": "boolean",
           "description": "Enter configured start stage on load/reset without skiing into the Arcade entrance."
+        },
+        "stageDefaults": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "yetiColor",
+            "gates",
+            "tierRates",
+            "itemRates",
+            "itemSpreadMetres",
+            "endTrafficMultiplier"
+          ],
+          "description": "Base verbose fields for compact stages; stageOverrides replace per key.",
+          "properties": {
+            "yetiColor": {
+              "type": "string",
+              "enum": [
+                "teal",
+                "orange",
+                "violet"
+              ],
+              "description": "Visual tier of the start-line yetis."
+            },
+            "gates": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "count",
+                "swordGateCount"
+              ],
+              "properties": {
+                "count": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 500
+                },
+                "swordGateCount": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 500
+                },
+                "icePercent": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 100,
+                  "description": "Percentage of gates with a frozen patch covering the opening (rounded to whole gates)."
+                }
+              }
+            },
+            "tierRates": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "slightlyRare",
+                "veryRare"
+              ],
+              "description": "Default placement attempts per 100 metres for each rarity tier on this stage.",
+              "properties": {
+                "slightlyRare": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 30,
+                  "description": "Placement attempts per 100 metres for slightlyRare objects; 0 disables the tier unless overridden."
+                },
+                "veryRare": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 30,
+                  "description": "Placement attempts per 100 metres for veryRare objects; 0 disables the tier unless overridden."
+                }
+              }
+            },
+            "itemRates": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [],
+              "description": "Per-object spawn-rate overrides. Omitted objects use their tier rate; 0 disables the object.",
+              "properties": {
+                "pine": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 30,
+                  "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                },
+                "fir": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 30,
+                  "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                },
+                "smallPine": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 30,
+                  "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                },
+                "spruceTree": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 30,
+                  "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                },
+                "crookedTree": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 30,
+                  "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                },
+                "cedarTree": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 30,
+                  "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                },
+                "alpineTree": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 30,
+                  "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                },
+                "rock": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 30,
+                  "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                },
+                "pebble": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 30,
+                  "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                },
+                "stump": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 30,
+                  "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                },
+                "bush": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 30,
+                  "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                },
+                "mushroom": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 30,
+                  "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                },
+                "sled": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 30,
+                  "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                },
+                "snowball": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 30,
+                  "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                },
+                "ramp": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 30,
+                  "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                },
+                "mogul": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 30,
+                  "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                },
+                "rainbow": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 30,
+                  "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                },
+                "smallLake": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 30,
+                  "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                },
+                "largeLake": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 30,
+                  "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                },
+                "skier": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 30,
+                  "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                },
+                "fastSkier": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 30,
+                  "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                },
+                "overtakingSkier": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 30,
+                  "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                },
+                "boarder": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 30,
+                  "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                },
+                "personRed": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 30,
+                  "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                },
+                "personYellow": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 30,
+                  "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                },
+                "personGreen": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 30,
+                  "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                },
+                "dog": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 30,
+                  "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                },
+                "hostileDog": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 30,
+                  "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                },
+                "cat": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 30,
+                  "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                },
+                "rabbit": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 30,
+                  "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                },
+                "fox": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 30,
+                  "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                },
+                "wolf": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 30,
+                  "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                },
+                "wolfPack": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 30,
+                  "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                },
+                "bear": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 30,
+                  "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                },
+                "yetiTeal": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 30,
+                  "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                },
+                "yetiOrange": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 30,
+                  "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                },
+                "yetiViolet": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 30,
+                  "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                },
+                "lodge": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 30,
+                  "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                },
+                "rental": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 30,
+                  "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                },
+                "cottage": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 30,
+                  "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                },
+                "chalet": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 30,
+                  "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                },
+                "inn": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 30,
+                  "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                },
+                "cafe": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 30,
+                  "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                },
+                "hotel": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 30,
+                  "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                },
+                "skiShop": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 30,
+                  "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                },
+                "lamp": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 30,
+                  "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                },
+                "bench": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 30,
+                  "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                },
+                "snowman": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 30,
+                  "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                },
+                "bunting": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 30,
+                  "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                },
+                "powderPile": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 30,
+                  "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                },
+                "pigeons": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 30,
+                  "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                },
+                "breadStand": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 30,
+                  "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                },
+                "skiRack": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 30,
+                  "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                },
+                "lift": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 30,
+                  "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                },
+                "sign": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 30,
+                  "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                },
+                "flag": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 30,
+                  "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                },
+                "star": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 30,
+                  "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                },
+                "snowPath": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 30,
+                  "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                },
+                "pavedPath": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 30,
+                  "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                }
+              }
+            },
+            "itemSpreadMetres": {
+              "type": "number",
+              "minimum": 5,
+              "maximum": 100
+            },
+            "endTrafficMultiplier": {
+              "type": "number",
+              "minimum": 1,
+              "maximum": 3
+            }
+          }
+        },
+        "stageOverrides": {
+          "type": "object",
+          "properties": {},
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [],
+            "description": "Partial verbose stage keyed by stage name; unknown names fail validation.",
+            "properties": {
+              "yetiColor": {
+                "type": "string",
+                "enum": [
+                  "teal",
+                  "orange",
+                  "violet"
+                ],
+                "description": "Visual tier of the start-line yetis."
+              },
+              "gates": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [],
+                "properties": {
+                  "count": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 500
+                  },
+                  "swordGateCount": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 500
+                  },
+                  "icePercent": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 100,
+                    "description": "Percentage of gates with a frozen patch covering the opening (rounded to whole gates)."
+                  }
+                }
+              },
+              "tierRates": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [],
+                "description": "Default placement attempts per 100 metres for each rarity tier on this stage.",
+                "properties": {
+                  "slightlyRare": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres for slightlyRare objects; 0 disables the tier unless overridden."
+                  },
+                  "veryRare": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres for veryRare objects; 0 disables the tier unless overridden."
+                  }
+                }
+              },
+              "itemRates": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [],
+                "description": "Per-object spawn-rate overrides. Omitted objects use their tier rate; 0 disables the object.",
+                "properties": {
+                  "pine": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                  },
+                  "fir": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                  },
+                  "smallPine": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                  },
+                  "spruceTree": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                  },
+                  "crookedTree": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                  },
+                  "cedarTree": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                  },
+                  "alpineTree": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                  },
+                  "rock": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                  },
+                  "pebble": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                  },
+                  "stump": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                  },
+                  "bush": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                  },
+                  "mushroom": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                  },
+                  "sled": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                  },
+                  "snowball": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                  },
+                  "ramp": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                  },
+                  "mogul": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                  },
+                  "rainbow": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                  },
+                  "smallLake": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                  },
+                  "largeLake": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                  },
+                  "skier": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                  },
+                  "fastSkier": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                  },
+                  "overtakingSkier": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                  },
+                  "boarder": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                  },
+                  "personRed": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                  },
+                  "personYellow": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                  },
+                  "personGreen": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                  },
+                  "dog": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                  },
+                  "hostileDog": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                  },
+                  "cat": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                  },
+                  "rabbit": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                  },
+                  "fox": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                  },
+                  "wolf": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                  },
+                  "wolfPack": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                  },
+                  "bear": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                  },
+                  "yetiTeal": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                  },
+                  "yetiOrange": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                  },
+                  "yetiViolet": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                  },
+                  "lodge": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                  },
+                  "rental": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                  },
+                  "cottage": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                  },
+                  "chalet": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                  },
+                  "inn": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                  },
+                  "cafe": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                  },
+                  "hotel": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                  },
+                  "skiShop": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                  },
+                  "lamp": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                  },
+                  "bench": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                  },
+                  "snowman": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                  },
+                  "bunting": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                  },
+                  "powderPile": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                  },
+                  "pigeons": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                  },
+                  "breadStand": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                  },
+                  "skiRack": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                  },
+                  "lift": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                  },
+                  "sign": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                  },
+                  "flag": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                  },
+                  "star": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                  },
+                  "snowPath": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                  },
+                  "pavedPath": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                  }
+                }
+              },
+              "itemSpreadMetres": {
+                "type": "number",
+                "minimum": 5,
+                "maximum": 100
+              },
+              "endTrafficMultiplier": {
+                "type": "number",
+                "minimum": 1,
+                "maximum": 3
+              }
+            }
+          },
+          "description": "Per-stage verbose overrides keyed by stage name."
         }
       }
     },

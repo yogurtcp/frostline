@@ -158,7 +158,7 @@ Timing begins at the actual start line. A qualifying fast finish gains a bounded
 
 ### Arcade
 
-- Physical Arcade entrance starts a named, ordered survival campaign, currently 12 configurable stages.
+- Physical Arcade entrance starts a named, ordered survival campaign, currently 20 compact stage rows.
 - No entry fees, money rewards, or time-based qualification. Creatures create urgency.
 - Towns connect stages automatically; no course selection between stages.
 - **Missing the finish fails Arcade in place. Do not teleport or reset the world.** The player can continue skiing normally.
@@ -195,19 +195,15 @@ The user wants direct control. **Do not introduce automatic Yeti speed math or r
 
 The previous attempt to make the first Yeti stages faster was rejected and reverted. Stages 3–4 were restored to normal 103 km/h and 30 m vertical gate spacing. Absolute Yeti speeds then became editable per stage.
 
-Each `arcade.stages[]` entry has:
+`arcade.stages` maps names to knob tuples `[obstacles, chase, miss, speed]` (levels 1–4); map order is play order (currently 20 stages). Effective fields resolve per stage as `stageDefaults` plus that name's `stageOverrides` entry (same verbose field names, all optional; unknown names fail validation):
 
 | Setting | Meaning |
 | --- | --- |
-| `name` | Display name; array position supplies stage number |
-| `knobs` | Four levels 1–4: [obstacles, start chase, miss guards, speed] |
+| `knobs` | Four levels 1–4 from the compact row |
 | `yetiColor` | Visual tier (teal/orange/violet) of the knob-driven start group |
-| `gates.count` | Total gate count, including sword gates |
-| `gates.swordGateCount` | Exact number distributed across the course |
-| `gates.icePercent` | 0–100 percent of gates covered by ice, rounded to a whole gate count |
+| `gates.count` / `.swordGateCount` / `.icePercent` | Gate totals (geometry derives from speed knob) |
 | `tierRates` / `itemRates` | slightlyRare/veryRare defaults plus per-object overrides (tiers in `arcade.itemTiers`; common rate from obstacle knob) |
-| `itemSpreadMetres` | Horizontal placement range about centreline |
-| `endTrafficMultiplier` | Gradual increase in skier/boarder density toward finish |
+| `itemSpreadMetres` / `endTrafficMultiplier` | Placement range; skier/boarder ramp toward finish |
 
 `arcade.knobLevels` holds the four level tables (obstacle rates, chase counts/speeds as percent of top, guarded-gate shares, top speeds) plus gate geometry as percents of top speed. Course length is the derived first run-out + `(count − 1) × derived vertical spacing` + derived finish run-out. Horizontal gate centres alternate at plus/minus half the derived horizontal distance. No extra Arcade gate sway is added.
 
@@ -215,7 +211,7 @@ Start groups resolve from the chase knob; `yetiColor` (teal/orange/violet) maps 
 
 Global `arcade.itemTiers` maps each of the 59 catalog keys (listed in `ARCADE.md` and `ARCADE_ITEMS` in `game.js`) to `common`, `slightlyRare` or `veryRare`. Each stage's `tierRates` sets the per-100m default for `slightlyRare`/`veryRare` while the obstacle knob sets `common`; `itemRates` overrides single objects, with explicit `0` disabling one and omission using the tier/knob rate. Rates are placement attempts, not guaranteed exact counts: collision, gate and landing clearances can reject a placement. `wolfPack` counts packs; `wolf` counts individuals. Town/ambient scenery has separate settings. Do not add a hidden background spawn stream inside Arcade that defeats these controls.
 
-Gate ice is separate from randomly placed `smallLake` and `largeLake`. At handover, stages 8 and 12 use 25% gate ice; others use 0%. Selected gates vary per run. Their patches span the opening and intentionally bypass the ordinary gate-clearance restriction for lakes.
+Gate ice is separate from randomly placed `smallLake` and `largeLake`. Stages 8 and False Summit (12) use 25% gate ice, Whiteout (18) uses 50%; the rest use the default 0%. Selected gates vary per run. Their patches span the opening and intentionally bypass the ordinary gate-clearance restriction for lakes.
 
 ## 8. Code navigation and state ownership
 
