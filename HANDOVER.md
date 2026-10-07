@@ -278,7 +278,7 @@ Local scratch rendering helpers exist under the parent workspace's `work/` direc
 
 The latest implementation passed build validation, JS syntax checks and staged visual review of combo labels and Yeti celebration. It has not been comprehensively playtested on phones or through all stages. Do not turn this handover into a claim that every mechanic is verified.
 
-The user reported slowdown near stage transitions and then explicitly said it was no longer occurring and to ignore it. There is **no active performance-investigation task**. Do not resume broad profiling/refactoring unless requested.
+The user re-reported slowdown at the town NEXT sign (Oct 2026) and asked for a fresh investigation. Root cause: per-step full-array scans in NPC pathing (`travel` validity probes ran `patchAt` over all objects and `houseClearance` over ~160 houses per probe) plus per-rabbit/wolf predator scans. Fixed with a per-step ice list cache, a 256px house grid with 3×3 query, and a hoisted `hunters` list; headless town step 112→9ms, verified bit-identical over a 400-step differential run vs HEAD. Render side (~9.4k canvas calls/frame in town, Y-cull only, no X-cull) measured but left alone — revisit only if browsers still feel slow.
 
 No new gameplay request is pending in this handover; wait for the user's next specific edit. Keep the guide updated when mechanics or workflow materially change.
 

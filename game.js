@@ -597,10 +597,10 @@ window.FROSTLINE_READY = (async () => {
     if(p.speed>L.animalSpookSpeed&&clock>=(o.playerSpookAt||0)){o.playerSpookAt=clock+L.animalCooldownSeconds;o.fleeAngle=Math.atan2(o.y-p.y,o.x-p.x);o.socialFleeUntil=clock+L.animalFleeSeconds;o.hunting=false;o.visitUntil=0;villageReaction(o,'spooked');}
     else if(p.speed<=L.animalSpookSpeed&&clock>=(o.socialNext||0)&&(touched||p.speed<=S.physics.walkSpeed)){o.socialNext=clock+L.animalCooldownSeconds;o.visitUntil=clock+L.socialSeconds;o.hunting=false;say(o.type==='rabbit'?'Sniff sniff.':'Yip?',o,1.3);villageReaction(o,'gentle');}
   }
-  function moveSocialAnimal(o,dt){
+  function moveSocialAnimal(o,dt,hunters){
     const p=state.p,L=S.villageLife;
     // A nearby wolf/fox still takes priority over a rabbit's curiosity.
-    if(o.type==='rabbit'&&state.objects.some(q=>!q.dead&&(q.type==='fox'||q.type==='wolf')&&q.hunting&&Math.hypot(q.x-o.x,q.y-o.y)<S.wildlife.rabbitFearDistance))return false;
+    if(o.type==='rabbit'&&hunters.some(q=>!q.dead&&(q.type==='fox'||q.type==='wolf')&&q.hunting&&Math.hypot(q.x-o.x,q.y-o.y)<S.wildlife.rabbitFearDistance))return false;
     greetSmallAnimal(o);
     if(o.socialFleeUntil>clock){travel(o,o.fleeAngle,L.animalFleeSpeed,dt,true);return true;}
     if(o.socialUntil>clock){if(o.socialPartner&&Math.hypot(o.x-o.socialPartner.x,o.y-o.socialPartner.y)>30)travel(o,Math.atan2(o.socialPartner.y-o.y,o.socialPartner.x-o.x),L.npcAnimalApproachSpeed,dt,true);else o.running=false;return true;}
@@ -1040,11 +1040,26 @@ window.FROSTLINE_READY = (async () => {
       o.walkCycle=(o.walkCycle||0)+distance*P.stridePerUnit;if(Math.abs(o.x-oldX)>.001)o.walkFacing=Math.sign(o.x-oldX);
     }
   }
-  let houseCacheTime=-1,houseCache=[];
+  let houseCacheTime=-1,houseCache=[],houseGrid=new Map(),iceCacheTime=-1,iceCache=[];
+  // Grid cell must exceed max house half-extent + traveller rm (~120px); 3x3 query then covers every house in reach.
+  const HOUSE_CELL=256,houseCell=(x,y)=>Math.floor(x/HOUSE_CELL)+','+Math.floor(y/HOUSE_CELL);
   function travel(o,angle,speed,dt,animal=false,avoidTowns=false){
-    if(houseCacheTime!==clock){houseCache=state.objects.filter(h=>h.type==='lodge'||h.type==='rental');houseCacheTime=clock;}
-    const A=S.wildlife,houses=houseCache;
-    const valid=(x,y)=>(!avoidTowns||!insideTown(x,y))&&!patchAt(x,y)&&!houses.some(h=>houseClearance(h,x,y)<(o.r||10)+5)&&(!animal||courseCreature(o,x,y)||!o.arcadeRun&&!classicArea(x,y,35)&&(!(o.type==='bear'||(['fox','wolf'].includes(o.type)&&!o.humanVisitor))||!humanArea(x,y)));
+    if(houseCacheTime!==clock){
+      houseCache=state.objects.filter(h=>h.type==='lodge'||h.type==='rental');houseCacheTime=clock;houseGrid=new Map();
+      for(const h of houseCache){const k=houseCell(h.x,h.y-h.width*S.village.houseFootHeightRatio);let a=houseGrid.get(k);if(!a)houseGrid.set(k,a=[]);a.push(h);}
+    }
+    if(iceCacheTime!==clock){iceCache=state.objects.filter(h=>h.type==='ice');iceCacheTime=clock;}
+    const A=S.wildlife,Vh=S.village,hwr=Vh.houseFootWidthRatio,hhr=Vh.houseFootHeightRatio,rm=(o.r||10)+5;
+    const nearHouse=(x,y)=>{
+      const cx=Math.floor(x/HOUSE_CELL),cy=Math.floor(y/HOUSE_CELL);
+      for(let ix=cx-1;ix<=cx+1;ix++)for(let iy=cy-1;iy<=cy+1;iy++){
+        const a=houseGrid.get(ix+','+iy);
+        if(a)for(const h of a){const hw=h.width*hwr;if(Math.abs(x-h.x)>hw+rm)continue;const dy=h.y-y;if(dy>-rm&&dy<h.width*hhr*2+rm&&houseClearance(h,x,y)<rm)return true;}
+      }
+      return false;
+    };
+    const nearIce=(x,y)=>iceCache.some(h=>{const g=h.lake||lakeGeometry(h);return Math.abs(x-h.x)<=g.radius+rm&&Math.abs(y-h.y)<=g.radius+rm&&lakeContains(h,x,y);});
+    const valid=(x,y)=>(!avoidTowns||!insideTown(x,y))&&!nearIce(x,y)&&!nearHouse(x,y)&&(!animal||courseCreature(o,x,y)||!o.arcadeRun&&!classicArea(x,y,35)&&(!(o.type==='bear'||(['fox','wolf'].includes(o.type)&&!o.humanVisitor))||!humanArea(x,y)));
     const probe=Math.max(A.avoidProbeDistance,speed*A.avoidLookaheadSeconds);
     const clear=a=>[Math.min(probe,speed*dt),probe*.5,probe].every(d=>valid(o.x+Math.cos(a)*d,o.y+Math.sin(a)*d));
     let heading=o.avoidUntil>clock?o.avoidHeading:angle;
@@ -1100,10 +1115,10 @@ window.FROSTLINE_READY = (async () => {
     }
   }
   function updateWildlife(dt){
-    const p=state.p,A=S.wildlife,rabbits=state.objects.filter(o=>o.type==='rabbit'&&!o.eaten),cats=state.objects.filter(o=>o.type==='cat'),skis=state.objects.filter(o=>o.type==='skier'||o.type==='boarder');
+    const p=state.p,A=S.wildlife,rabbits=state.objects.filter(o=>o.type==='rabbit'&&!o.eaten),cats=state.objects.filter(o=>o.type==='cat'),skis=state.objects.filter(o=>o.type==='skier'||o.type==='boarder'),hunters=state.objects.filter(o=>o.type==='fox'||o.type==='wolf');
     for(const o of state.objects){if(o.eaten||o.dead||o.stunnedUntil>clock||!o.animal||o.penaltyGate&&!o.wolfAwake||Math.hypot(o.x-p.x,o.y-p.y)>A.activeRadius)continue;
       if(state.started&&o.type==='bear'&&(courseCreature(o,p.x,p.y)||!humanArea(o.x,o.y)&&!humanArea(p.x,p.y))&&Math.hypot(o.x-p.x,o.y-p.y)<A.bearWakeDistance){o.animal=false;o.type='awakened';o.r=0;state.chasers.push({kind:'bear',chaseRun:o.arcadeRun,x:o.x,y:o.y,speed:A.bearChaseSpeed,phase:o.phase,expires:p.y+A.bearChaseDistance,talkAt:Infinity});continue;}
-      if(['rabbit','fox'].includes(o.type)&&moveSocialAnimal(o,dt))continue;
+      if(['rabbit','fox'].includes(o.type)&&moveSocialAnimal(o,dt,hunters))continue;
       if(o.feedingUntil>clock){o.running=false;continue;}
       if(o.type==='cat'){
         if(o.socialUntil>clock&&o.socialPartner){if(Math.hypot(o.x-o.socialPartner.x,o.y-o.socialPartner.y)>30)travel(o,Math.atan2(o.socialPartner.y-o.y,o.socialPartner.x-o.x),S.villageLife.npcAnimalApproachSpeed,dt);continue;}
@@ -1115,7 +1130,7 @@ window.FROSTLINE_READY = (async () => {
         if(clock>o.nextAI){o.ai=random()<A.catRoamChance?'flee':'idle';o.nextAI=clock+range(...A.catRoamSeconds);o.calmAt=clock+A.catCalmSeconds;}continue;
       }
       let target=null,speed=o.type==='rabbit'?A.rabbitWalkSpeed:o.type==='bear'?A.bearRoamSpeed:A.roamSpeed;
-      if(o.type==='wolf'&&(courseCreature(o,p.x,p.y)||!humanArea(p.x,p.y)&&!humanArea(o.x,o.y))&&Math.hypot(o.x-p.x,o.y-p.y)<A.wolfAlertDistance){for(const mate of state.objects)if(mate.type==='wolf'&&!mate.dead&&mate.packId===o.packId)mate.alertUntil=clock+A.wolfAlertSeconds;}
+      if(o.type==='wolf'&&(courseCreature(o,p.x,p.y)||!humanArea(p.x,p.y)&&!humanArea(o.x,o.y))&&Math.hypot(o.x-p.x,o.y-p.y)<A.wolfAlertDistance){for(const mate of hunters)if(mate.type==='wolf'&&!mate.dead&&mate.packId===o.packId)mate.alertUntil=clock+A.wolfAlertSeconds;}
       if(o.type==='wolf'){
         const nearby=skis.filter(n=>(courseCreature(o,n.x,n.y)||!humanArea(n.x,n.y))&&!(n.npcFallUntil>clock)&&Math.hypot(n.x-o.x,n.y-o.y)<A.wolfSkierDetection).sort((a,b)=>Math.hypot(a.x-o.x,a.y-o.y)-Math.hypot(b.x-o.x,b.y-o.y))[0];
         if(o.alertUntil>clock&&(courseCreature(o,p.x,p.y)||!humanArea(p.x,p.y))){target=p;speed=o.wolfSpeedKmh?o.wolfSpeedKmh/S.physics.hudKmhPerSpeed:A.wolfPlayerChaseSpeed;}
@@ -1128,12 +1143,12 @@ window.FROSTLINE_READY = (async () => {
         if(o.hunting&&!target){target=rabbits.filter(r=>!r.eaten&&Math.hypot(r.x-o.x,r.y-o.y)<A.rabbitDetection).sort((a,b)=>Math.hypot(a.x-o.x,a.y-o.y)-Math.hypot(b.x-o.x,b.y-o.y))[0];speed=o.type==='wolf'?A.wolfHuntSpeed:A.foxHuntSpeed;}
       }
       if(o.type==='rabbit'){
-        const predator=state.objects.find(q=>!q.dead&&(q.type==='fox'||q.type==='wolf')&&q.hunting&&Math.hypot(q.x-o.x,q.y-o.y)<A.rabbitFearDistance);
+        const predator=hunters.find(q=>!q.dead&&(q.type==='fox'||q.type==='wolf')&&q.hunting&&Math.hypot(q.x-o.x,q.y-o.y)<A.rabbitFearDistance);
         if(predator){o.angle=Math.atan2(o.y-predator.y,o.x-predator.x)+Math.sin(clock*5)*.5;speed=A.rabbitFleeSpeed;}
         else if(clock>o.nextAI){o.angle=range(0,TAU);o.nextAI=clock+range(...A.rabbitTurnSeconds);}
       }else if(!target&&clock>o.nextAI){o.angle=range(0,TAU);o.nextAI=clock+range(...A.roamSeconds);}
       if(!target&&o.type==='wolf'){
-        const leader=state.objects.find(q=>q.type==='wolf'&&!q.dead&&q.packId===o.packId&&q.packIndex===0);
+        const leader=hunters.find(q=>q.type==='wolf'&&!q.dead&&q.packId===o.packId&&q.packIndex===0);
         if(leader&&leader!==o&&Math.hypot(leader.x-o.x,leader.y-o.y)>A.packFollowDistance){o.angle=Math.atan2(leader.y-o.y,leader.x-o.x);speed=A.packFollowSpeed;}
       }
       if(target){o.angle=Math.atan2(target.y-o.y,target.x-o.x);if(Math.hypot(target.x-o.x,target.y-o.y)<A.captureDistance){
