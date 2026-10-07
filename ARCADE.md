@@ -58,7 +58,7 @@ Design guideline: keep gate geometry the same across stages except for speed —
 
 All correct gates share one streak, regardless of shield/sword type. They award 1, then 2, then 3 points per gate; missing a gate resets the streak. Three points equal the previous full gate charge (one sword-gate unit or `shieldsPerStage / ordinaryGateCount` shield charge). Thus the first two gates charge at one-third and two-thirds speed. `swordGatesPerSword` still counts full-charge equivalents. The streak carries through towns and continues even when an inventory is full, but full inventories gain no charge.
 
-Gate labels show each gate's contribution as a share of one full item (`+14% SHIELD`, `+13% SWORD`): the streak points scaled by that stage's per-gate charge, so the number always reads as progress toward a full shield or sword. Label color and weight still encode the streak tier (1/2/3), and labels fade out ~2.5 s after you pass. There is no top CHAIN indicator. Shields are not consumed in towns or their safe approach paths. Death/new Arcade run resets the streak.
+Gate labels show each gate's contribution as a share of one full item (`+14% SHIELD`, `+25% SWORD`): the streak points scaled by that stage's per-gate charge, so the number always reads as progress toward a full shield or sword. Label color and weight still encode the streak tier (1/2/3), and labels fade out ~2.5 s after you pass. There is no top CHAIN indicator. Shields are not consumed in towns or their safe approach paths. Death/new Arcade run resets the streak.
 
 ### Yetis
 
@@ -123,7 +123,7 @@ Knobs read `[obstacles, chase, miss, speed, ice]`, levels 1–4. Chase shows res
 
 ## Gear, towns and records
 
-Ordinary successful gates provide 1.5 shield charges per fully cleared stage; eight successful sword gates earn one sword. These global amounts remain in `arcade.gear`. Charge and up to two of each item carry through towns. An attempt starts empty. If every gate is a sword gate, that stage awards no shield charge.
+Ordinary successful gates provide 1.5 shield charges per fully cleared stage; four successful sword gates earn one sword. These global amounts remain in `arcade.gear`. Charge and up to two of each item carry through towns. An attempt starts empty. If every gate is a sword gate, that stage awards no shield charge. Ramming a bear, yeti or wolf dead at speed also knocks you down unless a shield is spent; sword saves against lethal catches stay clean.
 
 Towns are safe intermissions and the next stage starts automatically at their exit. No money or timed qualification applies. Crossing outside the finish fails Arcade without teleporting; death returns to the summit (or the configured automatic start). Completing the final configured stage ends the run.
 

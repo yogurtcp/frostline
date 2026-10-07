@@ -220,7 +220,7 @@ window.FROSTLINE_READY = (async () => {
   }
   function useObstacleShield(obstacle){
     const a=state.arcade,p=state.p,G=S.arcade.gear;
-    if(!a||!a.shields||insideTown(p.x,p.y)||safeApproach(p.x,p.y)||p.awaitingInput||tooSlowToCrash()||['dog','bear','lurker','wolf','fox','rabbit','cat'].includes(obstacle?.type))return false;
+    if(!a||!a.shields||insideTown(p.x,p.y)||safeApproach(p.x,p.y)||p.awaitingInput||tooSlowToCrash())return false;
     a.shields--;a.shieldsUsed++;p.shield=Math.max(p.shield,G.protectionSeconds);
     if(obstacle)p.slowContacts.add(obstacle);
     a.gearEffect={kind:'shield',start:clock,until:clock+G.effectSeconds};
@@ -822,7 +822,7 @@ window.FROSTLINE_READY = (async () => {
     const maxAngle=kind==='bear'?S.wildlife.bearMaxImpactAngleDegrees:S.wildlife.yetiMaxImpactAngleDegrees,impactAngle=Math.atan2(Math.abs(p.vx),p.vy)*180/Math.PI;
     if(o.dead||impactAngle>maxAngle||p.air>0||p.fall||p.awaitingInput||p.speed*S.physics.hudKmhPerSpeed<=threshold||(o.x-p.x)*p.vx+(o.y-p.y)*p.vy<=0)return false;
     o.dead=true;o.r=0;o.fadeUntil=clock+S.wildlife.predatorFadeSeconds;o.running=false;p.speed*=S.wildlife.knockoutSpeedRetention;p.shield=S.wildlife.knockoutShieldSeconds;
-    burst(o.x,o.y,C.gold,12);say(kind==='bear'?'BEAR DOWN!':'YETI DOWN!',o);beep(190,.12,'triangle');return true;
+    burst(o.x,o.y,C.gold,12);say(kind==='bear'?'BEAR DOWN!':'YETI DOWN!',o);beep(190,.12,'triangle');if(state.arcade)crash(null);return true;
   }
   function tooSlowToCrash(){return state.p.speed*S.physics.hudKmhPerSpeed<=S.physics.minimumCollisionKmh;}
   function hit(o) {
@@ -834,7 +834,6 @@ window.FROSTLINE_READY = (async () => {
     if(p.awaitingInput||p.shield>0||o===p.crashObstacle)return;
     if(o.type==='wolf'&&killWolf(o))return;
     if(['bear','lurker'].includes(o.type)&&knockOut(o,o.type))return;
-    if(['bear','lurker','dog'].includes(o.type)&&!tooSlowToCrash()&&useArcadeSword(o))return;
     if(o.touched&&['ramp','mogul','mushroom','rainbow','sled','bush','cat'].includes(o.type))return;
     const uphill=p.vy<0,fast=p.speed>S.physics.fastImpactSpeed;
     if(o.type==='cat'){
@@ -1070,7 +1069,7 @@ window.FROSTLINE_READY = (async () => {
         if(clock>=(skier.thanksAt||0)){say(pick(S.dialogue.rescued),skier,3);skier.thanksAt=clock+A.rescueThanksCooldown;skier.speakAt=clock+A.npcSpeechCooldown;}
         if(skier.threat===o){skier.threat=null;skier.fearUntil=0;skier.npcFallUntil=0;}
       }
-    }return true;
+    }if(state.arcade)crash(null);return true;
   }
   function frighten(skier,wolf){
     skier.threat=wolf;skier.fearUntil=clock+S.wildlife.npcFearSeconds;skier.catInterest=null;
@@ -1228,7 +1227,7 @@ window.FROSTLINE_READY = (async () => {
           if(c.harmlessDog)continue;
         }
         if(!lethal&&(p.awaitingInput||tooSlowToCrash()))continue;
-        if(['fast','slow','bear','dog'].includes(c.kind)&&useArcadeSword(c))continue;
+        if(['fast','slow','bear'].includes(c.kind)&&useArcadeSword(c))continue;
         if(['fast','slow','bear'].includes(c.kind)){if(state.course&&!p.awaitingInput)state.course.hits++;burst(p.x,p.y,C.ice,12);die(c.kind==='bear'?'BEAR':'YETI',c);break;}
         crash(null,S.chasers.patrolFallSeconds,c.kind==='dog');announce(c.kind==='dog'?'AGGRESSIVELY LOVED':'A WORD FROM SKI PATROL',c.kind==='dog'?'Covered in slobber. Wallet intact.':'They are very disappointed.',C.red,3);for(const other of state.chasers)if(!other.patrolPass&&(!other.chaseRun||other.chaseRun!==state.course))other.expires=p.y-1;burst(p.x,p.y,C.ice,20);break;
       }

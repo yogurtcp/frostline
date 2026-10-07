@@ -78,7 +78,7 @@ Before editing, still inspect for newer user changes. Do not discard them or use
 | `CONFIG.md` | Config sections, units and workflow |
 | `ARCADE.md` | Stage editor reference, item catalog and baseline stage table |
 
-Some older prose can lag behind newer mechanics. In particular, the final **Gear, towns and records** section of `ARCADE.md` describes the old eight-gate sword/full-stage shield rate without qualifying the new combo ramp. Its newer **Gate combos and gear** section and current code give the correct formula. Numeric tuning in prose is secondary to the current JSON.
+Some older prose can lag behind newer mechanics. In particular, the final **Gear, towns and records** section of `ARCADE.md` describes the old four-gate sword/full-stage shield rate without qualifying the new combo ramp. Its newer **Gate combos and gear** section and current code give the correct formula. Numeric tuning in prose is secondary to the current JSON.
 
 ## 4. Build, run and config reloads
 
@@ -182,12 +182,12 @@ charge gained = old per-gate charge × combo / 3
 - Second consecutive success: 2 points / two-thirds old charge.
 - Third and later: 3 points / full old charge, not triple old charge.
 - Shield then sword gives two sword points; shield, shield, sword gives three sword points; miss then sword gives one sword point.
-- Sword full-rate charge is 1 unit. Sword threshold is `arcade.gear.swordGatesPerSword` (currently 8 full-rate units, equivalent to 24 new points).
+- Sword full-rate charge is 1 unit. Sword threshold is `arcade.gear.swordGatesPerSword` (currently 4 full-rate units, equivalent to 12 new points).
 - Shield full-rate charge is `shieldsPerStage / ordinaryGateCount` (currently a 1.5-shield stage budget before combo ramp losses).
 - Inventory and partial charges persist across towns. So does the combo until a miss. New attempts start empty.
 - Even a correct gate whose inventory is full advances the shared combo, but awards no stored charge.
 - Gate labels show `+N% SHIELD/SWORD` (that gate's share of one full item) in three chain-tier weights/colors; no top CHAIN indicator exists. Top inventory icons fill gradually and brighten when ready.
-- Shields automatically protect from qualifying obstacles outside towns. Swords automatically defeat qualifying animal threats. See the exclusion/eligibility guards rather than assuming every collision spends gear.
+- Shields automatically protect from qualifying obstacles outside towns, and from the fall when ramming an animal dead. Swords automatically defeat lethal animal threats only: yeti/bear chaser catches and wolf attacks. Dog tackles and animal-object bumps cost a fall, never a sword. Arcade impact kills (`knockOut`/`killWolf`) knock you down unless a shield is spent; regular-mode impact kills stay clean. See the exclusion/eligibility guards rather than assuming every collision spends gear.
 
 ## 7. Stage config: explicit tuning, no hidden balancing
 

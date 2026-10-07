@@ -14,7 +14,7 @@ Open `index.html` in a browser, or reload the already open game tab. The game co
 
 Crashes leave you stopped until a fresh arrow-key press, Space press, or touch after the fall animation. Holding a key or keeping the same finger down does not restart skiing. Solid obstacles remain collidable on later visits; fast tree impacts break the tree and cause a fall. A brief recovery grace and separation from the last obstacle prevent getting trapped in repeated falls.
 
-The body stays upright while standing and climbing. Fast and slow diagonal skiing have distinct 30° and 60° ski poses with animated crouching and poles. Snow acceleration is about 72% stronger on a straight descent, and snow top speeds are about 23% higher than the preceding revision. Faster jumps gain more height and airtime.
+The body stays upright while standing and climbing. Fast and slow diagonal skiing have distinct 30° and 60° ski poses with animated crouching and poles. Snow acceleration is strongest on a straight descent (doubled from the original tuning for faster crash recovery), and snow top speeds are about 23% higher than the preceding revision. Faster jumps gain more height and airtime.
 
 ## The mountain
 
