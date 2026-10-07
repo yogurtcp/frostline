@@ -98,28 +98,28 @@ Densities are placement attempts, not exact counts: gates, finish openings, lake
 
 | # | Name | Knobs O/C/M/S | Top | Chase | Guarded |
 | --- | --- | ---: | ---: | --- | ---: |
-| 1 | First Tracks | 1111 | 90 | none | 0% |
-| 2 | Mind the Pines | 2111 | 90 | none | 0% |
-| 3 | Polite Pursuit | 2211 | 90 | 1 teal @45 | 0% |
-| 4 | Forest Company | 2221 | 90 | 1 teal @45 | 25% |
-| 5 | Orange Alert | 2222 | 105 | 1 orange @52 | 25% |
-| 6 | Timber Express | 3111 | 90 | none | 0% |
-| 7 | Rush Hour | 3211 | 90 | 1 teal @45 | 0% |
-| 8 | Frozen Assets | 3221 | 90 | 1 orange @45 | 25% |
-| 9 | Air Mail | 3222 | 105 | 1 orange @52 | 25% |
-| 10 | Flag Consequences | 3322 | 105 | 2 orange @74 | 25% |
-| 11 | Violet Warning | 3332 | 105 | 2 violet @74 | 50% |
-| 12 | False Summit | 3333 | 120 | 2 violet @84 | 50% |
-| 13 | Thicket | 4111 | 90 | none | 0% |
-| 14 | Thin Air | 4211 | 90 | 1 orange @45 | 0% |
-| 15 | Long Shadows | 4221 | 90 | 1 orange @45 | 25% |
-| 16 | Deep Snow | 4222 | 105 | 1 orange @52 | 25% |
-| 17 | High Wind | 4332 | 105 | 2 orange @74 | 50% |
-| 18 | Whiteout | 4333 | 120 | 2 violet @84 | 50% |
-| 19 | Wolf Moon | 4443 | 120 | 3 violet @108 | 100% |
-| 20 | Last Tracks | 4444 | 150 | 3 violet @135 | 100% |
+| 1 | First Wobble | 1111 | 90 | none | 0% |
+| 2 | Pine Curious | 2111 | 90 | none | 0% |
+| 3 | Tag, You're It | 2211 | 90 | 1 teal @45 | 0% |
+| 4 | Nap Patrol | 2221 | 90 | 1 teal @45 | 25% |
+| 5 | Double Trouble | 1311 | 90 | 2 orange @63 | 0% |
+| 6 | Two-Yeti Minimum | 2311 | 90 | 2 orange @63 | 0% |
+| 7 | Sleeping on the Job | 2321 | 90 | 2 teal @63 | 25% |
+| 8 | Lumber Party | 3111 | 90 | none | 0% |
+| 9 | Zoom School | 2112 | 105 | none | 0% |
+| 10 | Fast and Flurrious | 2212 | 105 | 1 orange @52 | 0% |
+| 11 | Double Jeopardy | 2312 | 105 | 2 violet @74 | 0% |
+| 12 | Crowded House | 3312 | 105 | 2 violet @74 | 0% |
+| 13 | Speed Run | 1213 | 120 | 1 orange @60 | 0% |
+| 14 | Cruise Control | 2223 | 120 | 1 orange @60 | 25% |
+| 15 | Hot Pursuit | 2333 | 120 | 2 orange @84 | 50% |
+| 16 | Peak Suspicion | 3333 | 120 | 2 orange @84 | 50% |
+| 17 | Tree Jail | 4111 | 90 | none | 0% |
+| 18 | Peekaboo | 4211 | 90 | 1 violet @45 | 0% |
+| 19 | Hide and Seek | 4311 | 90 | 2 violet @63 | 0% |
+| 20 | Nowhere to Hide | 1411 | 90 | 3 violet @81 | 0% |
 
-Knobs read `[obstacles, chase, miss, speed]`, levels 1–4. Chase shows resolved count, color and km/h; guarded shows the share of gates with a 3-wolf pack. Common rate per obstacle level lives in `knobLevels`. The ladder is a staircase with resets: 1–5 climb to all-2s; 6 introduces obstacles 3 with the rest back at 1, then 7–12 rebuild to all-3s; 13 introduces obstacles 4 the same way, then 14–20 rebuild to the all-4 finale. Every step moves one knob except 16→17 and 18→19, which raise both monster knobs together so the full climb fits 20 stages. Speed 150 appears only on the final stage.
+Knobs read `[obstacles, chase, miss, speed]`, levels 1–4. Chase shows resolved count, color and km/h; guarded shows the share of gates with a 3-wolf pack. Common rate per obstacle level lives in `knobLevels`. The curve previews each tier in isolation before combining: 1–4 ramp 1s into 2s; 5–7 preview chase-3 at low speed; 8 is a dense-forest breather; 9–12 climb at speed 105 with chase rising to 3; 13 spotlights speed 120 on an empty piste; 14–16 run full 120-tier stages up to all-3s; 17–19 cross the max forest with rising chase; 20 empties the forest for a 3-yeti boss chase. Speed 150 and 100% guarding are currently unused; guards appear only on stages 4, 7 and 14–16.
 
 ## Gear, towns and records
 

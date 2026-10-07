@@ -152,7 +152,7 @@ These have been repeatedly requested; preserve them unless explicitly changed.
 
 Regular mode has a persistent wallet, paid courses, timing and qualifying rewards. Most gate courses require at least 90% correct gates plus the finish crossing. Unpaid entries award no money or qualifying best time and can trigger yetis, persistent dog pursuit, or repeated ski-patrol waves. Ski patrol is intentionally prolonged rather than a single group stuck beside the player.
 
-Classic `slalom` is gates and people in its corridor; other terrain stays outside. `Spore Decisions` is mushroom collection, not another gate slalom. Ordinary world mushrooms retain their old behavior; collectible course mushrooms are a separate case. Regular `Polite Pursuit` uses `politePursuit` settings, distinct from the similarly named Arcade stage.
+Classic `slalom` is gates and people in its corridor; other terrain stays outside. `Spore Decisions` is mushroom collection, not another gate slalom. Ordinary world mushrooms retain their old behavior; collectible course mushrooms are a separate case. Regular `Polite Pursuit` uses `politePursuit` settings. (No Arcade stage shares that name anymore.)
 
 Timing begins at the actual start line. A qualifying fast finish gains a bounded time bonus. Saved bests include a signature of relevant rules so incompatible times are not treated as comparable. See `creditRun`, `timingSignature` and `timing` config.
 
@@ -211,7 +211,7 @@ Start groups resolve from the chase knob; `yetiColor` (teal/orange/violet) maps 
 
 Global `arcade.itemTiers` maps each of the 59 catalog keys (listed in `ARCADE.md` and `ARCADE_ITEMS` in `game.js`) to `common`, `slightlyRare` or `veryRare`. Each stage's `tierRates` sets the per-100m default for `slightlyRare`/`veryRare` while the obstacle knob sets `common`; `itemRates` overrides single objects, with explicit `0` disabling one and omission using the tier/knob rate. Rates are placement attempts, not guaranteed exact counts: collision, gate and landing clearances can reject a placement. `wolfPack` counts packs; `wolf` counts individuals. Town/ambient scenery has separate settings. Do not add a hidden background spawn stream inside Arcade that defeats these controls.
 
-Gate ice is separate from randomly placed `smallLake` and `largeLake`. Stages 8 and False Summit (12) use 25% gate ice, Whiteout (18) uses 50%; the rest use the default 0%. Selected gates vary per run. Their patches span the opening and intentionally bypass the ordinary gate-clearance restriction for lakes.
+Gate ice is separate from randomly placed `smallLake` and `largeLake`. Lumber Party (8) and Crowded House (12) use 25% gate ice, Peekaboo (18) uses 50%; the rest use the default 0%. Selected gates vary per run. Their patches span the opening and intentionally bypass the ordinary gate-clearance restriction for lakes.
 
 ## 8. Code navigation and state ownership
 

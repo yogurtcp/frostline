@@ -6,125 +6,125 @@
     "autoStart": false,
     "campaignVersion": 2,
     "stages": {
-      "First Tracks": [
+      "First Wobble": [
         1,
         1,
         1,
         1
       ],
-      "Mind the Pines": [
+      "Pine Curious": [
         2,
         1,
         1,
         1
       ],
-      "Polite Pursuit": [
+      "Tag, You're It": [
         2,
         2,
         1,
         1
       ],
-      "Forest Company": [
+      "Nap Patrol": [
         2,
         2,
         2,
         1
       ],
-      "Orange Alert": [
+      "Double Trouble": [
+        1,
+        3,
+        1,
+        1
+      ],
+      "Two-Yeti Minimum": [
         2,
+        3,
+        1,
+        1
+      ],
+      "Sleeping on the Job": [
         2,
+        3,
         2,
+        1
+      ],
+      "Lumber Party": [
+        3,
+        1,
+        1,
+        1
+      ],
+      "Zoom School": [
+        2,
+        1,
+        1,
         2
       ],
-      "Timber Express": [
-        3,
-        1,
-        1,
-        1
-      ],
-      "Rush Hour": [
-        3,
+      "Fast and Flurrious": [
+        2,
         2,
         1,
-        1
-      ],
-      "Frozen Assets": [
-        3,
-        2,
-        2,
-        1
-      ],
-      "Air Mail": [
-        3,
-        2,
-        2,
         2
       ],
-      "Flag Consequences": [
-        3,
-        3,
+      "Double Jeopardy": [
         2,
+        3,
+        1,
         2
       ],
-      "Violet Warning": [
+      "Crowded House": [
         3,
         3,
-        3,
+        1,
         2
       ],
-      "False Summit": [
+      "Speed Run": [
+        1,
+        2,
+        1,
+        3
+      ],
+      "Cruise Control": [
+        2,
+        2,
+        2,
+        3
+      ],
+      "Hot Pursuit": [
+        2,
+        3,
+        3,
+        3
+      ],
+      "Peak Suspicion": [
         3,
         3,
         3,
         3
       ],
-      "Thicket": [
+      "Tree Jail": [
         4,
         1,
         1,
         1
       ],
-      "Thin Air": [
+      "Peekaboo": [
         4,
         2,
         1,
         1
       ],
-      "Long Shadows": [
+      "Hide and Seek": [
         4,
-        2,
-        2,
+        3,
+        1,
         1
       ],
-      "Deep Snow": [
+      "Nowhere to Hide": [
+        1,
         4,
-        2,
-        2,
-        2
-      ],
-      "High Wind": [
-        4,
-        3,
-        3,
-        2
-      ],
-      "Whiteout": [
-        4,
-        3,
-        3,
-        3
-      ],
-      "Wolf Moon": [
-        4,
-        4,
-        4,
-        3
-      ],
-      "Last Tracks": [
-        4,
-        4,
-        4,
-        4
+        1,
+        1
       ]
     },
     "itemTiers": {
@@ -298,7 +298,7 @@
       "endTrafficMultiplier": 1.5
     },
     "stageOverrides": {
-      "First Tracks": {
+      "First Wobble": {
         "yetiColor": "teal",
         "gates": {
           "count": 12,
@@ -315,7 +315,7 @@
         },
         "endTrafficMultiplier": 1.4
       },
-      "Mind the Pines": {
+      "Pine Curious": {
         "yetiColor": "teal",
         "gates": {
           "count": 15,
@@ -334,7 +334,7 @@
         },
         "endTrafficMultiplier": 1.4
       },
-      "Polite Pursuit": {
+      "Tag, You're It": {
         "yetiColor": "teal",
         "gates": {
           "count": 19,
@@ -350,7 +350,7 @@
           "overtakingSkier": 0.1
         }
       },
-      "Forest Company": {
+      "Nap Patrol": {
         "yetiColor": "teal",
         "gates": {
           "swordGateCount": 3
@@ -367,7 +367,7 @@
           "personGreen": 0.2
         }
       },
-      "Orange Alert": {
+      "Double Trouble": {
         "gates": {
           "count": 17
         },
@@ -381,7 +381,7 @@
           "personGreen": 0.2
         }
       },
-      "Timber Express": {
+      "Two-Yeti Minimum": {
         "gates": {
           "count": 18
         },
@@ -400,7 +400,7 @@
           "personGreen": 0.2
         }
       },
-      "Rush Hour": {
+      "Sleeping on the Job": {
         "yetiColor": "teal",
         "gates": {
           "count": 19,
@@ -421,7 +421,7 @@
         },
         "endTrafficMultiplier": 2.0
       },
-      "Frozen Assets": {
+      "Lumber Party": {
         "gates": {
           "icePercent": 25
         },
@@ -439,7 +439,7 @@
           "personGreen": 0.3
         }
       },
-      "Air Mail": {
+      "Zoom School": {
         "gates": {
           "count": 18,
           "swordGateCount": 3
@@ -460,7 +460,7 @@
           "personGreen": 0.3
         }
       },
-      "Flag Consequences": {
+      "Fast and Flurrious": {
         "gates": {
           "count": 24
         },
@@ -474,7 +474,7 @@
         },
         "itemSpreadMetres": 28
       },
-      "Violet Warning": {
+      "Double Jeopardy": {
         "yetiColor": "violet",
         "gates": {
           "count": 27,
@@ -496,7 +496,7 @@
           "personGreen": 0.2
         }
       },
-      "False Summit": {
+      "Crowded House": {
         "yetiColor": "violet",
         "gates": {
           "count": 28,
@@ -523,27 +523,32 @@
           "personGreen": 0.3
         }
       },
-      "Thin Air": {
+      "Speed Run": {
+        "gates": {
+          "count": 24
+        }
+      },
+      "Cruise Control": {
         "gates": {
           "count": 22
         }
       },
-      "Long Shadows": {
+      "Hot Pursuit": {
         "gates": {
           "count": 24
         }
       },
-      "Deep Snow": {
+      "Peak Suspicion": {
         "gates": {
           "count": 26
         }
       },
-      "High Wind": {
+      "Tree Jail": {
         "gates": {
           "count": 24
         }
       },
-      "Whiteout": {
+      "Peekaboo": {
         "yetiColor": "violet",
         "gates": {
           "count": 24,
@@ -554,7 +559,7 @@
           "largeLake": 0.25
         }
       },
-      "Wolf Moon": {
+      "Hide and Seek": {
         "yetiColor": "violet",
         "gates": {
           "count": 26,
@@ -567,15 +572,10 @@
           "hostileDog": 0.2
         }
       },
-      "Last Tracks": {
+      "Nowhere to Hide": {
         "yetiColor": "violet",
         "gates": {
           "count": 28
-        }
-      },
-      "Thicket": {
-        "gates": {
-          "count": 24
         }
       }
     }
