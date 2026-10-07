@@ -4871,15 +4871,16 @@
                 "type": "object",
                 "additionalProperties": false,
                 "required": [
-                  "count",
+                  "gatePercent",
                   "color",
                   "speedKmh"
                 ],
                 "properties": {
-                  "count": {
-                    "type": "integer",
+                  "gatePercent": {
+                    "type": "number",
                     "minimum": 0,
-                    "maximum": 12
+                    "maximum": 100,
+                    "description": "Percentage of gates guarded by one sleeping penalty yeti (rounded to whole gates). Missing an armed gate wakes its yeti."
                   },
                   "color": {
                     "type": "string",

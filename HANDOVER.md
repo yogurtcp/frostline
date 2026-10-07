@@ -162,7 +162,7 @@ Timing begins at the actual start line. A qualifying fast finish gains a bounded
 - No entry fees, money rewards, or time-based qualification. Creatures create urgency.
 - Towns connect stages automatically; no course selection between stages.
 - **Missing the finish fails Arcade in place. Do not teleport or reset the world.** The player can continue skiing normally.
-- Missing ordinary gates does not itself invoke the regular 90% failure rule. It breaks the combo and may release configured yetis.
+- Missing ordinary gates does not itself invoke the regular 90% failure rule. It breaks the combo and wakes that gate's sleeping penalty yeti, if it has one.
 - Death ends the run and resets to the summit/configured automatic practice start, preserving the wallet.
 - Completing the final stage ends the campaign; current code resets to the summit.
 - `arcade.startStage` is one-based. Values above 1 are practice and do not replace full-run records. `autoStart` skips the summit approach and places the skier just above the stage's start, awaiting input.
@@ -210,7 +210,7 @@ Each `arcade.stages[]` entry has:
 | `gates.swordGateCount` | Exact number distributed across the course |
 | `gates.icePercent` | 0–100 percent of gates covered by ice, rounded to a whole gate count |
 | `yeti` | Start group: independent count, color and absolute speedKmh |
-| `missedGateYetis` | Per-miss releases: independent count, color and speedKmh |
+| `missedGateYetis` | `gatePercent` of gates guarded by one sleeping penalty yeti (color, absolute speedKmh); a miss wakes that gate's yeti |
 | `tierRates` / `itemRates` | Per-tier default spawn rates plus optional per-object overrides (tiers defined once in global `arcade.itemTiers`) |
 | `itemSpreadMetres` | Horizontal placement range about centreline |
 | `endTrafficMultiplier` | Gradual increase in skier/boarder density toward finish |

@@ -141,7 +141,7 @@ window.FROSTLINE_READY = (async () => {
     return {...a,length:g.firstGateMetres+(g.count-1)*g.verticalDistanceMetres+g.finishAfterLastGateMetres,
       pace:a.topSpeedKmh/(S.physics.speedMultiplier*S.physics.hudKmhPerSpeed),spacing:g.verticalDistanceMetres*PX_PER_M,
       trees:Object.keys(ARCADE_ITEMS).some(key=>arcadeItemRate(a,key)>0&&ARCADE_ITEMS[key].treeVariant),
-      yetiTier:yetiTierForColor[a.yeti.color],yetis:a.yeti.count,missTier:yetiTierForColor[a.missedGateYetis.color],missYetis:a.missedGateYetis.count};
+      yetiTier:yetiTierForColor[a.yeti.color],yetis:a.yeti.count,missTier:yetiTierForColor[a.missedGateYetis.color],missPercent:a.missedGateYetis.gatePercent};
   }
   function arcadeTrafficMultiplier(run,y){return mix(1,run.arcade.endTrafficMultiplier,clamp((y-run.startY)/(run.endY-run.startY),0,1));}
   function startCourse(id,gate) {
@@ -175,6 +175,7 @@ window.FROSTLINE_READY = (async () => {
     for(let i=0;i<S.race.spectators;i++)entity(i%2?'personYellow':'personRed',run.x+(i%2?1:-1)*(run.finishHalf+65+(i%3)*20),endY+80+Math.floor(i/2)*105,{width:30,r:10,cheerRun:run});
     state.plannedTown=makeVillage(endY+S.race.townAfterFinish,run.x,false);
     protectScenery();
+    if(run.arcade)armPenaltyGates(run);
     if(id!=='arcade'&&id!=='slalom'&&run.objective!=='mushrooms'){entity('ice',run.x+290,startY+940,{rx:185,ry:250,width:370,r:0});
     entity('ice',run.x-240,startY+1940,{rx:85,ry:105,width:170,r:0});
     for(let y=startY+S.race.rainbowFirstOffset;y<endY-300;y+=s.kind==='freestyle'?S.race.freestyleRainbowSpacing:S.race.rainbowSpacing)entity('rainbow',centerAt(y,run)-90,y,{width:115,r:25});}
@@ -253,7 +254,7 @@ window.FROSTLINE_READY = (async () => {
   }
   function prepareArcadeTerrain(run){
     // Plan every configured object below the viewport; no hidden mixed spawn tables.
-    state.objects=state.objects.filter(o=>o.y<run.startY-100||o.y>run.endY||Math.abs(o.x-centerAt(o.y,run))>S.world.safeCourseHalfWidth+100||!o.worldChunk&&['gate','courseStart','finish','entrance','personRed','personGreen','personYellow'].includes(o.type));
+    state.objects=state.objects.filter(o=>o.y<run.startY-100||o.y>run.endY||Math.abs(o.x-centerAt(o.y,run))>S.world.safeCourseHalfWidth+100||o.penaltyGate||!o.worldChunk&&['gate','courseStart','finish','entrance','personRed','personGreen','personYellow'].includes(o.type));
     const gates=state.objects.filter(o=>o.type==='gate'&&o.run===run);
     const iceGates=[...gates];for(let i=iceGates.length-1;i>0;i--){const j=Math.floor(random()*(i+1));[iceGates[i],iceGates[j]]=[iceGates[j],iceGates[i]];}
     for(const g of iceGates.slice(0,Math.round(gates.length*(run.arcade.gates.icePercent||0)/100)))entity('ice',g.x,g.y,{gateIce:true,arcadeFeature:true,arcadeRun:run,rx:g.half+45,ry:Math.min(run.arcade.spacing*.25,80),width:(g.half+45)*2,r:0});
@@ -276,17 +277,31 @@ window.FROSTLINE_READY = (async () => {
       }
     }
   }
-  function spawnArcadeYetis(run,tier,count,missedGate=null){
+  function spawnArcadeYetis(run,tier,count){
     if(!count||tier==='none')return;
     const active=state.chasers.filter(c=>c.chaseRun===run&&!c.dead&&!c.leaving).length;
     for(let i=0;i<Math.min(count,S.arcade.maxActiveYetis-active);i++){
-      const waiting=!missedGate,side=i%2?1:-1,row=Math.floor(i/2);
-      const kind=tier==='slow'?'slow':'fast',x=waiting?run.x+side*(S.arcade.startLineSideOffsetMetres+row*S.arcade.startLineRowOffsetMetres)*PX_PER_M:missedGate.x+range(-S.arcade.spawnSpread,S.arcade.spawnSpread);
-      const y=waiting?run.startY+S.arcade.startLineDownhillOffsetMetres*PX_PER_M:missedGate.y-S.arcade.missSpawnAbove;
-      const speedKmh=(waiting?run.arcade.yeti:run.arcade.missedGateYetis).speedKmh;
-      state.chasers.push({kind,arcadeTier:tier,x,y,waiting,speed:speedKmh/S.physics.hudKmhPerSpeed,chaseRun:run,id:random(),phase:range(0,6),expires:Infinity,leaving:false,talkAt:clock+6});
-      if(missedGate)burst(x,y,S.arcade.yetiColors[tier],12);
+      const side=i%2?1:-1,row=Math.floor(i/2);
+      const kind=tier==='slow'?'slow':'fast',x=run.x+side*(S.arcade.startLineSideOffsetMetres+row*S.arcade.startLineRowOffsetMetres)*PX_PER_M;
+      const y=run.startY+S.arcade.startLineDownhillOffsetMetres*PX_PER_M;
+      state.chasers.push({kind,arcadeTier:tier,x,y,waiting:true,speed:run.arcade.yeti.speedKmh/S.physics.hudKmhPerSpeed,chaseRun:run,id:random(),phase:range(0,6),expires:Infinity,leaving:false,talkAt:clock+6});
     }
+  }
+  function armPenaltyGates(run){
+    const gates=state.objects.filter(o=>o.type==='gate'&&o.run===run),armed=[...gates];
+    for(let i=armed.length-1;i>0;i--){const j=Math.floor(random()*(i+1));[armed[i],armed[j]]=[armed[j],armed[i]];}
+    for(const gate of armed.slice(0,Math.round(gates.length*(run.arcade.missPercent||0)/100))){
+      const side=random()<.5?-1:1;
+      gate.penaltyArmed=true;gate.penaltyTier=run.arcade.missTier;
+      gate.penaltyLurker=entity('lurker',gate.x+side*(gate.half+70),gate.y,{width:55,r:18,arcadeTier:run.arcade.missTier,arcadeRun:run,yetiSpeedKmh:run.arcade.missedGateYetis.speedKmh,penaltyGate:gate});
+    }
+  }
+  function wakePenaltyYeti(gate){
+    const o=gate.penaltyLurker;
+    if(!o||o.dead||o.type!=='lurker')return;
+    o.type='awakened';o.r=0;
+    state.chasers.push({kind:o.arcadeTier==='slow'?'slow':'fast',arcadeTier:o.arcadeTier,chaseRun:o.arcadeRun,x:o.x,y:o.y,speed:o.yetiSpeedKmh/S.physics.hudKmhPerSpeed,phase:o.phase,expires:Infinity,talkAt:clock+6});
+    say('Oh. Breakfast.',o);burst(o.x,o.y,S.arcade.yetiColors[o.arcadeTier]||C.teal,12);
   }
   function arcadeSnapshot(reason,ended=false){
     const a=state.arcade,r=state.course;
@@ -940,8 +955,8 @@ window.FROSTLINE_READY = (async () => {
       if(o.type==='arcadeOvertaker'&&o.arcadeRun===state.course&&p.y>=o.y&&!o.collected){
         o.collected=true;entity('skier',p.x+pick([-1,1])*range(...S.skiers.fastSpawnOffsetX),viewBounds().top-S.skiers.fastSpawnAbove,{width:44,r:12,fast:true,vy:topSpeed()*S.skiers.fastSpeedRatio,vx:range(-13,13),arcadeRun:o.arcadeRun});
       }
-      if(state.started&&!(o.stunnedUntil>clock)&&o.type==='lurker'&&(courseCreature(o,p.x,p.y)||!humanArea(o.x,o.y)&&!humanArea(p.x,p.y))&&Math.hypot(o.x-p.x,o.y-p.y)<S.wildlife.yetiWakeDistance){o.type='awakened';o.r=0;state.chasers.push({kind:o.arcadeTier==='slow'?'slow':'fast',arcadeTier:o.arcadeTier,chaseRun:o.arcadeRun,x:o.x,y:o.y,speed:o.arcadeRun?o.yetiSpeedKmh/S.physics.hudKmhPerSpeed:topSpeed()*S.wildlife.yetiWildSpeedRatio,phase:o.phase,expires:p.y+S.wildlife.yetiWildChaseDistance,talkAt:clock+6});say('Oh. Breakfast.',o);}
-      if(o.type==='gate'&&o.run===state.course&&!o.checked&&previous.y<o.y&&p.y>=o.y){o.checked=true;const ratio=(o.y-previous.y)/(p.y-previous.y||1),crossX=mix(previous.x,p.x,ratio);if(state.course){if(Math.abs(crossX-o.x)<o.half){state.course.points+=S.race.gatePoints;state.course.cleared++;o.good=true;if(state.course.arcade)collectArcadeGear(o);burst(o.x,o.y,C.gold,9);beep(710,.04);}else{state.course.missed++;o.good=false;if(state.course.arcade)state.arcade.combo=0;beep(210,.045);if(state.course.arcade?.missYetis)spawnArcadeYetis(state.course,state.course.arcade.missTier,state.course.arcade.missYetis,o);}}}
+      if(state.started&&!(o.stunnedUntil>clock)&&o.type==='lurker'&&!o.penaltyGate&&(courseCreature(o,p.x,p.y)||!humanArea(o.x,o.y)&&!humanArea(p.x,p.y))&&Math.hypot(o.x-p.x,o.y-p.y)<S.wildlife.yetiWakeDistance){o.type='awakened';o.r=0;state.chasers.push({kind:o.arcadeTier==='slow'?'slow':'fast',arcadeTier:o.arcadeTier,chaseRun:o.arcadeRun,x:o.x,y:o.y,speed:o.arcadeRun?o.yetiSpeedKmh/S.physics.hudKmhPerSpeed:topSpeed()*S.wildlife.yetiWildSpeedRatio,phase:o.phase,expires:p.y+S.wildlife.yetiWildChaseDistance,talkAt:clock+6});say('Oh. Breakfast.',o);}
+      if(o.type==='gate'&&o.run===state.course&&!o.checked&&previous.y<o.y&&p.y>=o.y){o.checked=true;const ratio=(o.y-previous.y)/(p.y-previous.y||1),crossX=mix(previous.x,p.x,ratio);if(state.course){if(Math.abs(crossX-o.x)<o.half){state.course.points+=S.race.gatePoints;state.course.cleared++;o.good=true;if(state.course.arcade)collectArcadeGear(o);burst(o.x,o.y,C.gold,9);beep(710,.04);}else{state.course.missed++;o.good=false;if(state.course.arcade)state.arcade.combo=0;beep(210,.045);if(state.course.arcade)wakePenaltyYeti(o);}}}
       if(o.type==='entrance'&&!state.course&&previous.y<o.y&&p.y>=o.y&&Math.abs(p.x-o.x)<o.half){startCourse(o.stage,o);break;}
       if(!state.arcade&&o.type==='lift'&&!o.used&&previous.y<o.y&&p.y>=o.y&&Math.abs(p.x-o.x)<o.half){o.used=true;state.liftTimer=S.lift.rideSeconds;p.speed=0;announce('UP WE GO','Next stop: the summit.',C.teal,3);}
       if(o.r>0&&Math.abs(o.y-p.y)<Math.max(130,o.width)){const d=Math.hypot(p.x-o.x,(p.y-o.y)*.85);if(obstacleClearance(o,p.x,p.y)<S.physics.playerRadius)hit(o);else if(o.type.startsWith('person')&&!o.greeted&&d<85){o.greeted=true;say(pick(S.dialogue.greetings),o);}}
@@ -1430,6 +1445,7 @@ window.FROSTLINE_READY = (async () => {
       const a=o.checked?.6:1;ctx.globalAlpha=a;
       const color=o.gear==='sword'?S.arcade.gear.swordColor:o.color;
       flag(s.x-o.half*ZOOM,s.y,color,1,o.good);flag(s.x+o.half*ZOOM,s.y,color,-1,o.good);
+      if(o.penaltyArmed)text('!',s.x,s.y-44,14,S.arcade.yetiColors[o.penaltyTier]||C.red);
       if(o.gear==='sword'){gearIcon('sword',s.x-o.half*ZOOM,s.y-31,2);gearIcon('sword',s.x+o.half*ZOOM,s.y-31,2);}
       if(o.checked){if(o.good&&o.run.arcade)comboText(o.gearFull?'FULL':'+'+o.comboLevel+' '+(o.gear==='sword'?'SWORD':'SHIELD'),s.x,s.y-15,o.comboLevel);else text(o.good?'+'+S.race.gatePoints:'×',s.x,s.y-15,10,o.good?C.teal:C.red);}else text(String(o.number).padStart(2,'0'),s.x,s.y+9,8,'#8eaaa5');
       ctx.globalAlpha=1;return;

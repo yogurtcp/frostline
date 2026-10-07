@@ -64,4 +64,4 @@ Local-file and hosted versions have separate browser storage origins. Publishing
 
 
 
-Arcade starts: `startStage` is 1-based; `autoStart: true` loads directly above that stage’s start. Starts above 1 are practice and do not overwrite records. `yeti` and `missedGateYetis` each specify `count`, `color` and absolute `speedKmh`; no automatic speed calculation applies.
+Arcade starts: `startStage` is 1-based; `autoStart: true` loads directly above that stage’s start. Starts above 1 are practice and do not overwrite records. `yeti` specifies `count`, `color` and absolute `speedKmh`; `missedGateYetis` specifies `gatePercent` (share of gates guarded by one sleeping penalty yeti), `color` and absolute `speedKmh`; no automatic speed calculation applies.

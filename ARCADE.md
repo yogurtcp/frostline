@@ -38,7 +38,7 @@ Copy any entry in `arcade.stages`, change `name`, and insert it where you want. 
     "icePercent": 25
   },
   "yeti": { "count": 3, "color": "teal", "speedKmh": 60 },
-  "missedGateYetis": { "count": 0, "color": "orange", "speedKmh": 75 },
+  "missedGateYetis": { "gatePercent": 50, "color": "orange", "speedKmh": 75 },
   "itemSpreadMetres": 32,
   "endTrafficMultiplier": 1.5,
   "tierRates": {
@@ -80,7 +80,7 @@ Gate labels and the top CHAIN indicator use three increasing text weights and `a
 
 ### Yetis
 
-`yeti` controls the waiting start-line group. `missedGateYetis` controls each missed-gate release. Both accept an independent `count`, `color` (teal/orange/violet), and **absolute `speedKmh`**. An orange yeti can be slower than a teal one if you set it that way. Zero count disables the group. Zero speed leaves it stationary. No percentage of player speed, gate-pace calculation, catch-up boost, or hidden color-speed multiplier applies.
+`yeti` controls the waiting start-line group with `count`, `color` (teal/orange/violet), and **absolute `speedKmh`**. `missedGateYetis` instead takes `gatePercent` (0–100), `color`, and absolute `speedKmh`: that percentage of gates, rounded to whole gates, gets one sleeping penalty yeti beside the opening, marked with a `!`. Missing an armed gate wakes its yeti; clearing it leaves the sleeper snoring. An orange yeti can be slower than a teal one if you set it that way. Zero count/percent disables the group. Zero speed leaves it stationary. No percentage of player speed, gate-pace calculation, catch-up boost, or hidden color-speed multiplier applies.
 
 Start-line yetis remain visible before the race, react when you cross, and chase after `arcade.wakeSeconds`. Pursuers follow off piste and retire at course end. The separately placed sleeping yeti items use their named color and the stage’s `yeti.speedKmh`, even if its start-line count is zero.
 

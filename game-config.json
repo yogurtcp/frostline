@@ -20,12 +20,12 @@
           "icePercent": 0
         },
         "yeti": {
-          "count": 0,
+          "count": 1,
           "color": "teal",
           "speedKmh": 0
         },
         "missedGateYetis": {
-          "count": 0,
+          "gatePercent": 100,
           "color": "orange",
           "speedKmh": 73.8
         },
@@ -62,7 +62,7 @@
           "speedKmh": 0
         },
         "missedGateYetis": {
-          "count": 0,
+          "gatePercent": 0,
           "color": "orange",
           "speedKmh": 73.8
         },
@@ -101,7 +101,7 @@
           "speedKmh": 52.1
         },
         "missedGateYetis": {
-          "count": 0,
+          "gatePercent": 0,
           "color": "orange",
           "speedKmh": 84.46
         },
@@ -138,7 +138,7 @@
           "speedKmh": 76.22
         },
         "missedGateYetis": {
-          "count": 0,
+          "gatePercent": 0,
           "color": "orange",
           "speedKmh": 84.46
         },
@@ -177,7 +177,7 @@
           "speedKmh": 82
         },
         "missedGateYetis": {
-          "count": 0,
+          "gatePercent": 0,
           "color": "orange",
           "speedKmh": 95
         },
@@ -217,7 +217,7 @@
           "speedKmh": 88
         },
         "missedGateYetis": {
-          "count": 0,
+          "gatePercent": 0,
           "color": "orange",
           "speedKmh": 95
         },
@@ -259,7 +259,7 @@
           "speedKmh": 80
         },
         "missedGateYetis": {
-          "count": 0,
+          "gatePercent": 0,
           "color": "orange",
           "speedKmh": 95
         },
@@ -303,7 +303,7 @@
           "speedKmh": 92
         },
         "missedGateYetis": {
-          "count": 0,
+          "gatePercent": 0,
           "color": "orange",
           "speedKmh": 95
         },
@@ -344,7 +344,7 @@
           "speedKmh": 95
         },
         "missedGateYetis": {
-          "count": 0,
+          "gatePercent": 0,
           "color": "orange",
           "speedKmh": 100
         },
@@ -387,7 +387,7 @@
           "speedKmh": 110
         },
         "missedGateYetis": {
-          "count": 1,
+          "gatePercent": 50,
           "color": "orange",
           "speedKmh": 108
         },
@@ -426,7 +426,7 @@
           "speedKmh": 120
         },
         "missedGateYetis": {
-          "count": 2,
+          "gatePercent": 100,
           "color": "orange",
           "speedKmh": 110
         },
@@ -472,7 +472,7 @@
           "speedKmh": 128
         },
         "missedGateYetis": {
-          "count": 2,
+          "gatePercent": 100,
           "color": "orange",
           "speedKmh": 112
         },
