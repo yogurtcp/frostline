@@ -286,6 +286,7 @@ window.FROSTLINE_READY = (async () => {
     const a=state.arcade,G=S.arcade.gear,kind=gate.gear==='sword'?'sword':'shield',stock=kind+'s',charge=kind+'Charge',cap=kind==='sword'?G.maxSwords:G.maxShields;
     if(!a)return;
     a.combo=Math.min(3,(a.combo||0)+1);gate.comboLevel=a.combo;
+    if(a.combo>=2)say('CHAIN '+a.combo+'!',state.p,1.5);
     if(a[stock]>=cap){gate.gearFull=true;return;}
     a[charge]+=(kind==='sword'?1:gate.run.shieldGateCharge)*a.combo/3;
     const needed=kind==='sword'?G.swordGatesPerSword:1;
