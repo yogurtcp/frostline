@@ -4942,7 +4942,6 @@
             "personYellow",
             "personGreen",
             "dog",
-            "hostileDog",
             "cat",
             "rabbit",
             "fox",
@@ -5186,14 +5185,6 @@
               ]
             },
             "dog": {
-              "type": "string",
-              "enum": [
-                "common",
-                "slightlyRare",
-                "veryRare"
-              ]
-            },
-            "hostileDog": {
               "type": "string",
               "enum": [
                 "common",
@@ -5879,12 +5870,6 @@
                   "maximum": 30,
                   "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
                 },
-                "hostileDog": {
-                  "type": "number",
-                  "minimum": 0,
-                  "maximum": 30,
-                  "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
-                },
                 "cat": {
                   "type": "number",
                   "minimum": 0,
@@ -6303,12 +6288,6 @@
                     "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
                   },
                   "dog": {
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 30,
-                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
-                  },
-                  "hostileDog": {
                     "type": "number",
                     "minimum": 0,
                     "maximum": 30,

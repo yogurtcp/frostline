@@ -212,7 +212,6 @@
       "breadStand": "slightlyRare",
       "smallLake": "veryRare",
       "largeLake": "veryRare",
-      "hostileDog": "veryRare",
       "wolf": "veryRare",
       "bear": "veryRare",
       "wolfPack": "veryRare",
@@ -476,7 +475,7 @@
           "overtakingSkier": 0.2,
           "wolfPack": 0.2,
           "bear": 0.2,
-          "hostileDog": 0.2,
+          "wolf": 0.2,
           "smallLake": 0.4,
           "largeLake": 0.15,
           "yetiViolet": 0.15,
@@ -528,10 +527,9 @@
           "swordGateCount": 14
         },
         "itemRates": {
-          "wolf": 0.4,
+          "wolf": 0.6,
           "wolfPack": 0.25,
-          "bear": 0.3,
-          "hostileDog": 0.2
+          "bear": 0.3
         }
       },
       "Good Luck": {

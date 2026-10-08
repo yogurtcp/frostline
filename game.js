@@ -101,7 +101,6 @@ window.FROSTLINE_READY = (async () => {
     "personYellow":{"type":"personYellow","width":30,"r":10},
     "personGreen":{"type":"personGreen","width":30,"r":10},
     "dog":{"type":"dog","width":34,"r":10,"roam":15},
-    "hostileDog":{"type":"dog","width":39,"r":10},
     "cat":{"type":"cat","width":27,"r":8,"animal":true,"ai":"idle","climb":0},
     "rabbit":{"type":"rabbit","width":20,"r":5,"animal":true,"ai":"idle","climb":0},
     "fox":{"type":"fox","width":39,"r":10,"animal":true,"ai":"idle","climb":0},
@@ -246,7 +245,6 @@ window.FROSTLINE_READY = (async () => {
   function createArcadeItem(key,x,y,run){
     const spec=ARCADE_ITEMS[key],extra={...spec,arcadeRun:run,nextAI:clock+range(1,4),humanVisitor:true};delete extra.type;
     if(key==='overtakingSkier')return entity('arcadeOvertaker',x,y,{r:0,arcadeRun:run});
-    if(key==='hostileDog'){state.chasers.push({kind:'dog',x,y,chaseRun:run,speed:S.chasers.dogContactSpeed,phase:random()*TAU,expires:Infinity});return;}
     if(key==='wolfPack'){
       const packId=random(),count=Math.floor(range(S.wildlife.packMin,S.wildlife.packMax+1));
       for(let i=0;i<count;i++)entity('wolf',x+(i%2?1:-1)*i*18,y+Math.floor(i/2)*25,{...extra,packId,packIndex:i});return;
