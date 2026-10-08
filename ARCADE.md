@@ -92,7 +92,7 @@ Densities are placement attempts, not exact counts: gates, finish openings, lake
 | `slightlyRare` | ramp, mogul, rainbow, mushroom, sled, snowball, fastSkier, overtakingSkier, dog, cat, rabbit, fox, lamp, bench, snowman, sign, flag, star, snowPath, pavedPath, bunting, powderPile, pigeons, skiRack, breadStand |
 | `veryRare` | smallLake, largeLake, wolf, bear, wolfPack, yetiTeal, yetiOrange, yetiViolet, lodge, rental, cottage, chalet, inn, cafe, hotel, skiShop, lift |
 
-`wolf` counts individuals; `wolfPack` counts packs of the configured 3–4 wolves. Explicitly placed course predators can chase/hunt on the piste; protected towns remain safe. House variants share existing collision footprints. `star`, `sign`, and the standalone `flag` are decorative, not currency or extra scoring gates. The stage `lift` is a prop during Arcade; it cannot exit the run. Animation poses (running/left/falling sprites), UI icons, and labels are not separate gameplay items.
+`wolf` counts individuals; `wolfPack` counts packs of the configured 3–4 wolves. Explicitly placed course predators can chase/hunt on the piste; protected towns remain safe. House variants share existing collision footprints. `star`, `sign`, and the standalone `flag` are decorative, not currency or extra scoring gates. The stage `lift` is a prop during Arcade; it cannot exit the run. Animation poses (running/left/falling sprites), UI icons, and labels are not separate gameplay items. Courses are forest: buildings, props, decor and paths never scatter there via tier rates (they stay in `itemTiers` for future village scatter); only an explicit per-stage `itemRates` pin places one on a course.
 
 ## Current defaults
 

@@ -110,28 +110,29 @@ window.FROSTLINE_READY = (async () => {
     "yetiTeal":{"type":"lurker","width":55,"r":18,"arcadeTier":"slow"},
     "yetiOrange":{"type":"lurker","width":55,"r":18,"arcadeTier":"fast"},
     "yetiViolet":{"type":"lurker","width":55,"r":18,"arcadeTier":"elite"},
-    "lodge":{"type":"lodge","width":150,"r":67,"buildingKind":"cottage","floors":1},
-    "rental":{"type":"rental","width":150,"r":67,"buildingKind":"rental","floors":1},
-    "cottage":{"type":"lodge","width":150,"r":67,"buildingKind":"cottage","floors":1},
-    "chalet":{"type":"lodge","width":150,"r":67,"buildingKind":"chalet","floors":1},
-    "inn":{"type":"rental","width":150,"r":67,"buildingKind":"inn","floors":1},
-    "cafe":{"type":"rental","width":150,"r":67,"buildingKind":"cafe","floors":1},
-    "hotel":{"type":"lodge","width":150,"r":67,"buildingKind":"hotel","floors":2},
-    "skiShop":{"type":"rental","width":150,"r":67,"buildingKind":"rental","floors":1},
-    "lamp":{"type":"lamp","width":20,"r":6},
-    "bench":{"type":"bench","width":46,"r":9},
-    "snowman":{"type":"snowman","width":28,"r":9},
-    "bunting":{"type":"bunting","width":180,"r":0},
-    "powderPile":{"type":"powderPile","width":45,"r":23,"villageDetail":true,"mischief":true},
-    "pigeons":{"type":"pigeons","width":50,"r":25,"villageDetail":true,"mischief":true},
-    "breadStand":{"type":"breadStand","width":70,"r":23,"villageDetail":true},
-    "skiRack":{"type":"skiRack","width":70,"r":23,"villageDetail":true},
-    "lift":{"type":"lift","width":174,"r":0,"half":73,"used":false},
-    "sign":{"type":"sign","width":50,"r":0},
-    "flag":{"type":"flag","width":30,"r":0},
-    "star":{"type":"star","width":20,"r":0},
-    "snowPath":{"type":"path","width":56,"r":0,"surface":"snow"},
-    "pavedPath":{"type":"path","width":56,"r":0,"surface":"paved"}
+    // Town flavor: houses, props, decor and paths never scatter on arcade courses (courses are forest).
+    "lodge":{"type":"lodge","width":150,"r":67,"buildingKind":"cottage","floors":1,"noCourse":true},
+    "rental":{"type":"rental","width":150,"r":67,"buildingKind":"rental","floors":1,"noCourse":true},
+    "cottage":{"type":"lodge","width":150,"r":67,"buildingKind":"cottage","floors":1,"noCourse":true},
+    "chalet":{"type":"lodge","width":150,"r":67,"buildingKind":"chalet","floors":1,"noCourse":true},
+    "inn":{"type":"rental","width":150,"r":67,"buildingKind":"inn","floors":1,"noCourse":true},
+    "cafe":{"type":"rental","width":150,"r":67,"buildingKind":"cafe","floors":1,"noCourse":true},
+    "hotel":{"type":"lodge","width":150,"r":67,"buildingKind":"hotel","floors":2,"noCourse":true},
+    "skiShop":{"type":"rental","width":150,"r":67,"buildingKind":"rental","floors":1,"noCourse":true},
+    "lamp":{"type":"lamp","width":20,"r":6,"noCourse":true},
+    "bench":{"type":"bench","width":46,"r":9,"noCourse":true},
+    "snowman":{"type":"snowman","width":28,"r":9,"noCourse":true},
+    "bunting":{"type":"bunting","width":180,"r":0,"noCourse":true},
+    "powderPile":{"type":"powderPile","width":45,"r":23,"villageDetail":true,"mischief":true,"noCourse":true},
+    "pigeons":{"type":"pigeons","width":50,"r":25,"villageDetail":true,"mischief":true,"noCourse":true},
+    "breadStand":{"type":"breadStand","width":70,"r":23,"villageDetail":true,"noCourse":true},
+    "skiRack":{"type":"skiRack","width":70,"r":23,"villageDetail":true,"noCourse":true},
+    "lift":{"type":"lift","width":174,"r":0,"half":73,"used":false,"noCourse":true},
+    "sign":{"type":"sign","width":50,"r":0,"noCourse":true},
+    "flag":{"type":"flag","width":30,"r":0,"noCourse":true},
+    "star":{"type":"star","width":20,"r":0,"noCourse":true},
+    "snowPath":{"type":"path","width":56,"r":0,"surface":"snow","noCourse":true},
+    "pavedPath":{"type":"path","width":56,"r":0,"surface":"paved","noCourse":true}
   };
   const yetiTierForColor={teal:'slow',orange:'fast',violet:'elite'};
   function arcadeItemRate(stage,key){const override=stage.itemRates?.[key];if(override!==undefined)return override;const tier=S.arcade.itemTiers[key];return tier==='common'?S.arcade.knobLevels.obstacles[stage.knobs[0]-1]:stage.tierRates[tier];}
@@ -266,7 +267,7 @@ window.FROSTLINE_READY = (async () => {
     const iceGates=[...gates];for(let i=iceGates.length-1;i>0;i--){const j=Math.floor(random()*(i+1));[iceGates[i],iceGates[j]]=[iceGates[j],iceGates[i]];}
     for(const g of iceGates.slice(0,Math.round(gates.length*(run.arcade.gates.icePercent||0)/100)))entity('ice',g.x,g.y,{gateIce:true,arcadeFeature:true,arcadeRun:run,rx:g.half+45,ry:Math.min(run.arcade.spacing*.25,80),width:(g.half+45)*2,r:0});
     const openings=[...gates,{x:run.x,y:run.startY,half:run.arcade.gates.openingWidthMetres*PX_PER_M/2},{x:run.x,y:run.endY,half:run.finishHalf}];
-    const entries=Object.keys(ARCADE_ITEMS).map(key=>[key,arcadeItemRate(run.arcade,key)]).filter(([,n])=>n>0).sort(([a],[b])=>Number(!!ARCADE_ITEMS[b].arcadeFeature)-Number(!!ARCADE_ITEMS[a].arcadeFeature));
+    const entries=Object.keys(ARCADE_ITEMS).map(key=>[key,arcadeItemRate(run.arcade,key)]).filter(([key,n])=>n>0&&(!ARCADE_ITEMS[key].noCourse||run.arcade.itemRates?.[key]!==undefined)).sort(([a],[b])=>Number(!!ARCADE_ITEMS[b].arcadeFeature)-Number(!!ARCADE_ITEMS[a].arcadeFeature));
     const spreadScale=SPREAD_REFERENCE_METRES/run.arcade.itemSpreadMetres;
     for(const [key,density] of entries){
       const spec=ARCADE_ITEMS[key],spacing=100*PX_PER_M/density*spreadScale,traffic=['skier','fastSkier','overtakingSkier','boarder'].includes(key);

@@ -435,9 +435,6 @@
           "skier": 2.0,
           "boarder": 0.4,
           "fastSkier": 0.3,
-          "lodge": 0.3,
-          "cottage": 0.2,
-          "chalet": 0.2,
           "personRed": 0.2,
           "personYellow": 0.2,
           "personGreen": 0.2
