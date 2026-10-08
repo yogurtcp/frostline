@@ -4,142 +4,114 @@
   "arcade": {
     "startStage": 1,
     "autoStart": false,
-    "campaignVersion": 2,
+    "campaignVersion": 3,
     "stages": {
-      "Just Warming Up": [
+      "Warmup": [
         1,
         1,
         1,
         1,
         1
       ],
-      "Mind the Dog": [
+      "Denser Forest": [
         2,
         1,
         1,
         1,
         1
       ],
-      "Don't Look Back": [
+      "Monster": [
         2,
         2,
         1,
         1,
         1
       ],
-      "Let Sleeping Wolves Lie": [
+      "Miss and Be Eaten": [
         2,
         2,
         2,
         1,
         1
       ],
-      "Run.": [
+      "Fast Monster": [
         1,
         3,
         1,
         1,
         1
       ],
-      "Door to Door": [
+      "2 Fast 2 Forest": [
         2,
         3,
         1,
         1,
         1
       ],
-      "Bumper to Bumper": [
-        2,
+      "Darker Woods, Icy Lakes": [
         3,
         2,
-        1,
-        1
-      ],
-      "So Many Trees": [
-        3,
-        1,
         1,
         1,
         2
       ],
-      "Whee": [
-        2,
-        1,
-        1,
-        2,
-        1
-      ],
-      "New Follower": [
-        2,
-        2,
-        1,
-        2,
-        1
-      ],
-      "Bear Country": [
-        2,
-        3,
-        1,
-        2,
-        2
-      ],
-      "One of Everything": [
+      "Dense Chase": [
         3,
         3,
         1,
         2,
         2
       ],
-      "Nothing to Hit": [
+      "Here We Go": [
         1,
         2,
         1,
         3,
         1
       ],
-      "Business as Usual": [
+      "Faster, Careful": [
         2,
         2,
         2,
         3,
         2
       ],
-      "Don't Stop": [
+      "My God": [
         2,
         3,
         3,
         3,
         3
       ],
-      "Pop Quiz": [
+      "Oh No": [
         3,
         3,
         3,
         3,
         3
       ],
-      "Mostly Trees Now": [
+      "Darkest Spots": [
         4,
         1,
         1,
         1,
         2
       ],
-      "In No Hurry": [
+      "Darker and Darker": [
         4,
         2,
         1,
         1,
         3
       ],
-      "Something in the Trees": [
+      "Almost There": [
         4,
         3,
         1,
         1,
         3
       ],
-      "No Excuses": [
+      "Good Luck": [
         1,
         4,
         1,
@@ -323,7 +295,7 @@
       "endTrafficMultiplier": 2.0
     },
     "stageOverrides": {
-      "Just Warming Up": {
+      "Warmup": {
         "yetiColor": "teal",
         "gates": {
           "count": 24,
@@ -339,7 +311,7 @@
           "overtakingSkier": 0.1
         }
       },
-      "Mind the Dog": {
+      "Denser Forest": {
         "yetiColor": "teal",
         "gates": {
           "count": 30,
@@ -357,7 +329,7 @@
           "personGreen": 0.2
         }
       },
-      "Don't Look Back": {
+      "Monster": {
         "yetiColor": "teal",
         "gates": {
           "count": 38,
@@ -373,7 +345,7 @@
           "overtakingSkier": 0.1
         }
       },
-      "Let Sleeping Wolves Lie": {
+      "Miss and Be Eaten": {
         "yetiColor": "teal",
         "gates": {
           "swordGateCount": 6
@@ -390,7 +362,7 @@
           "personGreen": 0.2
         }
       },
-      "Run.": {
+      "Fast Monster": {
         "gates": {
           "count": 34
         },
@@ -404,7 +376,7 @@
           "personGreen": 0.2
         }
       },
-      "Door to Door": {
+      "2 Fast 2 Forest": {
         "gates": {
           "count": 36
         },
@@ -423,27 +395,7 @@
           "personGreen": 0.2
         }
       },
-      "Bumper to Bumper": {
-        "yetiColor": "teal",
-        "gates": {
-          "count": 38,
-          "swordGateCount": 6
-        },
-        "itemRates": {
-          "skier": 4.0,
-          "fastSkier": 3.0,
-          "boarder": 1.3,
-          "overtakingSkier": 0.25,
-          "pine": 0,
-          "fir": 0,
-          "smallPine": 0,
-          "spruceTree": 0,
-          "crookedTree": 0,
-          "cedarTree": 0,
-          "alpineTree": 0
-        }
-      },
-      "So Many Trees": {
+      "Darker Woods, Icy Lakes": {
         "gates": {},
         "tierRates": {
           "slightlyRare": 0.15
@@ -459,64 +411,7 @@
           "personGreen": 0.3
         }
       },
-      "Whee": {
-        "gates": {
-          "count": 36,
-          "swordGateCount": 6
-        },
-        "tierRates": {
-          "slightlyRare": 0.4
-        },
-        "itemRates": {
-          "skier": 2.5,
-          "boarder": 0.8,
-          "fastSkier": 1.0,
-          "ramp": 0.8,
-          "mogul": 0.6,
-          "rainbow": 0.3,
-          "mushroom": 0.4,
-          "personRed": 0.3,
-          "personYellow": 0.3,
-          "personGreen": 0.3
-        }
-      },
-      "New Follower": {
-        "gates": {
-          "count": 48
-        },
-        "itemRates": {
-          "skier": 3.0,
-          "boarder": 1.0,
-          "fastSkier": 1.5,
-          "personRed": 0.3,
-          "personYellow": 0.3,
-          "personGreen": 0.3
-        },
-        "itemSpreadMetres": 28
-      },
-      "Bear Country": {
-        "yetiColor": "violet",
-        "gates": {
-          "count": 54,
-          "swordGateCount": 14
-        },
-        "itemRates": {
-          "skier": 2.5,
-          "boarder": 0.8,
-          "fastSkier": 1.0,
-          "dog": 0.3,
-          "wolf": 0.4,
-          "wolfPack": 0.2,
-          "bear": 0.3,
-          "hostileDog": 0.2,
-          "yetiOrange": 0.2,
-          "smallLake": 0.2,
-          "personRed": 0.2,
-          "personYellow": 0.2,
-          "personGreen": 0.2
-        }
-      },
-      "One of Everything": {
+      "Dense Chase": {
         "yetiColor": "violet",
         "gates": {
           "count": 56,
@@ -542,32 +437,32 @@
           "personGreen": 0.3
         }
       },
-      "Nothing to Hit": {
+      "Here We Go": {
         "gates": {
           "count": 48
         }
       },
-      "Business as Usual": {
+      "Faster, Careful": {
         "gates": {
           "count": 44
         }
       },
-      "Don't Stop": {
+      "My God": {
         "gates": {
           "count": 48
         }
       },
-      "Pop Quiz": {
+      "Oh No": {
         "gates": {
           "count": 52
         }
       },
-      "Mostly Trees Now": {
+      "Darkest Spots": {
         "gates": {
           "count": 48
         }
       },
-      "In No Hurry": {
+      "Darker and Darker": {
         "yetiColor": "violet",
         "gates": {
           "count": 48
@@ -577,7 +472,7 @@
           "largeLake": 0.25
         }
       },
-      "Something in the Trees": {
+      "Almost There": {
         "yetiColor": "violet",
         "gates": {
           "count": 52,
@@ -590,7 +485,7 @@
           "hostileDog": 0.2
         }
       },
-      "No Excuses": {
+      "Good Luck": {
         "yetiColor": "violet",
         "gates": {
           "count": 56

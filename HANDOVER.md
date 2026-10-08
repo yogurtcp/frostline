@@ -195,7 +195,7 @@ The user wants direct control. **Do not introduce automatic Yeti speed math or r
 
 The previous attempt to make the first Yeti stages faster was rejected and reverted. Stages 3–4 were restored to normal 103 km/h and 30 m vertical gate spacing. Absolute Yeti speeds then became editable per stage.
 
-`arcade.stages` maps names to knob tuples `[obstacles, chase, miss, speed, ice]` (levels 1–4); map order is play order (currently 20 stages). Effective fields resolve per stage as `stageDefaults` plus that name's `stageOverrides` entry (same verbose field names, all optional; unknown names fail validation):
+`arcade.stages` maps names to knob tuples `[obstacles, chase, miss, speed, ice]` (levels 1–4); map order is play order (currently 16 stages). Effective fields resolve per stage as `stageDefaults` plus that name's `stageOverrides` entry (same verbose field names, all optional; unknown names fail validation):
 
 | Setting | Meaning |
 | --- | --- |
