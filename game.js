@@ -220,7 +220,7 @@ window.FROSTLINE_READY = (async () => {
   }
   function useObstacleShield(obstacle){
     const a=state.arcade,p=state.p,G=S.arcade.gear;
-    if(!a||!a.shields||insideTown(p.x,p.y)||safeApproach(p.x,p.y)||p.awaitingInput||tooSlowToCrash())return false;
+    if(!a||!a.shields||insideTown(p.x,p.y)||safeApproach(p.x,p.y)||p.awaitingInput||tooSlowToCrash(obstacle))return false;
     a.shields--;a.shieldsUsed++;p.shield=Math.max(p.shield,G.protectionSeconds);
     if(obstacle)p.slowContacts.add(obstacle);
     a.gearEffect={kind:'shield',start:clock,until:clock+G.effectSeconds};
@@ -828,14 +828,22 @@ window.FROSTLINE_READY = (async () => {
     o.dead=true;o.r=0;o.fadeUntil=clock+S.wildlife.predatorFadeSeconds;o.running=false;p.speed*=S.wildlife.knockoutSpeedRetention;p.shield=S.wildlife.knockoutShieldSeconds;
     burst(o.x,o.y,C.gold,12);say(kind==='bear'?'BEAR DOWN!':'YETI DOWN!',o);beep(190,.12,'triangle');return true;
   }
-  function tooSlowToCrash(){return state.p.speed*S.physics.hudKmhPerSpeed<=S.physics.minimumCollisionKmh;}
+  function objectVelocity(o){
+    if(o.travelStamp===clock)return [Math.cos(o.angle)*(o.travelSpeed||0),Math.sin(o.angle)*(o.travelSpeed||0)];
+    return [0,0];
+  }
+  function tooSlowToCrash(o){
+    const p=state.p;let dx=p.vx||0,dy=p.vy||0;
+    if(o){const v=objectVelocity(o);dx-=v[0];dy-=v[1];}
+    return Math.hypot(dx,dy)*S.physics.hudKmhPerSpeed<=S.physics.minimumCollisionKmh;
+  }
   function slowForEnemy(o){const p=state.p;if(p.air>0||p.slowContacts.has(o))return false;p.slowContacts.add(o);p.speed*=S.physics.enemySlowRetention;return true;}
   function hit(o) {
     if(o.mischief||o.type==='snowman'){if(!state.p.fall&&state.p.air<=0)touchVillageProp(o);return;}
     if(o.collectible){collectMushroom(o);return;}
     const p=state.p;if(o.dead||o.stunnedUntil>clock)return;
     // Remember slow overlaps during recovery too, until the player moves fully clear.
-    if(tooSlowToCrash())p.slowContacts.add(o);
+    if(tooSlowToCrash(o))p.slowContacts.add(o);
     if(p.awaitingInput||p.shield>0||o===p.crashObstacle)return;
     if(o.type==='wolf'&&killWolf(o))return;
     if(['bear','lurker'].includes(o.type)&&knockOut(o,o.type))return;
@@ -1077,13 +1085,13 @@ window.FROSTLINE_READY = (async () => {
       let next=options.find(clear);
       // If a moving target left us inside a newly protected region, walk out continuously.
       if(next===undefined){
-        if(valid(o.x,o.y)){o.running=false;o.motionVx=0;return;}
+        if(valid(o.x,o.y)){o.running=false;o.motionVx=0;o.travelSpeed=0;o.travelStamp=clock;return;}
         const escape=options.find(a=>valid(o.x+Math.cos(a)*probe*2,o.y+Math.sin(a)*probe*2));
         next=escape??(o.avoidUntil>clock?o.avoidHeading:angle+Math.PI/2*turn);
       }
       heading=next;o.avoidHeading=heading;o.avoidUntil=clock+A.avoidCommitSeconds;o.avoidSide=turn;
     }
-    o.motionVx=Math.cos(heading)*speed;o.angle=heading;o.x+=o.motionVx*dt;o.y+=Math.sin(heading)*speed*dt;o.running=speed>60;
+    o.motionVx=Math.cos(heading)*speed;o.angle=heading;o.x+=o.motionVx*dt;o.y+=Math.sin(heading)*speed*dt;o.running=speed>60;o.travelSpeed=speed;o.travelStamp=clock;
   }
   function killWolf(o){
     const p=state.p,A=S.wildlife;
@@ -1206,7 +1214,7 @@ window.FROSTLINE_READY = (async () => {
     }
     if(!c.bumped&&segmentDistance(p.x,p.y,previous,c)<S.chasers.captureDistance){
       c.bumped=true;c.passed=true;
-      if(!p.awaitingInput&&p.shield<=0&&p.air<=0&&!tooSlowToCrash()){
+      if(!p.awaitingInput&&p.shield<=0&&p.air<=0&&!tooSlowToCrash(c)){
         crash(null,S.chasers.patrolFallSeconds);burst(p.x,p.y,C.ice,12);
         say('Should have paid for the course!',c,K.speechSeconds);
       }
@@ -1254,7 +1262,7 @@ window.FROSTLINE_READY = (async () => {
           if(p.speed<=S.physics.walkingBumpLimit){c.harmlessDog=true;continue;}
           if(c.harmlessDog)continue;
         }
-        if(!lethal&&(p.awaitingInput||tooSlowToCrash()))continue;
+        if(!lethal&&(p.awaitingInput||tooSlowToCrash(c)))continue;
         if(['fast','slow','bear'].includes(c.kind)&&useArcadeSword(c))continue;
         if(['fast','slow','bear'].includes(c.kind)){if(state.course&&!p.awaitingInput)state.course.hits++;burst(p.x,p.y,C.ice,12);die(c.kind==='bear'?'BEAR':'YETI',c);break;}
         crash(null,S.chasers.patrolFallSeconds,c.kind==='dog');announce(c.kind==='dog'?'AGGRESSIVELY LOVED':'A WORD FROM SKI PATROL',c.kind==='dog'?'Covered in slobber. Wallet intact.':'They are very disappointed.',C.red,3);for(const other of state.chasers)if(!other.patrolPass&&(!other.chaseRun||other.chaseRun!==state.course))other.expires=p.y-1;burst(p.x,p.y,C.ice,20);break;
