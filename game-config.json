@@ -302,7 +302,7 @@
       ],
       "gateSpacing": {
         "horizontalPercent": 28.89,
-        "verticalPercent": 33.33,
+        "verticalPercent": 36.33,
         "openingPercent": 17.33,
         "firstPercent": 44.44,
         "finishPercent": 55.56
@@ -311,8 +311,8 @@
     "stageDefaults": {
       "yetiColor": "orange",
       "gates": {
-        "count": 20,
-        "swordGateCount": 4
+        "count": 40,
+        "swordGateCount": 8
       },
       "tierRates": {
         "slightlyRare": 0.2,
@@ -326,8 +326,8 @@
       "Just Warming Up": {
         "yetiColor": "teal",
         "gates": {
-          "count": 12,
-          "swordGateCount": 1
+          "count": 24,
+          "swordGateCount": 2
         },
         "tierRates": {
           "slightlyRare": 0
@@ -343,8 +343,8 @@
       "Mind the Dog": {
         "yetiColor": "teal",
         "gates": {
-          "count": 15,
-          "swordGateCount": 1
+          "count": 30,
+          "swordGateCount": 2
         },
         "tierRates": {
           "slightlyRare": 0.05
@@ -362,8 +362,8 @@
       "Don't Look Back": {
         "yetiColor": "teal",
         "gates": {
-          "count": 19,
-          "swordGateCount": 2
+          "count": 38,
+          "swordGateCount": 4
         },
         "tierRates": {
           "slightlyRare": 0.1
@@ -378,7 +378,7 @@
       "Let Sleeping Wolves Lie": {
         "yetiColor": "teal",
         "gates": {
-          "swordGateCount": 3
+          "swordGateCount": 6
         },
         "tierRates": {
           "slightlyRare": 0.15
@@ -394,7 +394,7 @@
       },
       "Run.": {
         "gates": {
-          "count": 17
+          "count": 34
         },
         "itemRates": {
           "skier": 2.2,
@@ -408,7 +408,7 @@
       },
       "Door to Door": {
         "gates": {
-          "count": 18
+          "count": 36
         },
         "tierRates": {
           "slightlyRare": 0.15
@@ -428,8 +428,8 @@
       "Bumper to Bumper": {
         "yetiColor": "teal",
         "gates": {
-          "count": 19,
-          "swordGateCount": 3
+          "count": 38,
+          "swordGateCount": 6
         },
         "itemRates": {
           "skier": 4.0,
@@ -464,8 +464,8 @@
       },
       "Whee": {
         "gates": {
-          "count": 18,
-          "swordGateCount": 3
+          "count": 36,
+          "swordGateCount": 6
         },
         "tierRates": {
           "slightlyRare": 0.4
@@ -485,7 +485,7 @@
       },
       "New Follower": {
         "gates": {
-          "count": 24
+          "count": 48
         },
         "itemRates": {
           "skier": 3.0,
@@ -500,8 +500,8 @@
       "Bear Country": {
         "yetiColor": "violet",
         "gates": {
-          "count": 27,
-          "swordGateCount": 7
+          "count": 54,
+          "swordGateCount": 14
         },
         "itemRates": {
           "skier": 2.5,
@@ -522,8 +522,8 @@
       "One of Everything": {
         "yetiColor": "violet",
         "gates": {
-          "count": 28,
-          "swordGateCount": 6
+          "count": 56,
+          "swordGateCount": 12
         },
         "tierRates": {
           "slightlyRare": 0.35
@@ -547,33 +547,33 @@
       },
       "Nothing to Hit": {
         "gates": {
-          "count": 24
+          "count": 48
         }
       },
       "Business as Usual": {
         "gates": {
-          "count": 22
+          "count": 44
         }
       },
       "Don't Stop": {
         "gates": {
-          "count": 24
+          "count": 48
         }
       },
       "Pop Quiz": {
         "gates": {
-          "count": 26
+          "count": 52
         }
       },
       "Mostly Trees Now": {
         "gates": {
-          "count": 24
+          "count": 48
         }
       },
       "In No Hurry": {
         "yetiColor": "violet",
         "gates": {
-          "count": 24
+          "count": 48
         },
         "itemRates": {
           "smallLake": 0.5,
@@ -583,8 +583,8 @@
       "Something in the Trees": {
         "yetiColor": "violet",
         "gates": {
-          "count": 26,
-          "swordGateCount": 7
+          "count": 52,
+          "swordGateCount": 14
         },
         "itemRates": {
           "wolf": 0.4,
@@ -596,7 +596,7 @@
       "No Excuses": {
         "yetiColor": "violet",
         "gates": {
-          "count": 28
+          "count": 56
         }
       }
     }
