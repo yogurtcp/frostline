@@ -220,7 +220,7 @@ window.FROSTLINE_READY = (async () => {
   }
   function useObstacleShield(obstacle){
     const a=state.arcade,p=state.p,G=S.arcade.gear;
-    if(!a||!a.shields||insideTown(p.x,p.y)||safeApproach(p.x,p.y)||p.awaitingInput||tooSlowToCrash(obstacle))return false;
+    if(!a||!a.shields||insideTown(p.x,p.y)||safeApproach(p.x,p.y)||p.awaitingInput||tooSlowForObstacle(obstacle))return false;
     a.shields--;a.shieldsUsed++;p.shield=Math.max(p.shield,G.protectionSeconds);
     if(obstacle)p.slowContacts.add(obstacle);
     a.gearEffect={kind:'shield',start:clock,until:clock+G.effectSeconds};
@@ -837,13 +837,24 @@ window.FROSTLINE_READY = (async () => {
     if(o){const v=objectVelocity(o);dx-=v[0];dy-=v[1];}
     return Math.hypot(dx,dy)*S.physics.hudKmhPerSpeed<=S.physics.minimumCollisionKmh;
   }
+  // Obstacles (trees, skiers, boarders, dogs, villagers): gentle only when BOTH sides
+  // are slow in absolute terms. A fast skier cruising behind a same-speed boarder
+  // must still crash - matched closing speed is not a free pass for solid objects.
+  // Chasers keep the closing-speed rule above (outrunning them is escaping).
+  function tooSlowForObstacle(o){
+    const p=state.p;
+    if((p.speed||0)*S.physics.hudKmhPerSpeed>S.physics.minimumCollisionKmh)return false;
+    if(!o)return true;
+    const v=objectVelocity(o);
+    return Math.hypot(v[0],v[1])*S.physics.hudKmhPerSpeed<=S.physics.minimumCollisionKmh;
+  }
   function slowForEnemy(o){const p=state.p;if(p.air>0||p.slowContacts.has(o))return false;p.slowContacts.add(o);p.speed*=S.physics.enemySlowRetention;return true;}
   function hit(o) {
     if(o.mischief||o.type==='snowman'){if(!state.p.fall&&state.p.air<=0)touchVillageProp(o);return;}
     if(o.collectible){collectMushroom(o);return;}
     const p=state.p;if(o.dead||o.stunnedUntil>clock)return;
     // Remember slow overlaps during recovery too, until the player moves fully clear.
-    if(tooSlowToCrash(o))p.slowContacts.add(o);
+    if(tooSlowForObstacle(o))p.slowContacts.add(o);
     if(p.awaitingInput||p.shield>0||o===p.crashObstacle)return;
     if(o.type==='wolf'&&killWolf(o))return;
     if(['bear','lurker'].includes(o.type)&&knockOut(o,o.type))return;

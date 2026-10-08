@@ -320,7 +320,7 @@
       },
       "itemRates": {},
       "itemSpreadMetres": 55,
-      "endTrafficMultiplier": 1.5
+      "endTrafficMultiplier": 2.0
     },
     "stageOverrides": {
       "Just Warming Up": {
@@ -337,8 +337,7 @@
           "boarder": 0.3,
           "fastSkier": 0.1,
           "overtakingSkier": 0.1
-        },
-        "endTrafficMultiplier": 1.4
+        }
       },
       "Mind the Dog": {
         "yetiColor": "teal",
@@ -356,8 +355,7 @@
           "personRed": 0.2,
           "personYellow": 0.2,
           "personGreen": 0.2
-        },
-        "endTrafficMultiplier": 1.4
+        }
       },
       "Don't Look Back": {
         "yetiColor": "teal",
@@ -443,8 +441,7 @@
           "crookedTree": 0,
           "cedarTree": 0,
           "alpineTree": 0
-        },
-        "endTrafficMultiplier": 2.0
+        }
       },
       "So Many Trees": {
         "gates": {},
