@@ -190,6 +190,17 @@ window.FROSTLINE_READY = (async () => {
     for(let y=startY+S.race.rainbowFirstOffset;y<endY-300;y+=s.kind==='freestyle'?S.race.freestyleRainbowSpacing:S.race.rainbowSpacing)entity('rainbow',centerAt(y,run)-90,y,{width:115,r:25});}
     if(run.objective==='mushrooms')plantMushrooms(run);
     if(run.arcade){prepareArcadeTerrain(run);spawnArcadeYetis(run,run.arcade.yetiTier,run.arcade.yetis);}
+    if(id==='arcade'&&state.arcade.stage===1){
+      // Showcase the three terrain features right at the start of stage 1, above the first gate.
+      const firstGatePx=run.arcade.gates.firstGateMetres*PX_PER_M;
+      for(const [key,frac] of [['smallHill',.3],['largeHill',.55],['rugged',.7]]){
+        const spec=ARCADE_ITEMS[key],rx=spec.rx||Math.max(spec.r,spec.width*.45),at=startY+firstGatePx*frac;
+        for(const dx of [0,-45,45,-90,90]){
+          if(spec.r>0&&state.objects.some(o=>o.arcadeRun===run&&o.r>0&&Math.hypot(o.x-(run.x+dx),o.y-at)<rx+o.r+8))continue;
+          createArcadeItem(key,run.x+dx,at,run);break;
+        }
+      }
+    }
     if(id==='slalom')state.objects=state.objects.filter(o=>!classicArea(o.x,o.y,70)||['gate','courseStart','finish','entrance','skier','boarder','personRed','personGreen','personYellow'].includes(o.type));
     const oldRoute=state.liftRoutes[state.liftRoutes.length-1];
     if(oldRoute&&oldRoute.y1>startY)oldRoute.y1=startY;
@@ -283,7 +294,7 @@ window.FROSTLINE_READY = (async () => {
           const x=run.x+range(-run.arcade.itemSpreadMetres,run.arcade.itemSpreadMetres)*PX_PER_M;
           if(openings.some(g=>Math.abs(g.y-at)<ry+30&&Math.abs(g.x-x)<g.half+rx+20))continue;
           if(nearArcadeFeature(x,at)||patchAt(x,at))continue;
-          if(state.objects.some(o=>o.arcadeRun===run&&o.r>0&&Math.hypot(o.x-x,o.y-at)<rx+o.r+8))continue;
+          if(spec.r>0&&state.objects.some(o=>o.arcadeRun===run&&o.r>0&&Math.hypot(o.x-x,o.y-at)<rx+o.r+8))continue;
           createArcadeItem(key,x,at,run);break;
         }
       }
