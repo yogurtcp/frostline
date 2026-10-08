@@ -1175,7 +1175,8 @@
     "mushroomBoostSeconds": 1.5,
     "speedBoost": 1.2,
     "smallHillSeconds": 0.8,
-    "largeHillSeconds": 1.5
+    "largeHillSeconds": 1.5,
+    "hillDurationMax": 1.1
   },
   "race": {
     "minimumGateFraction": 0.9,

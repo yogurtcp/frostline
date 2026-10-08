@@ -2785,7 +2785,8 @@
         "mushroomBoostSeconds",
         "speedBoost",
         "smallHillSeconds",
-        "largeHillSeconds"
+        "largeHillSeconds",
+        "hillDurationMax"
       ],
       "properties": {
         "baseSeconds": {
@@ -2886,6 +2887,11 @@
           "exclusiveMinimum": 0
         },
         "largeHillSeconds": {
+          "type": "number",
+          "minimum": 0,
+          "exclusiveMinimum": 0
+        },
+        "hillDurationMax": {
           "type": "number",
           "minimum": 0,
           "exclusiveMinimum": 0
