@@ -188,6 +188,9 @@
       "ramp": "slightlyRare",
       "mogul": "slightlyRare",
       "rainbow": "slightlyRare",
+      "smallHill": "slightlyRare",
+      "largeHill": "slightlyRare",
+      "rugged": "slightlyRare",
       "mushroom": "slightlyRare",
       "sled": "slightlyRare",
       "snowball": "slightlyRare",
@@ -1141,7 +1144,8 @@
     "iceRestartSlideSpeed": 75,
     "iceHeadingSpeedMinimum": 3,
     "downhillCosMinimum": 0.18,
-    "minimumCollisionKmh": 8
+    "minimumCollisionKmh": 8,
+    "ruggedSpeedRatio": 0.5
   },
   "controls": {
     "pointerDeadZone": 11,
@@ -1169,7 +1173,9 @@
     "rainbowTrailSeconds": 8,
     "rainbowBoostSeconds": 2,
     "mushroomBoostSeconds": 1.5,
-    "speedBoost": 1.2
+    "speedBoost": 1.2,
+    "smallHillSeconds": 0.8,
+    "largeHillSeconds": 1.5
   },
   "race": {
     "minimumGateFraction": 0.9,

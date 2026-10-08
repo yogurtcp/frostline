@@ -91,8 +91,11 @@ window.FROSTLINE_READY = (async () => {
     "ramp":{"type":"ramp","width":65,"r":22,"arcadeFeature":true},
     "mogul":{"type":"mogul","width":40,"r":20,"arcadeFeature":true},
     "rainbow":{"type":"rainbow","width":115,"r":25,"arcadeFeature":true},
+    "smallHill":{"type":"smallHill","width":55,"r":20,"arcadeFeature":true},
+    "largeHill":{"type":"largeHill","width":110,"r":30,"arcadeFeature":true},
     "smallLake":{"type":"ice","width":170,"r":0,"rx":85,"ry":105,"arcadeFeature":true},
     "largeLake":{"type":"ice","width":370,"r":0,"rx":185,"ry":250,"arcadeFeature":true},
+    "rugged":{"type":"rugged","width":220,"r":0,"rx":110,"ry":80},
     "skier":{"type":"skier","width":42,"r":12,"fast":false},
     "fastSkier":{"type":"skier","width":42,"r":12,"fast":true},
     "overtakingSkier":{"type":"skier","width":42,"r":12,"fast":true},
@@ -241,7 +244,7 @@ window.FROSTLINE_READY = (async () => {
   }
 
   function arcadeTerrainAt(run,y){return run.arcade||{trees:false};}
-  function nearArcadeFeature(x,y){return state.objects.some(o=>o.arcadeFeature&&(Math.hypot(o.x-x,o.y-y)<S.arcade.featureClearance||['ramp','mogul'].includes(o.type)&&y>o.y&&y<o.y+S.arcade.landingClearanceLength&&Math.abs(x-o.x)<S.arcade.landingClearanceHalfWidth));}
+  function nearArcadeFeature(x,y){return state.objects.some(o=>o.arcadeFeature&&(Math.hypot(o.x-x,o.y-y)<S.arcade.featureClearance||['ramp','mogul','smallHill','largeHill'].includes(o.type)&&y>o.y&&y<o.y+S.arcade.landingClearanceLength&&Math.abs(x-o.x)<S.arcade.landingClearanceHalfWidth));}
   function courseCreature(o,x,y){return !!o?.arcadeRun&&o.arcadeRun===state.course&&!insideTown(x,y);}
   function createArcadeItem(key,x,y,run){
     const spec=ARCADE_ITEMS[key],extra={...spec,arcadeRun:run,nextAI:clock+range(1,4),humanVisitor:true};delete extra.type;
@@ -746,6 +749,7 @@ window.FROSTLINE_READY = (async () => {
     return polygonContains(g.points,dx,dy)&&!g.holes.some(h=>polygonContains(h,dx,dy));
   }
   function patchAt(x,y){return state.objects.find(o=>o.type==='ice'&&lakeContains(o,x,y));}
+  function ruggedAt(x,y){return state.objects.find(o=>o.type==='rugged'&&lakeContains(o,x,y));}
   function roadBBox(r){let x0=Infinity,y0=Infinity,x1=-Infinity,y1=-Infinity;for(const p of r.points){if(p.x<x0)x0=p.x;if(p.x>x1)x1=p.x;if(p.y<y0)y0=p.y;if(p.y>y1)y1=p.y;}return r.bounds={left:x0-r.width,right:x1+r.width,top:y0-r.width,bottom:y1+r.width};}
   function onRoad(x,y){
     // Only exposed paving slows skis. A snow-covered main road wins at intersections.
@@ -857,7 +861,7 @@ window.FROSTLINE_READY = (async () => {
     if(p.awaitingInput||p.shield>0||o===p.crashObstacle)return;
     if(o.type==='wolf'&&killWolf(o))return;
     if(['bear','lurker'].includes(o.type)&&knockOut(o,o.type))return;
-    if(o.touched&&['ramp','mogul','mushroom','rainbow','sled','bush','cat'].includes(o.type))return;
+    if(o.touched&&['ramp','mogul','mushroom','rainbow','sled','bush','cat','smallHill','largeHill'].includes(o.type))return;
     const uphill=p.vy<0,fast=p.speed>S.physics.fastImpactSpeed;
     if(o.type==='cat'){
       if(o.climb>8)return;
@@ -873,16 +877,16 @@ window.FROSTLINE_READY = (async () => {
 
     // Walking bumps stop against obstacles without a fall; moving away from an overlap is allowed.
     if(!p.onIce&&p.air<=0&&p.speed<=S.physics.walkingBumpLimit&&(p.mode==='traverse'||p.mode==='walk')){
-      if(['ramp','mogul','mushroom','rainbow','bush'].includes(o.type))return;
+      if(['ramp','mogul','mushroom','rainbow','bush','smallHill','largeHill'].includes(o.type))return;
       const before=p.walkOrigin;
       if(before&&obstacleClearance(o,p.x,p.y)<=obstacleClearance(o,before.x,before.y)){
         p.x=before.x;p.y=before.y;p.speed=p.vx=p.vy=0;
       }
       return;
     }
-    if(o.type==='ramp'||o.type==='mogul'||o.type==='mushroom'||o.type==='rainbow'){
+    if(o.type==='ramp'||o.type==='mogul'||o.type==='mushroom'||o.type==='rainbow'||o.type==='smallHill'||o.type==='largeHill'){
       if(p.air>0)return;o.touched=true;
-      launch(o.arcadeFeature&&['ramp','mogul'].includes(o.type)?S.arcade.rampSeconds:o.type==='rainbow'?S.jump.rainbowSeconds:o.type==='mushroom'?S.jump.mushroomSeconds:o.type==='ramp'?S.jump.rampSeconds:S.jump.mogulSeconds);
+      launch(o.arcadeFeature&&['ramp','mogul'].includes(o.type)?S.arcade.rampSeconds:o.type==='rainbow'?S.jump.rainbowSeconds:o.type==='mushroom'?S.jump.mushroomSeconds:o.type==='smallHill'?S.jump.smallHillSeconds:o.type==='largeHill'?S.jump.largeHillSeconds:o.type==='ramp'?S.jump.rampSeconds:S.jump.mogulSeconds);
       if(o.type==='rainbow'){p.rainbow=S.jump.rainbowTrailSeconds;p.boost=S.jump.rainbowBoostSeconds;announce('SOMEWHERE OVER THE RAINBOW','A spectacularly impractical shortcut.',C.blue,2.5);}
       if(o.type==='mushroom'){p.boost=S.jump.mushroomBoostSeconds;say('BOING. Bad decisions, good airtime.',o,2.1);}
       return;
@@ -938,6 +942,7 @@ window.FROSTLINE_READY = (async () => {
       else if(p.mode==='traverse')p.speed=ease(p.speed,S.physics.traverseSpeed,S.physics.traverseFollow,dt);
       else {p.speed=Math.max(0,p.speed-S.physics.brakeDeceleration*dt);if(p.speed<S.physics.stopEpsilon)p.speed=0;}
       if(onRoad(p.x,p.y)&&p.air<=0&&p.mode!=='still')p.speed=Math.min(p.speed,Math.max(p.mode==='walk'?S.physics.roadWalkSpeed:p.mode==='traverse'?S.physics.roadTraverseSpeed:S.physics.roadSlideSpeed,p.speed-S.physics.roadDeceleration*dt));
+      if(p.air<=0&&ruggedAt(p.x,p.y))p.speed=Math.min(p.speed,topSpeed()*S.physics.ruggedSpeedRatio);
     }
     if(p.fall>0)p.speed=ease(p.speed,4,12,dt);
     p.vx=Math.sin(p.heading)*p.speed;p.vy=p.air<=0&&!p.onIce&&p.mode==='traverse'?0:Math.cos(p.heading)*p.speed;
@@ -1330,8 +1335,8 @@ window.FROSTLINE_READY = (async () => {
   function snow() {
     box(0,0,W,H,C.snow);
     drawRoads();
-    for(const o of state.objects)if(o.type==='ice')drawIce(o);
-    for(const o of state.objects)if(o.type==='ramp'||o.type==='mogul')drawObject(o);
+    for(const o of state.objects)if(o.type==='ice')drawIce(o);else if(o.type==='rugged')drawRugged(o);
+    for(const o of state.objects)if(o.type==='ramp'||o.type==='mogul'||o.type==='smallHill'||o.type==='largeHill')drawObject(o);
     for(let i=0;i<60;i++){const x=((i*137-state.cam.x*.82)%W+W)%W,y=((i*197-state.cam.y*.97)%(H+80)+H+80)%(H+80)-30;box(x,y,2,1,'#c8deda');}
     const colors=['#dc666a','#eda859','#e7d366','#75ac79','#66b9c6','#9885bb'];
     for(const t of state.trails){const a=screen(t.x,t.y),b=screen(t.px,t.py),offset=Math.cos(t.angle)*6*ZOOM;
@@ -1362,6 +1367,29 @@ window.FROSTLINE_READY = (async () => {
       o.iceTile=tile;
     }
     ctx.drawImage(o.iceTile,s.x-r-4,s.y-r-4);
+  }
+  // SkiFree-style contour lines: concentric dark ellipses, more rings on bigger hills.
+  function drawHill(o,s){
+    const big=o.type==='largeHill',rx=o.width*ZOOM/2,ry=rx*.42,n=big?4:2;
+    ctx.strokeStyle=C.ink;ctx.lineWidth=big?2:1.5;
+    for(let i=0;i<n;i++){
+      const f=1-i/(n+.6);
+      ctx.beginPath();ctx.ellipse(s.x,s.y,Math.max(2,rx*f),Math.max(1.5,ry*f),0,0,TAU);ctx.stroke();
+    }
+  }
+  // Rugged ground: deterministic dark dashes scattered over the patch, stable per frame.
+  function drawRugged(o){
+    const s=screen(o.x,o.y),g=o.lake||lakeGeometry(o),r=g.radius*ZOOM;
+    if(s.x+r<0||s.x-r>W||s.y+r<0||s.y-r>H)return;
+    const ph=o.phase||0,rx=o.rx*ZOOM*.82,ry=o.ry*ZOOM*.82;
+    ctx.strokeStyle=C.ink;ctx.lineWidth=1.5;
+    for(let i=0;i<16;i++){
+      const h1=Math.sin(i*127.1+ph*311.7)*43758.5453,h2=Math.sin(i*269.5+ph*183.3)*28001.8384;
+      const fx=(h1-Math.floor(h1))*2-1,fy=(h2-Math.floor(h2))*2-1;
+      if(fx*fx+fy*fy>1)continue;
+      const cx=s.x+fx*rx,cy=s.y+fy*ry,a=(h1+h2)*3.7,len=4+(Math.abs(h2)%1)*6;
+      ctx.beginPath();ctx.moveTo(cx-Math.cos(a)*len,cy-Math.sin(a)*len);ctx.lineTo(cx+Math.cos(a)*len,cy+Math.sin(a)*len);ctx.stroke();
+    }
   }
 
   function drawLift(){
@@ -1507,7 +1535,7 @@ window.FROSTLINE_READY = (async () => {
     if(o.dead){ctx.save();ctx.globalAlpha=clamp((o.fadeUntil-clock)/(o.type==='wolf'?S.wildlife.wolfFadeSeconds:S.wildlife.predatorFadeSeconds),0,1);if(o.type==='wolf')sprite('wolf',s.x,s.y,o.width,{rotate:Math.PI/2});else drawKnockedOut(o,s,o.type);ctx.restore();return;}
     if(o.npcFallUntil>clock){sprite('fall',s.x,s.y,o.width);return;}
     if(o.fearUntil>clock)text('!',s.x,s.y-o.width*ZOOM-10,11,C.red);
-    if(o.type==='ice'||o.type==='awakened'||o.eaten||o.collected)return;
+    if(o.type==='ice'||o.type==='rugged'||o.type==='awakened'||o.eaten||o.collected)return;
     if(o.collectible){sprite('mushroom',s.x,s.y,o.width);const glint=(clock/S.mushroomHunt.glintSeconds+o.phase)%1;if(glint<.3){box(s.x+8,s.y-12,1,5,C.gold);box(s.x+6,s.y-10,5,1,C.gold);}return;}
     if(o.stunnedUntil>clock){drawKnockedOut(o,s,o.type);return;}
     if(o.type==='pine'&&o.smallPine){sprite('smallPine',s.x,s.y,o.width);return;}
@@ -1517,6 +1545,7 @@ window.FROSTLINE_READY = (async () => {
     if(['lamp','bunting','bench','snowman'].includes(o.type)){drawTownDetail(o,s);return;}
     if(o.type==='courseStart'){text(o.name.toUpperCase()+'  ·  START',s.x,s.y-22,11,C.teal);for(let x=-220;x<220;x+=20)box(s.x+x,s.y,10,2,'#a8c7bb');return;}
     if(o.type==='rainbow'){drawRainbow(s.x,s.y,o.width);return;}
+    if(o.type==='smallHill'||o.type==='largeHill'){drawHill(o,s);return;}
     if(o.type==='lurker'){sprite('yetiHappy',s.x,s.y,o.width,{yetiTier:o.arcadeTier});text('z',s.x+12,s.y-27,9,C.muted);return;}
     if(o.type==='bear'){sprite(o.running?'bearRun':'bear',s.x,s.y,o.width,{flip:Math.cos(o.angle||0)<0});return;}
     if(o.type==='rabbit'){sprite(o.running||Math.sin(clock*6+o.phase)>.3?'rabbitRun':'rabbit',s.x,s.y-(o.running?Math.abs(Math.sin(clock*10))*3:0),o.width,{flip:Math.cos(o.angle||0)<0});return;}
@@ -1745,7 +1774,7 @@ window.FROSTLINE_READY = (async () => {
     if(state.zone.kind==='start'){
       const s=screen(0,-128);text('S K I  I N T O  T R O U B L E',s.x,s.y,12,C.teal);text('four trails. absolutely no good judgement.',s.x,s.y+21,8,C.muted);
     }
-    const layers=state.objects.filter(o=>(o.type!=='ramp'&&o.type!=='mogul')&&o.y>state.cam.y-200&&o.y<state.cam.y+H/ZOOM+200).map(o=>({y:o.y,draw:()=>drawObject(o)}));
+    const layers=state.objects.filter(o=>(o.type!=='ramp'&&o.type!=='mogul'&&o.type!=='smallHill'&&o.type!=='largeHill'&&o.type!=='rugged')&&o.y>state.cam.y-200&&o.y<state.cam.y+H/ZOOM+200).map(o=>({y:o.y,draw:()=>drawObject(o)}));
     layers.push({y:state.p.y,draw:drawPlayer});for(const c of state.chasers)layers.push({y:c.y,draw:()=>drawChaser(c)});
     layers.sort((a,b)=>a.y-b.y);for(const layer of layers)layer.draw();
     for(const q of state.particles){const s=screen(q.x,q.y);box(s.x,s.y,3,3,q.color);}

@@ -2553,7 +2553,8 @@
         "iceRestartSlideSpeed",
         "iceHeadingSpeedMinimum",
         "downhillCosMinimum",
-        "minimumCollisionKmh"
+        "minimumCollisionKmh",
+        "ruggedSpeedRatio"
       ],
       "properties": {
         "speedMultiplier": {
@@ -2721,6 +2722,11 @@
         "minimumCollisionKmh": {
           "type": "number",
           "minimum": 0
+        },
+        "ruggedSpeedRatio": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
         }
       }
     },
@@ -2777,7 +2783,9 @@
         "rainbowTrailSeconds",
         "rainbowBoostSeconds",
         "mushroomBoostSeconds",
-        "speedBoost"
+        "speedBoost",
+        "smallHillSeconds",
+        "largeHillSeconds"
       ],
       "properties": {
         "baseSeconds": {
@@ -2868,6 +2876,16 @@
           "exclusiveMinimum": 0
         },
         "speedBoost": {
+          "type": "number",
+          "minimum": 0,
+          "exclusiveMinimum": 0
+        },
+        "smallHillSeconds": {
+          "type": "number",
+          "minimum": 0,
+          "exclusiveMinimum": 0
+        },
+        "largeHillSeconds": {
           "type": "number",
           "minimum": 0,
           "exclusiveMinimum": 0
@@ -4932,6 +4950,9 @@
             "ramp",
             "mogul",
             "rainbow",
+            "smallHill",
+            "largeHill",
+            "rugged",
             "smallLake",
             "largeLake",
             "skier",
@@ -5105,6 +5126,30 @@
               ]
             },
             "rainbow": {
+              "type": "string",
+              "enum": [
+                "common",
+                "slightlyRare",
+                "veryRare"
+              ]
+            },
+            "smallHill": {
+              "type": "string",
+              "enum": [
+                "common",
+                "slightlyRare",
+                "veryRare"
+              ]
+            },
+            "largeHill": {
+              "type": "string",
+              "enum": [
+                "common",
+                "slightlyRare",
+                "veryRare"
+              ]
+            },
+            "rugged": {
               "type": "string",
               "enum": [
                 "common",
@@ -5810,6 +5855,24 @@
                   "maximum": 30,
                   "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
                 },
+                "smallHill": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 30,
+                  "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                },
+                "largeHill": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 30,
+                  "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                },
+                "rugged": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 30,
+                  "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                },
                 "smallLake": {
                   "type": "number",
                   "minimum": 0,
@@ -6228,6 +6291,24 @@
                     "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
                   },
                   "rainbow": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                  },
+                  "smallHill": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                  },
+                  "largeHill": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                  },
+                  "rugged": {
                     "type": "number",
                     "minimum": 0,
                     "maximum": 30,
