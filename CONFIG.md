@@ -21,7 +21,7 @@ World coordinates increase rightward and downhill. `world.unitsPerMetre` default
 | `timing` | Enable timing, maximum speed bonus, gold/par targets for each timed course, record revision and history length |
 | `physics` | Acceleration, top speed, turning, walking, braking, ice, road slowdown, collisions and crash recovery |
 | `controls` | Drag dead zone, drag scale, repeat interval and steering angle steps |
-| `jump` | Manual/ramp/mushroom/rainbow airtime, height scaling, spin, boosts and cooldown |
+| `jump` | Manual/ramp/mushroom/rainbow airtime, takeoff speed multiplier (`speedBoost`), height scaling, spin, boosts and cooldown |
 | `world` | Random seed, terrain density, chunk sizes, cleanup distance, course sway, ice sizes and predator frequency |
 | `village` | House count, corridor offsets, layout randomization, building bands, footprints, path widths/routing, squares, walkers, pets, lift and entry positions |
 | `villageLife` | `buildings` (hotel count/floors and mixed building variants), rabbit and rare fox visits, harmless prop cooldowns, animal curiosity/fleeing, NPC social timing and dialogue |

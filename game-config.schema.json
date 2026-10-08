@@ -2776,7 +2776,8 @@
         "cooldownSeconds",
         "rainbowTrailSeconds",
         "rainbowBoostSeconds",
-        "mushroomBoostSeconds"
+        "mushroomBoostSeconds",
+        "speedBoost"
       ],
       "properties": {
         "baseSeconds": {
@@ -2862,6 +2863,11 @@
           "exclusiveMinimum": 0
         },
         "mushroomBoostSeconds": {
+          "type": "number",
+          "minimum": 0,
+          "exclusiveMinimum": 0
+        },
+        "speedBoost": {
           "type": "number",
           "minimum": 0,
           "exclusiveMinimum": 0

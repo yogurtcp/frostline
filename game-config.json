@@ -1173,7 +1173,8 @@
     "cooldownSeconds": 0.2,
     "rainbowTrailSeconds": 8,
     "rainbowBoostSeconds": 2,
-    "mushroomBoostSeconds": 1.5
+    "mushroomBoostSeconds": 1.5,
+    "speedBoost": 1.2
   },
   "race": {
     "minimumGateFraction": 0.9,

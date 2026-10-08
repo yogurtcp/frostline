@@ -817,7 +817,7 @@ window.FROSTLINE_READY = (async () => {
     const p=state.p;if(p.fall||p.air||p.jumpLock>0)return;
     const multiplier=clamp(S.jump.durationBase+p.speed/S.jump.durationSpeedDivisor,S.jump.durationMin,S.jump.durationMax);
     p.air=p.airTotal=duration*multiplier;p.jumpHeight=clamp(S.jump.heightBase+p.speed*S.jump.heightPerSpeed,S.jump.heightMin,S.jump.heightMax)*duration;
-    p.airHeading=p.heading;p.airSpeed=p.speed;p.airSpin=Math.abs(Math.sin(p.heading))*S.jump.spinRate;p.onIce=false;
+    p.airHeading=p.heading;p.airSpeed=p.speed*S.jump.speedBoost;p.airSpin=Math.abs(Math.sin(p.heading))*S.jump.spinRate;p.onIce=false;
     p.spin=0;p.jumpLock=p.airTotal+S.jump.cooldownSeconds;burst(p.x,p.y,C.ice,7);beep(520,.1);
   }
 
@@ -1674,6 +1674,15 @@ window.FROSTLINE_READY = (async () => {
       ctx.globalAlpha=clamp((q.until-clock)*3,0,1);box(x+2,y+3,width,height,'#c6d6d0');box(x,y,width,height,'#fffcef');box(clamp(s.x,x+4,x+width-8),y+height,5,4,'#fffcef');lines.forEach((l,i)=>text(l.trim(),x+width/2,y+12+i*12,9,C.ink));ctx.globalAlpha=1;
     }
   }
+  // Picks the chaser named by the offscreen warning: among pursuers above the view,
+  // a lethal one (yeti/bear) outranks nearer dogs, so a trailing dog can't mask the yeti.
+  function pickWarningChaser(list,p){
+    const unseen=list.filter(c=>!c.leaving&&!c.dead&&!c.waiting&&screen(c.x,c.y).y<75);
+    if(!unseen.length)return null;
+    const lethal=unseen.filter(c=>['fast','slow','bear'].includes(c.kind));
+    const pool=lethal.length?lethal:unseen;
+    return pool.reduce((a,b)=>Math.hypot(a.x-p.x,a.y-p.y)<Math.hypot(b.x-p.x,b.y-p.y)?a:b);
+  }
   function hud() {
     const p=state.p,run=state.course;
     ctx.fillStyle='rgba(243,247,240,.93)';ctx.fillRect(0,0,W,67);
@@ -1719,7 +1728,7 @@ window.FROSTLINE_READY = (async () => {
     }
     const msg=state.messages[state.messages.length-1];
     if(msg){const alpha=clamp((msg.until-clock)*2,0,1)*clamp((clock-msg.start)*5,0,1);ctx.globalAlpha=alpha;const width=Math.min(W-18,Math.max(msg.title.length*6,msg.detail.length*6)+26),x=(W-width)/2;box(x+2,83,width,49,'#bfd2cb');box(x,81,width,49,'#fbf7e9');box(x,81,3,49,msg.color);text(msg.title,W/2,98,12,msg.color);text(msg.detail,W/2,116,8,C.ink);ctx.globalAlpha=1;}
-    const nearby=state.chasers.filter(c=>!c.leaving&&!c.dead&&!c.waiting);if(nearby.length){const nearest=nearby.reduce((a,b)=>Math.hypot(a.x-p.x,a.y-p.y)<Math.hypot(b.x-p.x,b.y-p.y)?a:b);const gap=Math.round(Math.hypot(nearest.x-p.x,nearest.y-p.y)/PX_PER_M);const sp=screen(nearest.x,nearest.y);if(sp.y<75)text(`↑ ${nearest.kind==='dog'?'DOGS':nearest.kind==='patrol'?'PATROL':'YETI'}  ${gap} m`,W/2,153,10,C.red);}
+    const nearest=pickWarningChaser(state.chasers,p);if(nearest){const gap=Math.round(Math.hypot(nearest.x-p.x,nearest.y-p.y)/PX_PER_M);text(`↑ ${nearest.kind==='dog'?'DOGS':nearest.kind==='patrol'?'PATROL':'YETI'}  ${gap} m`,W/2,153,10,C.red);}
     if(run&&Math.abs(p.x-centerAt(p.y))>S.race.offPisteDistance){text(p.x<centerAt(p.y)?'COURSE →':'← COURSE',p.x<centerAt(p.y)?W-65:65,H*.55,10,C.blue);}
   }
   function touchControl() {
@@ -1761,5 +1770,5 @@ window.FROSTLINE_READY = (async () => {
   const loaded=Promise.all(Object.entries(window.FROSTLINE_ASSETS).map(([key,src])=>new Promise((resolve,reject)=>{const im=new Image();im.onload=()=>{images[key]=im;resolve();};im.onerror=()=>reject(new Error('Cannot load sprite atlas: '+key));im.src=src;})));
   loaded.then(()=>{ready=true;if(S.arcade.autoStart)autoStartArcade();render();requestAnimationFrame(frame);}).catch(window.showFrostlineError);
   // Kept out of the UI: deterministic hooks for simulation and renderer checks.
-  window.Frostline={config:S,state,stages,atlas,loaded,step,render,startCourse,creditRun,makeVillage,hit,triggerAmbush,addChasers,startMoving,resize,launch,playerPose,keyboardDirection,releasePointer,ensureWorld,updateWildlife,die,resetSummit,patchAt,onRoad,entity,topSpeed,viewBounds,humanArea,lakeContains,get ready(){return ready;},get height(){return H;}};
+  window.Frostline={config:S,state,stages,atlas,loaded,step,render,startCourse,creditRun,makeVillage,hit,triggerAmbush,addChasers,startMoving,resize,launch,playerPose,keyboardDirection,releasePointer,ensureWorld,updateWildlife,die,resetSummit,patchAt,onRoad,entity,topSpeed,viewBounds,humanArea,lakeContains,pickWarningChaser,get ready(){return ready;},get height(){return H;}};
 })().catch(window.showFrostlineError);
