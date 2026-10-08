@@ -4,7 +4,7 @@
   "arcade": {
     "startStage": 1,
     "autoStart": false,
-    "campaignVersion": 3,
+    "campaignVersion": 4,
     "stages": {
       "Warmup": [
         1,
@@ -116,6 +116,55 @@
         4,
         1,
         1,
+        4
+      ],
+      "Too Fast": [
+        1,
+        1,
+        1,
+        4,
+        1
+      ],
+      "Don't Miss": [
+        1,
+        1,
+        4,
+        1,
+        1
+      ],
+      "Nowhere to Hide": [
+        3,
+        4,
+        1,
+        1,
+        1
+      ],
+      "Black Ice": [
+        1,
+        1,
+        1,
+        3,
+        4
+      ],
+      "No Room for Error": [
+        2,
+        2,
+        4,
+        4,
+        2
+      ],
+      "Everything Hurts": [
+        3,
+        4,
+        3,
+        3,
+        3
+      ],
+      "You Asked For This": [
+        4,
+        4,
+        4,
+        4,
         4
       ]
     },

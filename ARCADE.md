@@ -4,7 +4,7 @@
 
 The gate-pace pursuit calculation and the faster/wider changes to stages 3–4 were reverted. Their defaults are back to 103 km/h and 30 m vertical gate spacing. Yeti speeds are now explicit absolute values; there are no calculated chase-speed caps or automatic adjustments.
 
-Player feedback to preserve: two warmups are enough; stage 2 needs more objects; stage 3 needs visible start-line yetis and sparse trees; stage 4 needs denser trees; stage 5 sparse trees, stage 6 dense trees and stage 7 heavier traffic. There are 16 stages, editable in order, with safe towns between them. No menus. Missing the finish fails Arcade in place; death returns to the summit.
+Player feedback to preserve: two warmups are enough; stage 2 needs more objects; stage 3 needs visible start-line yetis and sparse trees; stage 4 needs denser trees; stage 5 sparse trees, stage 6 dense trees and stage 7 heavier traffic. There are 23 stages, editable in order, with safe towns between them. No menus. Missing the finish fails Arcade in place; death returns to the summit.
 
 ## Quick start
 
@@ -114,8 +114,15 @@ Densities are placement attempts, not exact counts: gates, finish openings, lake
 | 14 | Darker and Darker | 42113 | 90 | 1 violet @45 | 0% | 50% |
 | 15 | Almost There | 43113 | 90 | 2 violet @63 | 0% | 50% |
 | 16 | Good Luck | 14114 | 90 | 3 violet @81 | 0% | 100% |
+| 17 | Too Fast | 11141 | 150 | none | 0% | 0% |
+| 18 | Don't Miss | 11411 | 90 | none | 100% | 0% |
+| 19 | Nowhere to Hide | 34111 | 90 | 3 orange @81 | 0% | 0% |
+| 20 | Black Ice | 11134 | 120 | none | 0% | 100% |
+| 21 | No Room for Error | 22442 | 150 | 1 orange @75 | 100% | 25% |
+| 22 | Everything Hurts | 34333 | 120 | 2 orange @84 | 50% | 50% |
+| 23 | You Asked For This | 44444 | 150 | 3 orange @135 | 100% | 100% |
 
-Knobs read `[obstacles, chase, miss, speed, ice]`, levels 1–4. Chase shows resolved count, color and km/h; guarded shows the share of gates with a 3-wolf pack; ice shows the share of gates with a frozen patch. Common rate per obstacle level lives in `knobLevels`. The curve previews each tier in isolation before combining: 1 warms up empty; 2 adds forest; 3 wakes the first monster; 4 punishes missed gates with wolves; 5–6 preview chase-3, first clean then with trees; 7 crosses dense forest with chase-2 and first ice (25%); 8 is a dense chase at speed 105; 9 spotlights speed 120 on an empty piste; 10 adds wolves and ice at 120; 11–12 run full 120-tier stages up to all-3s; 13–15 cross the max forest with rising chase and 25–50% ice; 16 empties the forest for a 3-yeti boss chase on full ice. Speed 150 and 100% guarding are currently unused; guards appear only on stages 4 and 10–12.
+Knobs read `[obstacles, chase, miss, speed, ice]`, levels 1–4. Chase shows resolved count, color and km/h; guarded shows the share of gates with a 3-wolf pack; ice shows the share of gates with a frozen patch. Common rate per obstacle level lives in `knobLevels`. The curve previews each tier in isolation before combining: 1 warms up empty; 2 adds forest; 3 wakes the first monster; 4 punishes missed gates with wolves; 5–6 preview chase-3, first clean then with trees; 7 crosses dense forest with chase-2 and first ice (25%); 8 is a dense chase at speed 105; 9 spotlights speed 120 on an empty piste; 10 adds wolves and ice at 120; 11–12 run full 120-tier stages up to all-3s; 13–15 cross the max forest with rising chase and 25–50% ice; 16 empties the forest for a 3-yeti boss chase on full ice. 17–20 isolate the remaining level-4s: 150 speed alone, fully guarded gates, a boss chase in dense forest, and full ice at speed 120; 21–22 combine speed-4 and miss-4 with the rest; 23 runs every knob at maximum. All knob levels are now in play; guards peak at 100% on stages 18, 21 and 23.
 
 ## Gear, towns and records
 
