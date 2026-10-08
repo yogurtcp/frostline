@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="28" height="16" viewBox="0 0 28 16" shape-rendering="crispEdges">
+<!-- A low snow lip; all edges are snapped to the game pixel grid. -->
+<path fill="#dce7e2" d="M2 12h24v2H2zM5 14h18v1H5z"/>
+<path fill="#b8ccce" d="M1 10h2V8h3V6h4V5h9v1h4v2h3v2h1v3h-5v1H6v-1H1z"/>
+<path fill="#e5eeea" d="M2 10h2V8h3V6h4V5h7v1h4v2h3v3h-5v1H7v-1H2z"/>
+<path fill="#fbfcf4" d="M4 9h3V7h4V6h7v1h4v2h-5v1H8V9z"/>
+<path fill="#7e9da6" d="M2 11h4v1h5v1h10v-1h4v-1h2v2h-5v1H10v-1H5v-1H2z"/>
+<path fill="#d5e3df" d="M9 10h9v1H9z"/>
+<path fill="#a4bec1" d="M0 14h3v1H0zM25 14h3v1h-3z"/>
+</svg>

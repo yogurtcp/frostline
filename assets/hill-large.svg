@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="56" height="26" viewBox="0 0 56 26" shape-rendering="crispEdges">
+<!-- Broad wind-packed ridge, with an uneven cornice and a shaded downhill face. -->
+<path fill="#dce7e2" d="M3 20h49v3H3zM10 23h35v2H10z"/>
+<path fill="#b8ccce" d="M1 16h3v-3h4v-3h5V8h6V6h10V5h8v2h6v3h5v3h4v3h3v5h-7v2H12v-1H5v-2H1z"/>
+<path fill="#e5eeea" d="M3 15h3v-3h5V9h8V7h10V6h7v2h6v3h5v3h4v4h-7v1H13v-1H6v-1H3z"/>
+<path fill="#fbfcf4" d="M7 13h5v-3h8V8h10V7h5v2h6v3h5v2h-8v1H21v-1H7z"/>
+<path fill="#cbdcda" d="M10 15h11v1h15v-1h10v1h5v2h-8v2H24v-1H14v-1h-4z"/>
+<path fill="#8daab1" d="M3 18h5v1h7v1h10v1h16v-1h7v-1h5v-1h2v3h-7v1h-7v1H25v-1H14v-1H7v-1H3z"/>
+<path fill="#668791" d="M15 20h10v1h13v1H24v-1h-9zM46 20h6v1h-6z"/>
+<path fill="#f5f8ef" d="M13 13h8v1h-8zM26 14h11v1H26z"/>
+<path fill="#b8ccce" d="M0 22h4v1H0zM8 24h5v1H8zM50 23h5v1h-5z"/>
+</svg>

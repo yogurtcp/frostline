@@ -1381,14 +1381,11 @@ window.FROSTLINE_READY = (async () => {
     }
     ctx.drawImage(o.iceTile,s.x-r-4,s.y-r-4);
   }
-  // SkiFree-style hill: nested dark arcs cupping the uphill side, crowding toward the lip.
+  // Small, crisp snowdrift assets share the existing hill footprint and ground layer.
   function drawHill(o,s){
-    const big=o.type==='largeHill',rx=o.width*ZOOM/2,ry=rx*.42,n=big?4:2;
-    ctx.strokeStyle=C.ink;ctx.lineWidth=big?2:1.5;
-    for(let i=0;i<n;i++){
-      const f=1-i/(n+.9);
-      ctx.beginPath();ctx.ellipse(s.x,s.y+i*2,Math.max(3,rx*f),Math.max(2,ry*f),0,Math.PI*1.5-1.15,Math.PI*1.5+1.15);ctx.stroke();
-    }
+    const big=o.type==='largeHill',img=images[big?'hillLarge':'hillSmall'];if(!img)return;
+    const width=Math.max(1,Math.round(o.width*ZOOM)),height=Math.round(width*(big?26/56:16/28));
+    ctx.drawImage(img,Math.round(s.x-width/2),Math.round(s.y-height*.65),width,height);
   }
   // Rugged ground: dashed dark boundary plus deterministic scruff dashes, stable per frame.
   function drawRugged(o){
