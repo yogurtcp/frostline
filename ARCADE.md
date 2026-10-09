@@ -134,7 +134,7 @@ Towns are safe intermissions and the next stage starts automatically at their ex
 
 ## Interactive slope features
 
-Three new catalog entries use `slightlyRare` rates, with the normal per-stage `itemRates` overrides. Warmup's zero rare rate keeps its existing lesson; later stages inherit their configured rare rates. There is no separate ambient spawn stream for these features.
+Three new catalog entries use `slightlyRare` rates, with the normal per-stage `itemRates` overrides. Later stages inherit their configured rare rates. For temporary playtesting, Warmup also hardcodes one log jump between gates 5–6, one falling tree between gates 7–8, and one rolling snowball between gates 10–11, regardless of its zero rare rate. There is no separate ambient spawn stream for these features.
 
 - `fallingTree`: a tall pine that creaks, shakes and marks its landing direction when the skier approaches. It fixes that direction at activation, tips over and stays as a jumpable fallen obstacle. The trunk can hit a grounded skier; airborne skiers clear it. Predators route around it, and the landing impact can knock them down.
 - `logJump`: one five-metre horizontal log with a snow bump 4.5 m uphill. Crossing the bump downhill at skiing speed launches a locked-heading hop with enough airtime to clear the trunk. Yetis, wolves and bears use its full horizontal footprint and route around its ends. Walking across the bump does not launch.

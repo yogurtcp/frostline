@@ -294,10 +294,16 @@ No new gameplay request is pending in this handover; wait for the user's next sp
 
 ## 12. Interactive slope features (2026-10-09)
 
-Added `fallingTree`, `logJump` and `rollingSnowball` to the Arcade catalog (now 64 items), schema and item tiers. All default to `slightlyRare`, respecting existing stage rates/overrides; Warmup remains unchanged at its zero rare rate. Their tuning lives in the new `terrainFeatures` section. The existing local `arcade.autoStart: true` was preserved and included under the standing publication authorization.
+Added `fallingTree`, `logJump` and `rollingSnowball` to the Arcade catalog (now 64 items), schema and item tiers. All default to `slightlyRare`, respecting existing stage rates/overrides; Warmup normally uses its zero rare rate, with the temporary demo override described below. Their tuning lives in the new `terrainFeatures` section. The existing local `arcade.autoStart: true` was preserved and included under the standing publication authorization.
 
 `entity('wideLog', ...)` creates its uphill `logBump` as an owned companion. `obstacleSegment`/`obstacleClearance` use capsule footprints for the log and fallen trunk; hunter routing uses these footprints in the existing spatial grid. Log bumps launch only downhill above the walking threshold, retaining normal jump heading lock and enough airtime for the log. `updateTerrainFeatures` handles fixed-direction tree warning/fall and snowball warning, diagonal movement, growth, swept contact and cleanup before protected town approaches. Old `snowball` is still stationary.
 
 New transparent PNGs: `assets/falling-tree.png`, `assets/wide-log.png`, `assets/rolling-snowball.png`. Generated with the built-in image tool using the existing tree atlas as style reference; exact prompts are recorded in `asset-prompts.md`. `build.py` embeds all three, including offline play.
 
 Verification: build/schema validation, JavaScript syntax checks and staged native-scale rendering. The environment blocks opening a local HTTP listener; no phone playtest or full campaign test is claimed.
+
+### Temporary opening demo
+
+At the user's request, stage 1 now always creates one `logJump` between gates 5–6, one `fallingTree` between gates 7–8, and one `rollingSnowball` between gates 10–11, following its existing rugged/small-hill/large-hill demo. The log and tree sit on the centreline; the snowball starts 36 m left and rolls right. These three objects carry `openingDemo: true`. The clearly marked `TEMPORARY` block in `startCourse` is the entire placement override; removing it restores tier-only spawns for these features. Existing stage configuration is untouched.
+
+Also fixed a helper-name collision introduced with these features: numeric capsule distance is now `obstacleSegmentDistance`, preserving the original point-object `segmentDistance` used by roads and patrol contact.

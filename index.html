@@ -300,6 +300,12 @@ window.FROSTLINE_READY = (async () => {
       }
       const gate2=state.objects.find(o=>o.type==='gate'&&o.run===run&&o.number===2);
       if(gate2)createArcadeItem('largeHill',gate2.x,gate2.y,run);
+      // TEMPORARY: fixed first-stage encounters for trying the three new features.
+      // Keep the log beyond the opening hill's landing, and separate the activation zones.
+      for(const [key,dx,interval] of [['logJump',0,4.5],['fallingTree',0,6.5],['rollingSnowball',-36,9.5]]){
+        const o=createArcadeItem(key,run.x+dx*PX_PER_M,startY+firstGatePx+interval*run.arcade.spacing,run);
+        o.openingDemo=true;
+      }
     }
     if(id==='slalom')state.objects=state.objects.filter(o=>!classicArea(o.x,o.y,70)||['gate','courseStart','finish','entrance','skier','boarder','personRed','personGreen','personYellow'].includes(o.type));
     const oldRoute=state.liftRoutes[state.liftRoutes.length-1];
@@ -568,7 +574,7 @@ window.FROSTLINE_READY = (async () => {
     const dx=Math.abs(x-o.x)-hw,dy=Math.abs(y-(o.y-hh))-hh;
     return Math.hypot(Math.max(dx,0),Math.max(dy,0))+Math.min(Math.max(dx,dy),0);
   }
-  function segmentDistance(x,y,ax,ay,bx,by){
+  function obstacleSegmentDistance(x,y,ax,ay,bx,by){
     const dx=bx-ax,dy=by-ay,t=clamp(((x-ax)*dx+(y-ay)*dy)/(dx*dx+dy*dy||1),0,1);
     return Math.hypot(x-ax-dx*t,y-ay-dy*t);
   }
@@ -580,7 +586,7 @@ window.FROSTLINE_READY = (async () => {
   }
   function obstacleClearance(o,x,y){
     if(o.type==='lodge'||o.type==='rental')return houseClearance(o,x,y);
-    if(o.type==='wideLog'||o.type==='logBump'||o.type==='fallingTree'){const [ax,ay,bx,by]=obstacleSegment(o);return segmentDistance(x,y,ax,ay,bx,by)-o.r;}
+    if(o.type==='wideLog'||o.type==='logBump'||o.type==='fallingTree'){const [ax,ay,bx,by]=obstacleSegment(o);return obstacleSegmentDistance(x,y,ax,ay,bx,by)-o.r;}
     return Math.hypot(x-o.x,(y-o.y)*S.physics.collisionYScale)-o.r;
   }
   function laneRoute(start,goal,houses,town){
@@ -1136,7 +1142,7 @@ window.FROSTLINE_READY = (async () => {
     burst(o.x,o.y,C.ice,8);
   }
   function terrainHitsPredators(feature,swept=null){
-    const contact=o=>swept?segmentDistance(o.x,o.y,...swept)-feature.r:obstacleClearance(feature,o.x,o.y);
+    const contact=o=>swept?obstacleSegmentDistance(o.x,o.y,...swept)-feature.r:obstacleClearance(feature,o.x,o.y);
     for(const o of state.objects)if((o.type==='wolf'||o.type==='bear'||o.type==='lurker')&&!o.dead&&!o.eaten&&Math.abs(o.y-feature.y)<(feature.treeLength||feature.width)+50&&contact(o)<(o.r||12))knockDownByTerrain(o);
     for(const c of state.chasers)if((c.kind==='fast'||c.kind==='slow'||c.kind==='bear')&&!c.dead&&Math.abs(c.y-feature.y)<(feature.treeLength||feature.width)+50&&contact(c)<S.chasers.knockoutDistance)knockDownByTerrain(c);
   }
@@ -1164,7 +1170,7 @@ window.FROSTLINE_READY = (async () => {
         const oldX=o.x,oldY=o.y,move=Math.hypot(o.vx,o.vy)*dt;
         o.x+=o.vx*dt;o.y+=o.vy*dt;o.rollDistance+=move;o.rollAngle+=move/o.r*o.rollSide;
         o.r=Math.min(f.maxRadiusMetres*PX_PER_M,f.radiusMetres*PX_PER_M+o.rollDistance*f.radiusGrowthPerMetre);o.width=o.r*2;
-        if(segmentDistance(0,0,previous.x-oldX,previous.y-oldY,p.x-o.x,p.y-o.y)<o.r+S.physics.playerRadius)hit(o);
+        if(obstacleSegmentDistance(0,0,previous.x-oldX,previous.y-oldY,p.x-o.x,p.y-o.y)<o.r+S.physics.playerRadius)hit(o);
         terrainHitsPredators(o,[oldX,oldY,o.x,o.y]);
         if(clock>(o.nextPowder||0)){burst(o.x-o.vx*.04,o.y,C.ice,2);o.nextPowder=clock+.12;}
         if(o.rollDistance>=f.travelMetres*PX_PER_M||insideTown(o.x,o.y)||safeApproach(o.x,o.y)){burst(o.x,o.y,C.ice,16);o.eaten=true;o.r=0;o.vx=o.vy=0;}
@@ -1303,7 +1309,7 @@ window.FROSTLINE_READY = (async () => {
       for(let ix=gx-1;ix<=gx+1;ix++){const col=treeGrid.get(ix);if(!col)continue;
         for(let iy=gy-1;iy<=gy+1;iy++){const a=col.get(iy);if(!a)continue;
           for(const t of a){
-            if(t.type==='wideLog'||t.type==='fallingTree'){const [ax,ay,bx,by]=obstacleSegment(t);if(segmentDistance(x,y,ax,ay,bx,by)<t.r+rm)return true;}
+            if(t.type==='wideLog'||t.type==='fallingTree'){const [ax,ay,bx,by]=obstacleSegment(t);if(obstacleSegmentDistance(x,y,ax,ay,bx,by)<t.r+rm)return true;}
             else if(Math.hypot(x-t.x,y-t.y)<(t.r||12)+rm)return true;
           }}}
       return false;
