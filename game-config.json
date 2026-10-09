@@ -3,7 +3,7 @@
   "version": 1,
   "arcade": {
     "startStage": 1,
-    "autoStart": false,
+    "autoStart": true,
     "campaignVersion": 4,
     "stages": {
       "Warmup": [
@@ -229,7 +229,10 @@
       "cafe": "veryRare",
       "hotel": "veryRare",
       "skiShop": "veryRare",
-      "lift": "veryRare"
+      "lift": "veryRare",
+      "fallingTree": "slightlyRare",
+      "logJump": "slightlyRare",
+      "rollingSnowball": "slightlyRare"
     },
     "yetiColors": {
       "slow": "#4babb0",
@@ -988,6 +991,27 @@
       715,
       280,
       319
+    ],
+    "fallingTree": [
+      "fallingTree",
+      217,
+      73,
+      618,
+      1399
+    ],
+    "wideLog": [
+      "wideLog",
+      70,
+      148,
+      2040,
+      512
+    ],
+    "rollingSnowball": [
+      "rollingSnowball",
+      123,
+      143,
+      1049,
+      1014
     ]
   },
   "palette": [
@@ -1837,6 +1861,31 @@
         "cafe",
         "rental"
       ]
+    }
+  },
+  "terrainFeatures": {
+    "fallingTree": {
+      "heightMetres": 14,
+      "trunkRadiusMetres": 1.2,
+      "triggerRadiusMetres": 60,
+      "warningSeconds": 0.55,
+      "fallSeconds": 0.3
+    },
+    "logJump": {
+      "widthMetres": 5,
+      "radiusMetres": 0.6,
+      "bumpGapMetres": 4.5,
+      "jumpSeconds": 0.3
+    },
+    "rollingSnowball": {
+      "radiusMetres": 2,
+      "maxRadiusMetres": 3,
+      "radiusGrowthPerMetre": 0.015,
+      "triggerDistanceMetres": 60,
+      "warningSeconds": 0.45,
+      "lateralSpeedKmh": 70,
+      "downhillSpeedKmh": 18,
+      "travelMetres": 90
     }
   }
 }

@@ -41,5 +41,10 @@ def validate(value, schema, path='config'):
             gates = {**base['gates'], **over.get('gates', {})}
             if gates['swordGateCount'] > gates['count']: fail(f'arcade.stages.{name}: swordGateCount exceeds gate count')
         if value['wildlife']['packMin'] > value['wildlife']['packMax']: fail('packMin must not exceed packMax')
+        features = value['terrainFeatures']
+        if features['rollingSnowball']['maxRadiusMetres'] < features['rollingSnowball']['radiusMetres']: fail('rollingSnowball.maxRadiusMetres must be at least radiusMetres')
+        log = features['logJump']; units = value['world']['unitsPerMetre']
+        if log['radiusMetres'] >= log['widthMetres'] / 2: fail('logJump.radiusMetres must be less than half widthMetres')
+        if log['bumpGapMetres'] * units <= (log['radiusMetres'] + .6) * units + value['physics']['playerRadius']: fail('logJump.bumpGapMetres must leave room to take off before the log')
         for course in value['race']['entryChoices'] + value['race']['villageChoices']:
             if course not in value['courses']: fail(f'unknown course {course}')

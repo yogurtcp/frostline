@@ -29,7 +29,8 @@
     "mushroomHunt",
     "politePursuit",
     "arcade",
-    "villageLife"
+    "villageLife",
+    "terrainFeatures"
   ],
   "properties": {
     "$schema": {
@@ -610,7 +611,10 @@
         "cat",
         "catClimb",
         "still",
-        "uphill"
+        "uphill",
+        "fallingTree",
+        "wideLog",
+        "rollingSnowball"
       ],
       "properties": {
         "spruceTree": {
@@ -2129,6 +2133,93 @@
                 "village",
                 "wildlife",
                 "trees"
+              ]
+            },
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "integer",
+              "minimum": 1
+            },
+            {
+              "type": "integer",
+              "minimum": 1
+            }
+          ]
+        },
+        "fallingTree": {
+          "type": "array",
+          "minItems": 5,
+          "maxItems": 5,
+          "prefixItems": [
+            {
+              "type": "string",
+              "enum": [
+                "fallingTree"
+              ]
+            },
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "integer",
+              "minimum": 1
+            },
+            {
+              "type": "integer",
+              "minimum": 1
+            }
+          ]
+        },
+        "wideLog": {
+          "type": "array",
+          "minItems": 5,
+          "maxItems": 5,
+          "prefixItems": [
+            {
+              "type": "string",
+              "enum": [
+                "wideLog"
+              ]
+            },
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "integer",
+              "minimum": 1
+            },
+            {
+              "type": "integer",
+              "minimum": 1
+            }
+          ]
+        },
+        "rollingSnowball": {
+          "type": "array",
+          "minItems": 5,
+          "maxItems": 5,
+          "prefixItems": [
+            {
+              "type": "string",
+              "enum": [
+                "rollingSnowball"
               ]
             },
             {
@@ -5032,7 +5123,10 @@
             "flag",
             "star",
             "snowPath",
-            "pavedPath"
+            "pavedPath",
+            "fallingTree",
+            "logJump",
+            "rollingSnowball"
           ],
           "description": "Rarity tier of each Arcade object. Per-stage tierRates set the default spawn rate; itemRates overrides single objects.",
           "properties": {
@@ -5517,6 +5611,30 @@
               ]
             },
             "pavedPath": {
+              "type": "string",
+              "enum": [
+                "common",
+                "slightlyRare",
+                "veryRare"
+              ]
+            },
+            "fallingTree": {
+              "type": "string",
+              "enum": [
+                "common",
+                "slightlyRare",
+                "veryRare"
+              ]
+            },
+            "logJump": {
+              "type": "string",
+              "enum": [
+                "common",
+                "slightlyRare",
+                "veryRare"
+              ]
+            },
+            "rollingSnowball": {
               "type": "string",
               "enum": [
                 "common",
@@ -6157,6 +6275,24 @@
                   "minimum": 0,
                   "maximum": 30,
                   "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                },
+                "fallingTree": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 30,
+                  "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                },
+                "logJump": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 30,
+                  "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                },
+                "rollingSnowball": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 30,
+                  "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
                 }
               }
             },
@@ -6598,6 +6734,24 @@
                     "minimum": 0,
                     "maximum": 30,
                     "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                  },
+                  "fallingTree": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                  },
+                  "logJump": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
+                  },
+                  "rollingSnowball": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 30,
+                    "description": "Placement attempts per 100 metres for this object; 0 disables it. Omitted means the object's tier rate."
                   }
                 }
               },
@@ -6810,6 +6964,146 @@
                   "rental"
                 ]
               }
+            }
+          }
+        }
+      }
+    },
+    "terrainFeatures": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "fallingTree",
+        "logJump",
+        "rollingSnowball"
+      ],
+      "properties": {
+        "fallingTree": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "heightMetres",
+            "trunkRadiusMetres",
+            "triggerRadiusMetres",
+            "warningSeconds",
+            "fallSeconds"
+          ],
+          "description": "Tall pine that warns, falls toward the skier's position at activation and remains a fallen obstacle.",
+          "properties": {
+            "heightMetres": {
+              "type": "number",
+              "minimum": 4,
+              "maximum": 30
+            },
+            "trunkRadiusMetres": {
+              "type": "number",
+              "minimum": 0.2,
+              "maximum": 3
+            },
+            "triggerRadiusMetres": {
+              "type": "number",
+              "minimum": 10,
+              "maximum": 100
+            },
+            "warningSeconds": {
+              "type": "number",
+              "minimum": 0.1,
+              "maximum": 4
+            },
+            "fallSeconds": {
+              "type": "number",
+              "minimum": 0.15,
+              "maximum": 2
+            }
+          }
+        },
+        "logJump": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "widthMetres",
+            "radiusMetres",
+            "bumpGapMetres",
+            "jumpSeconds"
+          ],
+          "description": "One horizontal log and its uphill jump bump, placed together.",
+          "properties": {
+            "widthMetres": {
+              "type": "number",
+              "minimum": 3,
+              "maximum": 20
+            },
+            "radiusMetres": {
+              "type": "number",
+              "minimum": 0.3,
+              "maximum": 5
+            },
+            "bumpGapMetres": {
+              "type": "number",
+              "minimum": 3,
+              "maximum": 12
+            },
+            "jumpSeconds": {
+              "type": "number",
+              "minimum": 0.1,
+              "maximum": 1
+            }
+          }
+        },
+        "rollingSnowball": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "radiusMetres",
+            "maxRadiusMetres",
+            "radiusGrowthPerMetre",
+            "triggerDistanceMetres",
+            "warningSeconds",
+            "lateralSpeedKmh",
+            "downhillSpeedKmh",
+            "travelMetres"
+          ],
+          "description": "Snowball that warns, rolls diagonally, grows, then breaks apart.",
+          "properties": {
+            "radiusMetres": {
+              "type": "number",
+              "minimum": 0.3,
+              "maximum": 5
+            },
+            "maxRadiusMetres": {
+              "type": "number",
+              "minimum": 0.3,
+              "maximum": 6
+            },
+            "radiusGrowthPerMetre": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 0.1
+            },
+            "triggerDistanceMetres": {
+              "type": "number",
+              "minimum": 10,
+              "maximum": 100
+            },
+            "warningSeconds": {
+              "type": "number",
+              "minimum": 0.1,
+              "maximum": 4
+            },
+            "lateralSpeedKmh": {
+              "type": "number",
+              "minimum": 10,
+              "maximum": 120
+            },
+            "downhillSpeedKmh": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 60
+            },
+            "travelMetres": {
+              "type": "number",
+              "minimum": 10,
+              "maximum": 150
             }
           }
         }

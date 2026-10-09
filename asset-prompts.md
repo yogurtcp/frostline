@@ -24,3 +24,25 @@ Generated with the built-in image-generation tool. Saved as `assets/tree-sprites
 Prompt:
 
 > Use case: stylized-concept. Asset type: ONE transparent PNG sprite atlas for the existing tiny pixel-art skiing game Frostline. The attached atlas is a STYLE REFERENCE ONLY, especially its snow-covered pine trees. Create a NEW atlas containing exactly four different snow-covered trees, arranged in one horizontal row, evenly spaced in four equal-width cells. Same ground baseline, generous transparent gutters, nothing touches cell borders. Left to right: (1) dark dense irregular mountain spruce, (2) slightly crooked old pine with asymmetrical boughs and visible brown trunk, (3) broad gnarly winter cedar with rounded clumps of deep evergreen foliage, (4) narrow snow-heavy alpine fir. These must be beautiful genuine chunky pixel art, designed to read at only 32–42 pixels wide and 45–60 pixels tall in-game, enlarged with hard nearest-neighbor square pixels in the delivered atlas. Match the reference's textured branch clusters, dark outlines, dappled snow caps, natural irregular silhouettes and depth. Rich organic branch structure, NOT repeated triangular geometric layers, NOT smooth illustrations. Muted dark forest green, desaturated slate teal, charcoal navy outlines, earthy dark brown bark, restrained gray-blue snow shadows and off-white snow highlights. No bright gold, no yellow foliage, no vivid cyan, no pastel trees, no neon. Snow highlights occupy less than half of each silhouette so trees read substantially dark. Top-down three-quarter view like the reference game trees. True transparent alpha background, no background scene, no floor, no cast shadows, no labels, no text, no grid lines. Exactly four complete isolated trees, all approximately the same visual height.
+
+## Interactive slope features (October 2026)
+
+Generated with the built-in `image_gen.imagegen` tool, using `assets/tree-sprites.png` as style guidance. Originals retain their generated transparency; the renderer uses tight atlas rectangles and the existing palette conversion. The log's snow bump reuses the existing mogul sprite.
+
+### fallingTree
+
+Saved as `assets/falling-tree.png`.
+
+Use case: stylized-concept. Asset type: transparent pixel-art game sprite for Frostline, viewed slightly from above/front. Reference image is STYLE GUIDANCE ONLY. Match muted dark evergreen/slate teal/navy outlines, earthy bark, off-white snow with gray-blue shadows. Chunky genuine low-resolution pixel art readable at tiny size, no gradients, no text, no background or cast shadow. One isolated complete sprite with generous transparent padding. Primary request: one tall narrow old snow-covered alpine pine, upright, with a clearly visible long brown trunk, irregular asymmetrical dark branches, about twice as tall as wide. Base at bottom center. Sparse snow caps, foliage substantially dark. Intended to be animated rotating about its base.
+
+### wideLog
+
+Saved as `assets/wide-log.png`.
+
+Use case: stylized-concept. Asset type: transparent pixel-art game sprite for Frostline, viewed slightly from above/front. Reference image is STYLE GUIDANCE ONLY. Match muted dark evergreen/slate teal/navy outlines, earthy bark, off-white snow with gray-blue shadows. Chunky genuine low-resolution pixel art readable at tiny size, no gradients, no text, no background or cast shadow. One isolated complete sprite with generous transparent padding. Primary request: one wide fallen tree trunk lying horizontally left-to-right, five times as wide as tall, rough dark brown bark, visible cut wood rings on one end, two tiny snapped branch stubs and irregular snow cap along top. No standing tree, no foliage, no ground.
+
+### rollingSnowball
+
+Saved as `assets/rolling-snowball.png`.
+
+Use case: stylized-concept. Asset type: transparent pixel-art game sprite for Frostline, viewed slightly from above/front. Reference image is STYLE GUIDANCE ONLY. Match muted dark evergreen/slate teal/navy outlines, earthy bark, off-white snow with gray-blue shadows. Chunky genuine low-resolution pixel art readable at tiny size, no gradients, no text, no background or cast shadow. One isolated complete sprite with generous transparent padding. Primary request: one large compact nearly circular snowball, slightly irregular chunky silhouette, icy blue shaded underside, off-white top, a few distinctive blue-gray curved compressed snow seams so rotating the sprite visibly reads as rolling. No other objects.

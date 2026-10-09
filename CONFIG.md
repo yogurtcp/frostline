@@ -21,6 +21,7 @@ World coordinates increase rightward and downhill. `world.unitsPerMetre` default
 | `timing` | Enable timing, maximum speed bonus, gold/par targets for each timed course, record revision and history length |
 | `physics` | Acceleration, top speed, turning, walking, braking, ice, road slowdown, collisions and crash recovery |
 | `controls` | Drag dead zone, drag scale, repeat interval and steering angle steps |
+| `terrainFeatures` | Falling pine dimensions/timing, the paired log and jump bump, and rolling snowball dimensions, speeds, growth and lifetime |
 | `jump` | Manual/ramp/mushroom/rainbow/hill airtime, takeoff speed multiplier (`speedBoost`), height scaling, spin, boosts and cooldown |
 | `world` | Random seed, terrain density, chunk sizes, cleanup distance, course sway, ice sizes and predator frequency |
 | `village` | House count, corridor offsets, layout randomization, building bands, footprints, path widths/routing, squares, walkers, pets, lift and entry positions |
@@ -42,7 +43,7 @@ World coordinates increase rightward and downhill. `world.unitsPerMetre` default
 
 - Arcade stage editor: `arcade.stages` maps names to knob tuples (`"Name": [obstacles, chase, miss, speed, ice]`, 1–4 each) in play order, with arbitrary names. Details resolve from `arcade.stageDefaults` plus per-name `arcade.stageOverrides` (gate count/swords, yeti color, two rarity-tier rates, overrides). Gate ice share comes from the ice knob. See `ARCADE.md` for a copyable pair and all keys.
 - Arcade equipment: each stage’s `gates.swordGateCount` selects the number of sword gates. `arcade.gear.shieldsPerStage` controls shield yield, `swordGatesPerSword` controls sword charge, and `maxShields` / `maxSwords` cap inventory.
-- Arcade item density: `arcade.itemTiers` assigns each of the 61 objects to `common`, `slightlyRare` or `veryRare`; the obstacle knob sets the `common` per-100m rate, each stage's `tierRates` sets the other two, and `itemRates` overrides single objects (0 disables; omission uses the tier/knob rate). `skier`, `fastSkier`, `boarder` and `overtakingSkier` are separate, and `endTrafficMultiplier` increases their density toward the finish. Other object densities stay constant. Safe gate openings and landing clearances can reduce actual placement.
+- Arcade item density: `arcade.itemTiers` assigns each of the 64 objects to `common`, `slightlyRare` or `veryRare`; the obstacle knob sets the `common` per-100m rate, each stage's `tierRates` sets the other two, and `itemRates` overrides single objects (0 disables; omission uses the tier/knob rate). `skier`, `fastSkier`, `boarder` and `overtakingSkier` are separate, and `endTrafficMultiplier` increases their density toward the finish. Other object densities stay constant. Safe gate openings and landing clearances can reduce actual placement.
 - Make regular slalom timing more forgiving: increase `timing.targets.slalom.goldSeconds` and `parSeconds`, keeping gold below par.
 - Reduce all speed prizes: lower `timing.maxBonus` (60 by default).
 - Slow recovery: `physics.minimumCollisionKmh` (8) disables obstacle impacts only when BOTH you and the object are at or below that HUD speed in absolute terms. Creeping into a stationary dog is harmless, but a fast skier hitting a stopped player still crashes, and so does cruising into a same-speed boarder. Objects touched gently stay harmless until you fully clear them, even if you accelerate. Chasers (wolves, patrol) keep the old closing-speed rule, so outrunning them still counts as escaping.
@@ -65,3 +66,5 @@ Local-file and hosted versions have separate browser storage origins. Publishing
 
 
 Arcade starts: `startStage` is 1-based; `autoStart: true` loads directly above that stage’s start. Starts above 1 are practice and do not overwrite records. start-line yetis and penalty wolves resolve from the stage's `knobs` via `arcade.knobLevels` (counts, chase speed as percent of top, guarded-gate share); no other automatic speed calculation applies.
+
+New Arcade item keys: `fallingTree`, `logJump`, `rollingSnowball` (all `slightlyRare`). Set a per-stage `itemRates` value to control each, including `0` to disable. `terrainFeatures.logJump.widthMetres` defaults to 5; the bump is spawned with the log and is not a separate rate. The old `snowball` stays stationary.

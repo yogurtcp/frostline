@@ -77,7 +77,7 @@ Densities are placement attempts, not exact counts: gates, finish openings, lake
 | Group | Individual keys |
 | --- | --- |
 | Trees | `pine`, `fir`, `smallPine`, `spruceTree`, `crookedTree`, `cedarTree`, `alpineTree` |
-| Obstacles | `rock`, `pebble`, `stump`, `bush`, `mushroom`, `sled`, `snowball` |
+| Obstacles | `rock`, `pebble`, `stump`, `bush`, `mushroom`, `sled`, `snowball`, `fallingTree`, `logJump`, `rollingSnowball` |
 | Jumps and surfaces | `ramp`, `mogul`, `rainbow`, `smallHill`, `largeHill`, `smallLake`, `largeLake`, `rugged`, `snowPath`, `pavedPath` |
 | Skiers | `skier`, `fastSkier`, `overtakingSkier`, `boarder` |
 | Pedestrians | `personRed`, `personYellow`, `personGreen` |
@@ -89,7 +89,7 @@ Densities are placement attempts, not exact counts: gates, finish openings, lake
 | Tier | Members |
 | --- | --- |
 | `common` | pine, fir, smallPine, spruceTree, crookedTree, cedarTree, alpineTree, rock, pebble, stump, bush, skier, boarder, personRed, personYellow, personGreen |
-| `slightlyRare` | ramp, mogul, rainbow, smallHill, largeHill, mushroom, sled, snowball, fastSkier, overtakingSkier, dog, cat, rabbit, fox, rugged, lamp, bench, snowman, sign, flag, star, snowPath, pavedPath, bunting, powderPile, pigeons, skiRack, breadStand |
+| `slightlyRare` | ramp, mogul, rainbow, smallHill, largeHill, mushroom, sled, snowball, fastSkier, overtakingSkier, dog, cat, rabbit, fox, rugged, lamp, bench, snowman, sign, flag, star, snowPath, pavedPath, bunting, powderPile, pigeons, skiRack, breadStand, fallingTree, logJump, rollingSnowball |
 | `veryRare` | smallLake, largeLake, wolf, bear, wolfPack, yetiTeal, yetiOrange, yetiViolet, lodge, rental, cottage, chalet, inn, cafe, hotel, skiShop, lift |
 
 `wolf` counts individuals; `wolfPack` counts packs of the configured 3–4 wolves. Explicitly placed course predators can chase/hunt on the piste; protected towns remain safe. House variants share existing collision footprints. `star`, `sign`, and the standalone `flag` are decorative, not currency or extra scoring gates. The stage `lift` is a prop during Arcade; it cannot exit the run. Animation poses (running/left/falling sprites), UI icons, and labels are not separate gameplay items. Courses are forest: buildings, props, decor and paths never scatter there via tier rates (they stay in `itemTiers` for future village scatter); only an explicit per-stage `itemRates` pin places one on a course. Hills are SkiFree-style contour jumps: `smallHill` launches briefly, `largeHill` is the biggest air in the game. `rugged` is scruffy ground that caps speed at half while you cross it.
@@ -131,3 +131,13 @@ Ordinary successful gates provide 1.5 shield charges per fully cleared stage; fo
 Towns are safe intermissions and the next stage starts automatically at their exit. No money or timed qualification applies. Crossing outside the finish fails Arcade without teleporting; death returns to the summit (or the configured automatic start). Completing the final configured stage ends the run.
 
 `frostline-v2` browser storage keeps wallet, regular-course times and Arcade records. Practice starts do not update Arcade records. `campaignVersion` can be incremented after a substantial redesign to retain the previous record separately. Refresh starts a new attempt rather than resuming one.
+
+## Interactive slope features
+
+Three new catalog entries use `slightlyRare` rates, with the normal per-stage `itemRates` overrides. Warmup's zero rare rate keeps its existing lesson; later stages inherit their configured rare rates. There is no separate ambient spawn stream for these features.
+
+- `fallingTree`: a tall pine that creaks, shakes and marks its landing direction when the skier approaches. It fixes that direction at activation, tips over and stays as a jumpable fallen obstacle. The trunk can hit a grounded skier; airborne skiers clear it. Predators route around it, and the landing impact can knock them down.
+- `logJump`: one five-metre horizontal log with a snow bump 4.5 m uphill. Crossing the bump downhill at skiing speed launches a locked-heading hop with enough airtime to clear the trunk. Yetis, wolves and bears use its full horizontal footprint and route around its ends. Walking across the bump does not launch.
+- `rollingSnowball`: shakes briefly, then rolls diagonally toward the course centre, with a powder trail and visible rotation. It grows from a 2 m radius to at most 3 m, breaks up after 90 m, and breaks up before entering towns or safe approaches. Grounded contact can cause a normal shield-protected fall, including when the skier is stopped; jumping clears it.
+
+Dimensions, trigger distances, warning durations, jump duration, snowball speeds and growth are editable under `terrainFeatures` in `game-config.json`. `snowball` remains the separate original stationary object. Changing the three new rates does not change existing tree densities or chase speeds.

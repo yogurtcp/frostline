@@ -52,6 +52,10 @@ window.loadFrostlineConfig = async function () {
     if(stage.gates.swordGateCount>stage.gates.count)throw new Error(`arcade.stages[${i}]: swordGateCount exceeds gate count`);
   }
   if (config.wildlife.packMin > config.wildlife.packMax) throw new Error('packMin must not exceed packMax');
+  const features=config.terrainFeatures;
+  if(features.rollingSnowball.maxRadiusMetres<features.rollingSnowball.radiusMetres)throw new Error('rollingSnowball.maxRadiusMetres must be at least radiusMetres');
+  if(features.logJump.radiusMetres>=features.logJump.widthMetres/2)throw new Error('logJump.radiusMetres must be less than half widthMetres');
+  if(features.logJump.bumpGapMetres*config.world.unitsPerMetre<=(features.logJump.radiusMetres+.6)*config.world.unitsPerMetre+config.physics.playerRadius)throw new Error('logJump.bumpGapMetres must leave room to take off before the log');
   for (const id of [...config.race.entryChoices, ...config.race.villageChoices]) if (!config.courses[id]) throw new Error(`Unknown course ${id}`);
   return config;
 };
