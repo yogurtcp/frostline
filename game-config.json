@@ -1869,7 +1869,8 @@
       "trunkRadiusMetres": 1.2,
       "triggerRadiusMetres": 60,
       "warningSeconds": 0.55,
-      "fallSeconds": 0.3
+      "fallSeconds": 0.3,
+      "fallenRadiusMetres": 3
     },
     "logJump": {
       "widthMetres": 100,
@@ -1883,11 +1884,16 @@
       "radiusMetres": 2,
       "maxRadiusMetres": 3,
       "radiusGrowthPerMetre": 0.015,
-      "triggerDistanceMetres": 120,
+      "triggerDistanceMetres": 240,
       "warningSeconds": 0.45,
       "lateralSpeedKmh": 70,
-      "downhillSpeedKmh": 18,
-      "travelMetres": 90
+      "downhillSpeedKmh": 90,
+      "travelMetres": 270,
+      "accelerationSeconds": 1.5,
+      "initialSpeedRatio": 0.15,
+      "swayAmplitudeMetres": 24,
+      "swayPeriodSeconds": 5,
+      "trailSeconds": 8
     }
   }
 }
