@@ -1001,10 +1001,10 @@
     ],
     "wideLog": [
       "wideLog",
-      70,
-      148,
-      2040,
-      512
+      40,
+      248,
+      2096,
+      371
     ],
     "rollingSnowball": [
       "rollingSnowball",
@@ -1872,16 +1872,18 @@
       "fallSeconds": 0.3
     },
     "logJump": {
-      "widthMetres": 5,
-      "radiusMetres": 0.6,
+      "widthMetres": 100,
+      "radiusMetres": 1.1,
       "bumpGapMetres": 4.5,
-      "jumpSeconds": 0.3
+      "jumpSeconds": 0.3,
+      "bumpWidthMetres": 15,
+      "heightMetres": 4
     },
     "rollingSnowball": {
       "radiusMetres": 2,
       "maxRadiusMetres": 3,
       "radiusGrowthPerMetre": 0.015,
-      "triggerDistanceMetres": 60,
+      "triggerDistanceMetres": 120,
       "warningSeconds": 0.45,
       "lateralSpeedKmh": 70,
       "downhillSpeedKmh": 18,

@@ -7024,14 +7024,16 @@
             "widthMetres",
             "radiusMetres",
             "bumpGapMetres",
-            "jumpSeconds"
+            "jumpSeconds",
+            "bumpWidthMetres",
+            "heightMetres"
           ],
           "description": "One horizontal log and its uphill jump bump, placed together.",
           "properties": {
             "widthMetres": {
               "type": "number",
               "minimum": 3,
-              "maximum": 20
+              "maximum": 150
             },
             "radiusMetres": {
               "type": "number",
@@ -7047,6 +7049,16 @@
               "type": "number",
               "minimum": 0.1,
               "maximum": 1
+            },
+            "bumpWidthMetres": {
+              "type": "number",
+              "minimum": 3,
+              "maximum": 150
+            },
+            "heightMetres": {
+              "type": "number",
+              "minimum": 0.5,
+              "maximum": 6
             }
           }
         },
@@ -7083,7 +7095,7 @@
             "triggerDistanceMetres": {
               "type": "number",
               "minimum": 10,
-              "maximum": 100
+              "maximum": 250
             },
             "warningSeconds": {
               "type": "number",

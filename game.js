@@ -56,8 +56,8 @@ window.FROSTLINE_READY = (async () => {
     }
     if(type==='wideLog'){
       const f=S.terrainFeatures.logJump;
-      o.width=f.widthMetres*PX_PER_M;o.r=f.radiusMetres*PX_PER_M;
-      const bump=entity('logBump',x,y-f.bumpGapMetres*PX_PER_M,{width:o.width,r:.6*PX_PER_M,arcadeRun:o.arcadeRun,arcadeFeature:true,log:o});o.bump=bump;
+      o.width=f.widthMetres*PX_PER_M;o.height=f.heightMetres*PX_PER_M;o.r=f.radiusMetres*PX_PER_M;
+      const bump=entity('logBump',x,y-f.bumpGapMetres*PX_PER_M,{width:f.bumpWidthMetres*PX_PER_M,r:.6*PX_PER_M,arcadeRun:o.arcadeRun,arcadeFeature:true,log:o});o.bump=bump;
     }
     if(type==='rollingSnowball'){
       const f=S.terrainFeatures.rollingSnowball;
@@ -315,13 +315,21 @@ window.FROSTLINE_READY = (async () => {
         const at=y;y+=spacing/(traffic?arcadeTrafficMultiplier(run,at):1)*range(1-S.arcade.spawnJitter,1+S.arcade.spawnJitter);
         if(key==='overtakingSkier'){createArcadeItem(key,run.x,at,run);continue;}
         const feature=key==='fallingTree'?S.terrainFeatures.fallingTree:key==='logJump'?S.terrainFeatures.logJump:key==='rollingSnowball'?S.terrainFeatures.rollingSnowball:null;
-        const rx=key==='fallingTree'?(feature.heightMetres+feature.trunkRadiusMetres)*PX_PER_M:key==='logJump'?feature.widthMetres*PX_PER_M/2+S.physics.playerRadius:key==='rollingSnowball'?feature.maxRadiusMetres*PX_PER_M:key==='wolfPack'?80:spec.rx||Math.max(spec.r,spec.width*.45);
+        const rx=key==='fallingTree'?(feature.heightMetres+feature.trunkRadiusMetres)*PX_PER_M:key==='logJump'?Math.max(feature.widthMetres,feature.bumpWidthMetres)*PX_PER_M/2+S.physics.playerRadius:key==='rollingSnowball'?feature.maxRadiusMetres*PX_PER_M:key==='wolfPack'?80:spec.rx||Math.max(spec.r,spec.width*.45);
         const ry=key==='logJump'?feature.bumpGapMetres*PX_PER_M+S.physics.playerRadius:spec.ry||rx;
         for(let attempt=0;attempt<8;attempt++){
           const x=run.x+range(-run.arcade.itemSpreadMetres,run.arcade.itemSpreadMetres)*PX_PER_M;
           if(openings.some(g=>Math.abs(g.y-at)<ry+30&&Math.abs(g.x-x)<g.half+rx+20))continue;
           if(nearArcadeFeature(x,at)||patchAt(x,at))continue;
-          if(spec.r>0&&state.objects.some(o=>o.arcadeRun===run&&o.r>0&&Math.hypot(o.x-x,o.y-at)<rx+o.r+8))continue;
+          if(spec.r>0&&state.objects.some(o=>{
+            if(o.arcadeRun!==run||o.r<=0)return false;
+            if(key==='logJump'){
+              const trunk={type:'wideLog',x,y:at,width:feature.widthMetres*PX_PER_M,r:feature.radiusMetres*PX_PER_M};
+              const bump={type:'logBump',x,y:at-feature.bumpGapMetres*PX_PER_M,width:feature.bumpWidthMetres*PX_PER_M,r:.6*PX_PER_M};
+              return obstacleClearance(trunk,o.x,o.y)<o.r+8||obstacleClearance(bump,o.x,o.y)<o.r+8;
+            }
+            return (o.type==='wideLog'||o.type==='logBump'?obstacleClearance(o,x,at):Math.hypot(o.x-x,o.y-at)-o.r)<rx+8;
+          }))continue;
           createArcadeItem(key,x,at,run);break;
         }
       }
@@ -1064,6 +1072,15 @@ window.FROSTLINE_READY = (async () => {
     for(const o of state.objects)if((o.type==='wolf'||o.type==='bear'||o.type==='lurker')&&!o.dead&&!o.eaten&&Math.abs(o.y-feature.y)<(feature.treeLength||feature.width)+50&&contact(o)<(o.r||12))knockDownByTerrain(o);
     for(const c of state.chasers)if((c.kind==='fast'||c.kind==='slow'||c.kind==='bear')&&!c.dead&&Math.abs(c.y-feature.y)<(feature.treeLength||feature.width)+50&&contact(c)<S.chasers.knockoutDistance)knockDownByTerrain(c);
   }
+  function snowballIntercept(o,delay){
+    const p=state.p,f=S.terrainFeatures.rollingSnowball;
+    if(p.awaitingInput||p.fall||p.vy<=S.physics.walkingBumpLimit)return null;
+    const side=p.x+p.vx*delay>=o.x?1:-1,vx=side*f.lateralSpeedKmh/S.physics.hudKmhPerSpeed,vy=f.downhillSpeedKmh/S.physics.hudKmhPerSpeed;
+    const closing=vx-p.vx;if(Math.abs(closing)<.001)return null;
+    const time=(p.x+p.vx*delay-o.x)/closing;
+    if(time<0||Math.hypot(vx,vy)*time>f.travelMetres*PX_PER_M)return null;
+    return {vx,vy,time,gap:o.y+vy*time-p.y-p.vy*(delay+time)};
+  }
   function updateTerrainFeatures(dt,previous=state.p){
     const p=state.p;
     for(const o of state.objects){
@@ -1081,9 +1098,19 @@ window.FROSTLINE_READY = (async () => {
       }else if(o.type==='rollingSnowball'){
         const f=S.terrainFeatures.rollingSnowball;
         if(o.rollState==='waiting'&&state.started&&o.y>=p.y-f.radiusMetres*PX_PER_M&&o.y-p.y<f.triggerDistanceMetres*PX_PER_M&&Math.abs(o.x-p.x)<f.triggerDistanceMetres*PX_PER_M){
-          o.rollState='warning';o.rollAt=clock+f.warningSeconds;beep(95,.12,'triangle');
+          const plan=snowballIntercept(o,f.warningSeconds);
+          if(plan&&plan.gap<=0&&plan.gap>=-p.vy*f.warningSeconds){o.rollState='warning';o.rollAt=clock+f.warningSeconds;beep(95,.12,'triangle');}
         }
-        if(o.rollState==='warning'&&clock>=o.rollAt){o.rollState='rolling';o.vx=o.rollSide*f.lateralSpeedKmh/S.physics.hudKmhPerSpeed;o.vy=f.downhillSpeedKmh/S.physics.hudKmhPerSpeed;p.slowContacts.delete(o);}
+        if(o.rollState==='warning'){
+          const plan=snowballIntercept(o,0);
+          if(!plan)o.rollState='waiting';
+          else if(clock>=o.rollAt&&plan.gap<=0){
+            o.rollState='rolling';o.vx=plan.vx;
+            // Aim once at release to absorb changes in speed during the warning; never home in flight.
+            o.vy=plan.time>.001?clamp((p.y+p.vy*plan.time-o.y)/plan.time,0,f.lateralSpeedKmh/S.physics.hudKmhPerSpeed):plan.vy;
+            o.rollSide=Math.sign(o.vx);p.slowContacts.delete(o);
+          }
+        }
         if(o.rollState!=='rolling')continue;
         const oldX=o.x,oldY=o.y,move=Math.hypot(o.vx,o.vy)*dt;
         o.x+=o.vx*dt;o.y+=o.vy*dt;o.rollDistance+=move;o.rollAngle+=move/o.r*o.rollSide;
@@ -1465,11 +1492,17 @@ window.FROSTLINE_READY = (async () => {
   function sprite(name,x,y,width,opts={}) {
     const a=atlas[name],img=a&&images[a[0]];if(!a||!img)return;
     width=Math.max(2,Math.round(width*(opts.ui?1:ZOOM)));
-    const h=Math.round(width*a[4]/a[3]),key=name+':'+width+(opts.yetiTier?':yeti'+opts.yetiTier:'')+(opts.guest?':guest':'')+(opts.fast?':fast':'')+(opts.houseStyle!==undefined?':house'+opts.houseStyle:'');
+    const h=opts.height===undefined?Math.round(width*a[4]/a[3]):Math.max(2,Math.round(opts.height*(opts.ui?1:ZOOM))),key=name+':'+width+(opts.height!==undefined?':height'+h:'')+(opts.repeatMiddle?':repeat':'')+(opts.yetiTier?':yeti'+opts.yetiTier:'')+(opts.guest?':guest':'')+(opts.fast?':fast':'')+(opts.houseStyle!==undefined?':house'+opts.houseStyle:'');
     if(!spriteCache.has(key)){
       const tile=document.createElement('canvas');tile.width=width;tile.height=h;
       const t=tile.getContext('2d');t.imageSmoothingEnabled=true;t.imageSmoothingQuality='high';
-      t.drawImage(img,a[1],a[2],a[3],a[4],0,0,width,h);
+      if(opts.repeatMiddle){
+        const sourceCap=Math.min(Math.round(a[4]*1.1),Math.floor(a[3]/3)),cap=Math.min(Math.round(sourceCap*h/a[4]),Math.floor(width/3));
+        t.drawImage(img,a[1],a[2],sourceCap,a[4],0,0,cap,h);
+        const sourceMiddle=a[3]-sourceCap*2,span=Math.max(1,Math.round(sourceMiddle*h/a[4]));
+        for(let left=cap;left<width-cap;left+=span){const n=Math.min(span,width-cap-left);t.drawImage(img,a[1]+sourceCap,a[2],sourceMiddle*n/span,a[4],left,0,n,h);}
+        t.drawImage(img,a[1]+a[3]-sourceCap,a[2],sourceCap,a[4],width-cap,0,cap,h);
+      }else t.drawImage(img,a[1],a[2],a[3],a[4],0,0,width,h);
       const pixels=t.getImageData(0,0,width,h),data=pixels.data;
       for(let i=0;i<data.length;i+=4){if(data[i+3]<S.render.spriteAlphaCutoff){data[i+3]=0;continue;}let nearest=paletteRGB[0],distance=Infinity;
         for(const rgb of paletteRGB){const d=(data[i]-rgb[0])**2+(data[i+1]-rgb[1])**2+(data[i+2]-rgb[2])**2;if(d<distance){distance=d;nearest=rgb;}}
@@ -1705,7 +1738,8 @@ window.FROSTLINE_READY = (async () => {
     sprite(name,s.x,s.y,o.width);
   }
   function drawObject(o) {
-    const s=screen(o.x,o.y);if(s.x<-230||s.x>W+230||s.y<-80||s.y>H+230)return;
+    const s=screen(o.x,o.y),margin=o.type==='wideLog'||o.type==='logBump'?Math.max(230,o.width*ZOOM/2):230;
+    if(s.x<-margin||s.x>W+margin||s.y<-80||s.y>H+230)return;
     if(o.villageDetail){drawVillageDetail(o,s);return;}
     if(o.dead){ctx.save();ctx.globalAlpha=clamp((o.fadeUntil-clock)/(o.type==='wolf'?S.wildlife.wolfFadeSeconds:S.wildlife.predatorFadeSeconds),0,1);if(o.type==='wolf')sprite('wolf',s.x,s.y,o.width,{rotate:Math.PI/2});else drawKnockedOut(o,s,o.type);ctx.restore();return;}
     if(o.npcFallUntil>clock){sprite('fall',s.x,s.y,o.width);return;}
@@ -1720,8 +1754,8 @@ window.FROSTLINE_READY = (async () => {
       ctx.save();ctx.translate(s.x,s.y);ctx.transform(Math.cos(angle*lean),Math.sin(angle*lean),-Math.cos(o.fallAngle||0)*lean,upright-Math.sin(o.fallAngle||0)*lean,0,0);
       sprite('fallingTree',0,0,o.width,{rotate:warning});ctx.restore();return;
     }
-    if(o.type==='wideLog'){sprite('wideLog',s.x,s.y+o.r*ZOOM,o.width);return;}
-    if(o.type==='logBump'){ctx.save();ctx.translate(s.x,s.y+3);ctx.scale(1,.4);sprite('mogul',0,0,o.width);ctx.restore();return;}
+    if(o.type==='wideLog'){sprite('wideLog',s.x,s.y,o.width,{height:o.height,repeatMiddle:true,center:true});return;}
+    if(o.type==='logBump'){sprite('mogul',s.x,s.y+o.r*ZOOM,o.width,{height:o.r*2});return;}
     if(o.type==='rollingSnowball'){
       shadow(s.x,s.y,o.r,o.r*.3,.15);
       const shake=o.rollState==='warning'?Math.sin(clock*30)*1.5:0;
