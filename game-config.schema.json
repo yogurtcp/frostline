@@ -17,6 +17,7 @@
     "village",
     "wildlife",
     "chasers",
+    "predators",
     "skiers",
     "lift",
     "spawnTables",
@@ -3994,6 +3995,38 @@
         "yetiCelebrationJumpPixels": {
           "type": "number",
           "minimum": 0
+        }
+      }
+    },
+    "predators": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "divertChance",
+        "divertRadius",
+        "divertRecheckSeconds",
+        "divertTimeoutSeconds"
+      ],
+      "properties": {
+        "divertChance": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "divertRadius": {
+          "type": "number",
+          "minimum": 0,
+          "exclusiveMinimum": 0
+        },
+        "divertRecheckSeconds": {
+          "type": "number",
+          "minimum": 0,
+          "exclusiveMinimum": 0
+        },
+        "divertTimeoutSeconds": {
+          "type": "number",
+          "minimum": 0,
+          "exclusiveMinimum": 0
         }
       }
     },

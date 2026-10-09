@@ -1460,6 +1460,12 @@
     "yetiCelebrationHopsPerSecond": 2.4,
     "yetiCelebrationJumpPixels": 14
   },
+  "predators": {
+    "divertChance": 0.5,
+    "divertRadius": 300,
+    "divertRecheckSeconds": 1.5,
+    "divertTimeoutSeconds": 8
+  },
   "skiers": {
     "slowSpeed": [
       38,
