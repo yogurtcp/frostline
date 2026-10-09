@@ -4003,7 +4003,7 @@
       "additionalProperties": false,
       "required": [
         "divertChance",
-        "divertRadius",
+        "divertRadiusMetres",
         "divertRecheckSeconds",
         "divertTimeoutSeconds"
       ],
@@ -4013,7 +4013,7 @@
           "minimum": 0,
           "maximum": 1
         },
-        "divertRadius": {
+        "divertRadiusMetres": {
           "type": "number",
           "minimum": 0,
           "exclusiveMinimum": 0

@@ -1462,7 +1462,7 @@
   },
   "predators": {
     "divertChance": 0.5,
-    "divertRadius": 300,
+    "divertRadiusMetres": 5,
     "divertRecheckSeconds": 1.5,
     "divertTimeoutSeconds": 8
   },

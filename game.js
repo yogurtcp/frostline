@@ -765,11 +765,13 @@ window.FROSTLINE_READY = (async () => {
   // are deliberately absent: predators never hunt each other.
   const CREATURE_TYPES=new Set(['skier','boarder','personRed','personYellow','personGreen','dog','cat','rabbit']);
   function nearestPrey(x,y,radius){
+    const p=state.p,pd=Math.hypot(p.x-x,p.y-y);
     let best=null,bestD=radius;
     for(const o of state.objects){
       if(!CREATURE_TYPES.has(o.type)||o.eaten||o.r<=0||o.dead)continue;
       const d=Math.hypot(o.x-x,o.y-y);
-      if(d<bestD){bestD=d;best=o;}
+      if(d>=bestD||Math.hypot(o.x-p.x,o.y-p.y)>=pd)continue;
+      bestD=d;best=o;
     }
     return best;
   }
@@ -1212,7 +1214,7 @@ window.FROSTLINE_READY = (async () => {
         if(o.divert&&(o.divert.eaten||o.divert.r<=0||clock>o.divertUntil))o.divert=null;
         if(!o.divert&&clock>(o.nextDivertCheck||0)){
           o.nextDivertCheck=clock+S.predators.divertRecheckSeconds;
-          const prey=nearestPrey(o.x,o.y,S.predators.divertRadius);
+          const prey=nearestPrey(o.x,o.y,S.predators.divertRadiusMetres*PX_PER_M);
           if(prey&&Math.random()<S.predators.divertChance){o.divert=prey;o.divertUntil=clock+S.predators.divertTimeoutSeconds;}
         }
         if(o.alertUntil>clock&&(courseCreature(o,p.x,p.y)||!humanArea(p.x,p.y))){target=p;speed=o.wolfSpeedKmh?o.wolfSpeedKmh/S.physics.hudKmhPerSpeed:A.wolfPlayerChaseSpeed;}
@@ -1309,7 +1311,7 @@ window.FROSTLINE_READY = (async () => {
         if(c.divert&&(c.divert.eaten||c.divert.r<=0||clock>c.divertUntil))c.divert=null;
         if(!c.divert&&clock>(c.nextDivertCheck||0)){
           c.nextDivertCheck=clock+S.predators.divertRecheckSeconds;
-          const prey=nearestPrey(c.x,c.y,S.predators.divertRadius);
+          const prey=nearestPrey(c.x,c.y,S.predators.divertRadiusMetres*PX_PER_M);
           if(prey&&Math.random()<S.predators.divertChance){c.divert=prey;c.divertUntil=clock+S.predators.divertTimeoutSeconds;}
         }
       }
