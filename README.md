@@ -120,3 +120,5 @@ Yetis, bears and wolves can divert to nearby NPC prey. They keep the selected ta
 Skiers and snowboarders fear nearby wolves, roaming/chasing bears and awake Yetis. They shout, show a red `!`, and flee downhill away from the nearest threat, interrupting social stops. Ordinary enemies do not frighten NPCs in protected areas; a course's own Yetis can frighten them on its piste. Dead, stunned, retiring and sleeping/waiting enemies do not trigger fear.
 
 Falling trees and rolling snowballs are now mostly placed along the route between gates: trees stand close enough to fall across it, and balls start close enough to roll into it. They use normal stage rates. All hardcoded Warmup terrain demonstrations, including the slowdown patch and jump hills, have been removed. Jumping and steering still let you evade either encounter.
+
+Slow skiers occasionally ease into a left or right turn, with straight stretches between turns. They stay near their own lane. Fast skiers gradually cut toward your predicted lane within 35 m, including while you approach one ahead of you; beyond that distance they straighten out. Enemy fear takes priority over either behavior.

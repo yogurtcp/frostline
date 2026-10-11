@@ -29,7 +29,7 @@ World coordinates increase rightward and downhill. `world.unitsPerMetre` default
 | `houseAnimation` | Chimney smoke, opening doors, roof snow, awning movement, window flicker and muted trim palettes |
 | `wildlife` | Impact speed/angle thresholds, defeated-predator fade duration, pack sizes, detection distances, chase/flee speeds, predator meals, avoidance, rescue reactions, impact thresholds and cat behavior |
 | `pedestrians` | Stroll radius, walking speeds and durations, pauses, obstacle clearance, spectator range and step animation |
-| `skiers` | Traffic speeds/frequency, aggressive skier aiming and taunt cooldowns |
+| `skiers` | Traffic speeds/frequency, casual skier turns, aggressive skier aiming and taunt cooldowns |
 | `politePursuit` | Number and speed of the persistent course yetis (three, at 42% of straight-down top speed) |
 | `chasers` | Pursuer speeds, ambush sizes, capture distances, and recurring patrol-wave duration, interval, steering and speech |
 | `lift` | Cable location, chairs, towers, ride duration and speed |
@@ -82,3 +82,5 @@ NPC prey selection checks `predators.divertChance` every `divertRecheckSeconds` 
 Skier/snowboarder fear uses `wildlife.npcFearDistance` (310 world units / 31 m), `npcFearSeconds`, `npcFleeSpeed`, `npcFleeLateralSpeed` and `npcSpeechCooldown` for wolves, bears and awake Yetis. The nearest eligible enemy drives fleeing; towns/protected pistes suppress ordinary threats, while course-owned pursuers can frighten NPCs on their own piste. Dead, stunned, retiring, sleeping and waiting enemies are excluded. `dialogue.terrified` contains wolf warnings; `bearTerrified` and `yetiTerrified` supply the other warnings.
 
 Falling-tree and rolling-ball `pathPlacementChance` defaults to 0.9: most placement attempts use the route between gate openings and a midpoint between gates. Their `pathOffsetMetres` pairs default to [4, 9] and [12, 24] respectively. Tree offsets are capped at 75% of height and nearby trees fall across the route; ball offsets are capped at 1.5× sway amplitude. Other ball placements also stay within the first bend's reach, with radius/player clearance deducted. Existing per-stage item rates are retained. See `ARCADE.md` for clearance rules. The temporary level-one log/tree/ball placements have been removed.
+
+Casual skier turns use `skiers.slowTurnSeconds: [2.5, 5.5]`, `slowTurnChance: 0.8` (otherwise a straight stretch), `slowTurnLateralRatio: 0.5`, `slowSteeringFollow: 1.4`, and `slowTurnMaxOffsetMetres: 18`. Steering eases toward the chosen direction and turns back near the lane boundary, with a small overshoot. Downhill speed is retained. Fear resets the lane around the skier's escape position. Fast skier targeting uses actual distance `fastAimDistance: 350` (35 m), from ahead or behind; `fastAimWeight: 0.75` and `fastSteeringFollow: 1.2` produce gradual lane cutting, with the existing lateral cap and lead time. Outside range they ease toward straight downhill motion.

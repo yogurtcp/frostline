@@ -1506,6 +1506,11 @@
     "offDownhillSpeedRatio": 0.5
   },
   "skiers": {
+    "slowTurnSeconds": [2.5, 5.5],
+    "slowTurnChance": 0.8,
+    "slowTurnLateralRatio": 0.5,
+    "slowSteeringFollow": 1.4,
+    "slowTurnMaxOffsetMetres": 18,
     "slowSpeed": [
       38,
       90
@@ -1530,11 +1535,11 @@
       240
     ],
     "fastSpeedRatio": 1.32,
-    "fastAimDistance": 600,
+    "fastAimDistance": 350,
     "fastAimLeadSeconds": 0.35,
-    "fastAimWeight": 0.55,
+    "fastAimWeight": 0.75,
     "fastMaxLateralSpeed": 90,
-    "fastSteeringFollow": 2.5,
+    "fastSteeringFollow": 1.2,
     "tauntDistance": 260,
     "tauntCooldownSeconds": 6,
     "bumpSpeechCooldownSeconds": 3

@@ -4211,6 +4211,11 @@
       "additionalProperties": false,
       "required": [
         "slowSpeed",
+        "slowTurnSeconds",
+        "slowTurnChance",
+        "slowTurnLateralRatio",
+        "slowSteeringFollow",
+        "slowTurnMaxOffsetMetres",
         "fastSpeed",
         "boarderSpeed",
         "ambientFastChance",
@@ -4237,6 +4242,20 @@
           },
           "minItems": 2,
           "maxItems": 2
+        },
+        "slowTurnSeconds": {
+          "type": "array",
+          "items": { "type": "number", "minimum": 0, "exclusiveMinimum": 0 },
+          "minItems": 2,
+          "maxItems": 2,
+          "description": "Minimum/maximum seconds between casual skier turn decisions."
+        },
+        "slowTurnChance": { "type": "number", "minimum": 0, "maximum": 1 },
+        "slowTurnLateralRatio": { "type": "number", "minimum": 0, "maximum": 1 },
+        "slowSteeringFollow": { "type": "number", "minimum": 0, "exclusiveMinimum": 0 },
+        "slowTurnMaxOffsetMetres": {
+          "type": "number", "minimum": 1,
+          "description": "Casual skiers turn back toward their own lane beyond this lateral offset; easing permits a small overshoot."
         },
         "fastSpeed": {
           "type": "array",
@@ -4295,7 +4314,8 @@
         },
         "fastAimDistance": {
           "type": "number",
-          "minimum": 0
+          "minimum": 0,
+          "description": "Actual distance from the player within which fast skiers gradually aim toward the player's predicted lane, from ahead or behind (350 = 35 m)."
         },
         "fastAimLeadSeconds": {
           "type": "number",

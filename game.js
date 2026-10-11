@@ -1408,13 +1408,23 @@ window.FROSTLINE_READY = (async () => {
       if(o.fearUntil>clock&&o.threat&&!o.threat.dead&&(courseCreature(o.threat,o.x,o.y)||!humanArea(o.x,o.y))){
         const dx=o.x-o.threat.x,dy=o.y-o.threat.y,len=Math.hypot(dx,dy)||1;
         vx=clamp(dx/len*A.npcFleeSpeed,-A.npcFleeLateralSpeed,A.npcFleeLateralSpeed);vy=Math.max(A.npcFleeSpeed*.45,dy/len*A.npcFleeSpeed);
+        o.skiLaneX=o.x;o.nextSkiTurn=0;
       }else{
         if(humanArea(o.x,o.y)&&!courseCreature(o.threat,o.x,o.y)){o.fearUntil=0;o.threat=null;}
         if(o.fast){
-          const distance=Math.hypot(o.x-p.x,o.y-p.y),behind=p.y-o.y;
-          const aim=behind>0&&behind<K.fastAimDistance?clamp((p.x+p.vx*K.fastAimLeadSeconds-o.x)*K.fastAimWeight,-K.fastMaxLateralSpeed,K.fastMaxLateralSpeed):0;
+          const distance=Math.hypot(o.x-p.x,o.y-p.y);
+          const aim=distance<K.fastAimDistance?clamp((p.x+p.vx*K.fastAimLeadSeconds-o.x)*K.fastAimWeight,-K.fastMaxLateralSpeed,K.fastMaxLateralSpeed):0;
           vx=o.vx=ease(vx,aim,K.fastSteeringFollow,dt);
           if(distance<K.tauntDistance&&clock>=(o.speakAt||0)){say(pick(S.dialogue.fastTaunts),o);o.speakAt=clock+K.tauntCooldownSeconds;}
+        }else if(o.type==='skier'&&vy>0){
+          o.skiLaneX??=o.x;
+          if(clock>=(o.nextSkiTurn||0)){
+            o.skiTurn=random()<K.slowTurnChance?(random()<.5?-1:1):0;
+            o.nextSkiTurn=clock+range(...K.slowTurnSeconds);
+          }
+          const offset=o.x-o.skiLaneX,limit=K.slowTurnMaxOffsetMetres*PX_PER_M;
+          if(Math.abs(offset)>limit)o.skiTurn=-Math.sign(offset);
+          vx=o.vx=ease(vx,o.skiTurn*vy*K.slowTurnLateralRatio,K.slowSteeringFollow,dt);
         }
       }
       const speed=Math.hypot(vx,vy);if(speed)travel(o,Math.atan2(vy,vx),speed,dt);
