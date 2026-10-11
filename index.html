@@ -392,13 +392,19 @@ window.FROSTLINE_READY = (async () => {
         let at=y;y+=spacing/(traffic?arcadeTrafficMultiplier(run,at):1)*range(1-S.arcade.spawnJitter,1+S.arcade.spawnJitter);
         if(key==='overtakingSkier'){createArcadeItem(key,run.x,at,run);continue;}
         const feature=key==='fallingTree'?S.terrainFeatures.fallingTree:key==='logJump'?S.terrainFeatures.logJump:key==='rollingSnowball'?S.terrainFeatures.rollingSnowball:null;
-        const animated=key==='fallingTree'||key==='rollingSnowball',onPath=animated&&random()<feature.pathPlacementChance;
+        const animated=key==='fallingTree'||key==='rollingSnowball',onPath=key==='logJump'||animated&&random()<feature.pathPlacementChance;
         if(onPath)at=arcadeEncounterY(run,at);
+        const plannedAt=at;
         const rx=key==='fallingTree'?(feature.heightMetres+feature.trunkRadiusMetres)*PX_PER_M:key==='logJump'?Math.max(feature.widthMetres,feature.bumpWidthMetres)*PX_PER_M/2+S.physics.playerRadius:key==='rollingSnowball'?feature.maxRadiusMetres*PX_PER_M:key==='wolfPack'?80:spec.rx||Math.max(spec.r,spec.width*.45);
         const ry=key==='fallingTree'?feature.fallenRadiusMetres*PX_PER_M+S.physics.playerRadius:key==='logJump'?feature.bumpGapMetres*PX_PER_M+S.physics.playerRadius:spec.ry||rx;
         for(let attempt=0;attempt<8;attempt++){
           let x;
-          if(onPath){
+          if(key==='logJump'){
+            // Keep the trunk midpoint on the route; retry neighbouring gaps if occupied.
+            at=plannedAt+(attempt?Math.ceil(attempt/2)*(attempt%2?-1:1)*run.arcade.spacing:0);
+            if(at<arcadeEncounterY(run,run.startY)||at>arcadeEncounterY(run,run.endY))continue;
+            x=arcadePathX(run,at);
+          }else if(onPath){
             const cap=key==='fallingTree'?feature.heightMetres*.75:feature.swayAmplitudeMetres*1.5;
             const offset=range(...feature.pathOffsetMetres.map(n=>Math.min(n,cap)))*PX_PER_M;
             x=arcadePathX(run,at)+(random()<.5?-1:1)*offset;
