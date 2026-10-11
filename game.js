@@ -973,7 +973,7 @@ window.FROSTLINE_READY = (async () => {
       return;
     }
     if(o.type==='ramp'||o.type==='mogul'||o.type==='mushroom'||o.type==='rainbow'||o.type==='smallHill'||o.type==='largeHill'){
-      if(p.air>0)return;o.touched=true;
+      if(p.air>0||p.jumpLock>0)return;o.touched=true;
       launch(o.arcadeFeature&&['ramp','mogul'].includes(o.type)?S.arcade.rampSeconds:o.type==='rainbow'?S.jump.rainbowSeconds:o.type==='mushroom'?S.jump.mushroomSeconds:o.type==='smallHill'?S.jump.smallHillSeconds:o.type==='largeHill'?S.jump.largeHillSeconds:o.type==='ramp'?S.jump.rampSeconds:S.jump.mogulSeconds,o.type==='smallHill'||o.type==='largeHill'?S.jump.hillDurationMax:S.jump.durationMax);
       if(o.type==='rainbow'){p.rainbow=S.jump.rainbowTrailSeconds;p.boost=S.jump.rainbowBoostSeconds;announce('SOMEWHERE OVER THE RAINBOW','A spectacularly impractical shortcut.',C.blue,2.5);}
       if(o.type==='mushroom'){p.boost=S.jump.mushroomBoostSeconds;say('BOING. Bad decisions, good airtime.',o,2.1);}
@@ -1039,7 +1039,7 @@ window.FROSTLINE_READY = (async () => {
     p.x+=p.vx*dt;p.y+=p.vy*dt;
     p.air=Math.max(0,p.air-dt);p.fall=Math.max(0,p.fall-dt);p.shield=Math.max(0,p.shield-dt);p.boost=Math.max(0,p.boost-dt);p.jumpLock=Math.max(0,p.jumpLock-dt);p.rainbow=Math.max(0,p.rainbow-dt);
     if(p.air>0)p.spin+=p.airSpin*dt;
-    if(p.air===0&&p.airTotal>0){const points=Math.round(S.race.jumpBasePoints+p.spin*S.race.spinPointMultiplier+p.jumpHeight*S.race.heightPointMultiplier);if(state.course){state.course.points+=points;state.course.tricks++;}p.airTotal=0;announce(p.spin>2?'STYLISH LANDING':'SOFT LANDING',`+${points} points`,C.blue,1.5);beep(710,.08);}
+    if(p.air===0&&p.airTotal>0){const points=Math.round(S.race.jumpBasePoints+p.spin*S.race.spinPointMultiplier+p.jumpHeight*S.race.heightPointMultiplier);if(state.course){state.course.points+=points;state.course.tricks++;}p.airTotal=0;p.landingFeedback={title:p.spin>2?'STYLISH LANDING':'SOFT LANDING',points};}
     if(state.input.jump){launch(S.jump.manualSeconds);state.input.jump=false;}
     if(p.air===0&&!p.fall&&(!state.lastTrack||Math.hypot(p.x-state.lastTrack.x,p.y-state.lastTrack.y)>S.render.trailSpacing)){
       if(state.lastTrack&&Math.hypot(p.x-state.lastTrack.x,p.y-state.lastTrack.y)<45)state.trails.push({x:p.x,y:p.y,px:state.lastTrack.x,py:state.lastTrack.y,angle:p.heading,rainbow:p.rainbow>0});state.lastTrack={x:p.x,y:p.y};
@@ -1213,6 +1213,11 @@ window.FROSTLINE_READY = (async () => {
     else if(state.zone.kind==='village'&&p.y>state.zone.end){if(state.arcade){state.arcade.stage++;startCourse('arcade',{x:state.zone.x,y:p.y});}else startCourse('free',{x:p.x,y:p.y});}
     if(state.arcade)state.arcade.furthestY=Math.max(state.arcade.furthestY,p.y);
     updateChasers(dt);
+    // Confirm landing feedback after obstacles and chasers have resolved this step.
+    if(p.landingFeedback){
+      const landing=p.landingFeedback;p.landingFeedback=null;
+      if(state.p===p&&!p.fall&&!p.awaitingInput&&!state.deathTimer){announce(landing.title,`+${landing.points} points`,C.blue,1.5);beep(710,.08);}
+    }
     state.objects=state.objects.filter(o=>!o.eaten&&!o.collected&&o.type!=='awakened'&&(!o.dead||clock<o.fadeUntil)&&(o.worldChunk||o.y>p.y-S.world.sceneryRetentionBehind));
     state.snowballTrails=state.snowballTrails.filter(t=>t.until>clock&&t.by>p.y-S.world.sceneryRetentionBehind);
     for(const q of state.particles){q.x+=q.vx*dt;q.y+=q.vy*dt;q.vy+=80*dt;q.life-=dt;}state.particles=state.particles.filter(q=>q.life>0);state.speech=state.speech.filter(q=>q.until>clock);state.messages=state.messages.filter(q=>q.until>clock);
@@ -1626,7 +1631,7 @@ window.FROSTLINE_READY = (async () => {
   // Small, crisp snowdrift assets share the existing hill footprint and ground layer.
   function drawHill(o,s){
     const big=o.type==='largeHill',img=images[big?'hillLarge':'hillSmall'];if(!img)return;
-    const width=Math.max(1,Math.round(o.width*ZOOM)),height=Math.round(width*(big?26/56:16/28));
+    const width=Math.max(1,Math.round(o.width*ZOOM)),height=Math.round(width*img.height/img.width);
     ctx.drawImage(img,Math.round(s.x-width/2),Math.round(s.y-height*.65),width,height);
   }
   // Cached, pixel-snapped churned snow. The edge uses the actual slow-zone polygon.

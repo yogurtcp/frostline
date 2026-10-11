@@ -108,3 +108,7 @@ The source was reviewed for state, collision, configuration, wildlife, timing, a
 ### Churned snow
 
 Rugged slow zones use cached pixel-snow ridges with a soft boundary matching their collision polygon. Grounded skiers chatter and throw small powder flecks while crossing them; the existing `physics.ruggedSpeedRatio` still sets the slowdown. Airborne skiers do not show the slowdown effect.
+
+### Hill readability and gameplay review
+
+Small and large hills use revised native pixel-art SVG/PNG sources with raised snow crests and shaded downhill faces. Their existing widths and jump physics are retained. Jump cooldown no longer consumes a terrain trigger, and landing success feedback waits for collision resolution. See [the gameplay review](GAMEPLAY_REVIEW.md) for the remaining snowball reach limitation and three proposed movement-focused improvements.

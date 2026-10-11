@@ -1,12 +1,14 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="56" height="26" viewBox="0 0 56 26" shape-rendering="crispEdges">
-<!-- Broad wind-packed ridge, with an uneven cornice and a shaded downhill face. -->
-<path fill="#dce7e2" d="M3 20h49v3H3zM10 23h35v2H10z"/>
-<path fill="#b8ccce" d="M1 16h3v-3h4v-3h5V8h6V6h10V5h8v2h6v3h5v3h4v3h3v5h-7v2H12v-1H5v-2H1z"/>
-<path fill="#e5eeea" d="M3 15h3v-3h5V9h8V7h10V6h7v2h6v3h5v3h4v4h-7v1H13v-1H6v-1H3z"/>
-<path fill="#fbfcf4" d="M7 13h5v-3h8V8h10V7h5v2h6v3h5v2h-8v1H21v-1H7z"/>
-<path fill="#cbdcda" d="M10 15h11v1h15v-1h10v1h5v2h-8v2H24v-1H14v-1h-4z"/>
-<path fill="#8daab1" d="M3 18h5v1h7v1h10v1h16v-1h7v-1h5v-1h2v3h-7v1h-7v1H25v-1H14v-1H7v-1H3z"/>
-<path fill="#668791" d="M15 20h10v1h13v1H24v-1h-9zM46 20h6v1h-6z"/>
-<path fill="#f5f8ef" d="M13 13h8v1h-8zM26 14h11v1H26z"/>
-<path fill="#b8ccce" d="M0 22h4v1H0zM8 24h5v1H8zM50 23h5v1h-5z"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="56" height="36" viewBox="0 0 56 36" shape-rendering="crispEdges">
+<!-- Broad asymmetric wind drift with a high crest and a folded snow cornice. -->
+<path fill="#dce7e2" d="M4 28h47v4H4zM11 32h32v2H11zM19 34h19v1H19z"/>
+<path fill="#b8ccce" d="M1 25h2v-5h3v-5h4v-4h5V7h6V4h8V3h7v3h5v4h5v4h4v5h3v6h2v5h-6v2H12v-1H6v-2H1z"/>
+<path fill="#e5eeea" d="M4 23v-4h4v-5h4v-4h5V7h6V4h12v3h5v4h5v4h3v5h3v4h-7v2H15v-1H8v-2z"/>
+<path fill="#fbfcf4" d="M9 17v-3h5v-4h5V7h6V4h9v3h5v4h4v4h-7v2H23v1H13v-1z"/>
+<path fill="#f5f8ef" d="M8 18h6v2h10v-1h11v-2h9v-1h3v4h-6v3H28v1H16v-2H8z"/>
+<path fill="#cbdcda" d="M6 23h9v2h13v1h13v-2h9v3h-6v3H22v-1H12v-2H6z"/>
+<path fill="#8daab1" d="M5 26h7v2h10v1h19v-2h8v-1h3v3h-8v2H23v-1H13v-1H5z"/>
+<path fill="#668791" d="M14 29h9v1h16v1H23v-1h-9zM44 29h7v1h-7z"/>
+<path fill="#b8ccce" d="M15 22h9v1h12v-1h5v1h-5v2H24v-1h-9zM45 20h3v2h-3z"/>
+<path fill="#fbfcf4" d="M18 12h6v1h-6zM26 14h8v1h-8zM36 16h5v1h-5zM11 25h4v1h-4zM2 30h4v1H2zM47 31h5v1h-5z"/>
+<path fill="#b8ccce" d="M0 32h3v1H0zM8 34h5v1H8zM50 34h5v1h-5z"/>
 </svg>
