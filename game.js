@@ -272,7 +272,7 @@ window.FROSTLINE_READY = (async () => {
     p.shield=G.protectionSeconds;
     a.gearEffect={kind:'sword',start:clock,until:clock+G.effectSeconds,angle:Math.atan2(target.y-p.y,target.x-p.x)};
     burst(target.x,target.y,G.swordColor,20);beep(980,.1,'triangle');
-    if(target.type==='wolf')for(const skier of state.objects){
+    for(const skier of state.objects){
       if(skier.threat===target){skier.threat=null;skier.fearUntil=0;skier.npcFallUntil=0;say(pick(S.dialogue.rescued),skier,2);}
     }
     return true;
@@ -280,7 +280,7 @@ window.FROSTLINE_READY = (async () => {
 
   function arcadeTerrainAt(run,y){return run.arcade||{trees:false};}
   function nearArcadeFeature(x,y){return state.objects.some(o=>o.arcadeFeature&&(Math.hypot(o.x-x,o.y-y)<S.arcade.featureClearance||['ramp','mogul','smallHill','largeHill','logBump'].includes(o.type)&&y>o.y&&y<o.y+S.arcade.landingClearanceLength&&Math.abs(x-o.x)<S.arcade.landingClearanceHalfWidth));}
-  function courseCreature(o,x,y){return !!o?.arcadeRun&&o.arcadeRun===state.course&&!insideTown(x,y);}
+  function courseCreature(o,x,y){const run=o?.arcadeRun||o?.chaseRun;return !!run&&run===state.course&&!insideTown(x,y);}
   function createArcadeItem(key,x,y,run){
     const spec=ARCADE_ITEMS[key],extra={...spec,arcadeRun:run,nextAI:clock+range(1,4),humanVisitor:true};delete extra.type;
     if(key==='rollingSnowball')extra.rollSide=x>run.x?-1:1;
@@ -1370,20 +1370,33 @@ window.FROSTLINE_READY = (async () => {
     burst(o.x,o.y,C.ice,18);beep(160,.12,'triangle');
     for(const skier of state.objects){
       if(!['skier','boarder'].includes(skier.type)||Math.hypot(skier.x-o.x,skier.y-o.y)>A.rescueThanksRadius)continue;
-      if(skier.threat===o||o.targetSkier===skier||skier.fearUntil>clock&&skier.threat?.packId===o.packId){
+      if(skier.threat===o||o.targetSkier===skier||skier.fearUntil>clock&&skier.threat?.type==='wolf'&&skier.threat.packId===o.packId){
         if(clock>=(skier.thanksAt||0)){say(pick(S.dialogue.rescued),skier,3);skier.thanksAt=clock+A.rescueThanksCooldown;skier.speakAt=clock+A.npcSpeechCooldown;}
         if(skier.threat===o){skier.threat=null;skier.fearUntil=0;skier.npcFallUntil=0;}
       }
     }return true;
   }
-  function frighten(skier,wolf){
-    skier.threat=wolf;skier.fearUntil=clock+S.wildlife.npcFearSeconds;skier.catInterest=null;
-    if(clock>=(skier.speakAt||0)){say(pick(S.dialogue.terrified),skier);skier.speakAt=clock+S.wildlife.npcSpeechCooldown;}
+  function frighten(skier,threat){
+    skier.threat=threat;skier.fearUntil=clock+S.wildlife.npcFearSeconds;skier.catInterest=null;skier.socialUntil=0;
+    const lines=threat.type==='bear'||threat.kind==='bear'?S.dialogue.bearTerrified:threat.kind==='fast'||threat.kind==='slow'?S.dialogue.yetiTerrified:S.dialogue.terrified;
+    if(clock>=(skier.speakAt||0)){say(pick(lines),skier);skier.speakAt=clock+S.wildlife.npcSpeechCooldown;}
   }
   function updateSkiers(dt){
     const p=state.p,A=S.wildlife,K=S.skiers;
+    // Bears/yetis live in the chaser list after waking; wolves and roaming bears are scenery.
+    const threats=state.objects.filter(o=>(o.type==='wolf'||o.type==='bear')&&!o.eaten&&!o.dead&&o.r>0&&!(o.stunnedUntil>clock)&&(!o.penaltyGate||o.wolfAwake));
+    if(state.started)for(const c of state.chasers)if((c.kind==='fast'||c.kind==='slow'||c.kind==='bear')&&!c.dead&&!c.leaving&&!c.waiting&&!(c.wakeUntil>clock)&&!(c.stunnedUntil>clock)&&(!c.chaseRun||c.chaseRun===state.course)&&(c.chaseRun||!(p.y>c.expires)))threats.push(c);
+    const liveThreats=new Set(threats);
     for(const o of state.objects){
-      if((o.type!=='skier'&&o.type!=='boarder')||Math.hypot(o.x-p.x,o.y-p.y)>A.activeRadius)continue;
+      if((o.type!=='skier'&&o.type!=='boarder')||o.eaten||o.dead||Math.hypot(o.x-p.x,o.y-p.y)>A.activeRadius)continue;
+      if(o.threat&&!liveThreats.has(o.threat)){o.threat=null;o.fearUntil=0;}
+      let nearest=null,distance=A.npcFearDistance;
+      const protectedArea=humanArea(o.x,o.y);
+      for(const threat of threats){
+        if(protectedArea&&!courseCreature(threat,o.x,o.y))continue;
+        const d=Math.hypot(threat.x-o.x,threat.y-o.y);if(d<distance){distance=d;nearest=threat;}
+      }
+      if(nearest)frighten(o,nearest);
       if(o.npcFallUntil>clock||o.catInterest||o.socialUntil>clock)continue;
       let vx=o.vx||0,vy=o.vy||0;
       if(o.fearUntil>clock&&o.threat&&!o.threat.dead&&(courseCreature(o.threat,o.x,o.y)||!humanArea(o.x,o.y))){
@@ -1425,7 +1438,6 @@ window.FROSTLINE_READY = (async () => {
         if(o.divert){target=o.divert;speed=A.wolfSkierChaseSpeed;}
         o.hunting=!!o.divert||o.alertUntil>clock;
         o.targetSkier=target&&target!==p?target:null;
-        for(const skier of skis)if((courseCreature(o,skier.x,skier.y)||!humanArea(skier.x,skier.y))&&Math.hypot(skier.x-o.x,skier.y-o.y)<A.npcFearDistance)frighten(skier,o);
       }
       if(o.type==='fox'){
         if(clock>o.nextAI){o.hunting=random()<A.huntChance;o.nextAI=clock+range(...A.huntInterval);}

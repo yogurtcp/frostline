@@ -3814,7 +3814,8 @@
         },
         "npcFearDistance": {
           "type": "number",
-          "minimum": 0
+          "minimum": 0,
+          "description": "Skier/snowboarder fear radius in world units for wolves, bears and awake yetis (310 = 31 m)."
         },
         "npcFleeSpeed": {
           "type": "number",
@@ -4451,6 +4452,8 @@
         "fastTaunts",
         "fastBumps",
         "terrified",
+        "bearTerrified",
+        "yetiTerrified",
         "rescued",
         "wolfCaught",
         "cheers",
@@ -4478,6 +4481,20 @@
           "minItems": 1
         },
         "terrified": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1
+        },
+        "bearTerrified": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1
+        },
+        "yetiTerrified": {
           "type": "array",
           "items": {
             "type": "string"

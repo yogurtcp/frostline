@@ -1645,6 +1645,16 @@
       "HELP! THEY ARE GAINING!",
       "PLEASE EAT THE OTHER GUY!"
     ],
+    "bearTerrified": [
+      "BEAR! KEEP SKIING!",
+      "HELP! A BEAR!",
+      "PLEASE EAT THE OTHER GUY!"
+    ],
+    "yetiTerrified": [
+      "YETI! RUN!",
+      "HELP! IT IS GAINING!",
+      "PLEASE EAT THE OTHER GUY!"
+    ],
     "rescued": [
       "You saved me! Thank you!",
       "My hero! I owe you cocoa!",
