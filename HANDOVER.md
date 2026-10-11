@@ -345,3 +345,11 @@ Verified syntax/build/schema validation and staged native-scale frames. A six-se
 ### Bear speed correction
 
 The user found 100 km/h too difficult to escape. Bear chase speed is now explicitly 400 world units/s (80 km/h), below the roughly 90–110 km/h straight downhill skiing speeds. Fast downhill skiing can open a gap, while slower turns remain vulnerable. Keep the 34 m wake radius, 1000 m wild chase range, course ownership, town protection, and four-legged animation from the prior revision. Earlier 100 km/h staged pursuit measurements above describe the initial revision, not the current speed. Build/schema validation passed for this tuning-only correction.
+
+### Explicit 30 km/h bears and directional enemy pursuit
+
+The user rejected 80 km/h and explicitly requested 30 km/h bears plus half-speed non-downhill pursuit, especially the X projection. Current `wildlife.bearChaseSpeed` is 150 world units/s (30 km/h downhill). `predators.offDownhillSpeedRatio: 0.5` halves horizontal X and negative/uphill Y components; positive/downhill Y remains full speed. Thus pure sideways/uphill bear pursuit is 15 km/h; diagonals scale X independently of downhill Y. Earlier 100/80 km/h entries are historical tuning.
+
+`chaseVelocity` supplies the shared component rule. `travel` has an optional chasing flag; both avoidance probes and final movement use the transformed velocity, so routing follows the actual slowed direction. Applied to course/wild yeti and bear chasers, direct dog/legacy patrol pursuit, ski-patrol passes, and wolves with an active hunt target. Ordinary animal wandering, fox/rabbit activity, friendly skiers, player controls and configured downhill speeds of other enemies remain unchanged. Longer bear persistence, 34 m wake radius, town/ice protection and quadruped art remain active.
+
+Verification: syntax and build/schema validation passed. Staged production movement measured bears at 30 km/h downhill and 15 km/h sideways/uphill; a diagonal produced X 10.61 and downhill Y 21.21 km/h. Yeti/dog scenes, wolf hunting, patrol steering and bear tree avoidance also confirmed component scaling. No automated suite or full campaign/phone playtest was run.

@@ -3747,7 +3747,7 @@
         "bearChaseSpeed": {
           "type": "number",
           "minimum": 0,
-          "description": "Explicit speed for all bear chases in world units per second (400 = 80 km/h)."
+          "description": "Explicit downhill speed for all bear chases in world units per second (150 = 30 km/h); directional pursuit scales horizontal and uphill components."
         },
         "bearChaseDistance": {
           "type": "number",
@@ -4171,7 +4171,8 @@
         "divertChance",
         "divertRadiusMetres",
         "divertRecheckSeconds",
-        "divertTimeoutSeconds"
+        "divertTimeoutSeconds",
+        "offDownhillSpeedRatio"
       ],
       "properties": {
         "divertChance": {
@@ -4193,6 +4194,12 @@
           "type": "number",
           "minimum": 0,
           "exclusiveMinimum": 0
+        },
+        "offDownhillSpeedRatio": {
+          "type": "number",
+          "minimum": 0.1,
+          "maximum": 1,
+          "description": "Horizontal and uphill velocity multiplier for enemy pursuit (0.5 = half speed); positive downhill Y keeps its configured speed."
         }
       }
     },

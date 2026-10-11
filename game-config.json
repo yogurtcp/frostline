@@ -1391,7 +1391,7 @@
     "roamSpeed": 30,
     "bearRoamSpeed": 40,
     "bearWakeDistance": 340,
-    "bearChaseSpeed": 400,
+    "bearChaseSpeed": 150,
     "bearChaseDistance": 10000,
     "packFollowDistance": 95,
     "packFollowSpeed": 65,
@@ -1502,7 +1502,8 @@
     "divertChance": 0.5,
     "divertRadiusMetres": 5,
     "divertRecheckSeconds": 1.5,
-    "divertTimeoutSeconds": 8
+    "divertTimeoutSeconds": 8,
+    "offDownhillSpeedRatio": 0.5
   },
   "skiers": {
     "slowSpeed": [

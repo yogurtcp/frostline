@@ -1283,7 +1283,8 @@ window.FROSTLINE_READY = (async () => {
   const TREE_TYPES=new Set(['pine','fir','smallPine','spruceTree','crookedTree','cedarTree','alpineTree','wideLog','fallingTree']);
   let treeCacheTime=-1;const treeGrid=new Map();
   function freshIceCache(){if(iceCacheTime!==clock){iceCache=state.objects.filter(h=>h.type==='ice');iceCacheTime=clock;}return iceCache;}
-  function travel(o,angle,speed,dt,animal=false,avoidTowns=false,avoidTrees=false){
+  function chaseVelocity(vx,vy){const ratio=S.predators.offDownhillSpeedRatio;return [vx*ratio,vy*(vy>0?1:ratio)];}
+  function travel(o,angle,speed,dt,animal=false,avoidTowns=false,avoidTrees=false,chasing=false){
     if(houseCacheTime!==clock){
       houseCache=state.objects.filter(h=>h.type==='lodge'||h.type==='rental');houseCacheTime=clock;houseGrid=new Map();
       for(const h of houseCache){
@@ -1322,8 +1323,12 @@ window.FROSTLINE_READY = (async () => {
     };
     const nearIce=(x,y)=>ice.some(h=>{const g=h.lake||lakeGeometry(h);return Math.abs(x-h.x)<=g.radius+rm&&Math.abs(y-h.y)<=g.radius+rm&&lakeContains(h,x,y);});
     const valid=(x,y)=>(!avoidTowns||!insideTown(x,y))&&!nearIce(x,y)&&!nearHouse(x,y)&&(!avoidTrees||!nearTree(x,y))&&(!animal||courseCreature(o,x,y)||!o.arcadeRun&&!classicArea(x,y,35)&&(!(o.type==='bear'||(['fox','wolf'].includes(o.type)&&!o.humanVisitor))||!humanArea(x,y)));
-    const probe=Math.max(A.avoidProbeDistance,speed*A.avoidLookaheadSeconds);
-    const clear=a=>[Math.min(probe,speed*dt),probe*.5,probe].every(d=>valid(o.x+Math.cos(a)*d,o.y+Math.sin(a)*d));
+    const motion=a=>{
+      const [vx,vy]=chasing?chaseVelocity(Math.cos(a)*speed,Math.sin(a)*speed):[Math.cos(a)*speed,Math.sin(a)*speed];
+      const actualSpeed=chasing?Math.hypot(vx,vy):speed;
+      return {vx,vy,speed:actualSpeed,ux:chasing?vx/(actualSpeed||1):Math.cos(a),uy:chasing?vy/(actualSpeed||1):Math.sin(a),probe:Math.max(A.avoidProbeDistance,actualSpeed*A.avoidLookaheadSeconds)};
+    };
+    const clear=a=>{const m=motion(a);return [Math.min(m.probe,m.speed*dt),m.probe*.5,m.probe].every(d=>valid(o.x+m.ux*d,o.y+m.uy*d));};
     let heading=o.avoidUntil>clock?o.avoidHeading:angle;
     if(!clear(heading)){
       const turn=o.avoidSide??(o.id>.5?1:-1),options=A.avoidProbeDegrees.map(d=>angle+d*Math.PI/180*turn);
@@ -1331,12 +1336,12 @@ window.FROSTLINE_READY = (async () => {
       // If a moving target left us inside a newly protected region, walk out continuously.
       if(next===undefined){
         if(valid(o.x,o.y)){o.running=false;o.motionVx=0;o.travelSpeed=0;o.travelStamp=clock;return;}
-        const escape=options.find(a=>valid(o.x+Math.cos(a)*probe*2,o.y+Math.sin(a)*probe*2));
+        const escape=options.find(a=>{const m=motion(a);return valid(o.x+m.ux*m.probe*2,o.y+m.uy*m.probe*2);});
         next=escape??(o.avoidUntil>clock?o.avoidHeading:angle+Math.PI/2*turn);
       }
       heading=next;o.avoidHeading=heading;o.avoidUntil=clock+A.avoidCommitSeconds;o.avoidSide=turn;
     }
-    o.motionVx=Math.cos(heading)*speed;o.angle=heading;o.x+=o.motionVx*dt;o.y+=Math.sin(heading)*speed*dt;o.running=speed>60;o.travelSpeed=speed;o.travelStamp=clock;
+    const m=motion(heading);o.motionVx=m.vx;o.angle=chasing?Math.atan2(m.vy,m.vx):heading;o.x+=m.vx*dt;o.y+=m.vy*dt;o.running=m.speed>60;o.travelSpeed=m.speed;o.travelStamp=clock;
   }
   function killWolf(o){
     const p=state.p,A=S.wildlife;
@@ -1424,7 +1429,7 @@ window.FROSTLINE_READY = (async () => {
         if(target===p){if(killWolf(o))continue;if(p.shield<=0&&p.air<=0){if(useArcadeSword(o))continue;die('WOLF');return;}}
         else {target.eaten=true;target.r=0;o.divert=null;o.hunting=false;o.feedingUntil=clock+A.feedingSeconds;o.nextAI=clock+A.satedSeconds;burst(target.x,target.y,C.ice,9);say('CHOMP!',o,1.2);continue;}
       }}
-      travel(o,o.angle??o.phase,speed,dt,true,false,o.type==='wolf'||o.type==='bear');
+      travel(o,o.angle??o.phase,speed,dt,true,false,o.type==='wolf'||o.type==='bear',o.type==='wolf'&&!!target);
     }
     for(const o of skis){
       if(o.annoyedUntil>clock||o.fearUntil>clock||o.fast){o.catInterest=null;continue;}
@@ -1456,7 +1461,7 @@ window.FROSTLINE_READY = (async () => {
     c.vx=ease(c.vx,targetVx,K.steeringFollow,dt);
     const vy=Math.max(topSpeed()*K.speedRatio,Math.max(0,p.vy)+K.overtakeSpeed);
     const previous={x:c.x,y:c.y};
-    travel(c,Math.atan2(vy,c.vx),Math.hypot(vy,c.vx),dt);
+    travel(c,Math.atan2(vy,c.vx),Math.hypot(vy,c.vx),dt,false,false,false,true);
     const distance=Math.hypot(c.x-p.x,c.y-p.y),penalty=state.patrolPenalty;
     if(!c.taunted&&distance<K.tauntDistance&&(!penalty||clock>=penalty.nextSpeech)){
       say(pick(S.dialogue.patrolTaunts),c,K.speechSeconds);c.taunted=true;
@@ -1501,15 +1506,16 @@ window.FROSTLINE_READY = (async () => {
       }
       const hunt=c.divert||p;
       const dx=hunt.x-c.x,dy=hunt.y-c.y,len=Math.hypot(dx,dy)||1;
-      const lethal=['fast','slow','bear'].includes(c.kind),nx=c.x+dx/len*c.speed*dt,ny=c.y+dy/len*c.speed*dt;
+      const [vx,vy]=chaseVelocity(dx/len*c.speed,dy/len*c.speed);
+      const lethal=['fast','slow','bear'].includes(c.kind),nx=c.x+vx*dt,ny=c.y+vy*dt;
       if(pursuit){
         if(insideTown(p.x,p.y))continue;
         // The course's own yetis can enter pistes and follow far into the wilderness.
         // Reuse committed avoidance turns to route around towns, houses, lakes and trees.
-        travel(c,Math.atan2(dy,dx),c.speed,dt,false,true,true);
+        travel(c,Math.atan2(dy,dx),c.speed,dt,false,true,true,true);
       }else{
         if(lethal&&(humanArea(p.x,p.y)||humanArea(nx,ny)))continue;
-        if(lethal)travel(c,Math.atan2(dy,dx),c.speed,dt,false,true,true);else {c.x=nx;c.y=ny;}
+        if(lethal)travel(c,Math.atan2(dy,dx),c.speed,dt,false,true,true,true);else {c.x=nx;c.y=ny;}
       }
       if(c.kind==='slow'&&clock>c.talkAt){say(pick(S.dialogue.politeYeti),c);c.talkAt=clock+S.chasers.slowTalkSeconds;}
       const contactDistance=Math.hypot(c.x-p.x,c.y-p.y);
