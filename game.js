@@ -823,6 +823,26 @@ window.FROSTLINE_READY = (async () => {
     }
     return best;
   }
+  function updatePreyTarget(hunter){
+    const P=S.predators,prey=hunter.divert;
+    if(prey){
+      if(prey.eaten||prey.dead||prey.r<=0)hunter.divert=null;
+      else {
+        const distance=Math.hypot(prey.x-hunter.x,prey.y-hunter.y);
+        // Keep a committed hunt while closing the gap; only time out stalled pursuits.
+        if(hunter.divertBestDistance===undefined||distance<=hunter.divertBestDistance-1){
+          hunter.divertBestDistance=distance;hunter.divertUntil=clock+P.divertTimeoutSeconds;
+        }
+        if(clock>hunter.divertUntil)hunter.divert=null;
+      }
+    }
+    if(hunter.divert||clock<=(hunter.nextDivertCheck||0))return;
+    hunter.nextDivertCheck=clock+P.divertRecheckSeconds;
+    const next=nearestPrey(hunter.x,hunter.y,P.divertRadiusMetres*PX_PER_M);
+    if(next&&Math.random()<P.divertChance){
+      hunter.divert=next;hunter.divertBestDistance=Math.hypot(next.x-hunter.x,next.y-hunter.y);hunter.divertUntil=clock+P.divertTimeoutSeconds;
+    }
+  }
   function patchAt(x,y){return state.objects.find(o=>o.type==='ice'&&lakeContains(o,x,y));}
   function ruggedAt(x,y){return state.objects.find(o=>o.type==='rugged'&&lakeContains(o,x,y));}
   function roadBBox(r){let x0=Infinity,y0=Infinity,x1=-Infinity,y1=-Infinity;for(const p of r.points){if(p.x<x0)x0=p.x;if(p.x>x1)x1=p.x;if(p.y<y0)y0=p.y;if(p.y>y1)y1=p.y;}return r.bounds={left:x0-r.width,right:x1+r.width,top:y0-r.width,bottom:y1+r.width};}
@@ -1400,12 +1420,7 @@ window.FROSTLINE_READY = (async () => {
       let target=null,speed=o.type==='rabbit'?A.rabbitWalkSpeed:o.type==='bear'?A.bearRoamSpeed:A.roamSpeed;
       if(o.type==='wolf'&&(courseCreature(o,p.x,p.y)||!humanArea(p.x,p.y)&&!humanArea(o.x,o.y))&&Math.hypot(o.x-p.x,o.y-p.y)<A.wolfAlertDistance){for(const mate of hunters)if(mate.type==='wolf'&&!mate.dead&&mate.packId===o.packId)mate.alertUntil=clock+A.wolfAlertSeconds;}
       if(o.type==='wolf'){
-        if(o.divert&&(o.divert.eaten||o.divert.r<=0||clock>o.divertUntil))o.divert=null;
-        if(!o.divert&&clock>(o.nextDivertCheck||0)){
-          o.nextDivertCheck=clock+S.predators.divertRecheckSeconds;
-          const prey=nearestPrey(o.x,o.y,S.predators.divertRadiusMetres*PX_PER_M);
-          if(prey&&Math.random()<S.predators.divertChance){o.divert=prey;o.divertUntil=clock+S.predators.divertTimeoutSeconds;}
-        }
+        updatePreyTarget(o);
         if(o.alertUntil>clock&&(courseCreature(o,p.x,p.y)||!humanArea(p.x,p.y))){target=p;speed=o.wolfSpeedKmh?o.wolfSpeedKmh/S.physics.hudKmhPerSpeed:A.wolfPlayerChaseSpeed;}
         if(o.divert){target=o.divert;speed=A.wolfSkierChaseSpeed;}
         o.hunting=!!o.divert||o.alertUntil>clock;
@@ -1497,12 +1512,7 @@ window.FROSTLINE_READY = (async () => {
       if(c.stunnedUntil>clock)continue;
       if(p.y>c.expires){c.leaving=true;c.speed*=.97;continue;}
       if(c.kind==='fast'||c.kind==='slow'||c.kind==='bear'){
-        if(c.divert&&(c.divert.eaten||c.divert.r<=0||clock>c.divertUntil))c.divert=null;
-        if(!c.divert&&clock>(c.nextDivertCheck||0)){
-          c.nextDivertCheck=clock+S.predators.divertRecheckSeconds;
-          const prey=nearestPrey(c.x,c.y,S.predators.divertRadiusMetres*PX_PER_M);
-          if(prey&&Math.random()<S.predators.divertChance){c.divert=prey;c.divertUntil=clock+S.predators.divertTimeoutSeconds;}
-        }
+        updatePreyTarget(c);
       }
       const hunt=c.divert||p;
       const dx=hunt.x-c.x,dy=hunt.y-c.y,len=Math.hypot(dx,dy)||1;

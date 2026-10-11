@@ -114,3 +114,5 @@ Rugged slow zones use cached pixel-snow ridges with a soft boundary matching the
 Small and large hills use revised native pixel-art SVG/PNG sources with raised snow crests and shaded downhill faces. Their existing widths and jump physics are retained. Jump cooldown no longer consumes a terrain trigger, and landing success feedback waits for collision resolution. See [the gameplay review](GAMEPLAY_REVIEW.md) for the remaining snowball reach limitation and three proposed movement-focused improvements.
 
 Enemy pursuit is directional: horizontal and uphill components run at half speed, while downhill movement retains its configured pace. This applies to bears, yetis, hunting wolves, dogs and ski patrol.
+
+Yetis, bears and wolves can divert to nearby NPC prey. They keep the selected target while closing the gap and abandon it after eight seconds without progress, rather than rerolling the decision during a chase. Other predators, including foxes, are excluded as prey.

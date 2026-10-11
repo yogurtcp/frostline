@@ -4188,12 +4188,14 @@
         "divertRecheckSeconds": {
           "type": "number",
           "minimum": 0,
-          "exclusiveMinimum": 0
+          "exclusiveMinimum": 0,
+          "description": "Interval between NPC prey selection attempts when there is no committed prey target."
         },
         "divertTimeoutSeconds": {
           "type": "number",
           "minimum": 0,
-          "exclusiveMinimum": 0
+          "exclusiveMinimum": 0,
+          "description": "Abandon NPC prey after this many seconds without reducing the best target distance by at least one world unit; progressing hunts stay committed."
         },
         "offDownhillSpeedRatio": {
           "type": "number",
