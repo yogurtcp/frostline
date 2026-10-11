@@ -301,19 +301,6 @@ window.FROSTLINE_READY = (async () => {
     for(let y=startY+S.race.rainbowFirstOffset;y<endY-300;y+=s.kind==='freestyle'?S.race.freestyleRainbowSpacing:S.race.rainbowSpacing)entity('rainbow',centerAt(y,run)-90,y,{width:115,r:25});}
     if(run.objective==='mushrooms')plantMushrooms(run);
     if(run.arcade){prepareArcadeTerrain(run);spawnArcadeYetis(run,run.arcade.yetiTier,run.arcade.yetis);}
-    if(id==='arcade'&&state.arcade.stage===1){
-      // Stage-1 terrain demo: rugged then a small hop above gate 1, big hill riding gate 2.
-      const firstGatePx=run.arcade.gates.firstGateMetres*PX_PER_M;
-      for(const [key,frac] of [['rugged',.3],['smallHill',.55]]){
-        const spec=ARCADE_ITEMS[key],rx=spec.rx||Math.max(spec.r,spec.width*.45),at=startY+firstGatePx*frac;
-        for(const dx of [0,-45,45,-90,90]){
-          if(spec.r>0&&state.objects.some(o=>o.arcadeRun===run&&o.r>0&&Math.hypot(o.x-(run.x+dx),o.y-at)<rx+o.r+8))continue;
-          createArcadeItem(key,run.x+dx,at,run);break;
-        }
-      }
-      const gate2=state.objects.find(o=>o.type==='gate'&&o.run===run&&o.number===2);
-      if(gate2)createArcadeItem('largeHill',gate2.x,gate2.y,run);
-    }
     if(id==='slalom')state.objects=state.objects.filter(o=>!classicArea(o.x,o.y,70)||['gate','courseStart','finish','entrance','skier','boarder','personRed','personGreen','personYellow'].includes(o.type));
     const oldRoute=state.liftRoutes[state.liftRoutes.length-1];
     if(oldRoute&&oldRoute.y1>startY)oldRoute.y1=startY;

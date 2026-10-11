@@ -381,3 +381,7 @@ Staged actual course generation covered stages 1,2,3,7,8,12,23 (0–100% gate ic
 ## 18. Remove temporary first-level encounters (2026-10-11)
 
 At the user's request, removed the `TEMPORARY` `startCourse` block that hardcoded a log jump, falling tree and rolling snowball in Warmup. Their normal configured placements and route bias remain active in other stages; Warmup's zero slightly-rare rate means none of these three spawn there by default. Its earlier rugged/small-hill/large-hill introduction remains. Earlier opening-demo entries and previews above describe historical revisions. Source inspection, JavaScript syntax and build/schema validation passed; no automated tests were run.
+
+### Remove the remaining opening terrain demonstrations
+
+The user also requested removal of the slowdown patch and jump hills. Deleted the entire remaining stage-one-only placement block for `rugged`, `smallHill` and `largeHill`. Warmup now uses only normal configured course generation, with no scripted terrain demonstrations. The preceding statement that its older hill introduction remains is historical and superseded. Normal catalog entries and per-stage terrain rates remain available. Source inspection, syntax and build/schema validation passed; no automated tests were run.
