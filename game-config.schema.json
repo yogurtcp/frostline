@@ -614,7 +614,9 @@
         "uphill",
         "fallingTree",
         "wideLog",
-        "rollingSnowball"
+        "rollingSnowball",
+        "bearWalkAlt",
+        "bearRunAlt"
       ],
       "properties": {
         "spruceTree": {
@@ -1780,7 +1782,8 @@
                 "ski",
                 "village",
                 "wildlife",
-                "trees"
+                "trees",
+                "bears"
               ]
             },
             {
@@ -1812,7 +1815,8 @@
                 "ski",
                 "village",
                 "wildlife",
-                "trees"
+                "trees",
+                "bears"
               ]
             },
             {
@@ -2220,6 +2224,72 @@
               "type": "string",
               "enum": [
                 "rollingSnowball"
+              ]
+            },
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "integer",
+              "minimum": 1
+            },
+            {
+              "type": "integer",
+              "minimum": 1
+            }
+          ]
+        },
+        "bearWalkAlt": {
+          "type": "array",
+          "minItems": 5,
+          "maxItems": 5,
+          "prefixItems": [
+            {
+              "type": "string",
+              "enum": [
+                "ski",
+                "village",
+                "wildlife",
+                "trees",
+                "bears"
+              ]
+            },
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "integer",
+              "minimum": 1
+            },
+            {
+              "type": "integer",
+              "minimum": 1
+            }
+          ]
+        },
+        "bearRunAlt": {
+          "type": "array",
+          "minItems": 5,
+          "maxItems": 5,
+          "prefixItems": [
+            {
+              "type": "string",
+              "enum": [
+                "ski",
+                "village",
+                "wildlife",
+                "trees",
+                "bears"
               ]
             },
             {
@@ -3666,19 +3736,23 @@
         },
         "bearRoamSpeed": {
           "type": "number",
-          "minimum": 0
+          "minimum": 0,
+          "description": "Bear walking speed in world units per second (40 = 8 km/h with default HUD conversion)."
         },
         "bearWakeDistance": {
           "type": "number",
-          "minimum": 0
+          "minimum": 0,
+          "description": "Bear activation radius in world units (340 = 34 m)."
         },
         "bearChaseSpeed": {
           "type": "number",
-          "minimum": 0
+          "minimum": 0,
+          "description": "Explicit speed for all bear chases in world units per second (500 = 100 km/h)."
         },
         "bearChaseDistance": {
           "type": "number",
-          "minimum": 0
+          "minimum": 0,
+          "description": "Wild bear chase duration measured in skier downhill world units (10000 = 1000 m); course bears pursue until their run ends."
         },
         "packFollowDistance": {
           "type": "number",
@@ -3931,7 +4005,8 @@
             },
             "bear": {
               "type": "number",
-              "minimum": 0
+              "minimum": 0,
+              "description": "Legacy helper ratio; bear spawns use the explicit wildlife.bearChaseSpeed setting."
             },
             "patrol": {
               "type": "number",

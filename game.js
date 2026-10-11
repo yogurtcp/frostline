@@ -124,7 +124,7 @@ window.FROSTLINE_READY = (async () => {
     "rabbit":{"type":"rabbit","width":20,"r":5,"animal":true,"ai":"idle","climb":0},
     "fox":{"type":"fox","width":39,"r":10,"animal":true,"ai":"idle","climb":0},
     "wolf":{"type":"wolf","width":43,"r":11,"animal":true,"ai":"idle","climb":0},
-    "bear":{"type":"bear","width":44,"r":18,"animal":true,"ai":"idle","climb":0},
+    "bear":{"type":"bear","width":60,"r":18,"animal":true,"ai":"idle","climb":0},
     "wolfPack":{"type":"wolf","width":43,"r":11,"animal":true,"ai":"idle"},
     "yetiTeal":{"type":"lurker","width":55,"r":18,"arcadeTier":"slow"},
     "yetiOrange":{"type":"lurker","width":55,"r":18,"arcadeTier":"fast"},
@@ -422,11 +422,11 @@ window.FROSTLINE_READY = (async () => {
   }
   function addChasers(kind,count,chaseRun=null) {
     if(kind==='patrol'){spawnPatrolWave(count);return;}
-    const speed=topSpeed()*(chaseRun?S.politePursuit.speedRatio:S.chasers.speedRatios[kind]);
+    const speed=kind==='bear'?S.wildlife.bearChaseSpeed:topSpeed()*(chaseRun?S.politePursuit.speedRatio:S.chasers.speedRatios[kind]);
     for(let i=0;i<count;i++){
       let x=state.p.x+range(-90,90),y=state.cam.y-S.chasers.spawnAbove-i*S.chasers.spawnSpacing;
       if(['fast','slow','bear'].includes(kind))while(humanArea(x,y))x+=(i%2?-1:1)*440;
-      state.chasers.push({kind,x,y,speed,chaseRun,id:random(),phase:range(0,6),expires:Infinity,leaving:false,talkAt:clock+range(4,8)});
+      state.chasers.push({kind,x,y,speed,chaseRun,id:random(),phase:range(0,6),expires:kind==='bear'?state.p.y+S.wildlife.bearChaseDistance:Infinity,leaving:false,talkAt:clock+range(4,8)});
     }
   }
 
@@ -465,7 +465,7 @@ window.FROSTLINE_READY = (async () => {
       burst(state.p.x,state.p.y,C.gold,34);
     }
     beep(passed?880:210,.2);state.course=null;
-    for(const c of state.chasers)if(!c.patrolPass)c.expires=state.p.y+(c.kind==='dog'?1600:220);
+    for(const c of state.chasers)if(!c.patrolPass&&(c.kind!=='bear'||c.chaseRun))c.expires=state.p.y+(c.kind==='dog'?1600:220);
     const town=state.plannedTown||makeVillage(belowView(300),state.p.x,false);
     state.zone={kind:'village',origin:town.origin,x:town.x,end:town.end};state.transitions.push({kind:'village',y:state.p.y});state.plannedTown=null;
   }
@@ -474,7 +474,7 @@ window.FROSTLINE_READY = (async () => {
     if(state.deathTimer)return;state.deathYeti=cause==='YETI'?attacker:null;state.deathTimer=state.deathYeti?S.chasers.yetiCelebrationSeconds:S.physics.deathSeconds;if(state.deathYeti)state.deathYeti.celebrateAt=clock;state.deaths++;
     state.p.fall=2;state.p.speed=0;state.p.vx=state.p.vy=0;
     if(state.arcade)state.arcade.endReason='CAUGHT BY '+cause;
-    announce(cause==='BEAR'?'BEAR HUG. TOO MUCH BEAR.':cause==='WOLF'?'THE PACK CAUGHT YOU.':'THE YETI GOT YOU.',state.arcade?'ARCADE RUN OVER - BACK TO THE SUMMIT':`Back to the summit. Your ${state.bank} coins are safe.`,C.red,3);
+    announce(cause==='BEAR'?'THE BEAR CAUGHT YOU.':cause==='WOLF'?'THE PACK CAUGHT YOU.':'THE YETI GOT YOU.',state.arcade?'ARCADE RUN OVER - BACK TO THE SUMMIT':`Back to the summit. Your ${state.bank} coins are safe.`,C.red,3);
     beep(110,.3,'triangle');save();
   }
   function autoStartArcade(){
@@ -844,7 +844,7 @@ window.FROSTLINE_READY = (async () => {
         const type=ambientType(x,y);
         if(type==='wolf'){if(!spawnWolfPack(x,y,{worldChunk:key}).length)entity('fir',x,y,{width:65,r:16,worldChunk:key});continue;}
         const fast=type==='skier'&&random()<(state.course?.arcade?.fastChance??S.skiers.ambientFastChance);
-        const widths={pine:range(60,90),fir:range(52,74),rock:44,pebble:28,skier:42,personGreen:30,rabbit:20,fox:39,wolf:43,bear:44,cat:25,lurker:55,bush:35};
+        const widths={pine:range(60,90),fir:range(52,74),rock:44,pebble:28,skier:42,personGreen:30,rabbit:20,fox:39,wolf:43,bear:60,cat:25,lurker:55,bush:35};
         entity(type,x,y,{worldChunk:key,fast,width:widths[type],r:['lurker','bear'].includes(type)?18:type==='rabbit'?5:12,animal:['rabbit','fox','wolf','bear','cat'].includes(type),humanVisitor:humanArea(x,y)||random()<S.world.animalVisitorChance,ai:'idle',nextAI:clock+range(1,5),climb:0,vy:type==='skier'?(fast?range(...S.skiers.fastSpeed):range(...S.skiers.slowSpeed)):0});
       }
       if(random()<S.world.lakeChance){const x=(tx+.5)*size,y=(ty+.5)*size;if(!insideTown(x,y)&&!safeApproach(x,y)&&!classicArea(x,y,360)&&!state.safeTrails.some(r=>r.arcade&&y>r.startY-360&&y<r.endY+360&&Math.abs(x-centerAt(y,r))<S.world.safeCourseHalfWidth+360)&&y>S.world.lakeMinY&&!state.objects.some(o=>o.type==='gate'&&Math.hypot(o.x-x,o.y-y)<260||o.collectible&&Math.hypot(o.x-x,o.y-y)<360))entity('ice',x,y,{worldChunk:key,rx:range(...S.world.lakeRadiusX),ry:range(...S.world.lakeRadiusY),width:330,r:0});}
@@ -1199,7 +1199,7 @@ window.FROSTLINE_READY = (async () => {
       if(!state.arcade&&o.type==='lift'&&!o.used&&previous.y<o.y&&p.y>=o.y&&Math.abs(p.x-o.x)<o.half){o.used=true;state.liftTimer=S.lift.rideSeconds;p.speed=0;announce('UP WE GO','Next stop: the summit.',C.teal,3);}
       if(o.r>0&&Math.abs(o.y-p.y)<Math.max(130,o.width,(o.treeLength||0)+o.r+S.physics.playerRadius)&&Math.abs(p.x-o.x)<Math.max(130+o.r,o.width,(o.treeLength||0)+o.r+S.physics.playerRadius)){const d=Math.hypot(p.x-o.x,(p.y-o.y)*.85);if(obstacleClearance(o,p.x,p.y)<S.physics.playerRadius)hit(o);else if(o.type.startsWith('person')&&!o.greeted&&d<85){o.greeted=true;say(pick(S.dialogue.greetings),o);}}
     }
-    if(state.course){const off=Math.abs(p.x-centerAt(p.y))>S.race.offPisteDistance;if(off&&!state.course.left){state.course.left=true;for(const c of state.chasers)if(!c.patrolPass&&c.chaseRun!==state.course)c.expires=p.y+(c.kind==='dog'?2100:220);if(state.course.violation)announce('OFF PISTE',state.course.ambush==='dog'?'The dogs are still very interested.':state.course.ambush==='patrol'?'Ski patrol follows you off piste. Pay next time!':'You left the marked course.',C.blue,3);}const run=state.course;
+    if(state.course){const off=Math.abs(p.x-centerAt(p.y))>S.race.offPisteDistance;if(off&&!state.course.left){state.course.left=true;for(const c of state.chasers)if(!c.patrolPass&&c.kind!=='bear'&&c.chaseRun!==state.course)c.expires=p.y+(c.kind==='dog'?2100:220);if(state.course.violation)announce('OFF PISTE',state.course.ambush==='dog'?'The dogs are still very interested.':state.course.ambush==='patrol'?'Ski patrol follows you off piste. Pay next time!':'You left the marked course.',C.blue,3);}const run=state.course;
       if(previous.y<run.endY&&p.y>=run.endY){
         const crossX=mix(previous.x,p.x,(run.endY-previous.y)/(p.y-previous.y||1));
         if(Math.abs(crossX-run.x)<run.finishHalf){run.time=Math.max(0,run.time-dt*(1-clamp((run.endY-previous.y)/(p.y-previous.y||1),0,1)));run.finishPassed=true;creditRun();}
@@ -1529,7 +1529,7 @@ window.FROSTLINE_READY = (async () => {
         if(!lethal&&(p.awaitingInput||tooSlowToCrash(c)))continue;
         if(['fast','slow','bear'].includes(c.kind)&&useArcadeSword(c))continue;
         if(['fast','slow','bear'].includes(c.kind)){if(state.course&&!p.awaitingInput)state.course.hits++;burst(p.x,p.y,C.ice,12);die(c.kind==='bear'?'BEAR':'YETI',c);break;}
-        crash(null,S.chasers.patrolFallSeconds,c.kind==='dog');announce(c.kind==='dog'?'AGGRESSIVELY LOVED':'A WORD FROM SKI PATROL',c.kind==='dog'?'Covered in slobber. Wallet intact.':'They are very disappointed.',C.red,3);for(const other of state.chasers)if(!other.patrolPass&&(!other.chaseRun||other.chaseRun!==state.course))other.expires=p.y-1;burst(p.x,p.y,C.ice,20);break;
+        crash(null,S.chasers.patrolFallSeconds,c.kind==='dog');announce(c.kind==='dog'?'AGGRESSIVELY LOVED':'A WORD FROM SKI PATROL',c.kind==='dog'?'Covered in slobber. Wallet intact.':'They are very disappointed.',C.red,3);for(const other of state.chasers)if(!other.patrolPass&&other.kind!=='bear'&&(!other.chaseRun||other.chaseRun!==state.course))other.expires=p.y-1;burst(p.x,p.y,C.ice,20);break;
       }
     }
     state.chasers=state.chasers.filter(c=>(!c.patrolPass||c.remaining>0)&&(!c.dead||clock<c.fadeUntil)&&(!c.leaving||Math.abs(c.y-p.y)<H*.7));
@@ -1732,8 +1732,16 @@ window.FROSTLINE_READY = (async () => {
     if(o.feedingUntil>clock)text('...',s.x,s.y-22,9,C.ink);
   }
   function drawKnockedOut(o,s,kind){
-    sprite(kind==='bear'?'bearRun':kind==='dog'?'dog':kind==='wolf'?'wolf':'yeti',s.x,s.y,kind==='bear'?44:52,{rotate:Math.PI/2});
+    sprite(kind==='bear'?'bearRun':kind==='dog'?'dog':kind==='wolf'?'wolf':'yeti',s.x,s.y,kind==='bear'?60:52,{rotate:Math.PI/2});
     for(let i=0;i<3;i++){const a=clock*4+i*TAU/3;box(s.x+Math.cos(a)*12,s.y-17+Math.sin(a)*4,2,2,C.gold);}
+  }
+  function drawBear(o,s,chasing=false){
+    const moving=o.travelStamp===clock&&o.travelSpeed>.5,run=chasing&&moving;
+    const alternate=moving&&Math.floor(clock*(run?8:4)+(o.phase||0))%2;
+    const frame=run?(alternate?'bearRunAlt':'bearRun'):(alternate?'bearWalkAlt':'bear');
+    const flip=(o.motionVx??Math.cos(o.angle||0))<0;
+    shadow(s.x,s.y,22,4);
+    sprite(frame,s.x,s.y-(run&&alternate?1:0),o.width||60,{flip});
   }
   function drawHouse(o,s){
     const A=S.houseAnimation,w=o.width*ZOOM,a=atlas[o.type],h=w*a[4]/a[3],style=o.houseStyle??0;
@@ -1833,7 +1841,7 @@ window.FROSTLINE_READY = (async () => {
     if(o.type==='rainbow'){drawRainbow(s.x,s.y,o.width);return;}
     if(o.type==='smallHill'||o.type==='largeHill'){drawHill(o,s);return;}
     if(o.type==='lurker'){sprite('yetiHappy',s.x,s.y,o.width,{yetiTier:o.arcadeTier});text('z',s.x+12,s.y-27,9,C.muted);return;}
-    if(o.type==='bear'){sprite(o.running?'bearRun':'bear',s.x,s.y,o.width,{flip:Math.cos(o.angle||0)<0});return;}
+    if(o.type==='bear'){drawBear(o,s);return;}
     if(o.type==='rabbit'){sprite(o.running||Math.sin(clock*6+o.phase)>.3?'rabbitRun':'rabbit',s.x,s.y-(o.running?Math.abs(Math.sin(clock*10))*3:0),o.width,{flip:Math.cos(o.angle||0)<0});return;}
     if(o.type==='fox'||o.type==='wolf'){drawPredator(o,s);if(o.carryBreadUntil>clock)box(s.x+(Math.cos(o.angle||0)<0?-9:7),s.y-5,5,3,'#c69a63');return;}
     if(o.type==='cat'){sprite(o.ai==='climb'?'catClimb':'cat',s.x,s.y-(o.climb||0)*ZOOM,o.width,{flip:o.perch?.x<o.x});return;}
@@ -1988,7 +1996,7 @@ window.FROSTLINE_READY = (async () => {
       box(s.x-10,s.y-10,20,3,S.arcade.yetiColors[c.arcadeTier]);
       text(c.waiting?'...':'!',s.x+(c.waiting?0:18),s.y-(c.waiting?28:18),c.waiting?9:15,c.waiting?C.muted:C.red);return;
     }
-    if(c.kind==='bear'){sprite(Math.sin(clock*6)>.2?'bearRun':'bear',s.x,s.y+bob,48,{flip:c.x>state.p.x});return;}
+    if(c.kind==='bear'){drawBear(c,s,true);return;}
     if(c.kind==='dog')sprite(Math.sin(clock*8+c.phase)>.3?'dog':'dogLeft',s.x,s.y+bob,39);
     else if(c.kind==='patrol'){sprite(c.motionVx<-5?'left':c.motionVx>5?'right':'skier',s.x,s.y+bob,42,{guest:true,fast:true});line(s.x-5,s.y+3,s.x-5,s.y+12,C.muted);}
     else {shadow(s.x,s.y,20,5);sprite(c.kind==='slow'?'yetiHappy':Math.sin(clock*7+c.phase)>.2?'yeti':'yetiWalk',s.x,s.y+bob,c.kind==='slow'?52:59,{yetiTier:c.arcadeTier});if(c.arcadeTier){box(s.x-10,s.y-10,20,3,S.arcade.yetiColors[c.arcadeTier]);box(s.x+6,s.y-8,3,9,S.arcade.yetiColors[c.arcadeTier]);}else if(c.kind==='slow'){box(s.x-10,s.y-9,20,2,'#7aabc1');box(s.x+6,s.y-8,2,4,'#7aabc1');}else {text('!',s.x,s.y-37,11,C.red);}}

@@ -1,5 +1,13 @@
 # Asset generation
 
+## Four-legged bear replacement (2026-10-11)
+
+Saved as `assets/bear-sprites.png`. Generated with the built-in `image_gen.imagegen` tool; `assets/wildlife-sprites.png` was style guidance only. The original wildlife atlas remains intact. The new strip contains two walking and two galloping poses, all quadrupeds. Atlas crops share a 500×280 source box with a common foot baseline; the game uses the normal palette conversion and displays bears at 30 pixels wide at default zoom.
+
+Exact prompt:
+
+Use case: stylized-concept. Create ONE production transparent PNG sprite strip for Frostline, a tiny muted pixel-art downhill skiing game. The supplied wildlife atlas is STYLE REFERENCE ONLY for chunky square pixel clusters, earthy brown fur, dark navy outlines and tiny in-game scale. Create exactly FOUR isolated sprites in one horizontal row, evenly spaced in four equal cells, same bear body size and baseline, generous fully transparent padding between sprites. Left to right: adult wild brown bear WALK frame A; same bear WALK frame B with alternating paws; same bear RUN / gallop frame A; same bear RUN / gallop frame B. All four face RIGHT, seen from slightly above and the side. Every pose is a natural QUADRUPED on FOUR FEET: long horizontal heavy body, large shoulder hump, lower rump, small round ears, extended muzzle, tiny dark eye, short barely visible tail, powerful short legs, dark paws and restrained claws. Walking poses grounded with believable alternating fore/hind feet. Running poses low and powerful, alternating gathered and extended legs. Wild bear anatomy and imposing weight; no standing upright, no humanoid body, no exposed cream belly, no teddy-bear face, no cute smile, no accessories. True low-resolution pixel art designed as approximately 34 pixels wide and 21 pixels tall per bear, enlarged with hard nearest-neighbor square pixels, limited muted brown/tan/dark navy/slate palette, a few chunky highlights; no gradients or smooth painterly detail. No ground, snow terrain, cast shadow, background, text, labels, grid, frame borders, or other creatures. Actual transparent alpha background. Approximately 1536x512 strip; complete paws and ears in every cell.
+
 Tool: built-in `image_gen.imagegen`.
 
 `assets/ski-sprites.png` is the earlier generated skiing sprite sheet from this task.

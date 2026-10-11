@@ -909,18 +909,18 @@
       254
     ],
     "bear": [
-      "wildlife",
-      100,
-      100,
-      162,
-      230
+      "bears",
+      30,
+      235,
+      500,
+      280
     ],
     "bearRun": [
-      "wildlife",
-      452,
-      98,
-      188,
-      237
+      "bears",
+      1116,
+      235,
+      500,
+      280
     ],
     "rabbit": [
       "wildlife",
@@ -1012,6 +1012,20 @@
       143,
       1049,
       1014
+    ],
+    "bearWalkAlt": [
+      "bears",
+      573,
+      235,
+      500,
+      280
+    ],
+    "bearRunAlt": [
+      "bears",
+      1659,
+      235,
+      500,
+      280
     ]
   },
   "palette": [
@@ -1375,10 +1389,10 @@
       2.3
     ],
     "roamSpeed": 30,
-    "bearRoamSpeed": 17,
-    "bearWakeDistance": 180,
-    "bearChaseSpeed": 85,
-    "bearChaseDistance": 2100,
+    "bearRoamSpeed": 40,
+    "bearWakeDistance": 340,
+    "bearChaseSpeed": 500,
+    "bearChaseDistance": 10000,
     "packFollowDistance": 95,
     "packFollowSpeed": 65,
     "roamSeconds": [
