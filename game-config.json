@@ -1391,7 +1391,7 @@
     "roamSpeed": 30,
     "bearRoamSpeed": 40,
     "bearWakeDistance": 340,
-    "bearChaseSpeed": 500,
+    "bearChaseSpeed": 400,
     "bearChaseDistance": 10000,
     "packFollowDistance": 95,
     "packFollowSpeed": 65,

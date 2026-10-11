@@ -3747,7 +3747,7 @@
         "bearChaseSpeed": {
           "type": "number",
           "minimum": 0,
-          "description": "Explicit speed for all bear chases in world units per second (500 = 100 km/h)."
+          "description": "Explicit speed for all bear chases in world units per second (400 = 80 km/h)."
         },
         "bearChaseDistance": {
           "type": "number",
