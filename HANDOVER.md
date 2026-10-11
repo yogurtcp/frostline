@@ -302,7 +302,7 @@ New transparent PNGs: `assets/falling-tree.png`, `assets/wide-log.png`, `assets/
 
 Verification: build/schema validation, JavaScript syntax checks and staged native-scale rendering. The environment blocks opening a local HTTP listener; no phone playtest or full campaign test is claimed.
 
-### Temporary opening demo
+### Temporary opening demo (removed; historical)
 
 At the user's request, stage 1 now always creates one `logJump` between gates 5–6, one `fallingTree` between gates 7–8, and one `rollingSnowball` between gates 10–11, following its existing rugged/small-hill/large-hill demo. The log and tree sit on the centreline; the snowball starts 36 m left and rolls right. These three objects carry `openingDemo: true`. The clearly marked `TEMPORARY` block in `startCourse` is the entire placement override; removing it restores tier-only spawns for these features. Existing stage configuration is untouched.
 
@@ -377,3 +377,7 @@ The user found falling trees/rolling balls too peripheral. Both shared the full 
 Tree longitudinal gate clearance now uses fallen radius/player clearance, while transverse clearance retains trunk length. Biased midpoint placements ignore the generic proximity exclusion for gate ice, but still avoid actual ice at the base, openings, other interactive features and landing areas. Stage rates/count scheduling remain configured as before; collisions can still reject attempts. Route-adjacent trees store `fallTowardX` and fall across the route instead of choosing the side from the skier's position several gates uphill. Off-route trees still fall toward the skier. Temporary Warmup tree is 7 m right of the route and its ball moved from 36 m to 18 m left; intervals remain unchanged, as does the log.
 
 Staged actual course generation covered stages 1,2,3,7,8,12,23 (0–100% gate ice). In a concentrated placement scene, old trees within 25 m of the route numbered 1/33 without ice and 2/33 with full gate ice; revised placement gave 30/31 and 29/33. Revised balls within 25 m numbered 28/30 and 26/29; all were within the default 48 m lateral reach. Opening tree fell across the route, and a focused straight skier scene had ball release, a 0.024 m closest crossing and visible tracks. Native renders: `preview-route-tree.png` / `preview-route-snowball.png` (ignored local artifacts). Syntax/build validation passed. No automated suite or full campaign/phone playtest is claimed.
+
+## 18. Remove temporary first-level encounters (2026-10-11)
+
+At the user's request, removed the `TEMPORARY` `startCourse` block that hardcoded a log jump, falling tree and rolling snowball in Warmup. Their normal configured placements and route bias remain active in other stages; Warmup's zero slightly-rare rate means none of these three spawn there by default. Its earlier rugged/small-hill/large-hill introduction remains. Earlier opening-demo entries and previews above describe historical revisions. Source inspection, JavaScript syntax and build/schema validation passed; no automated tests were run.

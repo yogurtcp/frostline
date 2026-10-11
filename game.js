@@ -231,13 +231,6 @@ window.FROSTLINE_READY = (async () => {
       }
       const gate2=state.objects.find(o=>o.type==='gate'&&o.run===run&&o.number===2);
       if(gate2)createArcadeItem('largeHill',gate2.x,gate2.y,run);
-      // TEMPORARY: fixed first-stage encounters for trying the three new features.
-      // Keep the log beyond the opening hill's landing, and separate the activation zones.
-      for(const [key,dx,interval] of [['logJump',0,4.5],['fallingTree',7,6.5],['rollingSnowball',-18,9.5]]){
-        const at=startY+firstGatePx+interval*run.arcade.spacing;
-        const o=createArcadeItem(key,arcadePathX(run,at)+dx*PX_PER_M,at,run);
-        o.openingDemo=true;
-      }
     }
     if(id==='slalom')state.objects=state.objects.filter(o=>!classicArea(o.x,o.y,70)||['gate','courseStart','finish','entrance','skier','boarder','personRed','personGreen','personYellow'].includes(o.type));
     const oldRoute=state.liftRoutes[state.liftRoutes.length-1];
