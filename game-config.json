@@ -1890,6 +1890,8 @@
   },
   "terrainFeatures": {
     "fallingTree": {
+      "pathPlacementChance": 0.9,
+      "pathOffsetMetres": [4, 9],
       "heightMetres": 14,
       "trunkRadiusMetres": 1.2,
       "triggerRadiusMetres": 60,
@@ -1906,6 +1908,8 @@
       "heightMetres": 4
     },
     "rollingSnowball": {
+      "pathPlacementChance": 0.9,
+      "pathOffsetMetres": [12, 24],
       "radiusMetres": 2,
       "maxRadiusMetres": 3,
       "radiusGrowthPerMetre": 0.015,

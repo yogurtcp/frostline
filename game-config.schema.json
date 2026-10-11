@@ -7088,10 +7088,25 @@
             "triggerRadiusMetres",
             "warningSeconds",
             "fallSeconds",
-            "fallenRadiusMetres"
+            "fallenRadiusMetres",
+            "pathPlacementChance",
+            "pathOffsetMetres"
           ],
           "description": "Tall pine that warns, rotates rigidly sideways toward the skier\u2019s side, and remains a jumpable fallen obstacle.",
           "properties": {
+            "pathPlacementChance": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "description": "Share of placement attempts biased to the route between gate openings."
+            },
+            "pathOffsetMetres": {
+              "type": "array",
+              "items": { "type": "number", "minimum": 0 },
+              "minItems": 2,
+              "maxItems": 2,
+              "description": "Minimum/maximum sideways offset from the gate route, capped at 75% of tree height so it can fall across that route."
+            },
             "heightMetres": {
               "type": "number",
               "minimum": 4,
@@ -7186,10 +7201,25 @@
             "initialSpeedRatio",
             "swayAmplitudeMetres",
             "swayPeriodSeconds",
-            "trailSeconds"
+            "trailSeconds",
+            "pathPlacementChance",
+            "pathOffsetMetres"
           ],
           "description": "Snowball that accelerates downhill along a fixed sinusoidal bend, leaves tracks, and shatters on solid scenery.",
           "properties": {
+            "pathPlacementChance": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "description": "Share of placement attempts biased to the route between gate openings."
+            },
+            "pathOffsetMetres": {
+              "type": "array",
+              "items": { "type": "number", "minimum": 0 },
+              "minItems": 2,
+              "maxItems": 2,
+              "description": "Minimum/maximum sideways offset from the gate route, capped at 1.5 times sway amplitude; other placements also stay within the first bend's lateral reach."
+            },
             "radiusMetres": {
               "type": "number",
               "minimum": 0.3,

@@ -86,6 +86,19 @@ window.FROSTLINE_READY = (async () => {
     if(run.arcade)return run.x;
     return run.x + (Math.sin((y-run.startY)/S.world.courseWavelength[0])*S.world.courseSway[0] + Math.sin((y-run.startY)/S.world.courseWavelength[1])*S.world.courseSway[1]);
   }
+  function arcadePathX(run,y){
+    const g=run.arcade.gates,first=run.startY+g.firstGateMetres*PX_PER_M,spacing=run.arcade.spacing,swing=g.horizontalDistanceMetres*PX_PER_M/2;
+    const n=(y-first)/spacing,last=g.count-1;
+    if(n<0)return mix(run.x,run.x-swing,clamp((y-run.startY)/(first-run.startY),0,1));
+    if(n>=last)return mix(run.x+(last%2?1:-1)*swing,run.x,clamp((y-first-last*spacing)/(run.endY-first-last*spacing),0,1));
+    const i=Math.floor(n);return run.x+mix((i%2?1:-1)*swing,(i%2?-1:1)*swing,n-i);
+  }
+  function arcadeEncounterY(run,y){
+    const first=run.startY+run.arcade.gates.firstGateMetres*PX_PER_M;
+    if(run.arcade.gates.count<2)return (first+run.endY)/2;
+    const gap=clamp(Math.floor((y-first)/run.arcade.spacing),0,run.arcade.gates.count-2);
+    return first+(gap+.5)*run.arcade.spacing;
+  }
   const ARCADE_ITEMS={
     "pine":{"type":"pine","width":70,"r":14,"treeVariant":"classic"},
     "fir":{"type":"fir","width":70,"r":14,"treeVariant":"classic"},
@@ -220,8 +233,9 @@ window.FROSTLINE_READY = (async () => {
       if(gate2)createArcadeItem('largeHill',gate2.x,gate2.y,run);
       // TEMPORARY: fixed first-stage encounters for trying the three new features.
       // Keep the log beyond the opening hill's landing, and separate the activation zones.
-      for(const [key,dx,interval] of [['logJump',0,4.5],['fallingTree',0,6.5],['rollingSnowball',-36,9.5]]){
-        const o=createArcadeItem(key,run.x+dx*PX_PER_M,startY+firstGatePx+interval*run.arcade.spacing,run);
+      for(const [key,dx,interval] of [['logJump',0,4.5],['fallingTree',7,6.5],['rollingSnowball',-18,9.5]]){
+        const at=startY+firstGatePx+interval*run.arcade.spacing;
+        const o=createArcadeItem(key,arcadePathX(run,at)+dx*PX_PER_M,at,run);
         o.openingDemo=true;
       }
     }
@@ -279,10 +293,11 @@ window.FROSTLINE_READY = (async () => {
   }
 
   function arcadeTerrainAt(run,y){return run.arcade||{trees:false};}
-  function nearArcadeFeature(x,y){return state.objects.some(o=>o.arcadeFeature&&(Math.hypot(o.x-x,o.y-y)<S.arcade.featureClearance||['ramp','mogul','smallHill','largeHill','logBump'].includes(o.type)&&y>o.y&&y<o.y+S.arcade.landingClearanceLength&&Math.abs(x-o.x)<S.arcade.landingClearanceHalfWidth));}
+  function nearArcadeFeature(x,y,allowGateIce=false){return state.objects.some(o=>o.arcadeFeature&&(!allowGateIce||!o.gateIce)&&(Math.hypot(o.x-x,o.y-y)<S.arcade.featureClearance||['ramp','mogul','smallHill','largeHill','logBump'].includes(o.type)&&y>o.y&&y<o.y+S.arcade.landingClearanceLength&&Math.abs(x-o.x)<S.arcade.landingClearanceHalfWidth));}
   function courseCreature(o,x,y){const run=o?.arcadeRun||o?.chaseRun;return !!run&&run===state.course&&!insideTown(x,y);}
   function createArcadeItem(key,x,y,run){
     const spec=ARCADE_ITEMS[key],extra={...spec,arcadeRun:run,nextAI:clock+range(1,4),humanVisitor:true};delete extra.type;
+    if(key==='fallingTree'&&Math.abs(x-arcadePathX(run,y))<=S.terrainFeatures.fallingTree.heightMetres*PX_PER_M*.75)extra.fallTowardX=arcadePathX(run,y);
     if(key==='rollingSnowball')extra.rollSide=x>run.x?-1:1;
     if(key==='overtakingSkier')return entity('arcadeOvertaker',x,y,{r:0,arcadeRun:run});
     if(key==='wolfPack'){
@@ -312,15 +327,25 @@ window.FROSTLINE_READY = (async () => {
       const spec=ARCADE_ITEMS[key],spacing=100*PX_PER_M/density*spreadScale,traffic=['skier','fastSkier','overtakingSkier','boarder'].includes(key);
       let y=run.startY+S.race.terrainStartOffset+spacing*range(.25,.75);
       while(y<run.endY-100){
-        const at=y;y+=spacing/(traffic?arcadeTrafficMultiplier(run,at):1)*range(1-S.arcade.spawnJitter,1+S.arcade.spawnJitter);
+        let at=y;y+=spacing/(traffic?arcadeTrafficMultiplier(run,at):1)*range(1-S.arcade.spawnJitter,1+S.arcade.spawnJitter);
         if(key==='overtakingSkier'){createArcadeItem(key,run.x,at,run);continue;}
         const feature=key==='fallingTree'?S.terrainFeatures.fallingTree:key==='logJump'?S.terrainFeatures.logJump:key==='rollingSnowball'?S.terrainFeatures.rollingSnowball:null;
+        const animated=key==='fallingTree'||key==='rollingSnowball',onPath=animated&&random()<feature.pathPlacementChance;
+        if(onPath)at=arcadeEncounterY(run,at);
         const rx=key==='fallingTree'?(feature.heightMetres+feature.trunkRadiusMetres)*PX_PER_M:key==='logJump'?Math.max(feature.widthMetres,feature.bumpWidthMetres)*PX_PER_M/2+S.physics.playerRadius:key==='rollingSnowball'?feature.maxRadiusMetres*PX_PER_M:key==='wolfPack'?80:spec.rx||Math.max(spec.r,spec.width*.45);
-        const ry=key==='logJump'?feature.bumpGapMetres*PX_PER_M+S.physics.playerRadius:spec.ry||rx;
+        const ry=key==='fallingTree'?feature.fallenRadiusMetres*PX_PER_M+S.physics.playerRadius:key==='logJump'?feature.bumpGapMetres*PX_PER_M+S.physics.playerRadius:spec.ry||rx;
         for(let attempt=0;attempt<8;attempt++){
-          const x=run.x+range(-run.arcade.itemSpreadMetres,run.arcade.itemSpreadMetres)*PX_PER_M;
+          let x;
+          if(onPath){
+            const cap=key==='fallingTree'?feature.heightMetres*.75:feature.swayAmplitudeMetres*1.5;
+            const offset=range(...feature.pathOffsetMetres.map(n=>Math.min(n,cap)))*PX_PER_M;
+            x=arcadePathX(run,at)+(random()<.5?-1:1)*offset;
+          }else if(key==='rollingSnowball'){
+            const reach=Math.max(0,2*feature.swayAmplitudeMetres-feature.maxRadiusMetres-S.physics.playerRadius/PX_PER_M),spread=Math.min(run.arcade.itemSpreadMetres,reach);
+            x=arcadePathX(run,at)+range(-spread,spread)*PX_PER_M;
+          }else x=run.x+range(-run.arcade.itemSpreadMetres,run.arcade.itemSpreadMetres)*PX_PER_M;
           if(openings.some(g=>Math.abs(g.y-at)<ry+30&&Math.abs(g.x-x)<g.half+rx+20))continue;
-          if(nearArcadeFeature(x,at)||patchAt(x,at))continue;
+          if(nearArcadeFeature(x,at,onPath)||patchAt(x,at))continue;
           if(spec.r>0&&state.objects.some(o=>{
             if(o.arcadeRun!==run||o.r<=0)return false;
             if(key==='logJump'){
@@ -1152,7 +1177,8 @@ window.FROSTLINE_READY = (async () => {
       if(o.type==='fallingTree'){
         const f=S.terrainFeatures.fallingTree;
         if(state.started&&o.fallState==='standing'&&Math.hypot(p.x-o.x,p.y-o.y)<f.triggerRadiusMetres*PX_PER_M){
-          o.fallSide=p.x<o.x?-1:p.x>o.x?1:Math.sign(p.vx)||(o.id>.5?1:-1);
+          const targetX=o.fallTowardX??p.x;
+          o.fallSide=targetX<o.x?-1:targetX>o.x?1:Math.sign(p.vx)||(o.id>.5?1:-1);
           o.fallState='warning';o.fallAt=clock+f.warningSeconds;o.fallAngle=o.fallSide>0?0:Math.PI;
           burst(o.x,o.y-o.treeLength*.7,C.ice,5);say('CREAK...',o,Math.min(f.warningSeconds,1));beep(100,.15,'sawtooth');
         }
