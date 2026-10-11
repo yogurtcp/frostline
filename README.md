@@ -124,3 +124,5 @@ Falling trees and rolling snowballs are now mostly placed along the route betwee
 Slow skiers occasionally ease into a left or right turn, with straight stretches between turns. They stay near their own lane. Fast skiers gradually cut toward your predicted lane within 35 m, including while you approach one ahead of you; beyond that distance they straighten out. Enemy fear takes priority over either behavior.
 
 Long logs span the route with their midpoint centered between gates. Their jump bumps share that midpoint, so the normal approach goes through the middle of the trunk.
+
+Chasing Yetis, bears and wolves commit to a route around one end of a blocking log or fallen tree, then resume chasing. Yeti tier colors appear in their body tint; the former floating bar/scarf has been removed.

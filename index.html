@@ -597,6 +597,14 @@ window.FROSTLINE_READY = (async () => {
     const dx=bx-ax,dy=by-ay,t=clamp(((x-ax)*dx+(y-ay)*dy)/(dx*dx+dy*dy||1),0,1);
     return Math.hypot(x-ax-dx*t,y-ay-dy*t);
   }
+  function obstacleSegmentSeparation(ax,ay,bx,by,cx,cy,dx,dy){
+    const ux=bx-ax,uy=by-ay,vx=dx-cx,vy=dy-cy,cross=ux*vy-uy*vx;
+    if(Math.abs(cross)>1e-8){
+      const t=((cx-ax)*vy-(cy-ay)*vx)/cross,u=((cx-ax)*uy-(cy-ay)*ux)/cross;
+      if(t>=0&&t<=1&&u>=0&&u<=1)return 0;
+    }
+    return Math.min(obstacleSegmentDistance(ax,ay,cx,cy,dx,dy),obstacleSegmentDistance(bx,by,cx,cy,dx,dy),obstacleSegmentDistance(cx,cy,ax,ay,bx,by),obstacleSegmentDistance(dx,dy,ax,ay,bx,by));
+  }
   function treeFallProgress(o){return o.fallState==='fallen'?1:o.fallState==='falling'?clamp((clock-o.fallAt)/S.terrainFeatures.fallingTree.fallSeconds,0,1):0;}
   function treeTilt(o){return (o.fallSide??(Math.cos(o.fallAngle||0)>=0?1:-1))*Math.PI/2*treeFallProgress(o)**2;}
   function obstacleSegment(o){
@@ -1395,10 +1403,10 @@ window.FROSTLINE_READY = (async () => {
   const HOUSE_CELL=128,HOUSE_REACH=64;
   const TREE_CELL=96;
   const TREE_TYPES=new Set(['pine','fir','smallPine','spruceTree','crookedTree','cedarTree','alpineTree','wideLog','fallingTree']);
-  let treeCacheTime=-1;const treeGrid=new Map();
+  let treeCacheTime=-1;const treeGrid=new Map(),treeObjects=new Set();
   function freshIceCache(){if(iceCacheTime!==clock){iceCache=state.objects.filter(h=>h.type==='ice');iceCacheTime=clock;}return iceCache;}
   function chaseVelocity(vx,vy){const ratio=S.predators.offDownhillSpeedRatio;return [vx*ratio,vy*(vy>0?1:ratio)];}
-  function travel(o,angle,speed,dt,animal=false,avoidTowns=false,avoidTrees=false,chasing=false){
+  function travel(o,angle,speed,dt,animal=false,avoidTowns=false,avoidTrees=false,chasing=false,target=null){
     if(houseCacheTime!==clock){
       houseCache=state.objects.filter(h=>h.type==='lodge'||h.type==='rental');houseCacheTime=clock;houseGrid=new Map();
       for(const h of houseCache){
@@ -1408,9 +1416,10 @@ window.FROSTLINE_READY = (async () => {
         for(let gx=x0;gx<=x1;gx++){let col=houseGrid.get(gx);if(!col)houseGrid.set(gx,col=new Map());for(let gy=y0;gy<=y1;gy++){let a=col.get(gy);if(!a)col.set(gy,a=[]);a.push(h);}}
       }
     }
-    if(avoidTrees&&treeCacheTime!==clock){treeCacheTime=clock;treeGrid.clear();
+    if(avoidTrees&&treeCacheTime!==clock){treeCacheTime=clock;treeGrid.clear();treeObjects.clear();
       for(const t of state.objects){
         if(!TREE_TYPES.has(t.type)||t.eaten)continue;
+        treeObjects.add(t);
         const extended=t.type==='wideLog'||t.type==='fallingTree';
         const [ax,ay,bx,by]=extended?obstacleSegment(t):[t.x,t.y,t.x,t.y],radius=extended?t.r:0;
         const gx0=Math.floor((Math.min(ax,bx)-radius)/TREE_CELL),gx1=Math.floor((Math.max(ax,bx)+radius)/TREE_CELL),gy0=Math.floor((Math.min(ay,by)-radius)/TREE_CELL),gy1=Math.floor((Math.max(ay,by)+radius)/TREE_CELL);
@@ -1442,6 +1451,56 @@ window.FROSTLINE_READY = (async () => {
       const actualSpeed=chasing?Math.hypot(vx,vy):speed;
       return {vx,vy,speed:actualSpeed,ux:chasing?vx/(actualSpeed||1):Math.cos(a),uy:chasing?vy/(actualSpeed||1):Math.sin(a),probe:Math.max(A.avoidProbeDistance,actualSpeed*A.avoidLookaheadSeconds)};
     };
+    // Long trunks need two committed corners; local turns alone steer back into their middle.
+    if(avoidTrees&&target){
+      const geometry=t=>{
+        const [ax,ay,bx,by]=obstacleSegment(t),length=Math.hypot(bx-ax,by-ay);if(length<1)return null;
+        const tx=(bx-ax)/length,ty=(by-ay)/length,padding=t.r+rm+Math.max(12,A.avoidProbeDistance*.5);
+        return {ax,ay,bx,by,tx,ty,nx:-ty,ny:tx,padding};
+      };
+      let route=o.obstacleDetour;
+      if(route){
+        const g=geometry(route.obstacle);
+        if(!g||route.obstacle.eaten||route.obstacle.dead||!treeObjects.has(route.obstacle))route=null;
+        else {
+          const here=(o.x-g.ax)*g.nx+(o.y-g.ay)*g.ny,there=(target.x-g.ax)*g.nx+(target.y-g.ay)*g.ny;
+          if(here*there>0&&Math.min(Math.abs(here),Math.abs(there))>g.padding)route=null;
+        }
+        if(!route)o.avoidUntil=0;
+      }
+      if(!route){
+        const reach=Math.max(A.avoidProbeDistance,speed*A.avoidLookaheadSeconds)+rm*2,seen=new Set();let blocker=null,best=Infinity;
+        const gx0=Math.floor((o.x-reach)/TREE_CELL),gx1=Math.floor((o.x+reach)/TREE_CELL),gy0=Math.floor((o.y-reach)/TREE_CELL),gy1=Math.floor((o.y+reach)/TREE_CELL);
+        for(let gx=gx0;gx<=gx1;gx++){const col=treeGrid.get(gx);if(!col)continue;
+          for(let gy=gy0;gy<=gy1;gy++)for(const t of col.get(gy)||[]){
+            if(seen.has(t)||t.dead||t.eaten||(t.type!=='wideLog'&&t.type!=='fallingTree'))continue;seen.add(t);
+            const g=geometry(t);if(!g)continue;
+            const distance=obstacleSegmentDistance(o.x,o.y,g.ax,g.ay,g.bx,g.by);
+            if(distance>reach||distance>=best||obstacleSegmentSeparation(o.x,o.y,target.x,target.y,g.ax,g.ay,g.bx,g.by)>=t.r+rm)continue;
+            best=distance;blocker={obstacle:t,g};
+          }}
+        if(blocker){
+          const {obstacle,g}=blocker,side=((o.x-g.ax)*g.nx+(o.y-g.ay)*g.ny)<0?-1:1;
+          const cost=end=>{
+            const x=(end<0?g.ax:g.bx)+end*g.tx*g.padding,y=(end<0?g.ay:g.by)+end*g.ty*g.padding;
+            const from={x:x+g.nx*side*g.padding,y:y+g.ny*side*g.padding},to={x:x-g.nx*side*g.padding,y:y-g.ny*side*g.padding};
+            return Math.hypot(from.x-o.x,from.y-o.y)+Math.hypot(to.x-target.x,to.y-target.y)+(valid(from.x,from.y)&&valid(to.x,to.y)?0:1e6);
+          };
+          route={obstacle,side,end:cost(-1)<=cost(1)?-1:1,index:0};o.avoidUntil=0;
+        }
+      }
+      if(route){
+        const g=geometry(route.obstacle),x=(route.end<0?g.ax:g.bx)+route.end*g.tx*g.padding,y=(route.end<0?g.ay:g.by)+route.end*g.ty*g.padding;
+        let side=route.index===0?route.side:-route.side,wx=x+g.nx*side*g.padding,wy=y+g.ny*side*g.padding;
+        if(Math.hypot(wx-o.x,wy-o.y)<Math.max(6,Math.min(rm,g.padding*.2))){
+          route.index++;o.avoidUntil=0;
+          if(route.index>1)route=null;
+          else {side=-route.side;wx=x+g.nx*side*g.padding;wy=y+g.ny*side*g.padding;}
+        }
+        if(route)angle=Math.atan2(wy-o.y,wx-o.x);
+      }
+      o.obstacleDetour=route;
+    }else o.obstacleDetour=null;
     const clear=a=>{const m=motion(a);return [Math.min(m.probe,m.speed*dt),m.probe*.5,m.probe].every(d=>valid(o.x+m.ux*d,o.y+m.uy*d));};
     let heading=o.avoidUntil>clock?o.avoidHeading:angle;
     if(!clear(heading)){
@@ -1560,7 +1619,7 @@ window.FROSTLINE_READY = (async () => {
         if(target===p){if(killWolf(o))continue;if(p.shield<=0&&p.air<=0){if(useArcadeSword(o))continue;die('WOLF');return;}}
         else {target.eaten=true;target.r=0;o.divert=null;o.hunting=false;o.feedingUntil=clock+A.feedingSeconds;o.nextAI=clock+A.satedSeconds;burst(target.x,target.y,C.ice,9);say('CHOMP!',o,1.2);continue;}
       }}
-      travel(o,o.angle??o.phase,speed,dt,true,false,o.type==='wolf'||o.type==='bear',o.type==='wolf'&&!!target);
+      travel(o,o.angle??o.phase,speed,dt,true,false,o.type==='wolf'||o.type==='bear',o.type==='wolf'&&!!target,o.type==='wolf'?target:null);
     }
     for(const o of skis){
       if(o.annoyedUntil>clock||o.fearUntil>clock||o.fast){o.catInterest=null;continue;}
@@ -1638,10 +1697,10 @@ window.FROSTLINE_READY = (async () => {
         if(insideTown(p.x,p.y))continue;
         // The course's own yetis can enter pistes and follow far into the wilderness.
         // Reuse committed avoidance turns to route around towns, houses, lakes and trees.
-        travel(c,Math.atan2(dy,dx),c.speed,dt,false,true,true,true);
+        travel(c,Math.atan2(dy,dx),c.speed,dt,false,true,true,true,hunt);
       }else{
         if(lethal&&(humanArea(p.x,p.y)||humanArea(nx,ny)))continue;
-        if(lethal)travel(c,Math.atan2(dy,dx),c.speed,dt,false,true,true,true);else {c.x=nx;c.y=ny;}
+        if(lethal)travel(c,Math.atan2(dy,dx),c.speed,dt,false,true,true,true,hunt);else {c.x=nx;c.y=ny;}
       }
       if(c.kind==='slow'&&clock>c.talkAt){say(pick(S.dialogue.politeYeti),c);c.talkAt=clock+S.chasers.slowTalkSeconds;}
       const contactDistance=Math.hypot(c.x-p.x,c.y-p.y);
@@ -2125,13 +2184,12 @@ window.FROSTLINE_READY = (async () => {
     const s=screen(c.x,c.y),bob=Math.sin(clock*(c.kind==='slow'?5:9)+c.phase)*2;
     if(c.waiting||c.wakeUntil>clock){
       shadow(s.x,s.y,20,5);sprite(c.waiting?'yetiHappy':'yeti',s.x,s.y,56,{yetiTier:c.arcadeTier});
-      box(s.x-10,s.y-10,20,3,S.arcade.yetiColors[c.arcadeTier]);
       text(c.waiting?'...':'!',s.x+(c.waiting?0:18),s.y-(c.waiting?28:18),c.waiting?9:15,c.waiting?C.muted:C.red);return;
     }
     if(c.kind==='bear'){drawBear(c,s,true);return;}
     if(c.kind==='dog')sprite(Math.sin(clock*8+c.phase)>.3?'dog':'dogLeft',s.x,s.y+bob,39);
     else if(c.kind==='patrol'){sprite(c.motionVx<-5?'left':c.motionVx>5?'right':'skier',s.x,s.y+bob,42,{guest:true,fast:true});line(s.x-5,s.y+3,s.x-5,s.y+12,C.muted);}
-    else {shadow(s.x,s.y,20,5);sprite(c.kind==='slow'?'yetiHappy':Math.sin(clock*7+c.phase)>.2?'yeti':'yetiWalk',s.x,s.y+bob,c.kind==='slow'?52:59,{yetiTier:c.arcadeTier});if(c.arcadeTier){box(s.x-10,s.y-10,20,3,S.arcade.yetiColors[c.arcadeTier]);box(s.x+6,s.y-8,3,9,S.arcade.yetiColors[c.arcadeTier]);}else if(c.kind==='slow'){box(s.x-10,s.y-9,20,2,'#7aabc1');box(s.x+6,s.y-8,2,4,'#7aabc1');}else {text('!',s.x,s.y-37,11,C.red);}}
+    else {shadow(s.x,s.y,20,5);sprite(c.kind==='slow'?'yetiHappy':Math.sin(clock*7+c.phase)>.2?'yeti':'yetiWalk',s.x,s.y+bob,c.kind==='slow'?52:59,{yetiTier:c.arcadeTier});if(!c.arcadeTier&&c.kind!=='slow')text('!',s.x,s.y-37,11,C.red);}
   }
   function drawSpeech() {
     for(const q of state.speech){const s=screen(q.object.x,q.object.y);if(s.y<-20||s.y>H+80)continue;
