@@ -4,7 +4,7 @@
 
 The gate-pace pursuit calculation remains removed. Stage speeds and gate geometry resolve from the explicit knob tables, with an optional Yeti-speed override for a special stage; there are no calculated chase-speed caps or automatic catch-up adjustments.
 
-Player feedback to preserve: two warmups are enough; stage 2 needs more objects; stage 3 needs visible start-line yetis and sparse trees; stage 4 needs denser trees; stage 5 sparse trees, stage 6 dense trees and stage 7 heavier traffic. There are 29 stages, editable in order, with safe towns between them. No menus. Missing the finish fails Arcade in place; death returns to the summit.
+There are 29 stages, editable in order, with safe towns between them. Warmup introduces gates and light traffic; Denser Forest introduces one slow Yeti across a clear opening before the forest begins. Enemy-free jump and ice practice precede the later mixed challenges. No menus. Missing the finish fails Arcade in place; death returns to the summit.
 
 ## Quick start
 
@@ -99,7 +99,7 @@ Densities are placement attempts, not exact counts: gates, finish openings, lake
 | # | Name | Knobs O/C/M/S/I | Top | Chase | Guarded | Ice |
 | --- | --- | ---: | ---: | --- | --- | ---: |
 | 1 | Warmup | 11111 | 90 | none | 0% | 0% |
-| 2 | Denser Forest | 21111 | 90 | none | 0% | 0% |
+| 2 | Denser Forest | 22111 | 90 | 1 teal @45 | 0% | 0% |
 | 3 | Keep Your Momentum | 11111 | 90 | none | 0% | 0% |
 | 4 | Monster | 22111 | 90 | 1 teal @45 | 0% | 0% |
 | 5 | Rush Hour | 13111 | 90 | 2 orange @63 | 0% | 0% |
@@ -128,7 +128,19 @@ Densities are placement attempts, not exact counts: gates, finish openings, lake
 | 28 | Everything Hurts | 34333 | 120 | 3 orange @108 | 50% | 50% |
 | 29 | You Asked For This | 44444 | 150 | 3 orange @135 | 100% | 100% |
 
-Knobs read `[obstacles, chase, miss, speed, ice]`, levels 1–4. Chase shows resolved count, color and km/h; guarded shows the share of gates with a 3-wolf pack; ice shows the share of gates with a frozen patch. Common rate per obstacle level lives in `knobLevels`. Existing stages retain their relative order and tuning; six named special stages now interrupt the progression.
+Knobs read `[obstacles, chase, miss, speed, ice]`, levels 1–4. Chase shows resolved count, color and km/h; guarded shows the share of gates with a 3-wolf pack; ice shows the share of gates with a frozen patch. Common rate per obstacle level lives in `knobLevels`. Existing stages retain their relative order; six named special stages interrupt the progression.
+
+### Concept progression
+
+| Concept | First introduction | Later pressure |
+| --- | --- | --- |
+| Gates and traffic | 1, Warmup: light traffic, no enemies | 5, Rush Hour: crowded traffic and two Yetis |
+| Yeti pursuit | 2, Denser Forest: one teal Yeti at 45 km/h, clear first three gates | 4, Monster; then multiple/faster chases |
+| Jumping and rough snow | 3, Keep Your Momentum: paired hills/rough patches, no enemies | 10, Air Time: jump over logs/tree rows with fast pursuit |
+| Missed-gate wolves | 6, Miss and Be Eaten: marked sleeping wolves, only 25% of gates guarded | Later stages raise the guarded share |
+| Ice steering lock | 7, Aim Before Ice: short patches separated by snow, no enemies | 11 and later icy chases |
+
+Random log jumps, falling trees and rolling balls are explicitly disabled in earlier stages, so they cannot appear unexpectedly before Air Time (10), Timber! (12), and Snowball Run (14). Jumping is already practiced before the long-log challenge. Falling-tree and rolling-ball warnings are introduced in their focused stages. These restrictions are ordinary `itemRates: 0` settings; update them if moving those lessons elsewhere.
 
 ## Special stages
 
@@ -145,7 +157,7 @@ These names are ordinary entries in `arcade.stages`. Move their rows to insert t
 
 New optional fields in a stage override:
 
-- `specialLayout`: `none` (default), `jumpLine`, `momentum`, `iceIslands`, `snowballs`, or `timber`. These reusable arrangements do not depend on stage names. Encounter counts follow gate count; jump spacing also allows room for flight and landing. Authored encounters are independent of `itemRates`, which add surrounding scenery/traffic. Set the layout to `none` to remove the arrangement.
+- `specialLayout`: `none` (default), `yetiIntro`, `jumpLine`, `momentum`, `iceIslands`, `snowballs`, or `timber`. These reusable arrangements do not depend on stage names. `yetiIntro` clears the route through the first three gates before ordinary forest/traffic begins; it does not set the Yeti count or speed. Encounter counts follow gate count; jump spacing also allows room for flight and landing. Authored encounters are independent of `itemRates`, which add surrounding scenery/traffic. Set the layout to `none` to remove the arrangement.
 - `briefing`: a short instruction shown at the stage start.
 - `yetiSpeedPercent`: explicit Yeti chase speed as a percentage of the stage top speed. Omission uses the chase knob. Air Time uses 105% (110.25 km/h at its 105 km/h top); other stages retain their configured speeds. Guard wolves still use the normal chase knob speed.
 

@@ -301,7 +301,10 @@ window.FROSTLINE_READY = (async () => {
     run.encounterClearings=[];
     const reserve=(x,from,to,half)=>run.encounterClearings.push({x,from,to,half});
     const place=(key,x,y)=>createArcadeItem(key,x,y,run);
-    if(layout==='jumpLine'||layout==='momentum'){
+    if(layout==='yetiIntro'){
+      // Learn the chase across three clear gates before adding normal forest and traffic.
+      reserve(run.x,run.startY-100,first+Math.min(2,g.count-1)*spacing+60,S.arcade.landingClearanceHalfWidth);
+    }else if(layout==='jumpLine'||layout==='momentum'){
       const hill=layout==='jumpLine'?'largeHill':'smallHill',duration=S.jump[hill+'Seconds']*S.jump.hillDurationMax;
       const speed=run.arcade.pace*S.physics.speedMultiplier,flight=speed*S.jump.speedBoost*duration;
       const stride=Math.max(3,Math.ceil((flight+220)/spacing));

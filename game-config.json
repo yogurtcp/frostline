@@ -15,7 +15,7 @@
       ],
       "Denser Forest": [
         2,
-        1,
+        2,
         1,
         1,
         1
@@ -414,16 +414,18 @@
           "swordGateCount": 2
         },
         "tierRates": {
-          "slightlyRare": 0.05
+          "slightlyRare": 0
         },
         "itemRates": {
           "skier": 2.5,
           "boarder": 0.5,
-          "dog": 0.4,
-          "personRed": 0.2,
-          "personYellow": 0.2,
-          "personGreen": 0.2
-        }
+          "dog": 0,
+          "personRed": 0,
+          "personYellow": 0,
+          "personGreen": 0
+        },
+        "specialLayout": "yetiIntro",
+        "briefing": "KEEP SKIING - ONE SLOW YETI IS FOLLOWING"
       },
       "Monster": {
         "yetiColor": "teal",
@@ -438,7 +440,10 @@
           "skier": 2.0,
           "boarder": 0.4,
           "fastSkier": 0.2,
-          "overtakingSkier": 0.1
+          "overtakingSkier": 0.1,
+          "logJump": 0,
+          "fallingTree": 0,
+          "rollingSnowball": 0
         }
       },
       "Miss and Be Eaten": {
@@ -455,7 +460,10 @@
           "fastSkier": 0.5,
           "personRed": 0.2,
           "personYellow": 0.2,
-          "personGreen": 0.2
+          "personGreen": 0.2,
+          "logJump": 0,
+          "fallingTree": 0,
+          "rollingSnowball": 0
         }
       },
       "Fast Monster": {
@@ -469,7 +477,10 @@
           "yetiTeal": 0.3,
           "personRed": 0.2,
           "personYellow": 0.2,
-          "personGreen": 0.2
+          "personGreen": 0.2,
+          "logJump": 0,
+          "fallingTree": 0,
+          "rollingSnowball": 0
         }
       },
       "2 Fast 2 Forest": {
@@ -485,7 +496,10 @@
           "fastSkier": 0.3,
           "personRed": 0.2,
           "personYellow": 0.2,
-          "personGreen": 0.2
+          "personGreen": 0.2,
+          "logJump": 0,
+          "fallingTree": 0,
+          "rollingSnowball": 0
         }
       },
       "Darker Woods, Icy Lakes": {
@@ -501,7 +515,9 @@
           "largeLake": 0.2,
           "personRed": 0.3,
           "personYellow": 0.3,
-          "personGreen": 0.3
+          "personGreen": 0.3,
+          "fallingTree": 0,
+          "rollingSnowball": 0
         }
       },
       "Dense Chase": {
@@ -527,7 +543,8 @@
           "ramp": 0.5,
           "personRed": 0.3,
           "personYellow": 0.3,
-          "personGreen": 0.3
+          "personGreen": 0.3,
+          "rollingSnowball": 0
         }
       },
       "Here We Go": {

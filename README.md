@@ -129,3 +129,5 @@ Chasing Yetis, bears and wolves commit to a route around one end of a blocking l
 
 
 Six special stages are interleaved through Arcade, keeping their recognizable names: Keep Your Momentum, Rush Hour, Aim Before Ice, Air Time, Timber!, and Snowball Run. They introduce paired jumps/rough snow, dense moving traffic, short ice crossings, jumps over trunks/tree rows, falling-tree warnings, and curved rolling balls. The jump stages use straight gates and clear landing corridors. Their layouts and start instructions are selectable in `arcade.stageOverrides`; their ordered rows can be moved between stages. Earlier campaign records are retained separately under revision 5.
+
+Stage 2 introduces a single slow teal Yeti at 45 km/h across three clear gate approaches before its ordinary forest/traffic. Stage 3 teaches jumps without enemies, and stage 7 teaches ice without enemies, before the later mixed challenges. Logs, falling trees and rolling balls are disabled in earlier random placement until their focused stages.

@@ -6890,13 +6890,14 @@
                 "type": "string",
                 "enum": [
                   "none",
+                  "yetiIntro",
                   "jumpLine",
                   "iceIslands",
                   "momentum",
                   "snowballs",
                   "timber"
                 ],
-                "description": "Reusable arranged encounters for a special stage. jumpLine and momentum use straight gates and clear landing corridors; other stages retain normal slalom gates."
+                "description": "Reusable arranged encounters for a special stage. yetiIntro clears the first three gates for learning the chase. jumpLine and momentum use straight gates and clear landing corridors; other stages retain normal slalom gates."
               },
               "briefing": {
                 "type": "string",
