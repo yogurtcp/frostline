@@ -10,6 +10,8 @@ window.loadFrostlineConfig = async function () {
   config.chasers.yetiCelebrationSeconds ??= 2.2;
   config.chasers.yetiCelebrationHopsPerSecond ??= 2.4;
   config.chasers.yetiCelebrationJumpPixels ??= 14;
+  config.village.names ??= ['Snowdrift','Pinehaven','Whitecap','Glacier Bend'];
+  config.village.backRoute ??= {enabled:true,width:100,offset:310};
   function validate(value, schema, path) {
     if (schema.type === 'object') {
       if (!value || typeof value !== 'object' || Array.isArray(value)) throw new Error(`${path} must be an object`);

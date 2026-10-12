@@ -4,7 +4,7 @@
   "arcade": {
     "startStage": 1,
     "autoStart": true,
-    "campaignVersion": 5,
+    "campaignVersion": 6,
     "stages": {
       "Warmup": [
         1,
@@ -64,7 +64,7 @@
       ],
       "Keep Your Momentum": [
         1,
-        2,
+        4,
         1,
         2,
         1
@@ -602,7 +602,7 @@
       },
       "Rush Hour": {
         "gates": {
-          "count": 20,
+          "count": 40,
           "swordGateCount": 4
         },
         "yetiColor": "orange",
@@ -676,17 +676,22 @@
       },
       "Aim Before Ice": {
         "gates": {
-          "count": 20,
+          "count": 24,
           "swordGateCount": 2
         },
-        "specialLayout": "iceIslands",
-        "itemRates": {},
-        "briefing": "AIM ON SNOW - COAST ACROSS ICE",
+        "specialLayout": "iceChaos",
+        "itemRates": {
+          "skier": 2,
+          "boarder": 0.6,
+          "pine": 0.4
+        },
+        "briefing": "ICE LOCKS YOUR LINE - WATCH THE FAR BANK",
         "tierRates": {
           "slightlyRare": 0,
           "veryRare": 0
         },
-        "endTrafficMultiplier": 1
+        "endTrafficMultiplier": 1,
+        "yetiSpeedPercent": 70
       },
       "Keep Your Momentum": {
         "gates": {
@@ -1194,6 +1199,195 @@
       235,
       500,
       280
+    ],
+    "personRedIdle0": [
+      "people",
+      0,
+      90,
+      192,
+      250
+    ],
+    "personRedIdle1": [
+      "people",
+      192,
+      90,
+      192,
+      250
+    ],
+    "personRedChat0": [
+      "people",
+      384,
+      90,
+      192,
+      250
+    ],
+    "personRedChat1": [
+      "people",
+      576,
+      90,
+      192,
+      250
+    ],
+    "personRedWave0": [
+      "people",
+      768,
+      90,
+      192,
+      250
+    ],
+    "personRedWave1": [
+      "people",
+      960,
+      90,
+      192,
+      250
+    ],
+    "personRedServe0": [
+      "people",
+      1152,
+      90,
+      192,
+      250
+    ],
+    "personRedServe1": [
+      "people",
+      1344,
+      90,
+      192,
+      250
+    ],
+    "personYellowIdle0": [
+      "people",
+      0,
+      398,
+      192,
+      255
+    ],
+    "personYellowIdle1": [
+      "people",
+      192,
+      398,
+      192,
+      255
+    ],
+    "personYellowChat0": [
+      "people",
+      384,
+      398,
+      192,
+      255
+    ],
+    "personYellowChat1": [
+      "people",
+      576,
+      398,
+      192,
+      255
+    ],
+    "personYellowWave0": [
+      "people",
+      768,
+      398,
+      192,
+      255
+    ],
+    "personYellowWave1": [
+      "people",
+      960,
+      398,
+      192,
+      255
+    ],
+    "personYellowServe0": [
+      "people",
+      1152,
+      398,
+      192,
+      255
+    ],
+    "personYellowServe1": [
+      "people",
+      1344,
+      398,
+      192,
+      255
+    ],
+    "personGreenIdle0": [
+      "people",
+      0,
+      713,
+      192,
+      257
+    ],
+    "personGreenIdle1": [
+      "people",
+      192,
+      713,
+      192,
+      257
+    ],
+    "personGreenChat0": [
+      "people",
+      384,
+      713,
+      192,
+      257
+    ],
+    "personGreenChat1": [
+      "people",
+      576,
+      713,
+      192,
+      257
+    ],
+    "personGreenWave0": [
+      "people",
+      768,
+      713,
+      192,
+      257
+    ],
+    "personGreenWave1": [
+      "people",
+      960,
+      713,
+      192,
+      257
+    ],
+    "personGreenServe0": [
+      "people",
+      1152,
+      713,
+      192,
+      257
+    ],
+    "personGreenServe1": [
+      "people",
+      1344,
+      713,
+      192,
+      257
+    ],
+    "bakeryFacade": [
+      "cozyBuildings",
+      0,
+      40,
+      724,
+      642
+    ],
+    "cocoaFacade": [
+      "cozyBuildings",
+      724,
+      40,
+      724,
+      642
+    ],
+    "toyFacade": [
+      "cozyBuildings",
+      1448,
+      40,
+      724,
+      642
     ]
   },
   "palette": [
@@ -1528,6 +1722,45 @@
       "plazaCountVariation": 1,
       "stationJitterX": 65,
       "stationJitterY": 55
+    },
+    "names": [
+      "Snowdrift",
+      "Pinehaven",
+      "Whitecap",
+      "Fox Hollow",
+      "Glacier Bend",
+      "Coldwater",
+      "Silver Fir",
+      "Northbell",
+      "Bear Creek",
+      "Moonridge",
+      "Windfall",
+      "Blue Spruce",
+      "Snowmere",
+      "High Hollow",
+      "Icemill",
+      "Alpenglen",
+      "Winterbrook",
+      "Raven Pass",
+      "Cloudrest",
+      "Little Summit",
+      "Cedarvale",
+      "Frostbridge",
+      "Mistwood",
+      "Wolf Ridge",
+      "Hailstone",
+      "Snowbank",
+      "Spruceford",
+      "Pinecrest",
+      "Crystal Vale",
+      "Rimewood",
+      "Last Light",
+      "Frostwick"
+    ],
+    "backRoute": {
+      "enabled": true,
+      "width": 100,
+      "offset": 310
     }
   },
   "wildlife": {
@@ -1668,7 +1901,7 @@
   },
   "predators": {
     "divertChance": 0.5,
-    "divertRadiusMetres": 5,
+    "divertRadiusMetres": 35,
     "divertRecheckSeconds": 1.5,
     "divertTimeoutSeconds": 8,
     "offDownhillSpeedRatio": 0.5
