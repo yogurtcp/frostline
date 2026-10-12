@@ -34,7 +34,7 @@ Snowmen lose and recover their hats, powder piles burst into snow, and pigeon fl
 
 ## Arcade
 
-The purple Arcade entrance starts the configurable 12-stage survival descent. Every stage has its own name, exact gate count/spacing, independent densities for 59 course objects, and explicit yeti color/count/speed. Stages 3–4 use their restored 103 km/h top speed and 30 m gate spacing. Yetis wait visibly at the start and react before chasing; no gate-pace speed adjustment is applied. Set `arcade.startStage` to enter a later stage and `autoStart` to skip the summit approach; later starts are practice and leave full-run records intact. Safe towns connect stages automatically, with no fees, time limits or menus. Missing the finish ends Arcade in place; death returns to the configured start. Shield/sword charges carry through towns. See [ARCADE.md](ARCADE.md) for the complete editable format and object list.
+The purple Arcade entrance starts the configurable 29-stage survival descent. Every stage has its own name, exact gate count/spacing, independent densities for 59 course objects, and explicit yeti color/count/speed. Stages 3–4 use their restored 103 km/h top speed and 30 m gate spacing. Yetis wait visibly at the start and react before chasing; no gate-pace speed adjustment is applied. Set `arcade.startStage` to enter a later stage and `autoStart` to skip the summit approach; later starts are practice and leave full-run records intact. Safe towns connect stages automatically, with no fees, time limits or menus. Missing the finish ends Arcade in place; death returns to the configured start. Shield/sword charges carry through towns. See [ARCADE.md](ARCADE.md) for the complete editable format and object list.
 
 ## Snowdrift Village
 
@@ -126,3 +126,6 @@ Slow skiers occasionally ease into a left or right turn, with straight stretches
 Long logs span the route with their midpoint centered between gates. Their jump bumps share that midpoint, so the normal approach goes through the middle of the trunk.
 
 Chasing Yetis, bears and wolves commit to a route around one end of a blocking log or fallen tree, then resume chasing. Yeti tier colors appear in their body tint; the former floating bar/scarf has been removed.
+
+
+Six special stages are interleaved through Arcade, keeping their recognizable names: Keep Your Momentum, Rush Hour, Aim Before Ice, Air Time, Timber!, and Snowball Run. They introduce paired jumps/rough snow, dense moving traffic, short ice crossings, jumps over trunks/tree rows, falling-tree warnings, and curved rolling balls. The jump stages use straight gates and clear landing corridors. Their layouts and start instructions are selectable in `arcade.stageOverrides`; their ordered rows can be moved between stages. Earlier campaign records are retained separately under revision 5.

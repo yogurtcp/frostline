@@ -170,16 +170,17 @@ window.FROSTLINE_READY = (async () => {
   function arcadeItemRate(stage,key){const override=stage.itemRates?.[key];if(override!==undefined)return override;const tier=S.arcade.itemTiers[key];return tier==='common'?S.arcade.knobLevels.obstacles[stage.knobs[0]-1]:stage.tierRates[tier];}
   function arcadeStage(index){
     const a=S.arcade.stages[index],K=S.arcade.knobLevels,[,lc,lm,ls,li]=a.knobs;
-    const top=K.speed[ls-1],chaseSpeed=K.chaseSpeedPercent[lc-1]*top/100,gs=K.gateSpacing;
+    const top=K.speed[ls-1],baseChaseSpeed=K.chaseSpeedPercent[lc-1]*top/100,chaseSpeed=a.yetiSpeedPercent===null?baseChaseSpeed:a.yetiSpeedPercent*top/100,gs=K.gateSpacing;
+    const straight=a.specialLayout==='jumpLine'||a.specialLayout==='momentum';
     const g={count:a.gates.count,swordGateCount:a.gates.swordGateCount,icePercent:K.iceGatePercent[li-1],
-      horizontalDistanceMetres:top*gs.horizontalPercent/100,verticalDistanceMetres:top*gs.verticalPercent/100,
+      horizontalDistanceMetres:straight?0:top*gs.horizontalPercent/100,verticalDistanceMetres:top*gs.verticalPercent/100,
       openingWidthMetres:top*gs.openingPercent/100,firstGateMetres:top*gs.firstPercent/100,
       finishAfterLastGateMetres:top*gs.finishPercent/100};
     return {...a,gates:g,length:g.firstGateMetres+(g.count-1)*g.verticalDistanceMetres+g.finishAfterLastGateMetres,
       pace:top/(S.physics.speedMultiplier*S.physics.hudKmhPerSpeed),spacing:g.verticalDistanceMetres*PX_PER_M,
       trees:Object.keys(ARCADE_ITEMS).some(key=>arcadeItemRate(a,key)>0&&ARCADE_ITEMS[key].treeVariant),
       yetiTier:yetiTierForColor[a.yetiColor],yetis:K.chaseCount[lc-1],yetiSpeedKmh:chaseSpeed,
-      missPercent:K.missGatePercent[lm-1],missWolves:K.missWolves,wolfSpeedKmh:chaseSpeed};
+      missPercent:K.missGatePercent[lm-1],missWolves:K.missWolves,wolfSpeedKmh:baseChaseSpeed};
   }
   function arcadeTrafficMultiplier(run,y){return mix(1,run.arcade.endTrafficMultiplier,clamp((y-run.startY)/(run.endY-run.startY),0,1));}
   function startCourse(id,gate) {
@@ -223,9 +224,9 @@ window.FROSTLINE_READY = (async () => {
     const oldRoute=state.liftRoutes[state.liftRoutes.length-1];
     if(oldRoute&&oldRoute.y1>startY)oldRoute.y1=startY;
     state.liftRoutes.push({x0:oldRoute?liftX(oldRoute,startY):run.x+S.lift.x,x1:state.plannedTown.stationX,y0:startY,y1:state.plannedTown.stationY});
-    announce(s.name.toUpperCase(),`${s.length} m ahead${s.fee?(paid?`  ·  ${s.fee} coins paid`:'  ·  Unpaid adventure!'):'  ·  Follow the flags.'}`,s.color);
+    announce(s.name.toUpperCase(),`${Math.round(s.length)} m ahead${s.fee?(paid?`  ·  ${s.fee} coins paid`:'  ·  Unpaid adventure!'):'  ·  Follow the flags.'}`,s.color);
     if(run.objective==='mushrooms')announce('SPORE DECISIONS',`COLLECT ${Math.ceil(run.totalMushrooms*S.mushroomHunt.minimumFraction)}/${run.totalMushrooms} MUSHROOMS - THEN FINISH${s.fee&&paid?' · '+s.fee+' PAID':''}`,s.color,5);
-    if(run.arcade)announce(stages.arcade.name.toUpperCase(),'REACH THE FINISH - NO FEES, NO TIME LIMIT',stages.arcade.color,5);
+    if(run.arcade)announce(stages.arcade.name.toUpperCase(),run.arcade.briefing||'REACH THE FINISH - NO FEES, NO TIME LIMIT',stages.arcade.color,5);
     if(!paid)triggerAmbush();else if(s.kind==='slow'){addChasers('slow',S.politePursuit.count,run);announce('POLITE PURSUIT',`${S.politePursuit.count} SLOW YETIS - THEY FOLLOW YOU OFF PISTE`,s.color,5);}else if(s.kind==='fast')addChasers('fast',1);
     state.transitions.push({kind:'start',id,y:p.y,paid});beep(650,.14);return true;
   }
@@ -294,12 +295,50 @@ window.FROSTLINE_READY = (async () => {
   }
   // Knob densities were tuned at +/-32m; placement counts scale with spread to hold per-area density.
   const SPREAD_REFERENCE_METRES=32;
+  function prepareArcadeSpecialLayout(run){
+    const layout=run.arcade.specialLayout,g=run.arcade.gates,spacing=run.arcade.spacing;
+    const first=run.startY+g.firstGateMetres*PX_PER_M;
+    run.encounterClearings=[];
+    const reserve=(x,from,to,half)=>run.encounterClearings.push({x,from,to,half});
+    const place=(key,x,y)=>createArcadeItem(key,x,y,run);
+    if(layout==='jumpLine'||layout==='momentum'){
+      const hill=layout==='jumpLine'?'largeHill':'smallHill',duration=S.jump[hill+'Seconds']*S.jump.hillDurationMax;
+      const speed=run.arcade.pace*S.physics.speedMultiplier,flight=speed*S.jump.speedBoost*duration;
+      const stride=Math.max(3,Math.ceil((flight+220)/spacing));
+      for(let i=1,n=0;i<g.count-3;i+=stride,n++){
+        const y=first+(i+1.5)*spacing-180;
+        if(y+flight+100>run.endY-100)break;
+        place(hill,run.x,y);
+        reserve(run.x,y-120,y+flight+100,S.arcade.landingClearanceHalfWidth);
+        if(layout==='momentum'){
+          // Jumping skips the rough-snow speed cap; either flank is a smooth alternative.
+          place('rugged',run.x,y+180);
+        }else if(n%2===0)place('logJump',run.x,y+180);
+        else for(let dx=-140;dx<=140;dx+=70)place('pine',run.x+dx,y+180);
+      }
+    }else if(layout==='iceIslands'){
+      // Short ice crossings with a full snow gap for choosing the next heading.
+      for(let i=1;i<g.count-2;i+=2){
+        const y=first+(i+.5)*spacing,x=arcadePathX(run,y),rx=g.openingWidthMetres*PX_PER_M/2+30,ry=Math.min(spacing*.2,70);
+        entity('ice',x,y,{rx,ry,width:rx*2,r:0,arcadeFeature:true,arcadeRun:run});
+        reserve(x,y-ry-45,y+ry+45,rx+30);
+      }
+    }else if(layout==='snowballs'||layout==='timber'){
+      const stride=layout==='snowballs'?2:1,key=layout==='snowballs'?'rollingSnowball':'fallingTree';
+      for(let i=1,n=0;i<g.count-2;i+=stride,n++){
+        const y=first+(i+.5)*spacing,path=arcadePathX(run,y),side=n%2?1:-1;
+        const x=path+side*(layout==='snowballs'?18:6)*PX_PER_M;
+        place(key,x,y);reserve(path,y-80,y+80,100);
+      }
+    }
+  }
   function prepareArcadeTerrain(run){
     // Plan every configured object below the viewport; no hidden mixed spawn tables.
     state.objects=state.objects.filter(o=>o.y<run.startY-100||o.y>run.endY||Math.abs(o.x-centerAt(o.y,run))>S.world.safeCourseHalfWidth+100||o.penaltyGate||!o.worldChunk&&['gate','courseStart','finish','entrance','personRed','personGreen','personYellow'].includes(o.type));
     const gates=state.objects.filter(o=>o.type==='gate'&&o.run===run);
     const iceGates=[...gates];for(let i=iceGates.length-1;i>0;i--){const j=Math.floor(random()*(i+1));[iceGates[i],iceGates[j]]=[iceGates[j],iceGates[i]];}
     for(const g of iceGates.slice(0,Math.round(gates.length*(run.arcade.gates.icePercent||0)/100)))entity('ice',g.x,g.y,{gateIce:true,arcadeFeature:true,arcadeRun:run,rx:g.half+45,ry:Math.min(run.arcade.spacing*.25,80),width:(g.half+45)*2,r:0});
+    prepareArcadeSpecialLayout(run);
     const openings=[...gates,{x:run.x,y:run.startY,half:run.arcade.gates.openingWidthMetres*PX_PER_M/2},{x:run.x,y:run.endY,half:run.finishHalf}];
     const entries=Object.keys(ARCADE_ITEMS).map(key=>[key,arcadeItemRate(run.arcade,key)]).filter(([key,n])=>n>0&&(!ARCADE_ITEMS[key].noCourse||run.arcade.itemRates?.[key]!==undefined)).sort(([a],[b])=>Number(!!ARCADE_ITEMS[b].arcadeFeature)-Number(!!ARCADE_ITEMS[a].arcadeFeature));
     const spreadScale=SPREAD_REFERENCE_METRES/run.arcade.itemSpreadMetres;
@@ -330,6 +369,7 @@ window.FROSTLINE_READY = (async () => {
             const reach=Math.max(0,2*feature.swayAmplitudeMetres-feature.maxRadiusMetres-S.physics.playerRadius/PX_PER_M),spread=Math.min(run.arcade.itemSpreadMetres,reach);
             x=arcadePathX(run,at)+range(-spread,spread)*PX_PER_M;
           }else x=run.x+range(-run.arcade.itemSpreadMetres,run.arcade.itemSpreadMetres)*PX_PER_M;
+          if(run.encounterClearings.some(q=>at+ry>q.from&&at-ry<q.to&&Math.abs(x-q.x)<q.half+rx))continue;
           if(openings.some(g=>Math.abs(g.y-at)<ry+30&&Math.abs(g.x-x)<g.half+rx+20))continue;
           if(nearArcadeFeature(x,at,onPath)||patchAt(x,at))continue;
           if(spec.r>0&&state.objects.some(o=>{
@@ -2133,7 +2173,7 @@ window.FROSTLINE_READY = (async () => {
     if(state.arcade)text((state.arcade.practice?'PRACTICE ':'ARCADE ')+state.arcade.stage+'/'+S.arcade.stages.length,W-19,24,12,C.teal,'right');else{sprite('star',W-96,31,15,{ui:true});text(state.bank.toLocaleString(),W-19,24,15,C.ink,'right');}
     const name=run?stages[run.id].name+(p.y<run.startY?' · approach':''):state.zone.kind==='village'?'Snowdrift Village':'Choose your first trail';
     text(name,20,48,10,C.teal,'left');
-    const right=run?`${Math.max(0,Math.floor((p.y-run.startY)/PX_PER_M))} / ${stages[run.id].length} m`:`${Math.round(S.world.summitAltitude+state.elevated-p.y/PX_PER_M)} m altitude`;
+    const right=run?`${Math.max(0,Math.floor((p.y-run.startY)/PX_PER_M))} / ${Math.round(stages[run.id].length)} m`:`${Math.round(S.world.summitAltitude+state.elevated-p.y/PX_PER_M)} m altitude`;
     text(right,W-20,48,10,C.muted,'right','normal');
     if(run){
       const frac=clamp((p.y-run.startY)/(run.endY-run.startY),0,1);box(18,64,(W-36)*frac,2,stages[run.id].color);

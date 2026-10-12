@@ -41,7 +41,10 @@ window.loadFrostlineConfig = async function () {
       tierRates: { ...base.tierRates, ...(over.tierRates || {}) },
       itemRates: { ...base.itemRates, ...(over.itemRates || {}) },
       itemSpreadMetres: over.itemSpreadMetres ?? base.itemSpreadMetres,
-      endTrafficMultiplier: over.endTrafficMultiplier ?? base.endTrafficMultiplier };
+      endTrafficMultiplier: over.endTrafficMultiplier ?? base.endTrafficMultiplier,
+      specialLayout: over.specialLayout ?? 'none',
+      briefing: over.briefing ?? '',
+      yetiSpeedPercent: over.yetiSpeedPercent ?? null };
   });
   for (const [id, target] of Object.entries(config.timing.targets)) {
     if (!(target.goldSeconds < target.parSeconds)) throw new Error(`timing.targets.${id}: goldSeconds must be below parSeconds`);

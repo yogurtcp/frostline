@@ -2,9 +2,9 @@
 
 ## Rollback and design intent
 
-The gate-pace pursuit calculation and the faster/wider changes to stages 3–4 were reverted. Their defaults are back to 103 km/h and 30 m vertical gate spacing. Yeti speeds are now explicit absolute values; there are no calculated chase-speed caps or automatic adjustments.
+The gate-pace pursuit calculation remains removed. Stage speeds and gate geometry resolve from the explicit knob tables, with an optional Yeti-speed override for a special stage; there are no calculated chase-speed caps or automatic catch-up adjustments.
 
-Player feedback to preserve: two warmups are enough; stage 2 needs more objects; stage 3 needs visible start-line yetis and sparse trees; stage 4 needs denser trees; stage 5 sparse trees, stage 6 dense trees and stage 7 heavier traffic. There are 23 stages, editable in order, with safe towns between them. No menus. Missing the finish fails Arcade in place; death returns to the summit.
+Player feedback to preserve: two warmups are enough; stage 2 needs more objects; stage 3 needs visible start-line yetis and sparse trees; stage 4 needs denser trees; stage 5 sparse trees, stage 6 dense trees and stage 7 heavier traffic. There are 29 stages, editable in order, with safe towns between them. No menus. Missing the finish fails Arcade in place; death returns to the summit.
 
 ## Quick start
 
@@ -46,13 +46,13 @@ Here `My snowy disaster` runs knobs [2,2,2,2,2] with 18 gates, teal yetis, sligh
 - `count`: exact total number of gates, including sword gates.
 - `swordGateCount`: exact number of sword gates, distributed along the course. Zero disables them; all gates can be sword gates if desired.
 
-Geometry (horizontal/vertical distance, opening, first-gate and finish run-outs) derives from the speed knob: each is a fixed percentage of the stage top speed from `arcade.knobLevels.gateSpacing`. Centres alternate at plus/minus half the derived horizontal distance. There is no added course sway.
+For ordinary stages, geometry (horizontal/vertical distance, opening, first-gate and finish run-outs) derives from the speed knob: each is a fixed percentage of the stage top speed from `arcade.knobLevels.gateSpacing`. Centres alternate at plus/minus half the derived horizontal distance. There is no added course sway.
 
 Course length is the derived first run-out + `(count − 1) × derived vertical spacing` + derived finish run-out. Changing count moves the finish and following town together. The finish opening still uses the global `race.finishWidthMultiplier` (2).
 
 The ice knob sets the share of gates with ice spanning the opening from `knobLevels.iceGatePercent` (rounded to whole gates, level 1 is none). Selected gates vary each run. These patches are independent of `smallLake`/`largeLake` density; use zero for both if you only want gate ice.
 
-Design guideline: keep gate geometry the same across stages except for speed — faster stages get more spread-out gates (larger vertical distance and wider openings) so reaction time stays fair.
+Design guideline: ordinary stages share gate geometry for a given speed — faster stages get more spread-out gates (larger vertical distance and wider openings) so reaction time stays fair. The two arranged jump layouts use straight gates to accommodate locked airborne heading.
 
 ### Gate combos and gear
 
@@ -100,29 +100,56 @@ Densities are placement attempts, not exact counts: gates, finish openings, lake
 | --- | --- | ---: | ---: | --- | --- | ---: |
 | 1 | Warmup | 11111 | 90 | none | 0% | 0% |
 | 2 | Denser Forest | 21111 | 90 | none | 0% | 0% |
-| 3 | Monster | 22111 | 90 | 1 teal @45 | 0% | 0% |
-| 4 | Miss and Be Eaten | 22211 | 90 | 1 teal @45 | 25% | 0% |
-| 5 | Fast Monster | 13111 | 90 | 2 orange @63 | 0% | 0% |
-| 6 | 2 Fast 2 Forest | 23111 | 90 | 2 orange @63 | 0% | 0% |
-| 7 | Darker Woods, Icy Lakes | 32112 | 90 | 1 orange @45 | 0% | 25% |
-| 8 | Dense Chase | 33122 | 105 | 2 violet @74 | 0% | 25% |
-| 9 | Here We Go | 12131 | 120 | 1 orange @60 | 0% | 0% |
-| 10 | Faster, Careful | 22232 | 120 | 1 orange @60 | 25% | 25% |
-| 11 | My God | 23333 | 120 | 2 orange @84 | 50% | 50% |
-| 12 | Oh No | 33333 | 120 | 2 orange @84 | 50% | 50% |
-| 13 | Darkest Spots | 41112 | 90 | none | 0% | 25% |
-| 14 | Darker and Darker | 42113 | 90 | 1 violet @45 | 0% | 50% |
-| 15 | Almost There | 43113 | 90 | 2 violet @63 | 0% | 50% |
-| 16 | Good Luck | 14114 | 90 | 3 violet @81 | 0% | 100% |
-| 17 | Too Fast | 11141 | 150 | none | 0% | 0% |
-| 18 | Don't Miss | 11411 | 90 | none | 100% | 0% |
-| 19 | Nowhere to Hide | 34111 | 90 | 3 orange @81 | 0% | 0% |
-| 20 | Black Ice | 11134 | 120 | none | 0% | 100% |
-| 21 | No Room for Error | 22442 | 150 | 1 orange @75 | 100% | 25% |
-| 22 | Everything Hurts | 34333 | 120 | 2 orange @84 | 50% | 50% |
-| 23 | You Asked For This | 44444 | 150 | 3 orange @135 | 100% | 100% |
+| 3 | Keep Your Momentum | 11111 | 90 | none | 0% | 0% |
+| 4 | Monster | 22111 | 90 | 1 teal @45 | 0% | 0% |
+| 5 | Rush Hour | 13111 | 90 | 2 orange @63 | 0% | 0% |
+| 6 | Miss and Be Eaten | 22211 | 90 | 1 teal @45 | 25% | 0% |
+| 7 | Aim Before Ice | 11111 | 90 | none | 0% | 0% |
+| 8 | Fast Monster | 13111 | 90 | 2 orange @63 | 0% | 0% |
+| 9 | 2 Fast 2 Forest | 23111 | 90 | 2 orange @63 | 0% | 0% |
+| 10 | Air Time | 14121 | 105 | 3 violet @110.25 | 0% | 0% |
+| 11 | Darker Woods, Icy Lakes | 32112 | 90 | 1 orange @45 | 0% | 25% |
+| 12 | Timber! | 12111 | 90 | 1 orange @45 | 0% | 0% |
+| 13 | Dense Chase | 33122 | 105 | 2 violet @73.5 | 0% | 25% |
+| 14 | Snowball Run | 13121 | 105 | 2 orange @73.5 | 0% | 0% |
+| 15 | Here We Go | 12131 | 120 | 1 orange @60 | 0% | 0% |
+| 16 | Faster, Careful | 22232 | 120 | 1 orange @60 | 25% | 25% |
+| 17 | My God | 23333 | 120 | 2 orange @84 | 50% | 50% |
+| 18 | Oh No | 33333 | 120 | 2 orange @84 | 50% | 50% |
+| 19 | Darkest Spots | 41112 | 90 | none | 0% | 25% |
+| 20 | Darker and Darker | 42113 | 90 | 1 violet @45 | 0% | 50% |
+| 21 | Almost There | 43113 | 90 | 2 violet @63 | 0% | 50% |
+| 22 | Good Luck | 14114 | 90 | 3 violet @81 | 0% | 100% |
+| 23 | Too Fast | 11141 | 150 | none | 0% | 0% |
+| 24 | Don't Miss | 11411 | 90 | none | 100% | 0% |
+| 25 | Nowhere to Hide | 34111 | 90 | 3 orange @81 | 0% | 0% |
+| 26 | Black Ice | 11134 | 120 | none | 0% | 100% |
+| 27 | No Room for Error | 22442 | 150 | 1 orange @75 | 100% | 25% |
+| 28 | Everything Hurts | 34333 | 120 | 3 orange @108 | 50% | 50% |
+| 29 | You Asked For This | 44444 | 150 | 3 orange @135 | 100% | 100% |
 
-Knobs read `[obstacles, chase, miss, speed, ice]`, levels 1–4. Chase shows resolved count, color and km/h; guarded shows the share of gates with a 3-wolf pack; ice shows the share of gates with a frozen patch. Common rate per obstacle level lives in `knobLevels`. The curve previews each tier in isolation before combining: 1 is a clear warmup with configured skier traffic and no hardcoded terrain demonstrations; 2 adds forest; 3 wakes the first monster; 4 punishes missed gates with wolves; 5–6 preview chase-3, first clean then with trees; 7 crosses dense forest with chase-2 and first ice (25%); 8 is a dense chase at speed 105; 9 spotlights speed 120 on an empty piste; 10 adds wolves and ice at 120; 11–12 run full 120-tier stages up to all-3s; 13–15 cross the max forest with rising chase and 25–50% ice; 16 empties the forest for a 3-yeti boss chase on full ice. 17–20 isolate the remaining level-4s: 150 speed alone, fully guarded gates, a boss chase in dense forest, and full ice at speed 120; 21–22 combine speed-4 and miss-4 with the rest; 23 runs every knob at maximum. All knob levels are now in play; guards peak at 100% on stages 18, 21 and 23.
+Knobs read `[obstacles, chase, miss, speed, ice]`, levels 1–4. Chase shows resolved count, color and km/h; guarded shows the share of gates with a 3-wolf pack; ice shows the share of gates with a frozen patch. Common rate per obstacle level lives in `knobLevels`. Existing stages retain their relative order and tuning; six named special stages now interrupt the progression.
+
+## Special stages
+
+| # | Name | Focus |
+| --- | --- | --- |
+| 3 | Keep Your Momentum | Six small-hill/rough-snow pairs. Jump to retain speed or pass around the rough patch. No enemies. |
+| 5 | Rush Hour | Dense weaving skier traffic, a few overtakers, two Yetis. |
+| 7 | Aim Before Ice | Nine short ice stretches with snow between them to correct your direction. No enemies. |
+| 10 | Air Time | Five large-hill sequences, alternating long logs and tree rows, with three fast Yetis. |
+| 12 | Timber! | Seventeen alternating-side falling trees, sparse ordinary trees and one Yeti. |
+| 14 | Snowball Run | Ten alternating-side rolling balls, a few trees/hills and two Yetis. |
+
+These names are ordinary entries in `arcade.stages`. Move their rows to insert them elsewhere; keep the matching `stageOverrides` keys. Set `startStage` to the current row number to try one directly. The campaign revision is now 5, preserving earlier campaign records separately.
+
+New optional fields in a stage override:
+
+- `specialLayout`: `none` (default), `jumpLine`, `momentum`, `iceIslands`, `snowballs`, or `timber`. These reusable arrangements do not depend on stage names. Encounter counts follow gate count; jump spacing also allows room for flight and landing. Authored encounters are independent of `itemRates`, which add surrounding scenery/traffic. Set the layout to `none` to remove the arrangement.
+- `briefing`: a short instruction shown at the stage start.
+- `yetiSpeedPercent`: explicit Yeti chase speed as a percentage of the stage top speed. Omission uses the chase knob. Air Time uses 105% (110.25 km/h at its 105 km/h top); other stages retain their configured speeds. Guard wolves still use the normal chase knob speed.
+
+`jumpLine` and `momentum` use straight gates because airborne heading is locked. Barriers sit between gates, with hills 18 m uphill and reserved approach/landing space so random scenery cannot fill it. Air Time alternates 100 m logs and five-tree rows; Keep Your Momentum uses existing rough patches, whose slowdown does not apply in the air. Ice islands retain slalom gates, use every other gap, and leave snow for steering. Snowball and timber layouts retain slalom gates and alternate which side of the route their encounters start on. Normal stages still use their existing placement rules.
 
 ## Gear, towns and records
 

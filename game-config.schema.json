@@ -6885,6 +6885,28 @@
                 "type": "number",
                 "minimum": 1,
                 "maximum": 3
+              },
+              "specialLayout": {
+                "type": "string",
+                "enum": [
+                  "none",
+                  "jumpLine",
+                  "iceIslands",
+                  "momentum",
+                  "snowballs",
+                  "timber"
+                ],
+                "description": "Reusable arranged encounters for a special stage. jumpLine and momentum use straight gates and clear landing corridors; other stages retain normal slalom gates."
+              },
+              "briefing": {
+                "type": "string",
+                "description": "Short gameplay instruction shown beneath the stage name at its start."
+              },
+              "yetiSpeedPercent": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 150,
+                "description": "Explicit stage-only chase speed as a percent of stage top speed; omitted uses the chase knob. Does not change other stages."
               }
             }
           },

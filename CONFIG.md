@@ -14,7 +14,7 @@ World coordinates increase rightward and downhill. `world.unitsPerMetre` default
 
 | Section | What it controls |
 | --- | --- |
-| `arcade` | 20 compact stage rows plus central knob tables, stage defaults/overrides, terrain, traffic, wolf-guard penalties and run-result duration |
+| `arcade` | 29 compact stage rows plus central knob tables, stage defaults/overrides, terrain, traffic, wolf-guard penalties and run-result duration |
 | `courses` | Names, fees, lengths in metres, pace, gate spacing, obstacle density and type |
 | `race` | Gate widths, required success fraction, point rewards, finish bonuses, choice rows and scenery placement |
 | `mushroomHunt` | Mushroom count, required fraction, points, pickup size, spread, spacing clearances and glints in Spore Decisions |
@@ -84,3 +84,8 @@ Skier/snowboarder fear uses `wildlife.npcFearDistance` (310 world units / 31 m),
 Falling-tree and rolling-ball `pathPlacementChance` defaults to 0.9: most placement attempts use the route between gate openings and a midpoint between gates. Their `pathOffsetMetres` pairs default to [4, 9] and [12, 24] respectively. Tree offsets are capped at 75% of height and nearby trees fall across the route; ball offsets are capped at 1.5× sway amplitude. Other ball placements also stay within the first bend's reach, with radius/player clearance deducted. Existing per-stage item rates are retained. See `ARCADE.md` for clearance rules. The temporary level-one log/tree/ball placements have been removed.
 
 Casual skier turns use `skiers.slowTurnSeconds: [2.5, 5.5]`, `slowTurnChance: 0.8` (otherwise a straight stretch), `slowTurnLateralRatio: 0.5`, `slowSteeringFollow: 1.4`, and `slowTurnMaxOffsetMetres: 18`. Steering eases toward the chosen direction and turns back near the lane boundary, with a small overshoot. Downhill speed is retained. Fear resets the lane around the skier's escape position. Fast skier targeting uses actual distance `fastAimDistance: 350` (35 m), from ahead or behind; `fastAimWeight: 0.75` and `fastSteeringFollow: 1.2` produce gradual lane cutting, with the existing lateral cap and lead time. Outside range they ease toward straight downhill motion.
+
+
+Special Arcade stages live in the same ordered `arcade.stages` map: Keep Your Momentum (3), Rush Hour (5), Aim Before Ice (7), Air Time (10), Timber! (12), Snowball Run (14). Their matching `stageOverrides` use optional `specialLayout` (`none`, `jumpLine`, `momentum`, `iceIslands`, `snowballs`, `timber`) for reusable arranged encounters, plus `briefing` for the start instruction. Layout encounters are independent of random `itemRates`; those rates add surrounding objects. `jumpLine`/`momentum` use straight gates and reserve approach/landing corridors. Move stage rows to change insertion points; rename the override key with the stage if renaming. `startStage` remains a 1-based row number.
+
+Optional per-stage `yetiSpeedPercent` overrides the chase knob's Yeti speed percentage only. Air Time uses 105% of its 105 km/h stage top speed (110.25 km/h) for its three Yetis; other stages and guard-wolf speeds are unchanged. Six new stages increase the campaign revision to 5 so earlier records remain separate. See ARCADE for the layouts and stage list.
