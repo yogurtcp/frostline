@@ -171,7 +171,7 @@ window.FROSTLINE_READY = (async () => {
   function arcadeStage(index){
     const a=S.arcade.stages[index],K=S.arcade.knobLevels,[,lc,lm,ls,li]=a.knobs;
     const top=K.speed[ls-1],baseChaseSpeed=K.chaseSpeedPercent[lc-1]*top/100,chaseSpeed=a.yetiSpeedPercent===null?baseChaseSpeed:a.yetiSpeedPercent*top/100,gs=K.gateSpacing;
-    const straight=a.specialLayout==='jumpLine'||a.specialLayout==='momentum';
+    const straight=a.specialLayout==='jumpLine';
     const g={count:a.gates.count,swordGateCount:a.gates.swordGateCount,icePercent:K.iceGatePercent[li-1],
       horizontalDistanceMetres:straight?0:top*gs.horizontalPercent/100,verticalDistanceMetres:top*gs.verticalPercent/100,
       openingWidthMetres:top*gs.openingPercent/100,firstGateMetres:top*gs.firstPercent/100,
@@ -274,7 +274,7 @@ window.FROSTLINE_READY = (async () => {
   }
 
   function arcadeTerrainAt(run,y){return run.arcade||{trees:false};}
-  function nearArcadeFeature(x,y,allowGateIce=false){return state.objects.some(o=>o.arcadeFeature&&(!allowGateIce||!o.gateIce)&&(Math.hypot(o.x-x,o.y-y)<S.arcade.featureClearance||['ramp','mogul','smallHill','largeHill','logBump'].includes(o.type)&&y>o.y&&y<o.y+S.arcade.landingClearanceLength&&Math.abs(x-o.x)<S.arcade.landingClearanceHalfWidth));}
+  function nearArcadeFeature(x,y,allowGateIce=false){return state.objects.some(o=>o.arcadeFeature&&(!allowGateIce||!o.gateIce)&&(Math.hypot(o.x-x,o.y-y)<S.arcade.featureClearance||['ramp','mogul','smallHill','largeHill','logBump'].includes(o.type)&&y>o.y&&y<(o.landingY??o.y+S.arcade.landingClearanceLength)&&Math.abs(x-o.x)<S.arcade.landingClearanceHalfWidth));}
   function courseCreature(o,x,y){const run=o?.arcadeRun||o?.chaseRun;return !!run&&run===state.course&&!insideTown(x,y);}
   function createArcadeItem(key,x,y,run){
     const spec=ARCADE_ITEMS[key],extra={...spec,arcadeRun:run,nextAI:clock+range(1,4),humanVisitor:true};delete extra.type;
@@ -304,8 +304,19 @@ window.FROSTLINE_READY = (async () => {
     if(layout==='yetiIntro'){
       // Learn the chase across three clear gates before adding normal forest and traffic.
       reserve(run.x,run.startY-100,first+Math.min(2,g.count-1)*spacing+60,S.arcade.landingClearanceHalfWidth);
-    }else if(layout==='jumpLine'||layout==='momentum'){
-      const hill=layout==='jumpLine'?'largeHill':'smallHill',duration=S.jump[hill+'Seconds']*S.jump.hillDurationMax;
+    }else if(layout==='momentum'){
+      const speed=run.arcade.pace*S.physics.speedMultiplier,cosine=spacing/Math.hypot(spacing,g.horizontalDistanceMetres*PX_PER_M);
+      const hopSeconds=Math.min(S.jump.smallHillSeconds,spacing*.65/(speed*S.jump.speedBoost*cosine*S.jump.hillDurationMax));
+      for(let i=1;i<g.count-2;i+=3){
+        const y=first+(i+.15)*spacing,roughY=first+(i+.35)*spacing;
+        const hill=place('smallHill',arcadePathX(run,y),y);
+        // A short hop clears the rough patch, then releases steering before the next turn.
+        hill.jumpSeconds=hopSeconds;hill.landingY=first+(i+1)*spacing-35;
+        const rough=place('rugged',arcadePathX(run,roughY),roughY);rough.ry=Math.min(40,spacing*.1);
+        reserve(run.x,first+i*spacing-40,hill.landingY,g.horizontalDistanceMetres*PX_PER_M/2+110);
+      }
+    }else if(layout==='jumpLine'){
+      const hill='largeHill',duration=S.jump.largeHillSeconds*S.jump.hillDurationMax;
       const speed=run.arcade.pace*S.physics.speedMultiplier,flight=speed*S.jump.speedBoost*duration;
       const stride=Math.max(3,Math.ceil((flight+220)/spacing));
       for(let i=1,n=0;i<g.count-3;i+=stride,n++){
@@ -313,10 +324,7 @@ window.FROSTLINE_READY = (async () => {
         if(y+flight+100>run.endY-100)break;
         place(hill,run.x,y);
         reserve(run.x,y-120,y+flight+100,S.arcade.landingClearanceHalfWidth);
-        if(layout==='momentum'){
-          // Jumping skips the rough-snow speed cap; either flank is a smooth alternative.
-          place('rugged',run.x,y+180);
-        }else if(n%2===0)place('logJump',run.x,y+180);
+        if(n%2===0)place('logJump',run.x,y+180);
         else for(let dx=-140;dx<=140;dx+=70)place('pine',run.x+dx,y+180);
       }
     }else if(layout==='iceIslands'){
@@ -1056,7 +1064,11 @@ window.FROSTLINE_READY = (async () => {
     }
     if(o.type==='ramp'||o.type==='mogul'||o.type==='mushroom'||o.type==='rainbow'||o.type==='smallHill'||o.type==='largeHill'){
       if(p.air>0||p.jumpLock>0)return;o.touched=true;
-      launch(o.arcadeFeature&&['ramp','mogul'].includes(o.type)?S.arcade.rampSeconds:o.type==='rainbow'?S.jump.rainbowSeconds:o.type==='mushroom'?S.jump.mushroomSeconds:o.type==='smallHill'?S.jump.smallHillSeconds:o.type==='largeHill'?S.jump.largeHillSeconds:o.type==='ramp'?S.jump.rampSeconds:S.jump.mogulSeconds,o.type==='smallHill'||o.type==='largeHill'?S.jump.hillDurationMax:S.jump.durationMax);
+      launch(o.jumpSeconds??(o.arcadeFeature&&['ramp','mogul'].includes(o.type)?S.arcade.rampSeconds:o.type==='rainbow'?S.jump.rainbowSeconds:o.type==='mushroom'?S.jump.mushroomSeconds:o.type==='smallHill'?S.jump.smallHillSeconds:o.type==='largeHill'?S.jump.largeHillSeconds:o.type==='ramp'?S.jump.rampSeconds:S.jump.mogulSeconds),o.type==='smallHill'||o.type==='largeHill'?S.jump.hillDurationMax:S.jump.durationMax);
+      if(o.landingY!==undefined&&p.air>0){
+        const downhill=Math.cos(p.airHeading)*p.airSpeed;
+        if(downhill>0){p.air=p.airTotal=Math.min(p.air,Math.max(.12,(o.landingY-p.y)/downhill));p.jumpLock=p.airTotal+S.jump.cooldownSeconds;}
+      }
       if(o.type==='rainbow'){p.rainbow=S.jump.rainbowTrailSeconds;p.boost=S.jump.rainbowBoostSeconds;announce('SOMEWHERE OVER THE RAINBOW','A spectacularly impractical shortcut.',C.blue,2.5);}
       if(o.type==='mushroom'){p.boost=S.jump.mushroomBoostSeconds;say('BOING. Bad decisions, good airtime.',o,2.1);}
       return;
