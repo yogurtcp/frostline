@@ -79,6 +79,17 @@ Enemy pursuit uses `predators.offDownhillSpeedRatio: 0.5`: horizontal X velocity
 
 NPC prey selection checks `predators.divertChance` every `divertRecheckSeconds` (1.5 s) only while a yeti, bear or wolf has no committed NPC target. A selected target stays locked; the 8 s `divertTimeoutSeconds` now measures lack of progress rather than total hunt duration. Closing the best gap by at least one world unit (0.1 m) refreshes it. Eaten/dead targets are released immediately. Prey must initially be within 35 m and nearer the player than the hunter. This is larger than the 31 m skier fear radius so a hunter can acquire a target before it flees. Town/protected-area prey is excluded except for an active course-owned hunter on its own course. Foxes, wolves, bears and yetis are excluded as prey.
 
+Yetis and bears additionally restrict prey to their direct route toward the player's current position. These optional `predators` fields have loader defaults for older configs:
+
+| Setting | Default | Effect |
+| --- | ---: | --- |
+| `divertPathWidthMetres` | 8 | Maximum sideways prey offset when selecting a target. |
+| `divertPathAngleDegrees` | 30 | Maximum prey heading deviation from the direction to the player when selecting. |
+| `divertReleaseWidthMetres` | 12 | Active hunt's maximum prey offset from the current route, and maximum hunter/prey offset from the diversion's starting point-to-current-player route. |
+| `divertReleaseAngleDegrees` | 45 | Active hunt's maximum prey heading deviation before returning to the player. |
+
+Prey must remain ahead of the hunter, before the player and nearer the player than the hunter. Wider release limits give small detours room without repeated target switching. The saved diversion origin prevents gradual sideways drift from redefining the route. A route-limit release resets old avoidance turns, resumes player pursuit that frame, and waits one `divertRecheckSeconds` interval before another selection attempt. Release width/angle must be at least their selection equivalents. Wolves retain their existing roaming hunts and do not use these limits.
+
 Skier/snowboarder fear uses `wildlife.npcFearDistance` (310 world units / 31 m), `npcFearSeconds`, `npcFleeSpeed`, `npcFleeLateralSpeed` and `npcSpeechCooldown` for wolves, bears and awake Yetis. The nearest eligible enemy drives fleeing; towns/protected pistes suppress ordinary threats, while course-owned pursuers can frighten NPCs on their own piste. Dead, stunned, retiring, sleeping and waiting enemies are excluded. `dialogue.terrified` contains wolf warnings; `bearTerrified` and `yetiTerrified` supply the other warnings.
 
 Falling-tree and rolling-ball `pathPlacementChance` defaults to 0.9: most placement attempts use the route between gate openings and a midpoint between gates. Their `pathOffsetMetres` pairs default to [4, 9] and [12, 24] respectively. Tree offsets are capped at 75% of height and nearby trees fall across the route; ball offsets are capped at 1.5× sway amplitude. Other ball placements also stay within the first bend's reach, with radius/player clearance deducted. Existing per-stage item rates are retained. See `ARCADE.md` for clearance rules. The temporary level-one log/tree/ball placements have been removed.

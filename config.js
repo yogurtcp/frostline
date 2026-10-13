@@ -12,6 +12,10 @@ window.loadFrostlineConfig = async function () {
   config.chasers.yetiCelebrationJumpPixels ??= 14;
   config.village.names ??= ['Snowdrift','Pinehaven','Whitecap','Glacier Bend'];
   config.village.backRoute ??= {enabled:true,width:100,offset:310};
+  config.predators.divertPathWidthMetres ??= 8;
+  config.predators.divertReleaseWidthMetres ??= 12;
+  config.predators.divertPathAngleDegrees ??= 30;
+  config.predators.divertReleaseAngleDegrees ??= 45;
   function validate(value, schema, path) {
     if (schema.type === 'object') {
       if (!value || typeof value !== 'object' || Array.isArray(value)) throw new Error(`${path} must be an object`);
@@ -57,6 +61,8 @@ window.loadFrostlineConfig = async function () {
     if(stage.gates.swordGateCount>stage.gates.count)throw new Error(`arcade.stages[${i}]: swordGateCount exceeds gate count`);
   }
   if (config.wildlife.packMin > config.wildlife.packMax) throw new Error('packMin must not exceed packMax');
+  if(config.predators.divertReleaseWidthMetres<config.predators.divertPathWidthMetres)throw new Error('divertReleaseWidthMetres must be at least divertPathWidthMetres');
+  if(config.predators.divertReleaseAngleDegrees<config.predators.divertPathAngleDegrees)throw new Error('divertReleaseAngleDegrees must be at least divertPathAngleDegrees');
   const features=config.terrainFeatures;
   if(features.rollingSnowball.maxRadiusMetres<features.rollingSnowball.radiusMetres)throw new Error('rollingSnowball.maxRadiusMetres must be at least radiusMetres');
   if(features.logJump.radiusMetres>=features.logJump.widthMetres/2)throw new Error('logJump.radiusMetres must be less than half widthMetres');

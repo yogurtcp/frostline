@@ -938,6 +938,23 @@ window.FROSTLINE_READY = (async () => {
   // Edible creatures for opportunistic predators. Predator kinds (wolf, fox, bear, lurkers)
   // are deliberately absent: predators never hunt each other.
   const CREATURE_TYPES=new Set(['skier','boarder','personRed','personYellow','personGreen','dog','cat','rabbit']);
+  function preyOnPlayerPath(hunter,prey,committed=false){
+    // Wolves keep their roaming hunts; Yetis and bears prioritize reaching the player.
+    if(!['fast','slow','bear'].includes(hunter?.kind))return true;
+    const p=state.p,P=S.predators,dx=p.x-hunter.x,dy=p.y-hunter.y,length=Math.hypot(dx,dy);
+    if(length<1)return false;
+    const qx=prey.x-hunter.x,qy=prey.y-hunter.y,along=(qx*dx+qy*dy)/length,across=Math.abs(qx*dy-qy*dx)/length;
+    const width=(committed?P.divertReleaseWidthMetres:P.divertPathWidthMetres)*PX_PER_M;
+    const angle=(committed?P.divertReleaseAngleDegrees:P.divertPathAngleDegrees)*Math.PI/180;
+    if(along<=0||along>=length||across>width||across>along*Math.tan(angle)||Math.hypot(prey.x-p.x,prey.y-p.y)>=length)return false;
+    if(committed){
+      // A moving hunter-to-player line alone would forgive gradual sideways drift.
+      // Keep the diversion bounded relative to its starting point and the live player.
+      const origin=hunter.divertOrigin||(hunter.divertOrigin={x:hunter.x,y:hunter.y});
+      if(segmentDistance(hunter.x,hunter.y,origin,p)>width||segmentDistance(prey.x,prey.y,origin,p)>width)return false;
+    }
+    return true;
+  }
   function nearestPrey(x,y,radius,hunter){
     const p=state.p,pd=Math.hypot(p.x-x,p.y-y);
     let best=null,bestD=radius;
@@ -946,6 +963,7 @@ window.FROSTLINE_READY = (async () => {
       if(humanArea(o.x,o.y)&&!courseCreature(hunter,o.x,o.y))continue;
       const d=Math.hypot(o.x-x,o.y-y);
       if(d>=bestD||Math.hypot(o.x-p.x,o.y-p.y)>=pd)continue;
+      if(!preyOnPlayerPath(hunter,o))continue;
       bestD=d;best=o;
     }
     return best;
@@ -954,6 +972,12 @@ window.FROSTLINE_READY = (async () => {
     const P=S.predators,prey=hunter.divert;
     if(prey){
       if(prey.eaten||prey.dead||prey.r<=0||humanArea(prey.x,prey.y)&&!courseCreature(hunter,prey.x,prey.y))hunter.divert=null;
+      else if(!preyOnPlayerPath(hunter,prey,true)){
+        hunter.divert=null;hunter.divertOrigin=null;
+        hunter.avoidUntil=0;hunter.obstacleDetour=null;
+        // Return to the player immediately, rather than choosing another NPC this frame.
+        hunter.nextDivertCheck=clock+P.divertRecheckSeconds;return;
+      }
       else {
         const distance=Math.hypot(prey.x-hunter.x,prey.y-hunter.y);
         // Keep a committed hunt while closing the gap; only time out stalled pursuits.
@@ -968,6 +992,7 @@ window.FROSTLINE_READY = (async () => {
     const next=nearestPrey(hunter.x,hunter.y,P.divertRadiusMetres*PX_PER_M,hunter);
     if(next&&Math.random()<P.divertChance){
       hunter.divert=next;hunter.divertBestDistance=Math.hypot(next.x-hunter.x,next.y-hunter.y);hunter.divertUntil=clock+P.divertTimeoutSeconds;
+      hunter.divertOrigin={x:hunter.x,y:hunter.y};
     }
   }
   function patchAt(x,y){return state.objects.find(o=>o.type==='ice'&&lakeContains(o,x,y));}

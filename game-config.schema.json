@@ -5148,7 +5148,29 @@
           "type": "number",
           "minimum": 0,
           "exclusiveMinimum": 0,
-          "description": "Abandon NPC prey after this many seconds without reducing the best target distance by at least one world unit; progressing hunts stay committed."
+          "description": "Abandon NPC prey after this many seconds without reducing the best target distance by at least one world unit; progressing hunts stay committed while within any applicable route limits."
+        },
+        "divertPathWidthMetres": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Yeti/bear prey selection: maximum sideways distance from their direct route to the player (8 m by default)."
+        },
+        "divertReleaseWidthMetres": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Yeti/bear committed hunts: maximum prey offset from the current route and maximum hunter/prey offset from the diversion origin-to-player route (12 m by default). Must be at least divertPathWidthMetres."
+        },
+        "divertPathAngleDegrees": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 80,
+          "description": "Yeti/bear prey selection: maximum heading deviation from the player (30 degrees by default). Prey must be ahead, before the player and nearer the player than the hunter."
+        },
+        "divertReleaseAngleDegrees": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 85,
+          "description": "Yeti/bear committed hunts: heading deviation limit (45 degrees by default). Crossing a route limit resumes player pursuit immediately with one selection interval before reconsidering prey. Must be at least divertPathAngleDegrees."
         },
         "offDownhillSpeedRatio": {
           "type": "number",

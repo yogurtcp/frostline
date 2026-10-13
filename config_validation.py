@@ -41,6 +41,9 @@ def validate(value, schema, path='config'):
             gates = {**base['gates'], **over.get('gates', {})}
             if gates['swordGateCount'] > gates['count']: fail(f'arcade.stages.{name}: swordGateCount exceeds gate count')
         if value['wildlife']['packMin'] > value['wildlife']['packMax']: fail('packMin must not exceed packMax')
+        predators = value['predators']
+        if predators.get('divertReleaseWidthMetres', 12) < predators.get('divertPathWidthMetres', 8): fail('divertReleaseWidthMetres must be at least divertPathWidthMetres')
+        if predators.get('divertReleaseAngleDegrees', 45) < predators.get('divertPathAngleDegrees', 30): fail('divertReleaseAngleDegrees must be at least divertPathAngleDegrees')
         features = value['terrainFeatures']
         if features['rollingSnowball']['maxRadiusMetres'] < features['rollingSnowball']['radiusMetres']: fail('rollingSnowball.maxRadiusMetres must be at least radiusMetres')
         log = features['logJump']; units = value['world']['unitsPerMetre']

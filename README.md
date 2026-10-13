@@ -115,7 +115,7 @@ Small and large hills use revised native pixel-art SVG/PNG sources with raised s
 
 Enemy pursuit is directional: horizontal and uphill components run at half speed, while downhill movement retains its configured pace. This applies to bears, yetis, hunting wolves, dogs and ski patrol.
 
-Yetis, bears and wolves can divert to nearby NPC prey. They keep the selected target while closing the gap and abandon it after eight seconds without progress, rather than rerolling the decision during a chase. Other predators, including foxes, are excluded as prey.
+Yetis, bears and wolves can divert to nearby NPC prey. Yetis and bears only choose prey on the way to you: ahead of them, before you, within 8 m of their direct route and 30 degrees of your direction. Small detours stay committed; if prey leaves the wider 12 m / 45-degree limits, or the hunter drifts over 12 m from the diversion's original route toward your current position, it immediately returns to chasing you. It waits 1.5 seconds before reconsidering prey. All hunters also abandon prey after eight seconds without progress, rather than rerolling during a progressing chase. Wolves retain their roaming prey choices. Other predators, including foxes, are excluded as prey.
 
 Skiers and snowboarders fear nearby wolves, roaming/chasing bears and awake Yetis. They shout, show a red `!`, and flee downhill away from the nearest threat, interrupting social stops. Ordinary enemies do not frighten NPCs in protected areas; a course's own Yetis can frighten them on its piste. Dead, stunned, retiring and sleeping/waiting enemies do not trigger fear.
 
