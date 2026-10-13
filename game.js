@@ -166,11 +166,11 @@ window.FROSTLINE_READY = (async () => {
     "snowPath":{"type":"path","width":56,"r":0,"surface":"snow","noCourse":true},
     "pavedPath":{"type":"path","width":56,"r":0,"surface":"paved","noCourse":true}
   };
-  const yetiTierForColor={teal:'slow',orange:'fast',violet:'elite'};
+  const yetiTierForColor={teal:'slow',orange:'fast',violet:'elite',magenta:'special'};
   function arcadeItemRate(stage,key){const override=stage.itemRates?.[key];if(override!==undefined)return override;const tier=S.arcade.itemTiers[key];return tier==='common'?S.arcade.knobLevels.obstacles[stage.knobs[0]-1]:stage.tierRates[tier];}
   function arcadeStage(index){
     const a=S.arcade.stages[index],K=S.arcade.knobLevels,[,lc,lm,ls,li]=a.knobs;
-    const top=K.speed[ls-1],baseChaseSpeed=K.chaseSpeedPercent[lc-1]*top/100,chaseSpeed=a.yetiSpeedPercent===null?baseChaseSpeed:a.yetiSpeedPercent*top/100,gs=K.gateSpacing;
+    const top=K.speed[ls-1],baseChaseSpeed=K.chaseSpeedPercent[lc-1]*top/100,chaseSpeed=a.yetiSpeedKmh??(a.yetiSpeedPercent===null?baseChaseSpeed:a.yetiSpeedPercent*top/100),gs=K.gateSpacing;
     const straight=a.specialLayout==='jumpLine';
     const g={count:a.gates.count,swordGateCount:a.gates.swordGateCount,icePercent:K.iceGatePercent[li-1],
       horizontalDistanceMetres:straight?0:top*gs.horizontalPercent/100,verticalDistanceMetres:top*gs.verticalPercent/100,
@@ -1819,7 +1819,7 @@ window.FROSTLINE_READY = (async () => {
       if(pursuit)c.expires=Infinity;
       if(c.waiting){
         if(!c.chaseRun.timingStarted)continue;
-        c.waiting=false;c.wakeUntil=clock+S.arcade.wakeSeconds;c.talkAt=c.wakeUntil+S.chasers.slowTalkSeconds;
+        c.waiting=false;c.wakeUntil=clock+(c.chaseRun.arcade.yetiWakeSeconds??S.arcade.wakeSeconds);c.talkAt=c.wakeUntil+S.chasers.slowTalkSeconds;
         burst(c.x,c.y,S.arcade.yetiColors[c.arcadeTier],8);
         continue;
       }
@@ -2065,7 +2065,7 @@ window.FROSTLINE_READY = (async () => {
     if(o.feedingUntil>clock)text('...',s.x,s.y-22,9,C.ink);
   }
   function drawKnockedOut(o,s,kind){
-    sprite(kind==='bear'?'bearRun':kind==='dog'?'dog':kind==='wolf'?'wolf':'yeti',s.x,s.y,kind==='bear'?60:52,{rotate:Math.PI/2});
+    sprite(kind==='bear'?'bearRun':kind==='dog'?'dog':kind==='wolf'?'wolf':'yeti',s.x,s.y,kind==='bear'?60:52,{rotate:Math.PI/2,yetiTier:o.arcadeTier});
     for(let i=0;i<3;i++){const a=clock*4+i*TAU/3;box(s.x+Math.cos(a)*12,s.y-17+Math.sin(a)*4,2,2,C.gold);}
   }
   function drawBear(o,s,chasing=false){

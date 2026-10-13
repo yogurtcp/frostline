@@ -70,7 +70,7 @@
         1,
         4,
         1,
-        2,
+        1,
         1
       ],
       "Air Time": [
@@ -283,7 +283,8 @@
     "yetiColors": {
       "slow": "#4babb0",
       "fast": "#d18143",
-      "elite": "#91649e"
+      "elite": "#91649e",
+      "special": "#c844a2"
     },
     "yetiTints": {
       "slow": [
@@ -300,6 +301,11 @@
         200,
         180,
         216
+      ],
+      "special": [
+        212,
+        30,
+        156
       ]
     },
     "maxActiveYetis": 160,
@@ -709,14 +715,15 @@
           "spruceTree": 0.7,
           "smallPine": 0.7
         },
-        "briefing": "KEEP SPEED - THE YETI IS FASTER THAN YOU",
+        "briefing": "4 SECONDS TO GET READY - KEEP YOUR SPEED",
         "tierRates": {
           "slightlyRare": 0,
           "veryRare": 0
         },
         "endTrafficMultiplier": 1,
-        "yetiColor": "violet",
-        "yetiSpeedPercent": 105
+        "yetiColor": "magenta",
+        "yetiSpeedKmh": 90.5,
+        "yetiWakeSeconds": 4
       }
     }
   },

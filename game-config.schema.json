@@ -6756,6 +6756,10 @@
             },
             "elite": {
               "type": "string"
+            },
+            "special": {
+              "type": "string",
+              "description": "Distinct magenta special-stage Yeti accent color."
             }
           }
         },
@@ -6791,6 +6795,17 @@
                 "type": "number",
                 "minimum": 0
               }
+            },
+            "special": {
+              "type": "array",
+              "minItems": 3,
+              "maxItems": 3,
+              "items": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 255
+              },
+              "description": "RGB body tint for magenta special-stage Yetis."
             }
           }
         },
@@ -6971,7 +6986,8 @@
               "enum": [
                 "teal",
                 "orange",
-                "violet"
+                "violet",
+                "magenta"
               ],
               "description": "Visual tier of the start-line yetis."
             },
@@ -7440,7 +7456,8 @@
                 "enum": [
                   "teal",
                   "orange",
-                  "violet"
+                  "violet",
+                  "magenta"
                 ],
                 "description": "Visual tier of the start-line yetis."
               },
@@ -7906,6 +7923,18 @@
                 "minimum": 0,
                 "maximum": 150,
                 "description": "Explicit stage-only chase speed as a percent of stage top speed; omitted uses the chase knob. Does not change other stages."
+              },
+              "yetiSpeedKmh": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 250,
+                "description": "Exact stage Yeti speed in HUD km/h. Overrides yetiSpeedPercent when present; omission uses the percent override or chase knob. Guard-wolf speeds still use the chase knob."
+              },
+              "yetiWakeSeconds": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 30,
+                "description": "Stage start-line Yeti adjustment time after crossing its start. Omission uses arcade.wakeSeconds. Already chasing monsters from earlier linked stages continue normally."
               }
             }
           },

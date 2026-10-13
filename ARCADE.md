@@ -83,7 +83,7 @@ Gate labels show each gate's contribution as a share of one full item (`+14% SHI
 
 ### Yetis
 
-The chase knob sets the waiting start-line group from `knobLevels.chaseCount` and `chaseSpeedPercent` (percent of stage top); `yetiColor` (teal/orange/violet) paints it. The miss knob arms that share of gates (`knobLevels.missGatePercent`, rounded) with `knobLevels.missWolves` sleeping wolves each, marked with a red `!`; they wake at the chase speed when their gate is missed. Clearing an armed gate leaves its wolves asleep. Bumping one wakes it. Colors select visual tiers only, shown through the body tint without a hovering bar/scarf. Zero count/percent disables the group. No gate-pace calculation, catch-up boost, or hidden color-speed multiplier applies.
+The chase knob sets the waiting start-line group from `knobLevels.chaseCount` and `chaseSpeedPercent` (percent of stage top); `yetiColor` (teal/orange/violet/magenta) paints it. The miss knob arms that share of gates (`knobLevels.missGatePercent`, rounded) with `knobLevels.missWolves` sleeping wolves each, marked with a red `!`; they wake at the chase speed when their gate is missed. Clearing an armed gate leaves its wolves asleep. Bumping one wakes it. Colors select visual tiers only, shown through the body tint without a hovering bar/scarf. Zero count/percent disables the group. No gate-pace calculation, catch-up boost, or hidden color-speed multiplier applies.
 
 Start-line yetis remain visible before their stage, react when you cross its boundary, and chase after `arcade.wakeSeconds`. Pursuers follow off piste and across linked stages, retiring at the connected slope's town finish. The separately placed sleeping yeti items use their named color and the stage’s knob-derived chase speed, even if its start-line count is zero.
 
@@ -127,7 +127,7 @@ Densities are placement attempts, not exact counts: gates, finish openings, lake
 | 6 | Aim Before Ice | 11111 | 90 | none | 0% | 0% |
 | 7 | Fast Monster | 13111 | 90 | 2 orange @63 | 0% | 0% |
 | 8 | 2 Fast 2 Forest | 23111 | 90 | 2 orange @63 | 0% | 0% |
-| 9 | Keep Your Momentum | 14121 | 105 | 3 violet @110.25 | 0% | 0% |
+| 9 | Keep Your Momentum | 14111 | 90 | 3 magenta @90.5 | 0% | 0% |
 | 10 | Air Time | 14121 | 105 | 3 violet @110.25 | 0% | 0% |
 | 11 | Darker Woods, Icy Lakes | 32112 | 90 | 1 orange @45 | 0% | 25% |
 | 12 | Timber! | 12111 | 90 | 1 orange @45 | 0% | 0% |
@@ -169,7 +169,7 @@ Random log jumps, falling trees and rolling balls are explicitly disabled in ear
 | --- | --- | --- |
 | 4 | Rush Hour | 40 gates / about 1,365 m of dense weaving skier traffic, overtakers and two Yetis that can divert to NPC prey. |
 | 6 | Aim Before Ice | 24 gates, irregular large lakes, sliding NPCs and wolves/Yetis waiting on the far banks. |
-| 9 | Keep Your Momentum | Normal slalom gates, 19 short hill/rough-snow pairs, a forest and three violet Yetis at 110.25 km/h, 5% above the 105 km/h sliding top. |
+| 9 | Keep Your Momentum | Normal slalom gates, 19 short hill/rough-snow pairs, a forest and three bright magenta Yetis at 90.5 km/h versus the player’s 90 km/h top, with four seconds to get ready before they chase. |
 | 10 | Air Time | Five large-hill sequences, alternating long logs and tree rows, with three fast Yetis. |
 | 12 | Timber! | Seventeen alternating-side falling trees, sparse ordinary trees and one Yeti. |
 | 14 | Snowball Run | Ten alternating-side rolling balls, a few trees/hills and two Yetis. |
@@ -180,7 +180,10 @@ New optional fields in a stage override:
 
 - `specialLayout`: `none` (default), `yetiIntro`, `jumpLine`, `momentum`, `iceIslands`, `iceChaos`, `snowballs`, or `timber`. These reusable arrangements do not depend on stage names. `yetiIntro` clears the route through the first three gates before ordinary forest/traffic begins; it does not set the Yeti count or speed. Encounter counts follow gate count; jump spacing also allows room for flight and landing. Authored encounters are independent of `itemRates`, which add surrounding scenery/traffic. Set the layout to `none` to remove the arrangement.
 - `briefing`: a short instruction shown at the stage start.
-- `yetiSpeedPercent`: explicit Yeti chase speed as a percentage of the stage top speed. Omission uses the chase knob. Air Time and Keep Your Momentum use 105% (110.25 km/h at their 105 km/h top). Aim Before Ice uses 70% for its shoreline Yetis (63 km/h); its start-line count remains zero. Guard wolves still use the normal chase knob speed.
+- `yetiSpeedPercent`: explicit Yeti chase speed as a percentage of the stage top speed. Omission uses the chase knob. Air Time uses 105% (110.25 km/h at its 105 km/h top). Aim Before Ice uses 70% for its shoreline Yetis (63 km/h); its start-line count remains zero. Guard wolves still use the normal chase knob speed.
+- `yetiSpeedKmh`: exact Yeti chase speed in HUD km/h, taking precedence over `yetiSpeedPercent`. Keep Your Momentum uses 90.5 km/h with speed knob 1 (player top 90 km/h).
+- `yetiWakeSeconds`: stage start-line adjustment time; omission uses global `arcade.wakeSeconds` (0.8 s). Keep Your Momentum uses 4 s. Earlier linked-stage pursuers continue at their own speeds; only the newly introduced Yetis wait.
+- `yetiColor`: `teal`, `orange`, `violet`, or `magenta`; magenta maps to the distinct `special` tint in `arcade.yetiColors`/`yetiTints`. Waiting, chasing, celebration and knocked-out poses retain their color.
 - `townAfter`: optional town boundary override; see Link stages and place towns above.
 
 `jumpLine` uses straight gates because its long airborne heading is locked. Air Time puts barriers between gates with hills 18 m uphill and reserved approach/landing space, alternating 100 m logs and five-tree rows. `momentum` retains normal slalom geometry: small hills and shallow rough patches follow each gate-to-gate leg. These hills use shorter flight times, capped to land before the next gate so steering returns for the turn. Surrounding forest remains configured through itemRates; only the hop/landing corridor is reserved. Rough slowdown does not apply in the air. Keep Your Momentum is stage 9, after Fast Monster and 2 Fast 2 Forest. The optional iceIslands layout still offers short practice patches. Aim Before Ice now uses iceChaos: randomly sized/offset lakes, three NPCs on each approach and a wolf/Yeti on the snowy far bank. Lake diameters range 44–68 m across and 44–62 m downhill before shape variation. NPC skiers and boarders coast with locked entry heading and the same downhill acceleration as the player; snow restores steering. Shore predators stay off ice and wait while their target is on ice, then pursue on snow. Snowball and timber layouts retain slalom gates and alternate which side of the route their encounters start on. Normal stages still use their existing placement rules.

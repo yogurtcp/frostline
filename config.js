@@ -10,6 +10,8 @@ window.loadFrostlineConfig = async function () {
   config.chasers.yetiCelebrationSeconds ??= 2.2;
   config.chasers.yetiCelebrationHopsPerSecond ??= 2.4;
   config.chasers.yetiCelebrationJumpPixels ??= 14;
+  config.arcade.yetiColors.special ??= '#c844a2';
+  config.arcade.yetiTints.special ??= [212,30,156];
   config.village.names ??= ['Snowdrift','Pinehaven','Whitecap','Glacier Bend'];
   config.village.backRoute ??= {enabled:true,width:100,offset:310};
   config.arcade.stageFlow ??= {};
@@ -54,7 +56,9 @@ window.loadFrostlineConfig = async function () {
       specialLayout: over.specialLayout ?? 'none',
       briefing: over.briefing ?? '',
       townAfter: over.townAfter ?? ((index+1)%config.arcade.stageFlow.townEveryStages===0),
-      yetiSpeedPercent: over.yetiSpeedPercent ?? null };
+      yetiSpeedPercent: over.yetiSpeedPercent ?? null,
+      yetiSpeedKmh: over.yetiSpeedKmh ?? null,
+      yetiWakeSeconds: over.yetiWakeSeconds ?? null };
   });
   for (const [id, target] of Object.entries(config.timing.targets)) {
     if (!(target.goldSeconds < target.parSeconds)) throw new Error(`timing.targets.${id}: goldSeconds must be below parSeconds`);
