@@ -2,7 +2,7 @@
   "$schema": "./game-config.schema.json",
   "version": 1,
   "arcade": {
-    "startStage": 1,
+    "startStage": 9,
     "autoStart": true,
     "campaignVersion": 7,
     "stageFlow": {
@@ -705,7 +705,7 @@
       },
       "Keep Your Momentum": {
         "gates": {
-          "count": 20,
+          "count": 40,
           "swordGateCount": 2
         },
         "specialLayout": "momentum",
@@ -715,14 +715,14 @@
           "spruceTree": 0.7,
           "smallPine": 0.7
         },
-        "briefing": "4 SECONDS TO GET READY - KEEP YOUR SPEED",
+        "briefing": "TAKE THE BIG HILLS AND RAINBOWS - KEEP SPEED",
         "tierRates": {
           "slightlyRare": 0,
           "veryRare": 0
         },
         "endTrafficMultiplier": 1,
         "yetiColor": "magenta",
-        "yetiSpeedKmh": 90.5,
+        "yetiSpeedKmh": 92,
         "yetiWakeSeconds": 4
       }
     }
@@ -1584,7 +1584,7 @@
     "rainbowTrailSeconds": 8,
     "rainbowBoostSeconds": 2,
     "mushroomBoostSeconds": 1.5,
-    "speedBoost": 1.2,
+    "speedBoost": 1.25,
     "smallHillSeconds": 0.8,
     "largeHillSeconds": 1.5,
     "hillDurationMax": 1.1

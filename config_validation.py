@@ -23,7 +23,7 @@ def validate(value, schema, path='config'):
         if isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value): fail('expected finite number')
         if kind == 'integer' and value != int(value): fail('expected integer')
         if not schema.get('minimum', -float('inf')) <= value <= schema.get('maximum', float('inf')): fail('out of range')
-        if 'exclusiveMinimum' in schema and value <= schema['exclusiveMinimum']: fail('must be positive')
+        if 'exclusiveMinimum' in schema and value <= schema['exclusiveMinimum']: fail(f'must be greater than {schema["exclusiveMinimum"]}')
     elif kind == 'boolean' and not isinstance(value, bool): fail('expected boolean')
     elif kind == 'string' and not isinstance(value, str): fail('expected string')
     if 'enum' in schema and value not in schema['enum']: fail('unknown value')

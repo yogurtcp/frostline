@@ -87,6 +87,12 @@ window.FROSTLINE_READY = (async () => {
     return run.x + (Math.sin((y-run.startY)/S.world.courseWavelength[0])*S.world.courseSway[0] + Math.sin((y-run.startY)/S.world.courseWavelength[1])*S.world.courseSway[1]);
   }
   function arcadePathX(run,y){
+    if(run.arcade.specialLayout==='momentum'&&run.gateYs){
+      const ys=run.gateYs,xs=run.gateXs,last=ys.length-1;
+      if(y<ys[0])return mix(run.x,xs[0],clamp((y-run.startY)/(ys[0]-run.startY),0,1));
+      if(y>=ys[last])return mix(xs[last],run.x,clamp((y-ys[last])/(run.endY-ys[last]),0,1));
+      const i=arcadeGateGap(run,y);return mix(xs[i],xs[i+1],(y-ys[i])/(ys[i+1]-ys[i]));
+    }
     const g=run.arcade.gates,first=run.startY+g.firstGateMetres*PX_PER_M,spacing=run.arcade.spacing,swing=g.horizontalDistanceMetres*PX_PER_M/2;
     const n=(y-first)/spacing,last=g.count-1;
     if(n<0)return mix(run.x,run.x-swing,clamp((y-run.startY)/(first-run.startY),0,1));
@@ -94,11 +100,20 @@ window.FROSTLINE_READY = (async () => {
     const i=Math.floor(n);return run.x+mix((i%2?1:-1)*swing,(i%2?-1:1)*swing,n-i);
   }
   function arcadeEncounterY(run,y){
+    if(run.arcade.specialLayout==='momentum'&&run.gateYs.length>1){const i=arcadeGateGap(run,y);return (run.gateYs[i]+run.gateYs[i+1])/2;}
     const first=run.startY+run.arcade.gates.firstGateMetres*PX_PER_M;
     if(run.arcade.gates.count<2)return (first+run.endY)/2;
     const gap=clamp(Math.floor((y-first)/run.arcade.spacing),0,run.arcade.gates.count-2);
     return first+(gap+.5)*run.arcade.spacing;
   }
+  function arcadeGateGap(run,y){
+    const ys=run.gateYs;let low=0,high=ys.length-1;
+    while(low+1<high){const middle=(low+high)>>1;if(ys[middle]<=y)low=middle;else high=middle;}
+    return Math.min(low,ys.length-2);
+  }
+  function momentumJumpAt(gap){return gap%6===1?'largeHill':gap%6===4?'rainbow':null;}
+  function momentumJumpCap(kind){return kind==='largeHill'?S.jump.hillDurationMax:Math.min(1.3,S.jump.durationMax);}
+  function momentumJumpDuration(kind){return (kind==='largeHill'?S.jump.largeHillSeconds:S.jump.rainbowSeconds)*momentumJumpCap(kind);}
   const ARCADE_ITEMS={
     "pine":{"type":"pine","width":70,"r":14,"treeVariant":"classic"},
     "fir":{"type":"fir","width":70,"r":14,"treeVariant":"classic"},
@@ -192,8 +207,21 @@ window.FROSTLINE_READY = (async () => {
     level.length=g.firstGateMetres+(g.count-1)*g.verticalDistanceMetres+g.finishAfterLastGateMetres;
     const run={id:'arcade',arcade:level,stageIndex:index+1,block,townAfter,objective:'gates',collected:0,totalMushrooms:0,x,selectionY,startY,endY:startY+level.length*PX_PER_M,points:0,hits:0,cleared:0,missed:0,tricks:0,time:0,violation:false,left:false,finishPassed:false,finishHalf:g.openingWidthMetres*PX_PER_M/2*S.race.finishWidthMultiplier,totalGates:g.count};
     state.safeTrails.push(run);block.runs.push(run);
-    for(let i=0;i<g.count;i++)entity('gate',x+(i%2?1:-1)*g.horizontalDistanceMetres*PX_PER_M/2,startY+(g.firstGateMetres+i*g.verticalDistanceMetres)*PX_PER_M,
-      {half:g.openingWidthMetres*PX_PER_M/2,width:g.openingWidthMetres*PX_PER_M,r:0,number:i+1,color:i%2?C.blue:C.red,checked:false,run});
+    run.gateYs=[];run.gateXs=[];let side=-1;
+    for(let i=0;i<g.count;i++){
+      const momentum=level.specialLayout==='momentum',jump=momentum&&i?momentumJumpAt(i-1):null;
+      let y=startY+(g.firstGateMetres+i*g.verticalDistanceMetres)*PX_PER_M;
+      if(momentum&&i){
+        const flight=level.pace*S.physics.speedMultiplier*S.jump.speedBoost*(jump?momentumJumpDuration(jump):0);
+        y=run.gateYs[i-1]+Math.max(level.spacing,jump?flight+380:0);
+        // A short straight recovery leg between cycles mirrors the next set of launches.
+        if(!jump&&(i===1||(i-1)%6!==0))side=-side;
+      }
+      const gx=x+(momentum?side:i%2?1:-1)*g.horizontalDistanceMetres*PX_PER_M/2;
+      run.gateYs.push(y);run.gateXs.push(gx);
+      entity('gate',gx,y,{half:g.openingWidthMetres*PX_PER_M/2,width:g.openingWidthMetres*PX_PER_M,r:0,number:i+1,color:i%2?C.blue:C.red,checked:false,run});
+    }
+    if(level.specialLayout==='momentum'){run.endY=run.gateYs.at(-1)+g.finishAfterLastGateMetres*PX_PER_M;level.length=(run.endY-startY)/PX_PER_M;}
     markArcadeGearGates(run);
     if(!linked)entity('courseStart',x,startY,{r:0,width:700,name:run.stageIndex+'. '+level.name});
     if(townAfter){
@@ -350,15 +378,15 @@ window.FROSTLINE_READY = (async () => {
       // Learn the chase across three clear gates before adding normal forest and traffic.
       reserve(run.x,run.startY-100,first+Math.min(2,g.count-1)*spacing+60,S.arcade.landingClearanceHalfWidth);
     }else if(layout==='momentum'){
-      const speed=run.arcade.pace*S.physics.speedMultiplier,cosine=spacing/Math.hypot(spacing,g.horizontalDistanceMetres*PX_PER_M);
-      const hopSeconds=Math.min(S.jump.smallHillSeconds,spacing*.65/(speed*S.jump.speedBoost*cosine*S.jump.hillDurationMax));
       for(let i=0;i<g.count-1;i++){
-        const y=first+(i+.3)*spacing,roughY=first+(i+.5)*spacing;
-        const hill=place('smallHill',arcadePathX(run,y),y);
-        // A short hop clears the rough patch, then releases steering before the next turn.
-        hill.jumpSeconds=hopSeconds;hill.landingY=first+(i+1)*spacing-35;
-        const rough=place('rugged',arcadePathX(run,roughY),roughY);rough.ry=Math.min(40,spacing*.1);
-        reserve(run.x,first+i*spacing-40,hill.landingY,g.horizontalDistanceMetres*PX_PER_M/2+110);
+        const kind=momentumJumpAt(i);if(!kind)continue;
+        const x=run.gateXs[i],from=run.gateYs[i],to=run.gateYs[i+1],y=from+200;
+        const jump=place(kind,x,y);jump.jumpDurationCap=momentumJumpCap(kind);jump.landingY=to-180;
+        // Room for full-sized flight and a clear landing; slalom resumes after this straight corridor.
+        reserve(x,from-80,to+80,150);
+        if(kind==='largeHill'&&i%12===7){
+          const rough=place('rugged',x,y+(to-y-180)*.45);rough.ry=55;
+        }
       }
     }else if(layout==='jumpLine'){
       const hill='largeHill',duration=S.jump.largeHillSeconds*S.jump.hillDurationMax;
@@ -1129,9 +1157,15 @@ window.FROSTLINE_READY = (async () => {
   }
   function launch(duration=S.jump.baseSeconds,multCap=S.jump.durationMax) {
     const p=state.p;if(p.fall||p.air||p.jumpLock>0)return;
-    const multiplier=Math.min(multCap,clamp(S.jump.durationBase+p.speed/S.jump.durationSpeedDivisor,S.jump.durationMin,S.jump.durationMax));
-    p.air=p.airTotal=duration*multiplier;p.jumpHeight=clamp(S.jump.heightBase+p.speed*S.jump.heightPerSpeed,S.jump.heightMin,S.jump.heightMax)*duration;
-    p.airPose=0;p.airTuck=0;p.onRugged=false;p.airHeading=p.heading;p.airSpeed=p.speed*S.jump.speedBoost;p.airSpin=Math.abs(Math.sin(p.heading))*S.jump.spinRate;p.onIce=false;
+    const downhill=Math.cos(p.heading)>S.physics.downhillCosMinimum;
+    const normal=downhill?topSpeed():p.mode==='walk'?S.physics.walkSpeed:p.mode==='traverse'?S.physics.traverseSpeed:topSpeed()*S.physics.acrossSpeedFraction;
+    const base=p.speed>0?Math.max(p.speed,normal):0;
+    const multiplier=Math.min(multCap,clamp(S.jump.durationBase+base/S.jump.durationSpeedDivisor,S.jump.durationMin,S.jump.durationMax));
+    p.air=p.airTotal=duration*multiplier;p.jumpHeight=clamp(S.jump.heightBase+base*S.jump.heightPerSpeed,S.jump.heightMin,S.jump.heightMax)*duration;
+    // Downhill jumps always beat the normal speed cap, including takeoffs from rough snow.
+    // Carry an already faster flight without multiplying its speed again on every jump.
+    p.airPose=0;p.airTuck=0;p.onRugged=false;p.airHeading=p.heading;p.airSpeed=p.speed>0?Math.max(p.speed,normal*S.jump.speedBoost):0;p.airSpin=Math.abs(Math.sin(p.heading))*S.jump.spinRate;p.onIce=false;
+    p.speed=p.airSpeed;p.vx=Math.sin(p.heading)*p.speed;p.vy=Math.cos(p.heading)*p.speed;
     p.spin=0;p.jumpLock=p.airTotal+S.jump.cooldownSeconds;burst(p.x,p.y,C.ice,7);beep(520,.1);
   }
 
@@ -1179,12 +1213,27 @@ window.FROSTLINE_READY = (async () => {
       }
       return;
     }
+    // Recovery protection does not suppress helpful jump surfaces.
+    if(o.type==='ramp'||o.type==='mogul'||o.type==='mushroom'||o.type==='rainbow'||o.type==='smallHill'||o.type==='largeHill'){
+      if(p.awaitingInput||p.fall||p.air>0||p.jumpLock>0||o.touched)return;
+      if(tooSlowForObstacle(o))p.slowContacts.add(o);
+      if(p.slowContacts.has(o)||!p.onIce&&p.speed<=S.physics.walkingBumpLimit&&(p.mode==='traverse'||p.mode==='walk'))return;
+      o.touched=true;
+      launch(o.jumpSeconds??(o.arcadeFeature&&['ramp','mogul'].includes(o.type)?S.arcade.rampSeconds:o.type==='rainbow'?S.jump.rainbowSeconds:o.type==='mushroom'?S.jump.mushroomSeconds:o.type==='smallHill'?S.jump.smallHillSeconds:o.type==='largeHill'?S.jump.largeHillSeconds:o.type==='ramp'?S.jump.rampSeconds:S.jump.mogulSeconds),o.jumpDurationCap??(o.type==='smallHill'||o.type==='largeHill'?S.jump.hillDurationMax:S.jump.durationMax));
+      if(o.landingY!==undefined&&p.air>0){
+        const downhill=Math.cos(p.airHeading)*p.airSpeed;
+        if(downhill>0){p.air=p.airTotal=Math.min(p.air,Math.max(.12,(o.landingY-p.y)/downhill));p.jumpLock=p.airTotal+S.jump.cooldownSeconds;}
+      }
+      if(o.type==='rainbow'){p.rainbow=S.jump.rainbowTrailSeconds;p.boost=S.jump.rainbowBoostSeconds;announce('SOMEWHERE OVER THE RAINBOW','A spectacularly impractical shortcut.',C.blue,2.5);}
+      if(o.type==='mushroom'){p.boost=S.jump.mushroomBoostSeconds;say('BOING. Bad decisions, good airtime.',o,2.1);}
+      return;
+    }
     // Remember slow overlaps during recovery too, until the player moves fully clear.
     if(tooSlowForObstacle(o))p.slowContacts.add(o);
     if(p.awaitingInput||p.shield>0||o===p.crashObstacle)return;
     if(o.type==='wolf'&&killWolf(o))return;
     if(['bear','lurker'].includes(o.type)&&knockOut(o,o.type))return;
-    if(o.touched&&['ramp','mogul','mushroom','rainbow','sled','bush','cat','smallHill','largeHill'].includes(o.type))return;
+    if(o.touched&&['sled','bush','cat'].includes(o.type))return;
     const uphill=p.vy<0,fast=p.speed>S.physics.fastImpactSpeed;
     if(o.type==='cat'){
       if(o.climb>8)return;
@@ -1201,22 +1250,11 @@ window.FROSTLINE_READY = (async () => {
     // Walking bumps stop against obstacles without a fall; moving away from an overlap is allowed.
     const movingTerrain=o.type==='rollingSnowball'&&o.rollState==='rolling'||o.type==='fallingTree'&&o.fallState==='falling';
     if(!movingTerrain&&!p.onIce&&p.air<=0&&p.speed<=S.physics.walkingBumpLimit&&(p.mode==='traverse'||p.mode==='walk')){
-      if(['ramp','mogul','mushroom','rainbow','bush','smallHill','largeHill'].includes(o.type))return;
+      if(o.type==='bush')return;
       const before=p.walkOrigin;
       if(before&&obstacleClearance(o,p.x,p.y)<=obstacleClearance(o,before.x,before.y)){
         p.x=before.x;p.y=before.y;p.speed=p.vx=p.vy=0;
       }
-      return;
-    }
-    if(o.type==='ramp'||o.type==='mogul'||o.type==='mushroom'||o.type==='rainbow'||o.type==='smallHill'||o.type==='largeHill'){
-      if(p.air>0||p.jumpLock>0)return;o.touched=true;
-      launch(o.jumpSeconds??(o.arcadeFeature&&['ramp','mogul'].includes(o.type)?S.arcade.rampSeconds:o.type==='rainbow'?S.jump.rainbowSeconds:o.type==='mushroom'?S.jump.mushroomSeconds:o.type==='smallHill'?S.jump.smallHillSeconds:o.type==='largeHill'?S.jump.largeHillSeconds:o.type==='ramp'?S.jump.rampSeconds:S.jump.mogulSeconds),o.type==='smallHill'||o.type==='largeHill'?S.jump.hillDurationMax:S.jump.durationMax);
-      if(o.landingY!==undefined&&p.air>0){
-        const downhill=Math.cos(p.airHeading)*p.airSpeed;
-        if(downhill>0){p.air=p.airTotal=Math.min(p.air,Math.max(.12,(o.landingY-p.y)/downhill));p.jumpLock=p.airTotal+S.jump.cooldownSeconds;}
-      }
-      if(o.type==='rainbow'){p.rainbow=S.jump.rainbowTrailSeconds;p.boost=S.jump.rainbowBoostSeconds;announce('SOMEWHERE OVER THE RAINBOW','A spectacularly impractical shortcut.',C.blue,2.5);}
-      if(o.type==='mushroom'){p.boost=S.jump.mushroomBoostSeconds;say('BOING. Bad decisions, good airtime.',o,2.1);}
       return;
     }
     if(p.air>0 && !['lodge','rental'].includes(o.type))return;

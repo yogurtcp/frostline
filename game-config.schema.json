@@ -3958,8 +3958,9 @@
         },
         "speedBoost": {
           "type": "number",
-          "minimum": 0,
-          "exclusiveMinimum": 0
+          "minimum": 1,
+          "exclusiveMinimum": 1,
+          "description": "Moving jumps target this multiple of ordinary movement speed; downhill jumps use the stage's full top speed even after rough snow. Must exceed 1. Faster existing momentum carries without multiplying again on repeated jumps."
         },
         "smallHillSeconds": {
           "type": "number",
@@ -7912,7 +7913,7 @@
                   "snowballs",
                   "timber"
                 ],
-                "description": "Reusable arranged encounters for a special stage. yetiIntro clears the first three gates for learning the chase. jumpLine uses straight gates; momentum uses short hops along normal slalom legs. Both reserve landing space. Other stages retain normal slalom gates."
+                "description": "Reusable arranged encounters for a special stage. yetiIntro clears the first three gates for learning the chase. jumpLine uses straight gates. momentum alternates large hills/rainbows in roomy straight jump corridors between slalom sections, with sparse rough snow beneath some hills. Landing space is reserved."
               },
               "briefing": {
                 "type": "string",
