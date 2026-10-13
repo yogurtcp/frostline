@@ -4,7 +4,11 @@
   "arcade": {
     "startStage": 1,
     "autoStart": true,
-    "campaignVersion": 6,
+    "campaignVersion": 7,
+    "stageFlow": {
+      "townEveryStages": 3,
+      "linkedStageGapMetres": 0
+    },
     "stages": {
       "Warmup": [
         1,

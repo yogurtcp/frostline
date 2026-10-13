@@ -4,7 +4,7 @@
 
 The gate-pace pursuit calculation remains removed. Stage speeds and gate geometry resolve from the explicit knob tables, with an optional Yeti-speed override for a special stage; there are no calculated chase-speed caps or automatic catch-up adjustments.
 
-There are 29 stages, editable in order, with safe towns between them. Warmup introduces gates and light traffic; Denser Forest introduces one slow Yeti across a clear opening before the forest begins. The first Yeti chase remains simple; later special stages mix dense traffic, slippery lakes, and forest pursuit. No menus. Missing the finish fails Arcade in place; death returns to the summit.
+There are 29 stages, editable in order, linked into continuous slopes of three stages by default. Safe towns follow stages 3, 6, 9, 12, 15, 18, 21, 24 and 27; the final two stages end the campaign. Warmup introduces gates and light traffic; Denser Forest introduces one slow Yeti across a clear opening before the forest begins. Later special stages mix dense traffic, slippery lakes, and forest pursuit. No menus. Missing a slope's finish fails Arcade in place; death returns to the summit.
 
 ## Quick start
 
@@ -41,6 +41,27 @@ Add one row per stage to `arcade.stages`: `"Name": [obstacles, chase, miss, spee
 
 Here `My snowy disaster` runs knobs [2,2,2,2,2] with 18 gates, teal yetis, slightlyRare 0.3, and `pine`/`skier`/`rock` item overrides; everything else comes from `stageDefaults`. `Warmup` runs pure defaults. Level meanings live in `arcade.knobLevels`.
 
+### Link stages and place towns
+
+`arcade.stageFlow` defines the default cadence; a named stage's optional `townAfter` override controls its own boundary:
+
+```json
+"stageFlow": {
+  "townEveryStages": 3,
+  "linkedStageGapMetres": 0
+},
+"stageOverrides": {
+  "Monster": { "townAfter": false },
+  "Rush Hour": { "townAfter": true }
+}
+```
+
+Merge these fields into existing overrides. This example skips the usual stage-3 town and places one after Rush Hour (4), making stages 1–4 one slope. The numbered cadence remains anchored to the campaign: the next default town is after stage 6. `townAfter: true` forces a town; `false` links to the next stage; omission uses the cadence. Set `townEveryStages: 1` to restore a town after every stage. For entirely named boundaries, use a cadence larger than the stage count and set `townAfter: true` only on your chosen stages. The last stage always ends the campaign, regardless of its override.
+
+At linked boundaries the stage name/HUD changes while skiing continues. There are no internal finish gates, start stripes, spectators or result panels. Gate numbers restart for the new stage; gate charges, combo, jumps, heading and speed carry across. Two half-spacing run-outs maintain ordinary gate spacing at a join; `linkedStageGapMetres` adds extra snow distance if desired. The first slope approach and final finish run-out retain their ordinary geometry. A group is prepared before it enters view, including future waiting start-line Yetis, so objects do not pop in at boundaries.
+
+Surviving Yetis, bears and awake wolves remain part of the connected slope and can accumulate through later stages, keeping their own chase speeds and prey/obstacle behavior. Each stage still introduces its configured monsters; waiting Yetis wake when their own stage starts. A town finish retires the whole slope's monsters, including sleeping ones, and remains a safe intermission. Starting practice midway through a group continues only to its next configured town.
+
 ### Gates
 
 - `count`: exact total number of gates, including sword gates.
@@ -48,7 +69,7 @@ Here `My snowy disaster` runs knobs [2,2,2,2,2] with 18 gates, teal yetis, sligh
 
 For ordinary stages, geometry (horizontal/vertical distance, opening, first-gate and finish run-outs) derives from the speed knob: each is a fixed percentage of the stage top speed from `arcade.knobLevels.gateSpacing`. Centres alternate at plus/minus half the derived horizontal distance. There is no added course sway.
 
-Course length is the derived first run-out + `(count − 1) × derived vertical spacing` + derived finish run-out. Changing count moves the finish and following town together. The finish opening still uses the global `race.finishWidthMultiplier` (2).
+Course length is the derived first run-out + `(count − 1) × derived vertical spacing` + derived finish run-out. Linked stage ends/starts replace their run-outs with half the local gate spacing (plus any configured link gap on the next stage's start). Changing count moves later stages and the slope's following town together. Only a town boundary or the campaign's end has finish flags; their opening still uses the global `race.finishWidthMultiplier` (2).
 
 The ice knob sets the share of gates with ice spanning the opening from `knobLevels.iceGatePercent` (rounded to whole gates, level 1 is none). Selected gates vary each run. These patches are independent of `smallLake`/`largeLake` density; use zero for both if you only want gate ice.
 
@@ -64,7 +85,7 @@ Gate labels show each gate's contribution as a share of one full item (`+14% SHI
 
 The chase knob sets the waiting start-line group from `knobLevels.chaseCount` and `chaseSpeedPercent` (percent of stage top); `yetiColor` (teal/orange/violet) paints it. The miss knob arms that share of gates (`knobLevels.missGatePercent`, rounded) with `knobLevels.missWolves` sleeping wolves each, marked with a red `!`; they wake at the chase speed when their gate is missed. Clearing an armed gate leaves its wolves asleep. Bumping one wakes it. Colors select visual tiers only, shown through the body tint without a hovering bar/scarf. Zero count/percent disables the group. No gate-pace calculation, catch-up boost, or hidden color-speed multiplier applies.
 
-Start-line yetis remain visible before the race, react when you cross, and chase after `arcade.wakeSeconds`. Pursuers follow off piste and retire at course end. The separately placed sleeping yeti items use their named color and the stage’s knob-derived chase speed, even if its start-line count is zero.
+Start-line yetis remain visible before their stage, react when you cross its boundary, and chase after `arcade.wakeSeconds`. Pursuers follow off piste and across linked stages, retiring at the connected slope's town finish. The separately placed sleeping yeti items use their named color and the stage’s knob-derived chase speed, even if its start-line count is zero.
 
 ### Item density
 
@@ -153,13 +174,14 @@ Random log jumps, falling trees and rolling balls are explicitly disabled in ear
 | 12 | Timber! | Seventeen alternating-side falling trees, sparse ordinary trees and one Yeti. |
 | 14 | Snowball Run | Ten alternating-side rolling balls, a few trees/hills and two Yetis. |
 
-These names are ordinary entries in `arcade.stages`. Move their rows to insert them elsewhere; keep the matching `stageOverrides` keys. Set `startStage` to the current row number to try one directly. The campaign revision is now 6, preserving earlier campaign records separately.
+These names are ordinary entries in `arcade.stages`. Move their rows to insert them elsewhere; keep the matching `stageOverrides` keys. Set `startStage` to the current row number to try one directly. The campaign revision is now 7, preserving earlier campaign records separately after the connected-slope redesign.
 
 New optional fields in a stage override:
 
 - `specialLayout`: `none` (default), `yetiIntro`, `jumpLine`, `momentum`, `iceIslands`, `iceChaos`, `snowballs`, or `timber`. These reusable arrangements do not depend on stage names. `yetiIntro` clears the route through the first three gates before ordinary forest/traffic begins; it does not set the Yeti count or speed. Encounter counts follow gate count; jump spacing also allows room for flight and landing. Authored encounters are independent of `itemRates`, which add surrounding scenery/traffic. Set the layout to `none` to remove the arrangement.
 - `briefing`: a short instruction shown at the stage start.
 - `yetiSpeedPercent`: explicit Yeti chase speed as a percentage of the stage top speed. Omission uses the chase knob. Air Time and Keep Your Momentum use 105% (110.25 km/h at their 105 km/h top). Aim Before Ice uses 70% for its shoreline Yetis (63 km/h); its start-line count remains zero. Guard wolves still use the normal chase knob speed.
+- `townAfter`: optional town boundary override; see Link stages and place towns above.
 
 `jumpLine` uses straight gates because its long airborne heading is locked. Air Time puts barriers between gates with hills 18 m uphill and reserved approach/landing space, alternating 100 m logs and five-tree rows. `momentum` retains normal slalom geometry: small hills and shallow rough patches follow each gate-to-gate leg. These hills use shorter flight times, capped to land before the next gate so steering returns for the turn. Surrounding forest remains configured through itemRates; only the hop/landing corridor is reserved. Rough slowdown does not apply in the air. Keep Your Momentum is stage 9, after Fast Monster and 2 Fast 2 Forest. The optional iceIslands layout still offers short practice patches. Aim Before Ice now uses iceChaos: randomly sized/offset lakes, three NPCs on each approach and a wolf/Yeti on the snowy far bank. Lake diameters range 44–68 m across and 44–62 m downhill before shape variation. NPC skiers and boarders coast with locked entry heading and the same downhill acceleration as the player; snow restores steering. Shore predators stay off ice and wait while their target is on ice, then pursue on snow. Snowball and timber layouts retain slalom gates and alternate which side of the route their encounters start on. Normal stages still use their existing placement rules.
 
@@ -167,7 +189,7 @@ New optional fields in a stage override:
 
 Ordinary successful gates provide 1.5 shield charges per fully cleared stage; four successful sword gates earn one sword. These global amounts remain in `arcade.gear`. Charge and up to four of each item carry through towns. An attempt starts empty. If every gate is a sword gate, that stage awards no shield charge. Touching an enemy (bear, sleeping yeti, wolf) slows you down instead of crashing you, and spends no sword or shield; ramming one dead at speed keeps that clean kill, and sleeping yetis die on any touch above a creep. Dogs and people still knock you down (shields apply). Chaser catches and wolf attacks stay lethal, with swords working as before.
 
-Towns are safe intermissions and the next stage starts automatically at their exit. No money or timed qualification applies. Crossing outside the finish fails Arcade without teleporting; death returns to the summit (or the configured automatic start). Completing the final configured stage ends the run.
+Towns are safe intermissions after configured groups; the next group starts automatically at their exit. Internal stage boundaries advance by downhill distance, including off piste, and keep the player and monsters moving. Crossing outside a group's actual finish flags fails Arcade without teleporting; death returns to the summit (or the configured automatic start). Completing the final configured stage ends the run.
 
 `frostline-v2` browser storage keeps wallet, regular-course times and Arcade records. Practice starts do not update Arcade records. `campaignVersion` can be incremented after a substantial redesign to retain the previous record separately. Refresh starts a new attempt rather than resuming one.
 

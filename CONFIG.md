@@ -14,7 +14,7 @@ World coordinates increase rightward and downhill. `world.unitsPerMetre` default
 
 | Section | What it controls |
 | --- | --- |
-| `arcade` | 29 compact stage rows plus central knob tables, stage defaults/overrides, terrain, traffic, wolf-guard penalties and run-result duration |
+| `arcade` | 29 compact stage rows plus central knob tables, connected-stage/town flow, stage defaults/overrides, terrain, traffic, wolf-guard penalties and run-result duration |
 | `courses` | Names, fees, lengths in metres, pace, gate spacing, obstacle density and type |
 | `race` | Gate widths, required success fraction, point rewards, finish bonuses, choice rows and scenery placement |
 | `mushroomHunt` | Mushroom count, required fraction, points, pickup size, spread, spacing clearances and glints in Spore Decisions |
@@ -98,6 +98,10 @@ Casual skier turns use `skiers.slowTurnSeconds: [2.5, 5.5]`, `slowTurnChance: 0.
 
 
 Special Arcade stages live in the same ordered `arcade.stages` map: Keep Your Momentum (9), Rush Hour (4), Aim Before Ice (6), Air Time (10), Timber! (12), Snowball Run (14). Their matching `stageOverrides` use optional `specialLayout` (`none`, `yetiIntro`, `jumpLine`, `momentum`, `iceIslands`, `iceChaos`, `snowballs`, `timber`) for reusable arranged encounters, plus `briefing` for the start instruction. Layout encounters are independent of random `itemRates`; those rates add surrounding objects. `jumpLine` uses straight gates; `momentum` uses short hops along ordinary slalom legs. Both reserve approach/landing corridors. Move stage rows to change insertion points; rename the override key with the stage if renaming. `startStage` remains a 1-based row number.
+
+Arcade now links stages into groups of three. `arcade.stageFlow.townEveryStages: 3` puts towns after stage numbers 3, 6, 9, etc.; set 1 for the old every-stage cadence. Optional `arcade.stageOverrides["Stage name"].townAfter` forces (`true`) or skips (`false`) that stage's town boundary. Omission uses the global numbered cadence. For example, `Monster: {townAfter:false}` and `Rush Hour: {townAfter:true}` join stages 1–4, with the next default town still at 6. Merge these fields into existing overrides. A cadence larger than the stage count lets named `townAfter:true` overrides define all intermediate breaks. The final stage always ends the campaign.
+
+`arcade.stageFlow.linkedStageGapMetres: 0` adds no extra gap: two half-spacing run-outs keep gate rhythm at joins. Increase it for a longer snow connector. These fields are optional with loader defaults of 3/0. Connected slopes are prepared in advance and retain surviving monsters, player speed/heading/jumps, combo and gear through internal boundaries. Per-stage gate counts and monster introductions still apply. Finish flags, spectators, result panels and protected towns appear at group ends; a town retires the entire group's predators. Practice starts proceed from the selected stage to its next town. Campaign version is 7 to separate records after this redesign. See ARCADE.md for an editable JSON example.
 
 Optional per-stage `yetiSpeedPercent` overrides the chase knob's Yeti speed percentage only. Air Time uses 105% of its 105 km/h stage top speed (110.25 km/h) for its three Yetis; Keep Your Momentum uses the same percentage for three violet Yetis; other stages and guard-wolf speeds are unchanged. The current campaign revision is 6 so earlier records remain separate. See ARCADE for the layouts and stage list.
 

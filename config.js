@@ -12,6 +12,9 @@ window.loadFrostlineConfig = async function () {
   config.chasers.yetiCelebrationJumpPixels ??= 14;
   config.village.names ??= ['Snowdrift','Pinehaven','Whitecap','Glacier Bend'];
   config.village.backRoute ??= {enabled:true,width:100,offset:310};
+  config.arcade.stageFlow ??= {};
+  config.arcade.stageFlow.townEveryStages ??= 3;
+  config.arcade.stageFlow.linkedStageGapMetres ??= 0;
   config.predators.divertPathWidthMetres ??= 8;
   config.predators.divertReleaseWidthMetres ??= 12;
   config.predators.divertPathAngleDegrees ??= 30;
@@ -39,7 +42,7 @@ window.loadFrostlineConfig = async function () {
   validate(config, window.FROSTLINE_SCHEMA, 'config');
   if (!Object.keys(config.arcade.stages).length) throw new Error('arcade.stages needs at least one stage');
   for (const name of Object.keys(config.arcade.stageOverrides)) if (!(name in config.arcade.stages)) throw new Error(`stageOverrides has no stage named ${name}`);
-  config.arcade.stages = Object.entries(config.arcade.stages).map(([name, knobs]) => {
+  config.arcade.stages = Object.entries(config.arcade.stages).map(([name, knobs], index) => {
     const base = config.arcade.stageDefaults, over = config.arcade.stageOverrides[name] || {};
     return { name, knobs,
       yetiColor: over.yetiColor ?? base.yetiColor,
@@ -50,6 +53,7 @@ window.loadFrostlineConfig = async function () {
       endTrafficMultiplier: over.endTrafficMultiplier ?? base.endTrafficMultiplier,
       specialLayout: over.specialLayout ?? 'none',
       briefing: over.briefing ?? '',
+      townAfter: over.townAfter ?? ((index+1)%config.arcade.stageFlow.townEveryStages===0),
       yetiSpeedPercent: over.yetiSpeedPercent ?? null };
   });
   for (const [id, target] of Object.entries(config.timing.targets)) {

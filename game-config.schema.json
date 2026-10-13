@@ -6896,6 +6896,25 @@
           "type": "number",
           "exclusiveMinimum": 0
         },
+        "stageFlow": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Arcade stages link into continuous slopes until a town break. Per-stage townAfter overrides the numbered cadence.",
+          "properties": {
+            "townEveryStages": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 500,
+              "description": "Town after each multiple of this stage number (default 3). Set 1 for a town after every stage; stageOverrides can move individual breaks."
+            },
+            "linkedStageGapMetres": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 200,
+              "description": "Extra snow distance between linked stages, added to their normal gate spacing (default 0). Does not stop the player or retire monsters."
+            }
+          }
+        },
         "campaignVersion": {
           "type": "integer",
           "minimum": 1,
@@ -7412,6 +7431,10 @@
             "required": [],
             "description": "Partial verbose stage keyed by stage name; unknown names fail validation.",
             "properties": {
+              "townAfter": {
+                "type": "boolean",
+                "description": "Override the town break after this named stage. True ends the connected slope with a town; false links directly to the next stage, carrying surviving monsters. The last stage always ends the campaign."
+              },
               "yetiColor": {
                 "type": "string",
                 "enum": [
