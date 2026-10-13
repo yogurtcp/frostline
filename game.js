@@ -668,8 +668,6 @@ window.FROSTLINE_READY = (async () => {
       const points=[entry];
       for(let row=0;row<V.rows;row++)points.push({x:clamp(centers[row]+side*(halfWidths[row]+V.houseWidth[1]*V.houseFootWidthRatio+B.offset),base-V.halfWidth+B.width,base+V.halfWidth-B.width),y:rowYs[row]+(row?60:-70)});
       points.push(exit);town.backRoute={surface:'snow',natural:true,width:B.width,points};roads.push(town.backRoute);
-      entity('backRouteSign',entry.x+side*65,entry.y+10,{r:0,width:60,town,side});
-      entity('backRouteSign',exit.x+side*65,exit.y-20,{r:0,width:60,town,side:-side,rejoin:true});
     }
     const houseCount=Math.round(V.houseCount*(varied?between(...R.houseCountScale):1));
     // Fill the inner walls along the whole route first, then grow outward into blocks.
@@ -2112,7 +2110,6 @@ window.FROSTLINE_READY = (async () => {
       text('FINISH',s.x,s.y-31,20,C.teal);text('BETWEEN THE FLAGS',s.x,s.y+26,9,C.muted);return;
     }
     if(o.type==='villageTitle'){text(o.town.name.toUpperCase().split('').join(' '),s.x,s.y,22,C.teal);text('VILLAGE  ·  PLEASE DISTURB THE PEACE QUIETLY',s.x,s.y+23,8,C.muted);return;}
-    if(o.type==='backRouteSign'){const label=o.rejoin?'MAIN ROAD':'BACK WAY';box(s.x-1,s.y-16,2,18,'#976e4d');box(s.x-33,s.y-23,66,11,'#e6dcc4');text((o.side<0?'← ':'')+label+(o.side>0?' →':''),s.x,s.y-17,8,C.teal);return;}
     if(o.type==='liftLabel'){text('SUMMIT LIFT',s.x,s.y,10,C.ink);text(state.arcade?'ARCADE: KEEP SKIING DOWN':'SKI IN TO RIDE',s.x,s.y+15,8,C.muted);return;}
     const wiggle=o.roam?Math.sin(clock*6+o.phase)*1.2:0;
     if(o.cheerUntil>clock&&o.type.startsWith('person')){
