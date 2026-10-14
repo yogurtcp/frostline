@@ -4,7 +4,7 @@
 
 The gate-pace pursuit calculation remains removed. Stage speeds and gate geometry resolve from the explicit knob tables, with an optional Yeti-speed override for a special stage; there are no calculated chase-speed caps or automatic catch-up adjustments.
 
-There are 29 stages, editable in order, linked into continuous slopes of three stages by default. Safe towns follow stages 3, 6, 9, 12, 15, 18, 21, 24 and 27; the final two stages end the campaign. Warmup introduces gates and light traffic; Denser Forest introduces one slow Yeti across a clear opening before the forest begins. Later special stages mix dense traffic, slippery lakes, and forest pursuit. No menus. Missing a slope's finish fails Arcade in place; death returns to the summit.
+There are 27 stages, editable in order, linked into continuous slopes of three stages by default. Safe towns follow stages 3, 6, 9, 12, 15, 18, 21 and 24; the final slope, stages 25–27, ends the campaign. Warmup introduces gates and light traffic; Denser Forest introduces one slow Yeti across a clear opening before the forest begins. Later special stages mix dense traffic, slippery lakes, and forest pursuit. No menus. Missing a slope's finish fails Arcade in place; death returns to the summit.
 
 ## Quick start
 
@@ -73,7 +73,7 @@ Ordinary course length is the derived first run-out + `(count − 1) × derived 
 
 The ice knob sets the share of gates with ice spanning the opening from `knobLevels.iceGatePercent` (rounded to whole gates, level 1 is none). Selected gates vary each run. These patches are independent of `smallLake`/`largeLake` density; use zero for both if you only want gate ice.
 
-Design guideline: ordinary stages share gate geometry for a given speed — faster stages get more spread-out gates (larger vertical distance and wider openings) so reaction time stays fair. jumpLine uses straight gates throughout; momentum alternates ordinary slalom sections with straight, extended jump corridors so its locked-heading flights can clear the next gate.
+Design guideline: ordinary stages share gate geometry for a given speed — faster stages get more spread-out gates (larger vertical distance and wider openings) so reaction time stays fair. jumpLine remains available for custom straight-gate jump stages; momentum keeps alternating slalom gates and occasional gate-versus-jump choices, with landing room for its locked-heading flights.
 
 ### Gate combos and gear
 
@@ -128,28 +128,26 @@ Densities are placement attempts, not exact counts: gates, finish openings, lake
 | 7 | Fast Monster | 13111 | 90 | 2 orange @63 | 0% | 0% |
 | 8 | 2 Fast 2 Forest | 23111 | 90 | 2 orange @63 | 0% | 0% |
 | 9 | Keep Your Momentum | 14111 | 90 | 3 magenta @92 | 0% | 0% |
-| 10 | Air Time | 14121 | 105 | 3 violet @110.25 | 0% | 0% |
-| 11 | Darker Woods, Icy Lakes | 32112 | 90 | 1 orange @45 | 0% | 25% |
-| 12 | Timber! | 12111 | 90 | 1 orange @45 | 0% | 0% |
-| 13 | Dense Chase | 33122 | 105 | 2 violet @73.5 | 0% | 25% |
-| 14 | Snowball Run | 13121 | 105 | 2 orange @73.5 | 0% | 0% |
-| 15 | Here We Go | 12131 | 120 | 1 orange @60 | 0% | 0% |
-| 16 | Faster, Careful | 22232 | 120 | 1 orange @60 | 25% | 25% |
-| 17 | My God | 23333 | 120 | 2 orange @84 | 50% | 50% |
-| 18 | Oh No | 33333 | 120 | 2 orange @84 | 50% | 50% |
-| 19 | Darkest Spots | 41112 | 90 | none | 0% | 25% |
-| 20 | Darker and Darker | 42113 | 90 | 1 violet @45 | 0% | 50% |
-| 21 | Almost There | 43113 | 90 | 2 violet @63 | 0% | 50% |
-| 22 | Good Luck | 14114 | 90 | 3 violet @81 | 0% | 100% |
-| 23 | Too Fast | 11141 | 150 | none | 0% | 0% |
-| 24 | Don't Miss | 11411 | 90 | none | 100% | 0% |
-| 25 | Nowhere to Hide | 34111 | 90 | 3 orange @81 | 0% | 0% |
-| 26 | Black Ice | 11134 | 120 | none | 0% | 100% |
-| 27 | No Room for Error | 22442 | 150 | 1 orange @75 | 100% | 25% |
-| 28 | Everything Hurts | 34333 | 120 | 3 orange @108 | 50% | 50% |
-| 29 | You Asked For This | 44444 | 150 | 3 orange @135 | 100% | 100% |
+| 10 | Timber! | 12111 | 90 | 1 orange @45 | 0% | 0% |
+| 11 | Dense Chase | 33122 | 105 | 2 violet @73.5 | 0% | 25% |
+| 12 | Snowball Run | 13121 | 105 | 2 orange @73.5 | 0% | 0% |
+| 13 | Here We Go | 12131 | 120 | 1 orange @60 | 0% | 0% |
+| 14 | Faster, Careful | 22232 | 120 | 1 orange @60 | 25% | 25% |
+| 15 | My God | 23333 | 120 | 2 orange @84 | 50% | 50% |
+| 16 | Oh No | 33333 | 120 | 2 orange @84 | 50% | 50% |
+| 17 | Darkest Spots | 41112 | 90 | none | 0% | 25% |
+| 18 | Darker and Darker | 42113 | 90 | 1 violet @45 | 0% | 50% |
+| 19 | Almost There | 43113 | 90 | 2 violet @63 | 0% | 50% |
+| 20 | Good Luck | 14114 | 90 | 3 violet @81 | 0% | 100% |
+| 21 | Too Fast | 11141 | 150 | none | 0% | 0% |
+| 22 | Don't Miss | 11411 | 90 | none | 100% | 0% |
+| 23 | Nowhere to Hide | 34111 | 90 | 3 orange @81 | 0% | 0% |
+| 24 | Black Ice | 11134 | 120 | none | 0% | 100% |
+| 25 | No Room for Error | 22442 | 150 | 1 orange @75 | 100% | 25% |
+| 26 | Everything Hurts | 34333 | 120 | 3 orange @108 | 50% | 50% |
+| 27 | You Asked For This | 44444 | 150 | 3 orange @135 | 100% | 100% |
 
-Knobs read `[obstacles, chase, miss, speed, ice]`, levels 1–4. The Ice column counts dedicated gate-ice patches; lake layouts and lake item rates are separate. Chase shows resolved count, color and km/h; guarded shows the share of gates with a 3-wolf pack; ice shows the share of gates with a frozen patch. Common rate per obstacle level lives in `knobLevels`. Existing stages retain their relative order; six named special stages interrupt the progression.
+Knobs read `[obstacles, chase, miss, speed, ice]`, levels 1–4. The Ice column counts dedicated gate-ice patches; lake layouts and lake item rates are separate. Chase shows resolved count, color and km/h; guarded shows the share of gates with a 3-wolf pack; ice shows the share of gates with a frozen patch. Common rate per obstacle level lives in `knobLevels`. Existing stages retain their relative order; five named special stages interrupt the progression.
 
 ### Concept progression
 
@@ -157,11 +155,11 @@ Knobs read `[obstacles, chase, miss, speed, ice]`, levels 1–4. The Ice column 
 | --- | --- | --- |
 | Gates and traffic | 1, Warmup: light traffic, no enemies | 4, Rush Hour: crowded traffic and two Yetis |
 | Yeti pursuit | 2, Denser Forest: one teal Yeti at 45 km/h, clear first three gates | 3, Monster; then multiple/faster chases |
-| Jumping | The initial control hint explains manual jumping; ordinary hills launch on contact | 9, Keep Your Momentum: large hills/rainbows with boosted flights and sparse rough snow; 10, Air Time: long jumps over logs/tree rows |
+| Jumping | The initial control hint explains manual jumping; ordinary hills launch on contact | 9, Keep Your Momentum: large hills/rainbows with boosted flights and sparse rough snow |
 | Missed-gate wolves | 5, Miss and Be Eaten: marked sleeping wolves, only 25% of gates guarded | Later stages raise the guarded share |
 | Ice steering lock | 6, Aim Before Ice: irregular large lakes, slippery skier traffic and shoreline ambushes | 11 and later icy chases |
 
-Random log jumps, falling trees and rolling balls are explicitly disabled in earlier stages, so they cannot appear unexpectedly before Air Time (10), Timber! (12), and Snowball Run (14). Keep Your Momentum now precedes the long-log challenge as a harder stage, rather than an enemy-free tutorial. Falling-tree and rolling-ball warnings are introduced in their focused stages. These restrictions are ordinary `itemRates: 0` settings; update them if moving those lessons elsewhere.
+Random logs remain disabled before Dense Chase (11); falling trees and rolling balls are disabled before Timber! (10) and Snowball Run (12). Those two hazards retain their focused introductions. Air Time and Darker Woods, Icy Lakes have been removed: Momentum now provides the big-jump challenge, while Aim Before Ice already introduces large lakes and slippery skier traffic. The restrictions are ordinary stage rates, not global unlocks.
 
 ## Special stages
 
@@ -170,23 +168,22 @@ Random log jumps, falling trees and rolling balls are explicitly disabled in ear
 | 4 | Rush Hour | 40 gates / about 1,365 m of dense weaving skier traffic, overtakers and two Yetis that can divert to NPC prey. |
 | 6 | Aim Before Ice | 24 gates, irregular large lakes, sliding NPCs and wolves/Yetis waiting on the far banks. |
 | 9 | Keep Your Momentum | 40 gates, seven large hills, six rainbow jumps and three small slowdown patches. Slalom gates keep alternating; four jumps compete with the next gate for a gear-versus-speed choice; three magenta Yetis at the user’s 92 km/h versus a 90 km/h player top, with four seconds to get ready. |
-| 10 | Air Time | Five large-hill sequences, alternating long logs and tree rows, with three fast Yetis. |
-| 12 | Timber! | Seventeen alternating-side falling trees, sparse ordinary trees and one Yeti. |
-| 14 | Snowball Run | Ten alternating-side rolling balls, a few trees/hills and two Yetis. |
+| 10 | Timber! | Seventeen alternating-side falling trees, sparse ordinary trees and one Yeti. |
+| 12 | Snowball Run | Ten alternating-side rolling balls, a few trees/hills and two Yetis. |
 
-These names are ordinary entries in `arcade.stages`. Move their rows to insert them elsewhere; keep the matching `stageOverrides` keys. Set `startStage` to the current row number to try one directly. The campaign revision is now 7, preserving earlier campaign records separately after the connected-slope redesign.
+These names are ordinary entries in `arcade.stages`. Move their rows to insert them elsewhere; keep the matching `stageOverrides` keys. Set `startStage` to the current row number to try one directly. The campaign revision is now 8, archiving earlier records after removing Air Time and Darker Woods, Icy Lakes. Stages 1–9 retain their numbers; Timber!, Dense Chase and Snowball Run are now 10–12.
 
 New optional fields in a stage override:
 
 - `specialLayout`: `none` (default), `yetiIntro`, `jumpLine`, `momentum`, `iceIslands`, `iceChaos`, `snowballs`, or `timber`. These reusable arrangements do not depend on stage names. `yetiIntro` clears the route through the first three gates before ordinary forest/traffic begins; it does not set the Yeti count or speed. Encounter counts follow gate count; jump spacing also allows room for flight and landing. Authored encounters are independent of `itemRates`, which add surrounding scenery/traffic. Set the layout to `none` to remove the arrangement.
 - `briefing`: a short instruction shown at the stage start.
-- `yetiSpeedPercent`: explicit Yeti chase speed as a percentage of the stage top speed. Omission uses the chase knob. Air Time uses 105% (110.25 km/h at its 105 km/h top). Aim Before Ice uses 70% for its shoreline Yetis (63 km/h); its start-line count remains zero. Guard wolves still use the normal chase knob speed.
+- `yetiSpeedPercent`: explicit Yeti chase speed as a percentage of the stage top speed. Omission uses the chase knob. Aim Before Ice uses 70% for its shoreline Yetis (63 km/h); its start-line count remains zero. Guard wolves still use the normal chase knob speed.
 - `yetiSpeedKmh`: exact Yeti chase speed in HUD km/h, taking precedence over `yetiSpeedPercent`. Keep Your Momentum currently uses the user’s 92 km/h with speed knob 1 (player top 90 km/h).
 - `yetiWakeSeconds`: stage start-line adjustment time; omission uses global `arcade.wakeSeconds` (0.8 s). Keep Your Momentum uses 4 s. Earlier linked-stage pursuers continue at their own speeds; only the newly introduced Yetis wait.
 - `yetiColor`: `teal`, `orange`, `violet`, or `magenta`; magenta maps to the distinct `special` tint in `arcade.yetiColors`/`yetiTints`. Waiting, chasing, celebration and knocked-out poses retain their color.
 - `townAfter`: optional town boundary override; see Link stages and place towns above.
 
-`jumpLine` uses straight gates because its long airborne heading is locked. Air Time puts barriers between gates with hills 18 m uphill and reserved approach/landing space, alternating 100 m logs and five-tree rows. `momentum` keeps every gate alternating, including at jump encounters. Each three-gap section selects a varying launch gap; the hill/rainbow mix is shuffled and takeoff locations vary. At 40 gates, it has seven large hills, six rainbows, three rough patches and four interior jump-versus-gate choices. Those four jumps sit late on the previous gate's outer side, opposite the next gate: keeping the gate preserves combo/gear, while taking the jump gives escape speed and rejoins at the following gate. Ordinary jumps are offset but can be aimed through the next gate. Big jumps retain boosted flight; risky branches have a landing limit before the next turn (roughly 1.4–1.6 s in staged samples). Flight/landing clearings protect the intended branch without lining up gate pairs. Extended gap lengths and the current practice length of about 2,698 m remain. Surrounding forest/traffic stays configured through itemRates; rough slowdown does not apply in the air. Keep Your Momentum is stage 9, after Fast Monster and 2 Fast 2 Forest. The optional iceIslands layout still offers short practice patches. Aim Before Ice now uses iceChaos: randomly sized/offset lakes, three NPCs on each approach and a wolf/Yeti on the snowy far bank. Lake diameters range 44–68 m across and 44–62 m downhill before shape variation. NPC skiers and boarders coast with locked entry heading and the same downhill acceleration as the player; snow restores steering. Shore predators stay off ice and wait while their target is on ice, then pursue on snow. Snowball and timber layouts retain slalom gates and alternate which side of the route their encounters start on. Normal stages still use their existing placement rules.
+`jumpLine` uses straight gates because its long airborne heading is locked. The reusable jumpLine layout puts barriers between gates with hills 18 m uphill and reserved approach/landing space, alternating 100 m logs and five-tree rows; no current campaign stage uses it. `momentum` keeps every gate alternating, including at jump encounters. Each three-gap section selects a varying launch gap; the hill/rainbow mix is shuffled and takeoff locations vary. At 40 gates, it has seven large hills, six rainbows, three rough patches and four interior jump-versus-gate choices. Those four jumps sit late on the previous gate's outer side, opposite the next gate: keeping the gate preserves combo/gear, while taking the jump gives escape speed and rejoins at the following gate. Ordinary jumps are offset but can be aimed through the next gate. Big jumps retain boosted flight; risky branches have a landing limit before the next turn (roughly 1.4–1.6 s in staged samples). Flight/landing clearings protect the intended branch without lining up gate pairs. Extended gap lengths and the current practice length of about 2,698 m remain. Surrounding forest/traffic stays configured through itemRates; rough slowdown does not apply in the air. Keep Your Momentum is stage 9, after Fast Monster and 2 Fast 2 Forest. The optional iceIslands layout still offers short practice patches. Aim Before Ice now uses iceChaos: randomly sized/offset lakes, three NPCs on each approach and a wolf/Yeti on the snowy far bank. Lake diameters range 44–68 m across and 44–62 m downhill before shape variation. NPC skiers and boarders coast with locked entry heading and the same downhill acceleration as the player; snow restores steering. Shore predators stay off ice and wait while their target is on ice, then pursue on snow. Snowball and timber layouts retain slalom gates and alternate which side of the route their encounters start on. Normal stages still use their existing placement rules.
 
 ## Gear, towns and records
 

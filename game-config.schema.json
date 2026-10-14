@@ -7913,7 +7913,7 @@
                   "snowballs",
                   "timber"
                 ],
-                "description": "Reusable arranged encounters for a special stage. yetiIntro clears the first three gates for learning the chase. jumpLine uses straight gates. momentum alternates large hills/rainbows in roomy straight jump corridors between slalom sections, with sparse rough snow beneath some hills. Landing space is reserved."
+                "description": "Reusable arranged encounters for a special stage. yetiIntro clears the first three gates for learning the chase. jumpLine uses straight gates. momentum keeps alternating slalom gates, varies large-hill/rainbow encounters and offers occasional gate-versus-jump choices, with sparse rough snow beneath some hills. Landing space is reserved."
               },
               "briefing": {
                 "type": "string",
