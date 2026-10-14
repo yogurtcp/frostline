@@ -111,7 +111,20 @@ window.FROSTLINE_READY = (async () => {
     while(low+1<high){const middle=(low+high)>>1;if(ys[middle]<=y)low=middle;else high=middle;}
     return Math.min(low,ys.length-2);
   }
-  function momentumJumpAt(gap){return gap%6===1?'largeHill':gap%6===4?'rainbow':null;}
+  function momentumJumpPlans(gateCount){
+    const gaps=gateCount-1,count=Math.floor(gaps/3),plans=[];
+    for(let n=0;n<count;n++){
+      const first=Math.floor(n*gaps/count),last=Math.floor((n+1)*gaps/count)-1;
+      plans.push({gap:Math.floor(range(first+1,last+1)),kind:n%2?'rainbow':'largeHill',risky:false});
+    }
+    // Keep the big-jump mix, but vary both its order and which encounters compete with a gate.
+    const kinds=plans.map(p=>p.kind),candidates=plans.slice(1,-1);
+    for(let i=kinds.length-1;i>0;i--){const j=Math.floor(random()*(i+1));[kinds[i],kinds[j]]=[kinds[j],kinds[i]];}
+    plans.forEach((p,i)=>p.kind=kinds[i]);
+    for(let i=candidates.length-1;i>0;i--){const j=Math.floor(random()*(i+1));[candidates[i],candidates[j]]=[candidates[j],candidates[i]];}
+    candidates.slice(0,Math.floor(count/3)).forEach(p=>p.risky=true);
+    return plans;
+  }
   function momentumJumpCap(kind){return kind==='largeHill'?S.jump.hillDurationMax:Math.min(1.3,S.jump.durationMax);}
   function momentumJumpDuration(kind){return (kind==='largeHill'?S.jump.largeHillSeconds:S.jump.rainbowSeconds)*momentumJumpCap(kind);}
   const ARCADE_ITEMS={
@@ -207,17 +220,16 @@ window.FROSTLINE_READY = (async () => {
     level.length=g.firstGateMetres+(g.count-1)*g.verticalDistanceMetres+g.finishAfterLastGateMetres;
     const run={id:'arcade',arcade:level,stageIndex:index+1,block,townAfter,objective:'gates',collected:0,totalMushrooms:0,x,selectionY,startY,endY:startY+level.length*PX_PER_M,points:0,hits:0,cleared:0,missed:0,tricks:0,time:0,violation:false,left:false,finishPassed:false,finishHalf:g.openingWidthMetres*PX_PER_M/2*S.race.finishWidthMultiplier,totalGates:g.count};
     state.safeTrails.push(run);block.runs.push(run);
-    run.gateYs=[];run.gateXs=[];let side=-1;
+    run.gateYs=[];run.gateXs=[];
+    run.momentumJumps=level.specialLayout==='momentum'?momentumJumpPlans(g.count):[];
     for(let i=0;i<g.count;i++){
-      const momentum=level.specialLayout==='momentum',jump=momentum&&i?momentumJumpAt(i-1):null;
+      const momentum=level.specialLayout==='momentum',jump=momentum&&i?run.momentumJumps.find(p=>p.gap===i-1):null;
       let y=startY+(g.firstGateMetres+i*g.verticalDistanceMetres)*PX_PER_M;
       if(momentum&&i){
-        const flight=level.pace*S.physics.speedMultiplier*S.jump.speedBoost*(jump?momentumJumpDuration(jump):0);
+        const flight=level.pace*S.physics.speedMultiplier*S.jump.speedBoost*(jump?momentumJumpDuration(jump.kind):0);
         y=run.gateYs[i-1]+Math.max(level.spacing,jump?flight+380:0);
-        // A short straight recovery leg between cycles mirrors the next set of launches.
-        if(!jump&&(i===1||(i-1)%6!==0))side=-side;
       }
-      const gx=x+(momentum?side:i%2?1:-1)*g.horizontalDistanceMetres*PX_PER_M/2;
+      const gx=x+(i%2?1:-1)*g.horizontalDistanceMetres*PX_PER_M/2;
       run.gateYs.push(y);run.gateXs.push(gx);
       entity('gate',gx,y,{half:g.openingWidthMetres*PX_PER_M/2,width:g.openingWidthMetres*PX_PER_M,r:0,number:i+1,color:i%2?C.blue:C.red,checked:false,run});
     }
@@ -378,14 +390,24 @@ window.FROSTLINE_READY = (async () => {
       // Learn the chase across three clear gates before adding normal forest and traffic.
       reserve(run.x,run.startY-100,first+Math.min(2,g.count-1)*spacing+60,S.arcade.landingClearanceHalfWidth);
     }else if(layout==='momentum'){
-      for(let i=0;i<g.count-1;i++){
-        const kind=momentumJumpAt(i);if(!kind)continue;
-        const x=run.gateXs[i],from=run.gateYs[i],to=run.gateYs[i+1],y=from+200;
-        const jump=place(kind,x,y);jump.jumpDurationCap=momentumJumpCap(kind);jump.landingY=to-180;
-        // Room for full-sized flight and a clear landing; slalom resumes after this straight corridor.
-        reserve(x,from-80,to+80,150);
-        if(kind==='largeHill'&&i%12===7){
-          const rough=place('rugged',x,y+(to-y-180)*.45);rough.ry=55;
+      let hills=0;
+      for(const plan of run.momentumJumps){
+        const {gap:i,kind,risky}=plan,from=run.gateYs[i],to=run.gateYs[i+1];
+        const y=risky?to-range(320,440):mix(from,to,range(.16,.32));
+        // The risky branch stays on the previous gate's side, opposite the imminent gate.
+        // Taking it downhill trades that gate/combo for escape speed; the other jumps are aimable.
+        const x=risky?run.gateXs[i]+Math.sign(run.gateXs[i]-run.x)*range(95,140):arcadePathX(run,y)+pick([-1,1])*range(65,115);
+        const target=Math.min(g.count-1,i+(risky?2:1)),targetX=run.gateXs[target],targetY=run.gateYs[target];
+        const jump=place(kind,x,y);jump.jumpDurationCap=momentumJumpCap(kind);
+        jump.landingY=risky?run.gateYs[Math.min(g.count-1,i+3)]-180:Math.min(run.endY-180,(run.gateYs[i+2]??run.endY)-180);
+        plan.x=x;plan.y=y;
+        const flight=run.arcade.pace*S.physics.speedMultiplier*S.jump.speedBoost*momentumJumpDuration(kind);
+        const landing=Math.min(y+flight,jump.landingY),landingX=x+(targetX-x)*(landing-y)/(targetY-y);
+        const low=Math.min(x,targetX,landingX),high=Math.max(x,targetX,landingX);
+        reserve((low+high)/2,y-120,landing+100,(high-low)/2+150);
+        if(kind==='largeHill'&&hills++%2===1){
+          const roughY=y+(landing-y)*.45,roughX=x+(landingX-x)*.45;
+          const rough=place('rugged',roughX,roughY);rough.ry=55;
         }
       }
     }else if(layout==='jumpLine'){
