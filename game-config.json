@@ -713,7 +713,9 @@
           "pine": 1.4,
           "fir": 1.0,
           "spruceTree": 0.7,
-          "smallPine": 0.7
+          "smallPine": 0.7,
+          "skier": 4,
+          "fastSkier": 0.25
         },
         "briefing": "TAKE THE BIG HILLS AND RAINBOWS - KEEP SPEED",
         "tierRates": {
