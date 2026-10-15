@@ -40,6 +40,10 @@ def validate(value, schema, path='config'):
             over = value['arcade']['stageOverrides'].get(name, {})
             gates = {**base['gates'], **over.get('gates', {})}
             if gates['swordGateCount'] > gates['count']: fail(f'arcade.stages.{name}: swordGateCount exceeds gate count')
+        crash_seconds = value['skiers'].get('crashSeconds', [4, 5])
+        if crash_seconds[0] > crash_seconds[1]: fail('skiers.crashSeconds must be ordered')
+        endless = value.get('endless')
+        if endless and endless['lakeRadiusMetres'][0] > endless['lakeRadiusMetres'][1]: fail('endless.lakeRadiusMetres must be ordered')
         if value['wildlife']['packMin'] > value['wildlife']['packMax']: fail('packMin must not exceed packMax')
         predators = value['predators']
         if predators.get('divertReleaseWidthMetres', 12) < predators.get('divertPathWidthMetres', 8): fail('divertReleaseWidthMetres must be at least divertPathWidthMetres')

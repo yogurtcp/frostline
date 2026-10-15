@@ -210,3 +210,10 @@ Animated encounters follow the route interpolated between gate openings rather t
 Stages have different lengths: gate count and speed-derived spacing determine length. Rush Hour was extended from 20 to 40 gates at the user's request; the 20–24-gate special stages remain shorter than many normal stages. NPC prey detection is now 35 m, just beyond the 31 m skier fear radius, so prey selection can occur before skiers escape. Existing 50% selection chance, 1.5 s idle checks and progress-based target commitment remain. Town/protected-area prey is excluded unless a hunter owns the active course.
 
 Every moving jump now uses a boosted speed target (jump.speedBoost, default 1.25): downhill flight runs at least 25% above ordinary stage top speed, so Momentum jumps target 112.5 km/h against its 92 km/h Yetis even from slowed snow. Manual jumps, ramps, moguls, mushrooms, both hill sizes, rainbows and log bumps share this behavior. Speed updates at takeoff and stays locked until landing. Existing faster momentum carries without repeated multiplication, while stationary jumps remain stationary. Hills/rainbows also work during recovery protection.
+
+
+## Separate Endless mode
+
+Endless Mixed Slalom is a separate summit entrance, centred below the original four trails. It does not use or edit Arcade's stage rows, town flow or campaign records. It generates an uninterrupted slope with distance-based pressure, random lakes, growing traffic/forest and capped Yeti encounters, retaining the shared gate combo and shield/sword mechanics. See CONFIG for the independent `endless` section.
+
+Shared NPC behavior: skiers/boarders now tumble on collisions and recover after 4–5 seconds; predators can eat them while down. Player falls no longer give temporary immunity to predators, so a nearby Yeti can catch you before you get back up. This applies in Arcade as well as Endless.

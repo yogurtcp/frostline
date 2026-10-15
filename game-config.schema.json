@@ -557,6 +557,57 @@
               "type": "string"
             }
           }
+        },
+        "endless": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "name",
+            "sub",
+            "length",
+            "fee",
+            "pace",
+            "spacing",
+            "density",
+            "color",
+            "kind"
+          ],
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "sub": {
+              "type": "string"
+            },
+            "length": {
+              "type": "number",
+              "minimum": 0,
+              "exclusiveMinimum": 0
+            },
+            "fee": {
+              "type": "number",
+              "minimum": 0
+            },
+            "pace": {
+              "type": "number",
+              "minimum": 0,
+              "exclusiveMinimum": 0
+            },
+            "spacing": {
+              "type": "number",
+              "minimum": 0
+            },
+            "density": {
+              "type": "number",
+              "minimum": 0
+            },
+            "color": {
+              "type": "string"
+            },
+            "kind": {
+              "type": "string"
+            }
+          }
         }
       }
     },
@@ -5323,6 +5374,21 @@
           "type": "number",
           "minimum": 0,
           "exclusiveMinimum": 0
+        },
+        "crashSeconds": {
+          "type": "array",
+          "items": {
+            "type": "number",
+            "minimum": 4,
+            "maximum": 5
+          },
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "getUpSeconds": {
+          "type": "number",
+          "minimum": 0.2,
+          "maximum": 1
         }
       }
     },
@@ -8163,7 +8229,7 @@
             "pathPlacementChance",
             "pathOffsetMetres"
           ],
-          "description": "Tall pine that warns, rotates rigidly sideways toward the skier\u2019s side, and remains a jumpable fallen obstacle.",
+          "description": "Tall pine that warns, rotates rigidly sideways toward the skier’s side, and remains a jumpable fallen obstacle.",
           "properties": {
             "pathPlacementChance": {
               "type": "number",
@@ -8173,7 +8239,10 @@
             },
             "pathOffsetMetres": {
               "type": "array",
-              "items": { "type": "number", "minimum": 0 },
+              "items": {
+                "type": "number",
+                "minimum": 0
+              },
               "minItems": 2,
               "maxItems": 2,
               "description": "Minimum/maximum sideways offset from the gate route, capped at 75% of tree height so it can fall across that route."
@@ -8286,7 +8355,10 @@
             },
             "pathOffsetMetres": {
               "type": "array",
-              "items": { "type": "number", "minimum": 0 },
+              "items": {
+                "type": "number",
+                "minimum": 0
+              },
               "minItems": 2,
               "maxItems": 2,
               "description": "Minimum/maximum sideways offset from the gate route, capped at 1.5 times sway amplitude; other placements also stay within the first bend's lateral reach."
@@ -8360,6 +8432,226 @@
               "minimum": 1,
               "maximum": 20,
               "description": "Lifetime of the visible compacted snow trail."
+            }
+          }
+        }
+      }
+    },
+    "endless": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "autoStart",
+        "recordVersion",
+        "playerSpeedKmh",
+        "sectionMetres",
+        "lookAheadMetres",
+        "difficultyRampMetres",
+        "waveMetres",
+        "itemSpreadMetres",
+        "gates",
+        "rates",
+        "lakeRadiusMetres",
+        "firstLakeMetres",
+        "yetis"
+      ],
+      "properties": {
+        "autoStart": {
+          "type": "boolean"
+        },
+        "recordVersion": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "playerSpeedKmh": {
+          "type": "number",
+          "minimum": 30,
+          "maximum": 150
+        },
+        "sectionMetres": {
+          "type": "number",
+          "minimum": 160,
+          "maximum": 500
+        },
+        "lookAheadMetres": {
+          "type": "number",
+          "minimum": 100,
+          "maximum": 500
+        },
+        "difficultyRampMetres": {
+          "type": "number",
+          "minimum": 500
+        },
+        "waveMetres": {
+          "type": "number",
+          "minimum": 400
+        },
+        "itemSpreadMetres": {
+          "type": "number",
+          "minimum": 45,
+          "maximum": 100
+        },
+        "gates": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "spacingMetres",
+            "openingMetres",
+            "swingMetres",
+            "swordEvery"
+          ],
+          "properties": {
+            "spacingMetres": {
+              "type": "number",
+              "minimum": 32,
+              "maximum": 65
+            },
+            "openingMetres": {
+              "type": "array",
+              "items": {
+                "type": "number",
+                "minimum": 10
+              },
+              "minItems": 2,
+              "maxItems": 2
+            },
+            "swingMetres": {
+              "type": "array",
+              "items": {
+                "type": "number",
+                "minimum": 0
+              },
+              "minItems": 2,
+              "maxItems": 2
+            },
+            "swordEvery": {
+              "type": "integer",
+              "minimum": 2
+            }
+          }
+        },
+        "rates": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "trees",
+            "skiers",
+            "fastSkiers",
+            "lakes",
+            "jumps"
+          ],
+          "properties": {
+            "trees": {
+              "type": "array",
+              "items": {
+                "type": "number",
+                "minimum": 0
+              },
+              "minItems": 2,
+              "maxItems": 2
+            },
+            "skiers": {
+              "type": "array",
+              "items": {
+                "type": "number",
+                "minimum": 0
+              },
+              "minItems": 2,
+              "maxItems": 2
+            },
+            "fastSkiers": {
+              "type": "array",
+              "items": {
+                "type": "number",
+                "minimum": 0
+              },
+              "minItems": 2,
+              "maxItems": 2
+            },
+            "lakes": {
+              "type": "array",
+              "items": {
+                "type": "number",
+                "minimum": 0
+              },
+              "minItems": 2,
+              "maxItems": 2
+            },
+            "jumps": {
+              "type": "array",
+              "items": {
+                "type": "number",
+                "minimum": 0
+              },
+              "minItems": 2,
+              "maxItems": 2
+            }
+          }
+        },
+        "lakeRadiusMetres": {
+          "type": "array",
+          "items": {
+            "type": "number",
+            "minimum": 12
+          },
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "firstLakeMetres": {
+          "type": "number",
+          "minimum": 150
+        },
+        "yetis": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "firstMetres",
+            "additionalEveryMetres",
+            "intervalMetres",
+            "speedKmh",
+            "maxActive",
+            "wakeSeconds",
+            "retireBehindMetres"
+          ],
+          "properties": {
+            "firstMetres": {
+              "type": "number",
+              "minimum": 300
+            },
+            "additionalEveryMetres": {
+              "type": "number",
+              "minimum": 300
+            },
+            "intervalMetres": {
+              "type": "array",
+              "items": {
+                "type": "number",
+                "minimum": 150
+              },
+              "minItems": 2,
+              "maxItems": 2
+            },
+            "speedKmh": {
+              "type": "array",
+              "items": {
+                "type": "number",
+                "minimum": 0
+              },
+              "minItems": 2,
+              "maxItems": 2
+            },
+            "maxActive": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 6
+            },
+            "wakeSeconds": {
+              "type": "number",
+              "minimum": 1
+            },
+            "retireBehindMetres": {
+              "type": "number",
+              "minimum": 100
             }
           }
         }
