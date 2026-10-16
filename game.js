@@ -301,16 +301,19 @@ window.FROSTLINE_READY = (async () => {
     for(let i=1;i<path.length;i++)if(y<=path[i].y){const t=clamp((y-path[i-1].y)/(path[i].y-path[i-1].y),0,1);return mix(path[i-1].x,path[i].x,t*t*(3-2*t));}
     return path.at(-1).x;
   }
-  function encounterHalf(e,y){const t=(y-e.startY)/(e.endY-e.startY);return e.half*(e.kind==='ruins'&&e.variant===1&&t>.32&&t<.68?1.45:1);}
+  function encounterHalf(e,y){
+    if(e.kind!=='ruins')return e.half;
+    // Each courtyard has the same difficulty: wide preparation space, then a breach.
+    const phase=((y-e.startY)/e.chamberLength)%1;
+    return e.half*(1+1.65*Math.sin(phase*Math.PI)**2);
+  }
   function encounterClearance(e,x,y,hw=0,hh=0){
-    // Rows share the same swept corridor bounds; avoid rebuilding paths for every wall cell.
     const cache=e.clearanceRows??=new Map(),key=y+'|'+hh;let bands=cache.get(key);
     if(!bands){
       bands=e.paths.map(path=>{
         let left=Infinity,right=-Infinity;
         const sample=at=>{const px=encounterPathX(path,at),half=encounterHalf(e,at);left=Math.min(left,px-half);right=Math.max(right,px+half);};
         sample(y-hh);sample(y);sample(y+hh);for(const p of path)if(p.y>y-hh&&p.y<y+hh)sample(p.y);
-        for(const t of [.32,.68]){const at=mix(e.startY,e.endY,t);if(at>y-hh&&at<y+hh){sample(at-.01);sample(at+.01);}}
         return [left,right];
       });cache.set(key,bands);
     }
@@ -320,61 +323,114 @@ window.FROSTLINE_READY = (async () => {
   function planEndlessEncounter(section,startY){
     const a=state.endless,E=S.endless,root=section.endlessRoot,Cf=E.encounters;
     if(!a.encounterBag.length){
-      a.encounterBag=['town','trees','ice','ruins'];
-      for(let i=3;i>0;i--){const j=Math.floor(random()*(i+1));[a.encounterBag[i],a.encounterBag[j]]=[a.encounterBag[j],a.encounterBag[i]];}
+      a.encounterBag=['town','trees','ice','ruins','mountains'];
+      for(let i=a.encounterBag.length-1;i>0;i--){const j=Math.floor(random()*(i+1));[a.encounterBag[i],a.encounterBag[j]]=[a.encounterBag[j],a.encounterBag[i]];}
       const avoid=a.encounterCount?a.lastEncounterKind:null;
       if(!a.encounterCount){const i=a.encounterBag.indexOf('town');[a.encounterBag[0],a.encounterBag[i]]=[a.encounterBag[i],a.encounterBag[0]];}
       else if(a.encounterBag[0]===avoid)[a.encounterBag[0],a.encounterBag[1]]=[a.encounterBag[1],a.encounterBag[0]];
     }
-    const kind=a.encounterBag.shift(),scale=endlessScaleAt((startY-a.startY)/PX_PER_M),length=range(...Cf.lengthMetres)*PX_PER_M*scale;
-    const variant=Math.floor(random()*3),mirror=pick([-1,1]),bend=range(165,220)*scale*mirror;
-    const point=(t,x)=>({x:root.x+x,y:startY+t*length});
-    let paths;
-    if(variant===0)paths=[-1,1].map(side=>[point(0,0),point(.18,0),point(.4,side*bend),point(.65,side*bend),point(.86,0),point(1,0)]);
-    else if(variant===1)paths=[[point(0,0),point(.28,bend*.65),point(.66,-bend*.65),point(1,0)]];
-    else paths=[-1,1].map(side=>[point(0,0),point(.25,side*bend*.8),point(.48,side*bend*.8),point(.68,0),point(.82,bend*.55),point(1,0)]);
-    const names={town:['Village Lanes','Market Bend','Backstreet Chase'],trees:['Forked Pines','Winding Grove','Forest Islands'],ice:['Glacier Fork','Blue Ice Canyon','Split Icefield'],ruins:['Twin Keeps','Lost Courtyard','Broken Ramparts']};
-    const e={id:++a.encounterCount,kind,variant,scale,startY,endY:startY+length,half:range(...Cf.corridorWidthMetres)*PX_PER_M*scale/2,paths,title:names[kind][variant],band:620*scale};
+    const kind=a.encounterBag.shift(),visit=a.themeVisits[kind]=(a.themeVisits[kind]||0)+1;
+    const difficulty=clamp((visit-1)/(Cf.difficultyVisits-1),0,1),scale=endlessScaleAt((startY-a.startY)/PX_PER_M),length=range(...Cf.lengthMetres)*PX_PER_M*scale;
+    const variant=Math.floor(random()*3),mirror=pick([-1,1]),bend=range(...Cf.routeSwingMetres)*PX_PER_M*scale,cycles=kind==='trees'?5+Math.round(difficulty):kind==='mountains'?4+Math.round(difficulty*2):5;
+    const paths=[[],[]],point=(t,x)=>({x:root.x+x,y:startY+t*length});
+    // Repeated broad excursions, with unequal routes that rejoin before the next choice.
+    for(let i=0;i<cycles;i++){
+      const base=i/cycles,span=1/cycles,side=(i%2?-1:1)*mirror;
+      const drift=side*bend*(variant===1?.75:1),fork=kind==='town'?bend*.68:kind==='ice'?bend*.95:bend*.8;
+      for(let branch=0;branch<2;branch++){
+        const path=paths[branch];if(!i)path.push(point(0,0));
+        const offset=branch?drift+side*fork:drift*(kind==='ice'?.12:1);
+        const lead=kind==='trees'?mix(.38,.3,difficulty):kind==='mountains'?mix(.44,.34,difficulty):.32;
+        path.push(point(base+span*lead,offset),point(base+span*.68,offset),point(base+span,0));
+      }
+    }
+    // Some forest runs have a single weaving route; other themes always offer a detour.
+    if(kind==='trees'&&variant===1)paths.pop();
+    const width=mix(Cf.corridorWidthMetres[1],kind==='ice'?Cf.corridorWidthMetres[1]*.88:Cf.corridorWidthMetres[0],difficulty);
+    const names={town:['Village Lanes','Market Bend','Backstreet Chase'],trees:['Forked Pines','Winding Grove','Forest Islands'],ice:['Glacier Fork','Blue Ice Canyon','Split Icefield'],ruins:['Twin Keeps','Lost Courtyard','Broken Ramparts'],mountains:['High Pass','Snowcap Traverse','Split Summits']};
+    const e={id:++a.encounterCount,kind,visit,difficulty,variant,scale,startY,endY:startY+length,half:width*PX_PER_M*scale/2,paths,title:names[kind][variant],band:bend*2.2+600*scale,chamberLength:length/cycles,generatedY:startY,features:[]};
     a.encounters.push(e);a.lastEncounterKind=kind;
-    const own={arcadeRun:section,encounter:e};
     if(kind==='town'){
       let names=S.village.names.filter(name=>!a.townNames.includes(name));if(!names.length){a.townNames=[];names=S.village.names;}const name=pick(names);a.townNames.push(name);
       const town={origin:startY,end:e.endY,x:root.x,halfWidth:e.band+200*scale,endlessRun:root,name,roadEndY:e.endY,approachEndY:e.endY,approachRoad:{surface:'snow',width:0,points:[point(1,0),point(1,0)]},route:paths[0],plazaRows:[]};
-      e.town=town;state.villages.push(town);entity('villageTitle',root.x,startY-60*scale,{...own,town,r:0,width:300});
-      for(const path of paths)state.roads.push({surface:'snow',width:e.half*1.65,points:path,endlessEncounter:e});
-      for(let y=startY+200*scale;y<e.endY-150*scale;y+=200*scale)for(let x=root.x-e.band;x<=root.x+e.band;x+=165*scale){
-        const width=range(145,195)*scale,hw=width*S.village.houseFootWidthRatio,hh=width*S.village.houseFootHeightRatio;
-        if(encounterClearance(e,x,y,hw,hh)<25*scale)continue;
-        const h=entity(pick(['lodge','rental']),x,y+hh,{...own,town,width,r:hw,houseStyle:Math.floor(random()*S.houseAnimation.trimRGB.length),cozyStyle:Math.floor(random()*3),buildingKind:pick(['inn','cafe','chalet']),floors:1});
-        if(h.buildingKind==='cafe'){h.houseSprite=pick(['bakeryFacade','cocoaFacade']);h.shopName=h.houseSprite==='bakeryFacade'?'BUNS':'COCOA';}
-        if(random()<.3)entity('personYellow',h.x-hw+12,h.y+25,{...own,town,width:30,r:0,job:'bakery'});
-      }
-      for(const path of paths){const at=path[Math.floor(path.length/2)];createArcadeItem('skier',at.x,at.y,section);}
-    }else{
-      entity('encounterTitle',root.x,startY-140*scale,{...own,r:0,width:300});
-      const tree=kind==='trees',stepX=(tree?52:104)*scale,stepY=(tree?55:112)*scale;
-      for(let y=startY+60*scale;y<e.endY-50*scale;y+=stepY)for(let x=root.x-e.band;x<=root.x+e.band;x+=stepX){
-        const hw=(tree?23:48)*scale,hh=(tree?23:51)*scale,d=encounterClearance(e,x,y,hw,hh);
-        if(d<14*scale||d>(tree?115:170)*scale)continue;
-        if(tree)entity(random()<.3?'fir':'pine',x,y,{...own,width:range(66,87)*scale,r:23*scale});
-        else entity(kind==='ice'?'iceBlock':'ruinWall',x,y,{...own,width:96*scale,depth:104*scale,r:48*scale,blockHeight:range(35,65)*scale,tower:kind==='ruins'&&random()<.23});
-      }
-      if(kind==='ice')for(const path of paths)for(let i=1;i<path.length;i++){
-        const prev=path[i-1],next=path[i],dy=next.y-prev.y;
-        if(Math.abs(next.x-prev.x)>30*scale||dy<240*scale)continue;
-        entity('ice',next.x,(prev.y+next.y)/2,{...own,rx:e.half*.46,ry:dy*.34,width:e.half,r:0,gateIce:true,arcadeFeature:true});
-      }
+      e.town=town;state.villages.push(town);
+      town.backRoute={surface:'snow',natural:true,width:e.half*1.5,points:paths[1]};
+    }
+    for(let i=0;i<cycles;i++){
+      const y=startY+(i+.5)*length/cycles,x=encounterPathX(paths[0],y);
+      if(kind==='ice')e.features.push({type:'lake',x,y,rx:Math.min(380*scale,Math.abs(encounterPathX(paths[1],y)-x)*.55),ry:length/cycles*mix(.24,.34,difficulty),islands:Math.max(1,3-Math.round(difficulty*2))});
       if(kind==='ruins'){
-        entity('ruinFloor',root.x,(e.startY+e.endY)/2,{...own,width:e.band*2,depth:length,r:0});
-        const arches=[];
-        for(const path of paths)for(const t of [.04,.94]){
-          const y=mix(e.startY,e.endY,t),x=encounterPathX(path,y);if(arches.some(p=>Math.hypot(p.x-x,p.y-y)<50*scale))continue;arches.push({x,y});
-          entity('ruinArch',x,y,{...own,width:e.half*2+132*scale,r:0});
-          for(const side of [-1,1]){const px=x+side*(e.half+44*scale);if(encounterClearance(e,px,y,20*scale,35*scale)>18*scale)entity('ruinWall',px,y,{...own,width:40*scale,depth:70*scale,blockHeight:110*scale,r:20*scale,tower:true});}
-        }
+        const at=startY+(i+.94)*length/cycles;
+        const xs=paths.map(path=>encounterPathX(path,at));
+        e.features.push({type:'arch',x:(Math.min(...xs)+Math.max(...xs))/2,y:at,half:encounterHalf(e,at)+(Math.max(...xs)-Math.min(...xs))/2});
+        e.features.push({type:'rubble',x:x+pick([-1,1])*e.half*.7,y});
       }
     }
-    delete e.clearanceRows;return e;
+    return e;
+  }
+  function populateEndlessEncounter(e,section,toY){
+    // Build only approaching rows, not the entire kilometre at entry. No visible pop-in.
+    const scale=e.scale,from=e.generatedY,to=Math.min(e.endY,toY);if(to<=from)return;
+    const own={arcadeRun:section,encounter:e},kind=e.kind,root=section.endlessRoot;
+    if(from===e.startY)entity(e.town?'villageTitle':'encounterTitle',root.x,e.startY-60*scale,{...own,town:e.town,r:0,width:300});
+    const town=e.town,tree=kind==='trees',stepX=(town?165:tree?mix(62,47,e.difficulty):112)*scale,stepY=(town?210:tree?mix(75,54,e.difficulty):120)*scale;
+    if(town)for(const [index,path] of e.paths.entries()){
+      const points=[];for(let y=from;y<to;y+=45*scale)points.push({x:encounterPathX(path,y),y});points.push({x:encounterPathX(path,to),y:to});
+      state.roads.push({surface:'snow',width:e.half*(index?1.5:1.7),points,natural:index===1,endlessEncounter:e,endlessEndY:to});
+    }
+    const rowStart=e.startY+120*scale;
+    for(let y=rowStart+Math.max(0,Math.ceil((from-rowStart)/stepY))*stepY;y<to&&y<e.endY-90*scale;y+=stepY){
+      const xs=e.paths.map(path=>encounterPathX(path,y)),minX=Math.min(...xs),maxX=Math.max(...xs);
+      const extent=(town?580:tree?mix(140,210,e.difficulty):kind==='mountains'?480:330)*scale;
+      for(let x=root.x+Math.floor((minX-root.x-e.half-extent)/stepX)*stepX;x<maxX+e.half+extent;x+=stepX){
+        const width=town?range(145,195):0,hw=town?width*S.village.houseFootWidthRatio:(tree?23:52)*scale,hh=town?width*S.village.houseFootHeightRatio:(tree?23:55)*scale;
+        const d=encounterClearance(e,x,y,hw,hh);if(d<(town?20:14)*scale||d>extent)continue;
+        if(town){
+          const h=entity(pick(['lodge','rental']),x,y+hh,{...own,town,width,r:hw,houseStyle:Math.floor(random()*S.houseAnimation.trimRGB.length),cozyStyle:Math.floor(random()*3),buildingKind:pick(S.villageLife.buildings.variants),floors:1});
+          if(random()<.13){h.buildingKind='hotel';h.floors=S.villageLife.buildings.hotelFloors;}
+          if(h.buildingKind==='cafe'){h.houseSprite=pick(['bakeryFacade','cocoaFacade']);h.shopName=h.houseSprite==='bakeryFacade'?'BUNS':'COCOA';}
+          if(random()<.09){h.houseSprite='toyFacade';h.shopName='TOYS';}
+          if(random()<.32)entity('personYellow',h.x-hw+12,h.y+25,{...own,town,width:30,r:10,job:h.houseSprite==='toyFacade'?'toys':'bakery'});
+        }else if(tree)entity(random()<.3?'fir':'pine',x,y,{...own,width:range(66,87),r:23});
+        else {
+          if(kind==='ice'&&e.features.some(f=>f.type==='lake'&&Math.abs(x-f.x)<f.rx+hw+20*scale&&Math.abs(y-f.y)<f.ry+hh+20*scale))continue;
+          const mountain=kind==='mountains'||kind==='ice'&&d>110*scale;
+          if(mountain&&(Math.round((x-root.x)/stepX)%3||Math.round((y-rowStart)/stepY)%2||encounterClearance(e,x,y,160*scale,110*scale)<14*scale))continue;
+          entity(kind==='ice'||kind==='mountains'?'iceBlock':'ruinWall',x,y,{...own,width:(mountain?320:104)*scale,depth:(mountain?220:110)*scale,r:(mountain?160:52)*scale,blockHeight:range(mountain?220:40,mountain?(kind==='mountains'?400:330):80)*scale,mountain,tower:kind==='ruins'&&random()<.3});
+        }
+      }
+      if(town)for(const [index,path] of e.paths.entries()){
+        const x=encounterPathX(path,y),half=e.half;
+        // The regular street and snowy back lanes have residents, animated shops and tiny props.
+        const crossing=[{x:encounterPathX(path,y-45*scale)-half*.6,y:y-45*scale},{x:encounterPathX(path,y+45*scale)+half*.6,y:y+45*scale}];
+        for(let n=0;n<Math.round(mix(2,5,e.difficulty));n++){const at=y+range(-50,50)*scale;entity(pick(['personRed','personYellow','personGreen']),encounterPathX(path,at)+range(-.6,.6)*half,at,{...own,town,width:30,r:10,walker:true,path:crossing,pathIndex:n%2,pathDir:n%2?-1:1,walkSpeed:range(...S.village.walkerSpeed)});}
+        if(index===0){
+          entity('bunting',x,y-70*scale,{...own,town,width:half*1.8,r:0});
+          for(const side of [-1,1]){const lx=x+side*(half+30*scale);if(encounterClearance(e,lx,y,6,6)>10)entity('lamp',lx,y,{...own,town,width:20,r:6});}
+          if(random()<.4)entity('skier',x+range(-.6,.6)*half,y+60,{...own,town,width:42,r:12,vy:range(...S.skiers.slowSpeed),vx:0,endlessBaseVy:range(...S.skiers.slowSpeed)});
+        }else if(random()<.5&&encounterClearance(e,x+half+35*scale,y+60,12,12)>10)entity(pick(['snowman','powderPile','pigeons']),x+half+35*scale,y+60,{...own,town,width:30,r:9,mischief:true,villageDetail:true});
+      }
+      if(!town&&random()<.1){const path=pick(e.paths),x=encounterPathX(path,y);entity('skier',x+range(-.4,.4)*e.half,y,{...own,width:42,r:12,vx:0,vy:range(...S.skiers.slowSpeed),endlessBaseVy:range(...S.skiers.slowSpeed)});}
+      if(kind==='ruins')entity('ruinFloor',(minX+maxX)/2,y,{...own,width:maxX-minX+e.half*5,depth:stepY,r:0});
+    }
+    for(const f of e.features){
+      // Lake footprints are generated before their uphill edge can enter the viewport.
+      const trigger=f.y-(f.ry||0);if(f.built||trigger>=to)continue;f.built=true;
+      if(f.type==='lake'){
+        const lake=entity('ice',f.x,f.y,{...own,rx:f.rx,ry:f.ry,width:f.rx*2,r:0,gateIce:true,arcadeFeature:true,glacier:true});
+        const g=lakeGeometry(lake);g.points=Array.from({length:48},(_,i)=>{const angle=i/48*TAU,r=.94+.035*Math.sin(angle*5+lake.phase)+.025*Math.cos(angle*9);return [Math.cos(angle)*f.rx*r,Math.sin(angle)*f.ry*r];});
+        for(let n=0;n<f.islands;n++){
+          const cy=(n-(f.islands-1)/2)*f.ry*.5,cx=(n%2?1:-1)*f.rx*.17,hole=[];
+          for(let j=0;j<16;j++){const angle=j/16*TAU;hole.push([cx+Math.cos(angle)*mix(80,48,e.difficulty)*scale,cy+Math.sin(angle)*65*scale]);}g.holes.push(hole);
+        }
+      }else if(f.type==='arch'){
+        const half=f.half;entity('ruinArch',f.x,f.y,{...own,width:half*2+132*scale,r:0});
+      }else if(f.type==='rubble'){
+        entity('rock',f.x,f.y,{...own,width:60,r:20});
+        entity('smallHill',f.x,f.y-110*scale,{...own,width:95,r:0,arcadeFeature:true});
+      }
+    }
+    e.generatedY=to;delete e.clearanceRows;
   }
   function endlessPursuitTarget(c,target){
     if(!state.endless||!activeCourseOwner(c)||target.y<c.y)return target;
@@ -382,9 +438,9 @@ window.FROSTLINE_READY = (async () => {
     if(c.encounterRoute?.encounter!==e){
       const y=clamp(c.y,e.startY,e.endY),goal=Math.min(e.endY,c.y+600*e.scale);
       const costs=e.paths.map(path=>Math.abs(encounterPathX(path,y)-c.x)+.35*Math.abs(encounterPathX(path,goal)-target.x));
-      c.encounterRoute={encounter:e,index:costs.indexOf(Math.min(...costs))};
+      c.encounterRoute={encounter:e,index:e.kind==='ice'?1:costs.indexOf(Math.min(...costs))};
     }
-    const y=Math.min(e.endY,c.y+Math.max(150*e.scale,c.speed*.5));
+    const y=Math.min(e.endY,c.y+Math.min(65*e.scale,e.half*.3));
     return {x:encounterPathX(e.paths[c.encounterRoute.index],y),y};
   }
   function recordEndless(reason){
@@ -397,7 +453,7 @@ window.FROSTLINE_READY = (async () => {
     const E=S.endless,p=state.p,startY=belowView(S.race.courseOffscreenMargin),pace=E.playerSpeedKmh/(S.physics.speedMultiplier*S.physics.hudKmhPerSpeed);
     stages.endless={...S.courses.endless,pace,length:Infinity};
     const block={},run={id:'endless',endless:true,arcade:{trees:true},block,x:gate?.x??p.x,selectionY:gate?.y??p.y,startY,endY:Infinity,objective:'gates',points:0,hits:0,cleared:0,missed:0,tricks:0,time:0,totalGates:0,shieldGateCharge:S.arcade.gear.shieldsPerStage/35};
-    state.endless={startY,furthestY:startY,plannedY:startY,nextGateY:startY+300,nextLakeY:startY+E.firstLakeMetres*PX_PER_M,nextYetiY:startY+E.yetis.firstMetres*PX_PER_M,sections:[],encounters:[],encounterBag:[],encounterCount:0,townNames:[],nextEncounterY:startY+E.encounters.firstMetres*PX_PER_M,speedScale:1,gateNumber:0,shields:0,swords:0,shieldCharge:0,swordCharge:0,shieldsUsed:0,swordsUsed:0,combo:0,savedMetres:0};
+    state.endless={startY,furthestY:startY,plannedY:startY,nextGateY:startY+300,nextLakeY:startY+E.firstLakeMetres*PX_PER_M,nextYetiY:startY+E.yetis.firstMetres*PX_PER_M,sections:[],encounters:[],encounterBag:[],encounterCount:0,themeVisits:{},townNames:[],nextEncounterY:startY+E.encounters.firstMetres*PX_PER_M,speedScale:1,gateNumber:0,shields:0,swords:0,shieldCharge:0,swordCharge:0,shieldsUsed:0,swordsUsed:0,combo:0,savedMetres:0};
     state.course=run;state.zone={kind:'course',origin:startY};state.safeTrails.push(run);state.chasers=[];state.patrolPenalty=null;state.plannedTown=null;state.results=null;state.arcadeResult=null;state.endlessResult=null;
     for(const o of state.objects)if(o.type==='entrance')o.selected=o===gate;
     entity('courseStart',run.x,startY,{r:0,width:700,name:'ENDLESS MIXED SLALOM'});
@@ -416,9 +472,11 @@ window.FROSTLINE_READY = (async () => {
       Object.assign(itemRates,{pine:trees,fir:trees*.6,spruceTree:trees*.25,smallPine:trees*.3,skier:rate('skiers'),fastSkier:rate('fastSkiers'),smallHill:rate('jumps'),largeHill:rate('jumps')*.35,rainbow:rate('jumps')*.25});
       const section={id:'endless',endlessRoot:root,endlessScale:scale,block:root.block,x:root.x,startY,endY,finishHalf:0,arcade:{knobs:[1,1,1,1,1],trees:true,specialLayout:'none',gates:{count:0,swordGateCount:0,icePercent:0,openingWidthMetres:mix(...E.gates.openingMetres,P.t)},spacing:E.gates.spacingMetres*PX_PER_M*scale,pace:E.playerSpeedKmh*scale/(S.physics.speedMultiplier*S.physics.hudKmhPerSpeed),itemSpreadMetres:E.itemSpreadMetres*scale,itemRates,tierRates:{slightlyRare:0,veryRare:0},endTrafficMultiplier:1}};
       while(a.nextEncounterY<endY+1200*scale){const e=planEndlessEncounter(section,a.nextEncounterY);a.nextEncounterY=e.endY+range(...E.encounters.gapMetres)*PX_PER_M*e.scale;}
+      for(const e of a.encounters)if(e.startY<endY&&e.endY>startY)populateEndlessEncounter(e,section,endY);
       while(a.nextGateY<endY){
-        const number=++a.gateNumber,metres=(a.nextGateY-root.startY)/PX_PER_M,t=endlessPressure(metres).t,gateScale=endlessScaleAt(metres),encounter=endlessEncounterAt(a.nextGateY);
-        const half=mix(...E.gates.openingMetres,t)*PX_PER_M*gateScale/2;
+        const number=++a.gateNumber,metres=(a.nextGateY-root.startY)/PX_PER_M,encounter=endlessEncounterAt(a.nextGateY);
+        const t=encounter?encounter.difficulty:endlessPressure(metres).t,gateScale=encounter?encounter.scale:endlessScaleAt(metres);
+        const half=Math.min(mix(...E.gates.openingMetres,t)*PX_PER_M*gateScale/2,encounter?encounterHalf(encounter,a.nextGateY)-22*encounter.scale:Infinity);
         const raw=encounter?encounter.paths.map(path=>encounterPathX(path,a.nextGateY)):[root.x+(number%2?-1:1)*mix(...E.gates.swingMetres,t)*PX_PER_M*gateScale];
         const spread=Math.max(...raw)-Math.min(...raw),merged=raw.length>1&&spread<half*2.3;
         const positions=merged?[raw.reduce((a,b)=>a+b,0)/raw.length]:raw,opening=merged?half+spread*.3:half;
@@ -436,8 +494,8 @@ window.FROSTLINE_READY = (async () => {
         a.nextLakeY+=Math.max(110,100/density*range(.8,1.2))*PX_PER_M*lakeScale;
       }
       prepareArcadeTerrain(section);
-      const live=state.chasers.filter(c=>activeCourseOwner(c)&&!c.dead&&!c.leaving).length+state.objects.filter(o=>o.type==='lurker'&&activeCourseOwner(o)&&!o.dead&&!o.eaten).length;
-      const desired=Math.min(E.yetis.maxActive,1+Math.floor(Math.max(0,distance-E.yetis.firstMetres)/E.yetis.additionalEveryMetres));
+      const live=state.chasers.filter(c=>activeCourseOwner(c)&&!c.dead&&!c.leaving&&c.y>state.p.y-E.yetis.nearbyMetres*PX_PER_M*scale).length+state.objects.filter(o=>o.type==='lurker'&&activeCourseOwner(o)&&!o.dead&&!o.eaten).length;
+      const desired=Math.min(E.yetis.maxNearbyHunters,1+Math.floor(Math.max(0,distance-E.yetis.firstMetres)/E.yetis.additionalEveryMetres));
       if(a.nextYetiY<endY){
         if(live<desired&&!endlessEncounterAt(a.nextYetiY)?.town){
           const y=Math.max(startY+100,a.nextYetiY),near=state.objects.find(o=>o.type==='ice'&&o.arcadeRun&&o.y>y-350&&o.y<y+350),side=pick([-1,1]);
@@ -455,19 +513,19 @@ window.FROSTLINE_READY = (async () => {
       a.sections.push(section);a.plannedY=endY;
     }
     a.sections=a.sections.filter(r=>r.endY>state.p.y-S.world.sceneryRetentionBehind);
-    a.encounters=a.encounters.filter(e=>e.endY>state.p.y-S.world.sceneryRetentionBehind);
+    a.encounters=a.encounters.filter(e=>e.endY>state.p.y-S.world.sceneryRetentionBehind||state.chasers.some(c=>activeCourseOwner(c)&&!c.dead&&!c.leaving&&c.y>=e.startY-200*e.scale&&c.y<=e.endY)||state.objects.some(o=>o.type==='wolf'&&o.linkedChase&&activeCourseOwner(o)&&o.y>=e.startY-200*e.scale&&o.y<=e.endY));
   }
   function updateEndless(){
     const a=state.endless;if(!a)return;
     a.furthestY=Math.max(a.furthestY,state.p.y);const distance=Math.max(0,(a.furthestY-a.startY)/PX_PER_M);
     if(distance>=a.savedMetres+250){a.savedMetres=distance;recordEndless('RUNNING');state.endlessResult=null;}
     const active=endlessEncounterAt(state.p.y);
-    if(active&&!active.entered){active.entered=true;announce(active.town?active.town.name.toUpperCase():active.title.toUpperCase(),active.town?'COURSE TOWN - YETIS CAN FOLLOW':active.paths.length>1?'CHOOSE A BRANCH - EITHER GATE COUNTS':'FOLLOW THE SNOW CORRIDOR',C.teal,3);}
-    state.roads=state.roads.filter(r=>!r.endlessEncounter||r.endlessEncounter.endY>state.p.y-S.world.sceneryRetentionBehind);
+    if(active&&!active.entered){active.entered=true;announce(active.town?active.town.name.toUpperCase():active.title.toUpperCase(),active.town?'COURSE TOWN - YETIS CAN FOLLOW':active.kind==='mountains'?'LONG TURNS - CHOOSE YOUR LINE':active.paths.length>1?'CHOOSE A BRANCH - EITHER GATE COUNTS':'WIND THROUGH THE PINES',C.teal,3);}
+    state.roads=state.roads.filter(r=>!r.endlessEncounter||(r.endlessEndY??r.endlessEncounter.endY)>state.p.y-S.world.sceneryRetentionBehind);
     state.villages=state.villages.filter(t=>!t.endlessRun||t.end>state.p.y-S.world.sceneryRetentionBehind);
     for(const o of state.objects)if(activeCourseOwner(o)&&o.endlessBaseVy!==undefined&&!(o.npcFallUntil>clock))o.vy=o.endlessBaseVy*a.speedScale;
-    const far=o=>o.y<state.p.y-S.endless.yetis.retireBehindMetres*PX_PER_M*a.speedScale;
-    for(const c of state.chasers)if(activeCourseOwner(c)&&far(c))c.leaving=true;
+    const far=o=>o.y<state.p.y-S.endless.yetis.nearbyMetres*PX_PER_M*a.speedScale;
+    // Only dormant spawns expire behind us. An awake hunter keeps pursuing at its real speed.
     state.objects=state.objects.filter(o=>!activeCourseOwner(o)||!((o.type==='lurker'&&far(o))||(['skier','boarder'].includes(o.type)&&o.y>a.plannedY+800*a.speedScale)));
   }
   function retireArcadeBlock(run){
@@ -668,7 +726,7 @@ window.FROSTLINE_READY = (async () => {
         const feature=key==='fallingTree'?S.terrainFeatures.fallingTree:key==='logJump'?S.terrainFeatures.logJump:key==='rollingSnowball'?S.terrainFeatures.rollingSnowball:null;
         const animated=key==='fallingTree'||key==='rollingSnowball',onPath=key==='logJump'||animated&&random()<feature.pathPlacementChance;
         if(onPath)at=arcadeEncounterY(run,at);
-        if(run.endlessRoot&&endlessEncounterAt(at)&&!traffic)continue;
+        if(run.endlessRoot&&endlessEncounterAt(at))continue; // Encounters own their traffic as well as scenery.
         const plannedAt=at;
         const rx=key==='fallingTree'?(feature.heightMetres+feature.trunkRadiusMetres)*PX_PER_M:key==='logJump'?Math.max(feature.widthMetres,feature.bumpWidthMetres)*PX_PER_M/2+S.physics.playerRadius:key==='rollingSnowball'?feature.maxRadiusMetres*PX_PER_M:key==='wolfPack'?80:spec.rx||Math.max(spec.r,spec.width*.45);
         const ry=key==='fallingTree'?feature.fallenRadiusMetres*PX_PER_M+S.physics.playerRadius:key==='logJump'?feature.bumpGapMetres*PX_PER_M+S.physics.playerRadius:spec.ry||rx;
@@ -1159,6 +1217,19 @@ window.FROSTLINE_READY = (async () => {
       if(r.natural)continue;
       r.bounds??=roadBBox(r);
       const view=viewBounds();if(r.bounds.right<view.left||r.bounds.left>view.right||r.bounds.bottom<view.top||r.bounds.top>view.bottom)continue;
+      if(!r.tiles&&r.endlessEncounter){
+        // Rasterize each short route segment directly, without oversampling the whole long town.
+        const cells=new Map(),half=r.width/2;
+        for(let i=1;i<r.points.length;i++){
+          const a=r.points[i-1],b=r.points[i];
+          for(let tx=Math.floor((Math.min(a.x,b.x)-half)/unit);tx<=Math.floor((Math.max(a.x,b.x)+half)/unit);tx++)for(let ty=Math.floor((Math.min(a.y,b.y)-half)/unit);ty<=Math.floor((Math.max(a.y,b.y)+half)/unit);ty++){
+            const distance=segmentDistance((tx+.5)*unit,(ty+.5)*unit,a,b);if(distance>half)continue;
+            const key=tx+','+ty,prior=cells.get(key);if(prior){prior.distance=Math.min(prior.distance,distance);continue;}
+            cells.set(key,{x:tx*unit,y:ty*unit,grain:Math.abs(tx*17+ty*31)%17,distance});
+          }
+        }
+        r.tiles=[...cells.values()];for(const cell of r.tiles)cell.edge=cell.distance>half-unit*.8;
+      }
       if(!r.tiles){const cells=new Map();for(let i=1;i<r.points.length;i++){
         const a=r.points[i-1],b=r.points[i],steps=Math.ceil(Math.hypot(b.x-a.x,b.y-a.y)/V.roadSampleSpacing);
         for(let j=0;j<=steps;j++){const x=mix(a.x,b.x,j/(steps||1)),y=mix(a.y,b.y,j/(steps||1)),n=Math.ceil(r.width/2/unit);
@@ -1330,6 +1401,7 @@ window.FROSTLINE_READY = (async () => {
       for(let i=0;i<(ty<0?S.world.uphillCount:S.world.ambientCount);i++){
         const x=tx*size+range(65,size-65),y=ty*size+range(80,size-60);
         // Arcade owns all in-course scenery; ambient chunks only populate the surrounding forest.
+        if(endlessEncounterAt(y))continue;
         if(state.safeTrails.some(r=>r.arcade&&y>r.startY-120&&y<r.endY+60&&Math.abs(x-centerAt(y,r))<S.world.safeCourseHalfWidth+100))continue;
         if(nearArcadeFeature(x,y)||nearMushroom(x,y)||patchAt(x,y)||insideTown(x,y)||state.villages.some(t=>roadDistance(t.approachRoad,x,y)<t.approachRoad.width/2+30)||(!state.course&&state.zone.kind==='start'&&Math.abs(x)<S.world.meadowHalfWidth&&y>S.world.meadowTop&&y<S.world.meadowBottom))continue;
         if(state.objects.some(o=>(o.type==='gate'||o.type==='entrance')&&Math.abs(o.x-x)<o.half+60&&Math.abs(o.y-y)<140))continue;
@@ -1339,7 +1411,7 @@ window.FROSTLINE_READY = (async () => {
         const widths={pine:range(60,90),fir:range(52,74),rock:44,pebble:28,skier:42,personGreen:30,rabbit:20,fox:39,wolf:43,bear:60,cat:25,lurker:55,bush:35};
         entity(type,x,y,{worldChunk:key,fast,width:widths[type],r:['lurker','bear'].includes(type)?18:type==='rabbit'?5:12,animal:['rabbit','fox','wolf','bear','cat'].includes(type),humanVisitor:humanArea(x,y)||random()<S.world.animalVisitorChance,ai:'idle',nextAI:clock+range(1,5),climb:0,vy:type==='skier'?(fast?range(...S.skiers.fastSpeed):range(...S.skiers.slowSpeed)):0});
       }
-      if(random()<S.world.lakeChance){const x=(tx+.5)*size,y=(ty+.5)*size;if(!insideTown(x,y)&&!safeApproach(x,y)&&!classicArea(x,y,360)&&!state.safeTrails.some(r=>r.arcade&&y>r.startY-360&&y<r.endY+360&&Math.abs(x-centerAt(y,r))<S.world.safeCourseHalfWidth+360)&&y>S.world.lakeMinY&&!state.objects.some(o=>o.type==='gate'&&Math.hypot(o.x-x,o.y-y)<260||o.collectible&&Math.hypot(o.x-x,o.y-y)<360))entity('ice',x,y,{worldChunk:key,rx:range(...S.world.lakeRadiusX),ry:range(...S.world.lakeRadiusY),width:330,r:0});}
+      if(random()<S.world.lakeChance){const x=(tx+.5)*size,y=(ty+.5)*size;if(!endlessEncounterAt(y)&&!insideTown(x,y)&&!safeApproach(x,y)&&!classicArea(x,y,360)&&!state.safeTrails.some(r=>r.arcade&&y>r.startY-360&&y<r.endY+360&&Math.abs(x-centerAt(y,r))<S.world.safeCourseHalfWidth+360)&&y>S.world.lakeMinY&&!state.objects.some(o=>o.type==='gate'&&Math.hypot(o.x-x,o.y-y)<260||o.collectible&&Math.hypot(o.x-x,o.y-y)<360))entity('ice',x,y,{worldChunk:key,rx:range(...S.world.lakeRadiusX),ry:range(...S.world.lakeRadiusY),width:330,r:0});}
     }
     for(const [key,t] of state.chunks)if(Math.abs(t.ty*size-state.p.y) >S.world.chunkRetention||Math.abs(t.tx*size-state.p.x) >S.world.chunkRetention){state.chunks.delete(key);state.objects=state.objects.filter(o=>o.worldChunk!==key);}
   }
@@ -1486,7 +1558,8 @@ window.FROSTLINE_READY = (async () => {
       }
       return;
     }
-    if(p.air>0 && !['lodge','rental'].includes(o.type))return;
+    // Cliff faces and standing castle walls require an opening; low rubble stays jumpable.
+    if(p.air>0 && !['lodge','rental','iceBlock','ruinWall'].includes(o.type))return;
     o.touched=true;
     if((o.type==='pine'||o.type==='fir')&&fast&&!uphill) {
       o.type='stump';o.width=65;o.r=15;burst(o.x,o.y,'#658479',24);say('TIMBERRR!',o);beep(115,.15,'sawtooth');
@@ -2034,6 +2107,7 @@ window.FROSTLINE_READY = (async () => {
     for(const o of state.objects){const t=o.type;if(t==='rabbit'){if(!o.eaten)rabbits.push(o);}else if(t==='cat')cats.push(o);else if(t==='skier'||t==='boarder')skis.push(o);else if(t==='fox'||t==='wolf')hunters.push(o);}
     for(const o of state.objects){
       if(o.retiring){o.y-=A.roamSpeed*dt;o.running=true;if(o.y<viewBounds().top-100)o.eaten=true;continue;}
+      if(state.endless&&o.type==='wolf'&&(o.wolfAwake||o.alertUntil>clock)&&!activeCourseOwner(o)){o.arcadeRun=state.course;o.linkedChase=true;delete o.worldChunk;}
       const linkedWolf=o.type==='wolf'&&activeCourseOwner(o)&&(o.linkedChase||o.wolfAwake||o.alertUntil>clock);
       if(linkedWolf)o.linkedChase=true;
       if(o.eaten||o.dead||o.stunnedUntil>clock||!o.animal||o.penaltyGate&&!o.wolfAwake||!linkedWolf&&Math.hypot(o.x-p.x,o.y-p.y)>A.activeRadius)continue;
@@ -2080,7 +2154,9 @@ window.FROSTLINE_READY = (async () => {
         if(target===p){if(killWolf(o))continue;if(p.shield<=0&&p.air<=0){if(useArcadeSword(o))continue;die('WOLF');return;}}
         else {target.eaten=true;target.r=0;o.divert=null;o.hunting=false;o.feedingUntil=clock+A.feedingSeconds;o.nextAI=clock+A.satedSeconds;burst(target.x,target.y,C.ice,9);say('CHOMP!',o,1.2);continue;}
       }}
-      travel(o,o.angle??o.phase,speed,dt,true,false,o.type==='wolf'||o.type==='bear',o.type==='wolf'&&!!target,o.type==='wolf'?target:null);
+      const route=target&&o.type==='wolf'?endlessPursuitTarget(o,target):target;
+      if(route&&target===p)o.angle=Math.atan2(route.y-o.y,route.x-o.x);
+      travel(o,o.angle??o.phase,speed,dt,true,false,o.type==='wolf'||o.type==='bear',o.type==='wolf'&&!!target,o.type==='wolf'?route:null);
     }
     for(const o of skis){
       if(o.annoyedUntil>clock||o.fearUntil>clock||o.fast||o.onIce){o.catInterest=null;continue;}
@@ -2134,6 +2210,7 @@ window.FROSTLINE_READY = (async () => {
     for(const c of state.chasers){
       if(c.patrolPass){updatePatrolPass(c,dt);continue;}
       if(c.dead)continue;
+      if(state.endless&&!c.chaseRun&&['fast','slow','bear'].includes(c.kind)&&!c.leaving){c.chaseRun=state.course;c.expires=Infinity;}
       if(c.endlessBaseKmh!==undefined&&activeCourseOwner(c))c.speed=c.endlessBaseKmh*endlessSpeedScale(c)/S.physics.hudKmhPerSpeed;
       // Owned pursuers share linked runs; protected towns stop them, but Endless course towns do not.
       if(c.leaving||c.chaseRun&&!activeCourseOwner(c)){c.leaving=true;c.y-=c.speed*dt;continue;}
@@ -2270,11 +2347,17 @@ window.FROSTLINE_READY = (async () => {
         const wet=at(x+1,y+1),near=[[-4,0],[4,0],[0,-4],[0,4]].some(([dx,dy])=>at(x+1+dx,y+1+dy)!==wet);
         if(!wet&&!near)continue;
         const edge=wet&&near,deep=wet&&!edge&&[-10,10].every(d=>at(x+d,y)&&at(x,y+d));
-        const glint=((x*3+y*7+Math.floor(o.phase*50))%67+67)%67<3;
-        t.fillStyle=!wet?'#d3e4dc':edge?'#e0f3ed':glint?'#d6f0ef':deep?'#84c2d8':'#addce6';
+        const glint=!o.glacier&&((x*3+y*7+Math.floor(o.phase*50))%67+67)%67<3;
+        t.fillStyle=!wet?'#cbdedb':edge?'#e7f2e9':glint?'#d6e9e9':deep?(o.glacier?'#8abccc':'#84c2d8'):'#b5d5dd';
         t.fillRect(x+r+4,y+r+4,2,2);
         if(wet&&!edge&&Math.abs(y-Math.sin(x*.07+o.phase)*7-r*.25)<1.5){t.fillStyle='#67a9c2';t.fillRect(x+r+4,y+r+4,2,2);}
-        if(wet&&at(x+5,y)&&Math.abs(y+r*.29+(Math.floor(x/16)%3)*2)<1.4){t.fillStyle='#edf8f1';t.fillRect(x+r+4,y+r+4,4,2);}
+        if(!o.glacier&&wet&&at(x+5,y)&&Math.abs(y+r*.29+(Math.floor(x/16)%3)*2)<1.4){t.fillStyle='#edf8f1';t.fillRect(x+r+4,y+r+4,4,2);}
+      }
+      if(o.glacier){
+        for(let row=-r+8;row<r-8;row+=19)for(let col=-r+6;col<r-6;col+=2){if(at(col,row)&&at(col,row+3)){t.fillStyle=Math.sin(row*.035+col*.008)>.4?'#a6ccd5':'#80afc1';t.fillRect(col+r+4,row+r+4,2,1);}}
+        for(let n=0;n<5;n++){const originX=Math.sin(n*2.4+o.phase)*o.rx*ZOOM*.7,originY=Math.cos(n*1.7)*o.ry*ZOOM*.8;
+          for(let branch=0;branch<3;branch++)for(let j=0;j<45;j++){const px=originX+j*(branch-1)*.7+Math.sin(j*.22+n)*2,py=originY+j*.8;if(at(px,py)&&at(px+2,py)){t.fillStyle=branch===1?'#e2f1ee':'#609bb9';t.fillRect(Math.round(px+r+4),Math.round(py+r+4),2,1);}}
+        }
       }
       // Small reeds and stones hug dry banks; islands share the same collision outline.
       for(let i=3;i<g.points.length;i+=11){const a=g.points[i],x=a[0]*ZOOM,y=a[1]*ZOOM;if(at(x,y))continue;
@@ -2483,13 +2566,34 @@ window.FROSTLINE_READY = (async () => {
     }
     if(o.type==='skier'&&elapsed>.35){const spread=Math.min(1,elapsed/.5);line(s.x-12*spread,s.y+2,s.x-8*spread,s.y+12,C.muted);line(s.x+9*spread,s.y,s.x+13*spread,s.y+9,C.muted);}
   }
+  function drawMountain(o,s){
+    const w=Math.round(o.width*ZOOM),d=Math.round(o.depth*ZOOM),height=Math.round(o.blockHeight*ZOOM),x=Math.round(s.x-w*.65),base=Math.round(s.y+d*.2),peak=x+w*(.4+Math.sin(o.phase)*.16);
+    // Pixel-stepped crags form a connected range, with a bright snow face and a shaded fold.
+    shadow(s.x,s.y+3,o.width*.7,o.depth*.3,.12);
+    for(let row=height;row>=0;row-=3){
+      const f=1-row/height,ledge=(.03+.03*Math.sin(row*.11+o.phase))*w*f,left=peak-(peak-x)*f-ledge,right=peak+(x+w*1.3-peak)*f+ledge;
+      const snow=row>height*.44+Math.sin(row*.12+o.phase)*8;
+      const fold=peak+Math.sin(row*.045+o.phase)*w*.07;
+      box(Math.floor(left),base-row,Math.max(1,fold-left),3,snow?'#eef5ee':'#a7bfc0');
+      box(Math.floor(fold),base-row,Math.max(1,right-fold),3,snow?'#bed6de':'#7695a5');
+      if(row<height*.72&&row>8&&Math.floor(row/3)%5===0){box(left+2,base-row,Math.max(2,(fold-left)*.5),1,'#d9e5dd');box(fold+3,base-row,Math.max(2,(right-fold)*.5),1,'#617f94');}
+      if(row>height*.38&&row<height*.8)box(fold-2,base-row,3,3,'#f8faf0');
+      if(row<height*.58&&row>height*.12){const crack=fold+(right-fold)*(.35+.12*Math.sin(row*.025+o.phase));box(crack,base-row,2,3,'#647f90');if(Math.floor(row/3)%6===0)box(crack-4,base-row,5,1,'#adc5cb');}
+      if(row>height*.3&&row<height*.65&&Math.floor(row/3)%4===0)box(left+3,base-row,Math.max(2,(fold-left)*.28),2,'#edf4ec');
+    }
+    for(let i=0;i<5;i++){const bx=x+w*(.1+i*.24),by=base-d*.1+(i%2)*3;box(bx,by,7,3,'#dce9e2');box(bx+2,by+3,8,2,'#99b6bd');}
+  }
   function drawEncounterBlock(o,s){
+    if(o.mountain){drawMountain(o,s);return;}
     const ice=o.type==='iceBlock',w=Math.max(4,Math.round(o.width*ZOOM)),d=Math.max(4,Math.round(o.depth*ZOOM)),h=Math.round(o.blockHeight*(o.tower?1.8:1)*ZOOM);
     const x=Math.round(s.x-w/2),y=Math.round(s.y-d/2-h),front=y+d;
     box(x+3,s.y-d/2+4,w,d,'#bbcecb');
     box(x,y,w,d,ice?'#e1eff0':'#bbc4b4');box(x,front,w,h,ice?'#a8cad5':'#83968d');
     box(x,front,3,h,ice?'#87aebb':'#697e79');box(x,y,w,2,ice?'#f7fbef':'#eef3e7');
     if(ice){
+      for(let row=3;row<h;row+=5){box(x+4,front+row,w-8,2,row%10?'#8cb6ca':'#bedce2');}
+      for(let i=0;i<4;i++){const fx=x+w*(.15+i*.2);line(fx,front+2,fx-w*.08,front+h*(.45+i*.1),'#d9edf0',1);box(fx,front+h*.55,2,2,'#eaf6ef');}
+      box(x+2,y+2,w*.55,Math.max(2,d*.15),'#f4f8ee');
       line(x+w*.22,y+5,x+w*.48,front-3,'#a7c8d2',1);line(x+w*.48,front-3,x+w*.38,front+h*.8,'#799eae',1);
       line(x+w*.48,front-3,x+w*.74,front+h*.34,'#cce4e5',2);box(x+w-3,front,2,h,'#dcefee');
       for(let i=0;i<3;i++)box(x+5+(i*17+Math.floor(o.phase*5))%Math.max(8,w-10),y+5+(i*11)%Math.max(8,d-10),3,1,'#f7fbef');
@@ -2504,7 +2608,12 @@ window.FROSTLINE_READY = (async () => {
       const vine=x+5+Math.floor(o.phase*11)%Math.max(5,w-12);
       for(let row=1;row<h;row+=4){box(vine+Math.sin(row+o.phase)*2,front+row,2,5,'#68816c');box(vine+3,front+row,3,2,'#8b9b79');}
       line(x+w*.7,y+4,x+w*.56,y+d*.6,'#758d80',1);line(x+w*.56,y+d*.6,x+w*.66,front+h*.5,'#637d73',1);
-      if(o.tower){for(const level of [.2,.68]){const wy=front+h*level;box(x+w/2-3,wy,6,10,'#385854');box(x+w/2-2,wy-2,4,2,'#536f64');box(x+w/2-4,wy-3,8,1,'#b9c4af');}}
+      if(o.tower){
+        box(x-3,front+h*.72,w+6,4,'#5d756d');box(x-2,front+h*.72,w+4,1,'#c5cdb8');
+        for(const side of [-1,1]){const bx=side<0?x-4:x+w-3;box(bx,front+h*.25,7,h*.75,'#6d8274');box(bx,front+h*.25,7,2,'#d6dfce');}
+        if(o.phase<2){line(x+w*.7,y-25,x+w*.7,y+2,'#677c73',1);box(x+w*.7,y-25,10,6,'#9b7470');box(x+w*.7+2,y-19,6,2,'#c3ada0');}
+        box(x+5,y+5,w-10,Math.max(2,d-12),'#99ab9c');box(x+7,y+7,Math.max(2,w-14),Math.max(2,d-16),'#e4ebdf');
+        for(const level of [.2,.68]){const wy=front+h*level;box(x+w/2-3,wy,6,10,'#385854');box(x+w/2-2,wy-2,4,2,'#536f64');box(x+w/2-4,wy-3,8,1,'#b9c4af');}}
     }
     box(x,front,w,2,ice?'#d6e9e9':'#e6eddf');
   }
@@ -2782,7 +2891,7 @@ window.FROSTLINE_READY = (async () => {
     const msg=state.messages[state.messages.length-1];
     if(msg){const alpha=clamp((msg.until-clock)*2,0,1)*clamp((clock-msg.start)*5,0,1);ctx.globalAlpha=alpha;const width=Math.min(W-18,Math.max(msg.title.length*6,msg.detail.length*6)+26),x=(W-width)/2;box(x+2,83,width,49,'#bfd2cb');box(x,81,width,49,'#fbf7e9');box(x,81,3,49,msg.color);text(msg.title,W/2,98,12,msg.color);text(msg.detail,W/2,116,8,C.ink);ctx.globalAlpha=1;}
     const nearest=pickWarningChaser(state.chasers,p);if(nearest){const gap=Math.round(Math.hypot(nearest.x-p.x,nearest.y-p.y)/PX_PER_M);text(`↑ ${nearest.kind==='dog'?'DOGS':nearest.kind==='patrol'?'PATROL':'YETI'}  ${gap} m`,W/2,153,10,C.red);}
-    if(run&&Math.abs(p.x-centerAt(p.y))>S.race.offPisteDistance){text(p.x<centerAt(p.y)?'COURSE →':'← COURSE',p.x<centerAt(p.y)?W-65:65,H*.55,10,C.blue);}
+    if(run&&!run.endless&&Math.abs(p.x-centerAt(p.y))>S.race.offPisteDistance){text(p.x<centerAt(p.y)?'COURSE →':'← COURSE',p.x<centerAt(p.y)?W-65:65,H*.55,10,C.blue);}
   }
   function touchControl() {
     const t=state.input.pointer;if(!t)return;

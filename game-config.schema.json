@@ -8609,9 +8609,7 @@
             "additionalEveryMetres",
             "intervalMetres",
             "speedKmh",
-            "maxActive",
-            "wakeSeconds",
-            "retireBehindMetres"
+            "wakeSeconds"
           ],
           "properties": {
             "firstMetres": {
@@ -8643,7 +8641,8 @@
             "maxActive": {
               "type": "integer",
               "minimum": 1,
-              "maximum": 6
+              "maximum": 6,
+              "description": "Legacy alias for maxNearbyHunters."
             },
             "wakeSeconds": {
               "type": "number",
@@ -8651,7 +8650,19 @@
             },
             "retireBehindMetres": {
               "type": "number",
-              "minimum": 100
+              "minimum": 100,
+              "description": "Legacy alias for nearbyMetres; no longer retires awake hunters."
+            },
+            "maxNearbyHunters": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 6,
+              "description": "Maximum awake/dormant hunters nearby; distant awake pursuers persist and do not occupy this local budget."
+            },
+            "nearbyMetres": {
+              "type": "number",
+              "minimum": 100,
+              "description": "Distance behind used only for local spawn counts and removing dormant placements. Awake hunters never expire at this distance."
             }
           }
         },
@@ -8701,6 +8712,21 @@
               "items": {
                 "type": "number",
                 "minimum": 14
+              },
+              "minItems": 2,
+              "maxItems": 2
+            },
+            "difficultyVisits": {
+              "type": "integer",
+              "minimum": 2,
+              "maximum": 20
+            },
+            "routeSwingMetres": {
+              "type": "array",
+              "items": {
+                "type": "number",
+                "minimum": 25,
+                "maximum": 100
               },
               "minItems": 2,
               "maxItems": 2

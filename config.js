@@ -7,9 +7,13 @@ window.loadFrostlineConfig = async function () {
     config = await response.json();
   }
   config.endless ??= {"autoStart":false,"recordVersion":1,"playerSpeedKmh":90,"sectionMetres":240,"lookAheadMetres":180,"difficultyRampMetres":2800,"waveMetres":900,"itemSpreadMetres":55,"gates":{"spacingMetres":38,"openingMetres":[19,14],"swingMetres":[11,16],"swordEvery":8},"rates":{"trees":[0.9,3.8],"skiers":[0.8,4.8],"fastSkiers":[0,0.7],"lakes":[0.12,0.85],"jumps":[0.12,0.5]},"lakeRadiusMetres":[20,34],"firstLakeMetres":350,"yetis":{"firstMetres":700,"additionalEveryMetres":900,"intervalMetres":[650,300],"speedKmh":[68,94],"maxActive":4,"wakeSeconds":2.5,"retireBehindMetres":180}};
+  config.endless.yetis.maxNearbyHunters ??= config.endless.yetis.maxActive ?? 4;
+  config.endless.yetis.nearbyMetres ??= config.endless.yetis.retireBehindMetres ?? 180;
   config.endless.maxPlayerSpeedKmh ??= 130;
   config.endless.speedRampMetres ??= 2400;
-  config.endless.encounters ??= {"firstMetres":450,"gapMetres":[300,480],"lengthMetres":[180,240],"corridorWidthMetres":[18,23]};
+  config.endless.encounters ??= {"firstMetres":450,"gapMetres":[300,480],"lengthMetres":[900,1200],"corridorWidthMetres":[14.4,23]};
+  config.endless.encounters.difficultyVisits ??= 6;
+  config.endless.encounters.routeSwingMetres ??= [38,55];
   config.skiers.crashSeconds ??= [4,5];
   config.skiers.getUpSeconds ??= .6;
   config.courses.endless ??= {"name":"Endless Mixed Slalom","sub":"ONE SLOPE. NO FINISH.","length":540,"fee":0,"pace":156,"spacing":380,"density":1,"color":"#24716d","kind":"forest"};

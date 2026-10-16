@@ -3,7 +3,7 @@
   "version": 1,
   "endless": {
     "autoStart": false,
-    "recordVersion": 2,
+    "recordVersion": 3,
     "playerSpeedKmh": 90,
     "sectionMetres": 240,
     "lookAheadMetres": 180,
@@ -60,9 +60,9 @@
         68,
         94
       ],
-      "maxActive": 4,
       "wakeSeconds": 2.5,
-      "retireBehindMetres": 180
+      "maxNearbyHunters": 4,
+      "nearbyMetres": 180
     },
     "maxPlayerSpeedKmh": 130,
     "speedRampMetres": 2400,
@@ -73,12 +73,17 @@
         480
       ],
       "lengthMetres": [
-        180,
-        240
+        900,
+        1200
       ],
       "corridorWidthMetres": [
-        18,
+        14.4,
         23
+      ],
+      "difficultyVisits": 6,
+      "routeSwingMetres": [
+        38,
+        55
       ]
     }
   },
