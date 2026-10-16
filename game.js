@@ -390,7 +390,7 @@ window.FROSTLINE_READY = (async () => {
           if(random()<.13){h.buildingKind='hotel';h.floors=S.villageLife.buildings.hotelFloors;}
           if(h.buildingKind==='cafe'){h.houseSprite=pick(['bakeryFacade','cocoaFacade']);h.shopName=h.houseSprite==='bakeryFacade'?'BUNS':'COCOA';}
           if(random()<.09){h.houseSprite='toyFacade';h.shopName='TOYS';}
-          if(random()<.32)entity('personYellow',h.x-hw+12,h.y+25,{...own,town,width:30,r:10,job:h.houseSprite==='toyFacade'?'toys':'bakery'});
+          if(random()<mix(.16,.32,e.difficulty))entity('personYellow',h.x-hw+12,h.y+25,{...own,town,width:30,r:10,job:h.houseSprite==='toyFacade'?'toys':'bakery'});
         }else if(tree)entity(random()<.3?'fir':'pine',x,y,{...own,width:range(66,87),r:23});
         else {
           if(kind==='ice'&&e.features.some(f=>f.type==='lake'&&Math.abs(x-f.x)<f.rx+hw+20*scale&&Math.abs(y-f.y)<f.ry+hh+20*scale))continue;
@@ -403,7 +403,7 @@ window.FROSTLINE_READY = (async () => {
         const x=encounterPathX(path,y),half=e.half;
         // The regular street and snowy back lanes have residents, animated shops and tiny props.
         const crossing=[{x:encounterPathX(path,y-45*scale)-half*.6,y:y-45*scale},{x:encounterPathX(path,y+45*scale)+half*.6,y:y+45*scale}];
-        for(let n=0;n<Math.round(mix(2,5,e.difficulty));n++){const at=y+range(-50,50)*scale;entity(pick(['personRed','personYellow','personGreen']),encounterPathX(path,at)+range(-.6,.6)*half,at,{...own,town,width:30,r:10,walker:true,path:crossing,pathIndex:n%2,pathDir:n%2?-1:1,walkSpeed:range(...S.village.walkerSpeed)});}
+        for(let n=0;n<Math.round(mix(1,5,e.difficulty));n++){const at=y+range(-50,50)*scale;entity(pick(['personRed','personYellow','personGreen']),encounterPathX(path,at)+range(-.6,.6)*half,at,{...own,town,width:30,r:10,walker:true,path:crossing,pathIndex:n%2,pathDir:n%2?-1:1,walkSpeed:range(...S.village.walkerSpeed)});}
         if(index===0){
           for(const side of [-1,1]){const lx=x+side*(half+30*scale);if(encounterClearance(e,lx,y,6,6)>10)entity('lamp',lx,y,{...own,town,width:20,r:6});}
           if(random()<.4)entity('skier',x+range(-.6,.6)*half,y+60,{...own,town,width:42,r:12,vy:range(...S.skiers.slowSpeed),vx:0,endlessBaseVy:range(...S.skiers.slowSpeed)});
