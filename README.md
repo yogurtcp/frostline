@@ -38,7 +38,7 @@ The purple Arcade entrance starts the configurable 27-stage survival descent. Ev
 
 ## Endless Mixed Slalom
 
-Ski straight through the gap between the summit's first four entrances, then through **Endless Mixed Slalom** on the second row. Arcade remains separate. Endless is a continuous, free slope with no finish lines or stage resets. Occasional towns are part of the course, where existing Yetis can follow you. Distance is the record; missed gates break the equipment combo but do not end the run. Gates earn the same shields/swords as Arcade.
+Ski through **Endless** on the left of the summit entrance row. All five trail entrances share the same starting line. Arcade remains separate. Endless is a continuous, free slope with no finish lines or stage resets. Occasional towns are part of the course, where existing Yetis can follow you. Distance is the record; missed gates break the equipment combo but do not end the run. Gates earn the same shields/swords as Arcade.
 
 Difficulty now rises more than twice as quickly, and the player top gradually increases from 90 toward 130 km/h. Gates, lakes, encounter dimensions, traffic, ice acceleration and owned Yeti speeds scale with that pace to keep reaction time sensible. Lakes begin around 220 m and Yeti encounters around 420 m, with up to four nearby hunters plus any distant enemies still pursuing. Hills and rainbows offer occasional speed boosts.
 

@@ -190,9 +190,9 @@ window.FROSTLINE_READY = (async () => {
     entity('pine',185,105,{width:86,r:18});entity('fir',232,190,{width:63,r:16});
     entity('bush',-222,210,{width:42,r:12});entity('personYellow',-101,138,{width:32,r:11});
     entity('dog',91,187,{width:34,r:11,roam:20});
-    const choices=S.race.entryChoices.filter(id=>id!=='endless');
-    choices.forEach((id,i)=>entrance(id,(i-(choices.length-1)/2)*S.arcade.entranceSpacing,450));
-    if(S.race.entryChoices.includes('endless'))entrance('endless',0,650);
+    const choices=S.race.entryChoices,spacing=Math.min(S.arcade.entranceSpacing,(W-24)/ZOOM/choices.length);
+    const half=Math.min(S.race.entryHalfWidth,spacing*.42);
+    choices.forEach((id,i)=>Object.assign(entrance(id,(i-(choices.length-1)/2)*spacing,450),{half,width:half*2,summit:true}));
     for(let i=0;i<22;i++){
       const side=i%2?1:-1,y=-280+i*65,x=side*range(375,610);
       entity(i%3?'pine':'fir',x,y,{width:range(58,91),r:17});
@@ -2551,11 +2551,11 @@ window.FROSTLINE_READY = (async () => {
   function drawEntrance(o,s) {
     const st=stages[o.stage],half=o.half*ZOOM;
     // Labels sit on the snow beside the physical start flags.
-    text(o.stage==='arcade'?'ARCADE':st.name.toUpperCase(),s.x,s.y-39,9,st.color);
-    text(o.stage==='endless'?'NO TOWNS - DISTANCE RECORD':o.stage==='arcade'?S.arcade.stages.length+' STAGES - NO COINS':st.fee?st.fee+' COINS':st.length+' m · FREE',s.x,s.y-24,8,st.fee?C.red:C.muted);
+    text(o.stage==='arcade'?'ARCADE':o.summit&&o.stage==='endless'?'ENDLESS':st.name.toUpperCase(),s.x,s.y-39,9,st.color);
+    text(o.stage==='endless'?'DISTANCE RECORD':o.stage==='arcade'?S.arcade.stages.length+(o.summit?' STAGES':' STAGES - NO COINS'):st.fee?st.fee+' COINS':st.length+' m · FREE',s.x,s.y-24,8,st.fee?C.red:C.muted);
     flag(s.x-half,s.y,st.color,1);flag(s.x+half,s.y,st.color,-1);
     text('↓',s.x,s.y-4,10,'#96b8b3');
-    if(Math.abs(o.y-state.p.y)<165)text(o.stage==='endless'?'GATES FOR GEAR - JUMPS FOR SPEED':o.stage==='arcade'?S.arcade.stages.length+' STAGES - ONE RUN':st.sub,s.x,s.y+24,7,C.muted);
+    if(Math.abs(o.y-state.p.y)<165&&(!o.summit||Math.abs(o.x-state.p.x)<o.half))text(o.stage==='endless'?'GATES FOR GEAR - JUMPS FOR SPEED':o.stage==='arcade'?S.arcade.stages.length+' STAGES - ONE RUN':st.sub,s.x,s.y+24,7,C.muted);
     const best=courseRecord(o.stage)?.bestSeconds;if(S.timing.enabled&&best)text('BEST '+formatTime(best),s.x,s.y+39,8,C.teal);
   }
   // Curled-up gate wolves breathe slowly until their existing wake trigger fires.
