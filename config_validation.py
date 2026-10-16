@@ -43,6 +43,9 @@ def validate(value, schema, path='config'):
         crash_seconds = value['skiers'].get('crashSeconds', [4, 5])
         if crash_seconds[0] > crash_seconds[1]: fail('skiers.crashSeconds must be ordered')
         endless = value.get('endless')
+        if endless and endless.get('maxPlayerSpeedKmh', 130) < endless['playerSpeedKmh']: fail('endless.maxPlayerSpeedKmh must be at least playerSpeedKmh')
+        for key, pair in (endless or {}).get('encounters', {}).items():
+            if isinstance(pair, list) and pair[0] > pair[1]: fail('endless.encounters.' + key + ' must be ordered')
         if endless and endless['lakeRadiusMetres'][0] > endless['lakeRadiusMetres'][1]: fail('endless.lakeRadiusMetres must be ordered')
         if value['wildlife']['packMin'] > value['wildlife']['packMax']: fail('packMin must not exceed packMax')
         predators = value['predators']

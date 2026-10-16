@@ -8654,6 +8654,58 @@
               "minimum": 100
             }
           }
+        },
+        "maxPlayerSpeedKmh": {
+          "type": "number",
+          "minimum": 30,
+          "maximum": 180
+        },
+        "speedRampMetres": {
+          "type": "number",
+          "minimum": 500
+        },
+        "encounters": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "firstMetres",
+            "gapMetres",
+            "lengthMetres",
+            "corridorWidthMetres"
+          ],
+          "properties": {
+            "firstMetres": {
+              "type": "number",
+              "minimum": 300
+            },
+            "gapMetres": {
+              "type": "array",
+              "items": {
+                "type": "number",
+                "minimum": 150
+              },
+              "minItems": 2,
+              "maxItems": 2
+            },
+            "lengthMetres": {
+              "type": "array",
+              "items": {
+                "type": "number",
+                "minimum": 120
+              },
+              "minItems": 2,
+              "maxItems": 2
+            },
+            "corridorWidthMetres": {
+              "type": "array",
+              "items": {
+                "type": "number",
+                "minimum": 14
+              },
+              "minItems": 2,
+              "maxItems": 2
+            }
+          }
         }
       }
     }

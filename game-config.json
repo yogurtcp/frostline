@@ -3,12 +3,12 @@
   "version": 1,
   "endless": {
     "autoStart": false,
-    "recordVersion": 1,
+    "recordVersion": 2,
     "playerSpeedKmh": 90,
     "sectionMetres": 240,
     "lookAheadMetres": 180,
-    "difficultyRampMetres": 2800,
-    "waveMetres": 900,
+    "difficultyRampMetres": 1200,
+    "waveMetres": 650,
     "itemSpreadMetres": 55,
     "gates": {
       "spacingMetres": 38,
@@ -48,13 +48,13 @@
       20,
       34
     ],
-    "firstLakeMetres": 350,
+    "firstLakeMetres": 220,
     "yetis": {
-      "firstMetres": 700,
-      "additionalEveryMetres": 900,
+      "firstMetres": 420,
+      "additionalEveryMetres": 650,
       "intervalMetres": [
-        650,
-        300
+        450,
+        240
       ],
       "speedKmh": [
         68,
@@ -63,6 +63,23 @@
       "maxActive": 4,
       "wakeSeconds": 2.5,
       "retireBehindMetres": 180
+    },
+    "maxPlayerSpeedKmh": 130,
+    "speedRampMetres": 2400,
+    "encounters": {
+      "firstMetres": 450,
+      "gapMetres": [
+        300,
+        480
+      ],
+      "lengthMetres": [
+        180,
+        240
+      ],
+      "corridorWidthMetres": [
+        18,
+        23
+      ]
     }
   },
   "arcade": {

@@ -7,6 +7,9 @@ window.loadFrostlineConfig = async function () {
     config = await response.json();
   }
   config.endless ??= {"autoStart":false,"recordVersion":1,"playerSpeedKmh":90,"sectionMetres":240,"lookAheadMetres":180,"difficultyRampMetres":2800,"waveMetres":900,"itemSpreadMetres":55,"gates":{"spacingMetres":38,"openingMetres":[19,14],"swingMetres":[11,16],"swordEvery":8},"rates":{"trees":[0.9,3.8],"skiers":[0.8,4.8],"fastSkiers":[0,0.7],"lakes":[0.12,0.85],"jumps":[0.12,0.5]},"lakeRadiusMetres":[20,34],"firstLakeMetres":350,"yetis":{"firstMetres":700,"additionalEveryMetres":900,"intervalMetres":[650,300],"speedKmh":[68,94],"maxActive":4,"wakeSeconds":2.5,"retireBehindMetres":180}};
+  config.endless.maxPlayerSpeedKmh ??= 130;
+  config.endless.speedRampMetres ??= 2400;
+  config.endless.encounters ??= {"firstMetres":450,"gapMetres":[300,480],"lengthMetres":[180,240],"corridorWidthMetres":[18,23]};
   config.skiers.crashSeconds ??= [4,5];
   config.skiers.getUpSeconds ??= .6;
   config.courses.endless ??= {"name":"Endless Mixed Slalom","sub":"ONE SLOPE. NO FINISH.","length":540,"fee":0,"pace":156,"spacing":380,"density":1,"color":"#24716d","kind":"forest"};
@@ -73,6 +76,8 @@ window.loadFrostlineConfig = async function () {
     if(stage.gates.swordGateCount>stage.gates.count)throw new Error(`arcade.stages[${i}]: swordGateCount exceeds gate count`);
   }
   if(config.skiers.crashSeconds[0]>config.skiers.crashSeconds[1])throw new Error('skiers.crashSeconds must be ordered');
+  if(config.endless.maxPlayerSpeedKmh<config.endless.playerSpeedKmh)throw new Error('endless.maxPlayerSpeedKmh must be at least playerSpeedKmh');
+  for(const [key,pair] of Object.entries(config.endless.encounters))if(Array.isArray(pair)&&pair[0]>pair[1])throw new Error('endless.encounters.'+key+' must be ordered');
   if(config.endless.lakeRadiusMetres[0]>config.endless.lakeRadiusMetres[1])throw new Error('endless.lakeRadiusMetres must be ordered');
   if (config.wildlife.packMin > config.wildlife.packMax) throw new Error('packMin must not exceed packMax');
   if(config.predators.divertReleaseWidthMetres<config.predators.divertPathWidthMetres)throw new Error('divertReleaseWidthMetres must be at least divertPathWidthMetres');

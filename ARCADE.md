@@ -214,6 +214,6 @@ Every moving jump now uses a boosted speed target (jump.speedBoost, default 1.25
 
 ## Separate Endless mode
 
-Endless Mixed Slalom is a separate summit entrance, centred below the original four trails. It does not use or edit Arcade's stage rows, town flow or campaign records. It generates an uninterrupted slope with distance-based pressure, random lakes, growing traffic/forest and capped Yeti encounters, retaining the shared gate combo and shield/sword mechanics. See CONFIG for the independent `endless` section.
+Endless Mixed Slalom is a separate summit entrance, centred below the original four trails. It does not use or edit Arcade's stage rows, town flow or campaign records. It generates an uninterrupted slope with distance-based pressure, random lakes, growing traffic/forest, capped Yeti encounters and rotating town/tree/glacier/castle passages, retaining the shared gate combo and shield/sword mechanics. The Endless speed rises 90→130 km/h with scaled encounter geometry. Its course towns admit existing owned pursuers and forbid new Yeti spawns; Arcade villages remain protected. Fork gates accept either route once. See CONFIG for the independent `endless` section.
 
 Shared NPC behavior: skiers/boarders now tumble on collisions and recover after 4–5 seconds; predators can eat them while down. Player falls no longer give temporary immunity to predators, so a nearby Yeti can catch you before you get back up. This applies in Arcade as well as Endless.
