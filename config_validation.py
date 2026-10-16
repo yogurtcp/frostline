@@ -46,6 +46,9 @@ def validate(value, schema, path='config'):
         if endless and endless.get('maxPlayerSpeedKmh', 130) < endless['playerSpeedKmh']: fail('endless.maxPlayerSpeedKmh must be at least playerSpeedKmh')
         for key, pair in (endless or {}).get('encounters', {}).items():
             if isinstance(pair, list) and pair[0] > pair[1]: fail('endless.encounters.' + key + ' must be ordered')
+        wildlife = (endless or {}).get('wildlife', {})
+        pack = wildlife.get('wolfPackSize', [2, 3])
+        if pack[0] > pack[1]: fail('endless.wildlife.wolfPackSize must be ordered')
         if endless and endless['lakeRadiusMetres'][0] > endless['lakeRadiusMetres'][1]: fail('endless.lakeRadiusMetres must be ordered')
         if value['wildlife']['packMin'] > value['wildlife']['packMax']: fail('packMin must not exceed packMax')
         predators = value['predators']

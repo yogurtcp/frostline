@@ -3,7 +3,7 @@
   "version": 1,
   "endless": {
     "autoStart": false,
-    "recordVersion": 3,
+    "recordVersion": 4,
     "playerSpeedKmh": 90,
     "sectionMetres": 240,
     "lookAheadMetres": 180,
@@ -62,7 +62,8 @@
       ],
       "wakeSeconds": 2.5,
       "maxNearbyHunters": 4,
-      "nearbyMetres": 180
+      "nearbyMetres": 180,
+      "wakeMetres": 140
     },
     "maxPlayerSpeedKmh": 130,
     "speedRampMetres": 2400,
@@ -84,7 +85,28 @@
       "routeSwingMetres": [
         38,
         55
+      ],
+      "townPeople": [
+        18,
+        60
+      ],
+      "townStreetWidthMetres": [
+        14.4,
+        23
       ]
+    },
+    "wildlife": {
+      "firstMetres": 650,
+      "intervalMetres": [
+        360,
+        200
+      ],
+      "maxNearby": 6,
+      "wolfPackSize": [
+        2,
+        3
+      ],
+      "noticeMetres": 55
     }
   },
   "arcade": {

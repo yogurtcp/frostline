@@ -14,6 +14,10 @@ window.loadFrostlineConfig = async function () {
   config.endless.encounters ??= {"firstMetres":450,"gapMetres":[300,480],"lengthMetres":[900,1200],"corridorWidthMetres":[14.4,23]};
   config.endless.encounters.difficultyVisits ??= 6;
   config.endless.encounters.routeSwingMetres ??= [38,55];
+  config.endless.encounters.townStreetWidthMetres ??= [14.4,23];
+  config.endless.encounters.townPeople ??= [18,60];
+  config.endless.yetis.wakeMetres ??= 140;
+  config.endless.wildlife ??= {firstMetres:650,intervalMetres:[360,200],maxNearby:6,wolfPackSize:[2,3],noticeMetres:55};
   config.skiers.crashSeconds ??= [4,5];
   config.skiers.getUpSeconds ??= .6;
   config.courses.endless ??= {"name":"Endless Mixed Slalom","sub":"ONE SLOPE. NO FINISH.","length":540,"fee":0,"pace":156,"spacing":380,"density":1,"color":"#24716d","kind":"forest"};
@@ -82,6 +86,7 @@ window.loadFrostlineConfig = async function () {
   if(config.skiers.crashSeconds[0]>config.skiers.crashSeconds[1])throw new Error('skiers.crashSeconds must be ordered');
   if(config.endless.maxPlayerSpeedKmh<config.endless.playerSpeedKmh)throw new Error('endless.maxPlayerSpeedKmh must be at least playerSpeedKmh');
   for(const [key,pair] of Object.entries(config.endless.encounters))if(Array.isArray(pair)&&pair[0]>pair[1])throw new Error('endless.encounters.'+key+' must be ordered');
+  if(config.endless.wildlife.wolfPackSize[0]>config.endless.wildlife.wolfPackSize[1])throw new Error('endless.wildlife.wolfPackSize must be ordered');
   if(config.endless.lakeRadiusMetres[0]>config.endless.lakeRadiusMetres[1])throw new Error('endless.lakeRadiusMetres must be ordered');
   if (config.wildlife.packMin > config.wildlife.packMax) throw new Error('packMin must not exceed packMax');
   if(config.predators.divertReleaseWidthMetres<config.predators.divertPathWidthMetres)throw new Error('divertReleaseWidthMetres must be at least divertPathWidthMetres');
