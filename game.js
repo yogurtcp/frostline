@@ -361,16 +361,22 @@ window.FROSTLINE_READY = (async () => {
     }
     e.generatedY=to;delete e.clearanceRows;
   }
-  function endlessPursuitTarget(c,target){
-    if(!state.endless||!activeCourseOwner(c)||target.y<c.y)return target;
-    const e=endlessEncounterAt(c.y+80*state.endless.speedScale);if(!e||target.y<e.startY||Math.hypot(target.x-c.x,target.y-c.y)<180)return target;
+  function endlessPursuitRoute(c,target){
+    if(!state.endless||!activeCourseOwner(c)||target.y<c.y)return null;
+    const e=endlessEncounterAt(c.y+80*state.endless.speedScale);if(!e||target.y<e.startY)return null;
     if(c.encounterRoute?.encounter!==e){
       const y=clamp(c.y,e.startY,e.endY),goal=Math.min(e.endY,c.y+600*e.scale);
       const costs=e.paths.map(path=>Math.abs(encounterPathX(path,y)-c.x)+.35*Math.abs(encounterPathX(path,goal)-target.x));
       c.encounterRoute={encounter:e,index:costs.indexOf(Math.min(...costs))};
     }
+    return c.encounterRoute;
+  }
+  function endlessPursuitTarget(c,target){
+    const route=endlessPursuitRoute(c,target);
+    if(!route||Math.hypot(target.x-c.x,target.y-c.y)<180)return target;
+    const e=route.encounter;
     const y=Math.min(e.endY,c.y+Math.min(65*e.scale,e.half*.3));
-    return {x:encounterPathX(e.paths[c.encounterRoute.index],y),y};
+    return {x:encounterPathX(e.paths[route.index],y),y};
   }
   function recordEndless(reason){
     const a=state.endless;if(!a)return;
@@ -384,6 +390,8 @@ window.FROSTLINE_READY = (async () => {
     const block={},run={id:'endless',endless:true,arcade:{trees:true},block,x:gate?.x??p.x,selectionY:gate?.y??p.y,startY,endY:Infinity,objective:'gates',points:0,hits:0,cleared:0,missed:0,tricks:0,time:0,totalGates:0,shieldGateCharge:S.arcade.gear.shieldsPerStage/35};
     state.endless={startY,furthestY:startY,plannedY:startY,nextGateY:startY+300,nextLakeY:startY+E.firstLakeMetres*PX_PER_M,nextYetiY:startY+E.yetis.firstMetres*PX_PER_M,nextWildlifeY:startY+E.wildlife.firstMetres*PX_PER_M,wildlifeNumber:0,sections:[],encounters:[],encounterCount:0,themeVisits:{},townNames:[],nextEncounterY:startY+E.encounters.firstMetres*PX_PER_M,speedScale:1,gateNumber:0,shields:0,swords:0,shieldCharge:0,swordCharge:0,shieldsUsed:0,swordsUsed:0,combo:0,savedMetres:0};
     state.course=run;state.zone={kind:'course',origin:startY};state.safeTrails.push(run);state.chasers=[];state.patrolPenalty=null;state.plannedTown=null;state.results=null;state.arcadeResult=null;state.endlessResult=null;
+    // The course schedules its own reachable threats; unrelated ambient sleepers add dead space.
+    state.objects=state.objects.filter(o=>o.arcadeRun||!['lurker','wolf','bear'].includes(o.type)||o.dead||o.eaten);
     for(const o of state.objects)if(o.type==='entrance')o.selected=o===gate;
     entity('courseStart',run.x,startY,{r:0,width:700,name:'ENDLESS MIXED SLALOM'});
     const route=state.liftRoutes.at(-1);if(route)route.y1=Math.min(route.y1,startY);
@@ -505,8 +513,9 @@ window.FROSTLINE_READY = (async () => {
       if(o.type==='ice'&&o.iceTile&&o.y+o.lake.radius<view.top-200)o.iceTile=null;
     }
     const far=o=>o.y<state.p.y-S.endless.yetis.nearbyMetres*PX_PER_M*a.speedScale;
-    // Only dormant spawns expire behind us. An awake hunter keeps pursuing at its real speed.
-    state.objects=state.objects.filter(o=>!activeCourseOwner(o)||!((o.type==='lurker'&&far(o))||(['skier','boarder'].includes(o.type)&&o.y>a.plannedY+800*a.speedScale)));
+    const dormant=o=>!o.dead&&!o.eaten&&(o.type==='lurker'||['wolf','bear'].includes(o.type)&&!o.linkedChase&&!o.wolfAwake&&!(o.alertUntil>clock)&&!o.divert&&!(o.feedingUntil>clock));
+    // Discard missed, unengaged threats once offscreen. Awake hunters keep physically pursuing.
+    state.objects=state.objects.filter(o=>!activeCourseOwner(o)||!((dormant(o)&&(far(o)||o.y<view.top-100))||(['skier','boarder'].includes(o.type)&&o.y>a.plannedY+800*a.speedScale)));
   }
   function retireArcadeBlock(run){
     const owned=o=>{const owner=o.arcadeRun||o.chaseRun;return owner&&(owner===run||run?.block&&owner.block===run.block);};
@@ -1349,12 +1358,24 @@ window.FROSTLINE_READY = (async () => {
   function preyOnPlayerPath(hunter,prey,committed=false){
     // Wolves keep their roaming hunts; Yetis and bears prioritize reaching the player.
     if(!['fast','slow','bear'].includes(hunter?.kind))return true;
-    const p=state.p,P=S.predators,dx=p.x-hunter.x,dy=p.y-hunter.y,length=Math.hypot(dx,dy);
-    if(length<1)return false;
-    const qx=prey.x-hunter.x,qy=prey.y-hunter.y,along=(qx*dx+qy*dy)/length,across=Math.abs(qx*dy-qy*dx)/length;
+    const p=state.p,P=S.predators;
     const width=(committed?P.divertReleaseWidthMetres:P.divertPathWidthMetres)*PX_PER_M*endlessSpeedScale(hunter);
     const angle=(committed?P.divertReleaseAngleDegrees:P.divertPathAngleDegrees)*Math.PI/180;
-    if(along<=0||along>=length||across>width||across>along*Math.tan(angle)||Math.hypot(prey.x-p.x,prey.y-p.y)>=length)return false;
+    const route=endlessPursuitRoute(hunter,p),e=route?.encounter;
+    const path=e&&hunter.y>=e.startY&&prey.y>=e.startY&&prey.y<=e.endY?e.paths[route.index]:null;
+    const goal=path?{x:encounterPathX(path,prey.y),y:prey.y}:p;
+    const dx=goal.x-hunter.x,dy=goal.y-hunter.y,length=Math.hypot(dx,dy);
+    if(length<1)return false;
+    const qx=prey.x-hunter.x,qy=prey.y-hunter.y,along=(qx*dx+qy*dy)/length,across=Math.abs(qx*dy-qy*dx)/length;
+    // Keep the release cone wide enough to finish a nearby meal instead of shrinking to zero.
+    const angleReach=committed?Math.max(along,width):along;
+    if(along<=0||across>width||across>angleReach*Math.tan(angle))return false;
+    if(path){
+      if(prey.y<=hunter.y||prey.y>=p.y||Math.abs(prey.x-goal.x)>width)return false;
+      if(committed&&Math.abs(hunter.x-encounterPathX(path,hunter.y))>width)return false;
+      return true;
+    }
+    if(along>=length||Math.hypot(prey.x-p.x,prey.y-p.y)>=length)return false;
     if(committed){
       // A moving hunter-to-player line alone would forgive gradual sideways drift.
       // Keep the diversion bounded relative to its starting point and the live player.
@@ -1370,7 +1391,9 @@ window.FROSTLINE_READY = (async () => {
       if(!CREATURE_TYPES.has(o.type)||o.eaten||o.r<=0||o.dead)continue;
       if(humanArea(o.x,o.y)&&!courseCreature(hunter,o.x,o.y))continue;
       const d=Math.hypot(o.x-x,o.y-y);
-      if(d>=bestD||Math.hypot(o.x-p.x,o.y-p.y)>=pd)continue;
+      if(d>=bestD)continue;
+      // A winding course can put on-route prey farther from the player in a straight line.
+      if(!['fast','slow','bear'].includes(hunter?.kind)&&Math.hypot(o.x-p.x,o.y-p.y)>=pd)continue;
       if(!preyOnPlayerPath(hunter,o))continue;
       bestD=d;best=o;
     }
@@ -1396,8 +1419,9 @@ window.FROSTLINE_READY = (async () => {
       }
     }
     if(hunter.divert||clock<=(hunter.nextDivertCheck||0))return;
-    hunter.nextDivertCheck=clock+P.divertRecheckSeconds;
     const next=nearestPrey(hunter.x,hunter.y,P.divertRadiusMetres*PX_PER_M*endlessSpeedScale(hunter),hunter);
+    // An empty scan must not hide a fast encounter for the whole decision interval.
+    hunter.nextDivertCheck=clock+(next?P.divertRecheckSeconds:Math.min(.2,P.divertRecheckSeconds));
     if(next&&Math.random()<P.divertChance){
       hunter.divert=next;hunter.divertBestDistance=Math.hypot(next.x-hunter.x,next.y-hunter.y);hunter.divertUntil=clock+P.divertTimeoutSeconds;
       hunter.divertOrigin={x:hunter.x,y:hunter.y};
@@ -1423,6 +1447,7 @@ window.FROSTLINE_READY = (async () => {
         if(nearArcadeFeature(x,y)||nearMushroom(x,y)||patchAt(x,y)||insideTown(x,y)||state.villages.some(t=>roadDistance(t.approachRoad,x,y)<t.approachRoad.width/2+30)||(!state.course&&state.zone.kind==='start'&&Math.abs(x)<S.world.meadowHalfWidth&&y>S.world.meadowTop&&y<S.world.meadowBottom))continue;
         if(state.objects.some(o=>(o.type==='gate'||o.type==='entrance')&&Math.abs(o.x-x)<o.half+60&&Math.abs(o.y-y)<140))continue;
         const type=ambientType(x,y);
+        if(state.endless&&['lurker','wolf','bear'].includes(type))continue;
         if(type==='wolf'){if(!spawnWolfPack(x,y,{worldChunk:key}).length)entity('fir',x,y,{width:65,r:16,worldChunk:key});continue;}
         const fast=type==='skier'&&random()<(state.course?.arcade?.fastChance??S.skiers.ambientFastChance);
         const widths={pine:range(60,90),fir:range(52,74),rock:44,pebble:28,skier:42,personGreen:30,rabbit:20,fox:39,wolf:43,bear:60,cat:25,lurker:55,bush:35};
