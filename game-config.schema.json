@@ -5179,10 +5179,16 @@
         "offDownhillSpeedRatio"
       ],
       "properties": {
+        "mealPauseSeconds": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Pause after a Yeti or chasing bear eats NPC prey. Defaults to 0.8 seconds; player contact remains dangerous during the meal."
+        },
         "divertChance": {
           "type": "number",
           "minimum": 0,
-          "maximum": 1
+          "maximum": 1,
+          "description": "Selection chance for animal prey and wolf hunts. Yetis and chasing bears reliably choose eligible on-route humans."
         },
         "divertRadiusMetres": {
           "type": "number",

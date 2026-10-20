@@ -36,6 +36,7 @@ window.loadFrostlineConfig = async function () {
   config.predators.divertReleaseWidthMetres ??= 12;
   config.predators.divertPathAngleDegrees ??= 30;
   config.predators.divertReleaseAngleDegrees ??= 45;
+  config.predators.mealPauseSeconds ??= .8;
   function validate(value, schema, path) {
     if (schema.type === 'object') {
       if (!value || typeof value !== 'object' || Array.isArray(value)) throw new Error(`${path} must be an object`);

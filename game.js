@@ -1205,7 +1205,7 @@ window.FROSTLINE_READY = (async () => {
     for(const o of near)if(o.type==='pigeons'&&Math.hypot(o.x-p.x,o.y-p.y)<65&&state.started)touchVillageProp(o);
     for(const n of near){
       if(n.backyardPet&&Math.hypot(n.x-p.x,n.y-p.y)<75)touchVillageProp(n);
-      if(!n.type.startsWith('person')||!n.town)continue;
+      if(!n.type.startsWith('person')||!n.town||n.fearUntil>clock)continue;
       const distance=Math.hypot(n.x-p.x,n.y-p.y);
       if(distance<170&&clock>=(n.nextWave||0)){n.waveUntil=clock+1.8;n.nextWave=clock+12;}
       if(n.job==='bakery'&&distance<105&&clock>=(n.nextServe||0)){
@@ -1219,12 +1219,12 @@ window.FROSTLINE_READY = (async () => {
         state.particles.push({x:n.x,y:n.y-12,vx:(p.x-n.x)/.7,vy:(p.y-n.y)/.7-28,life:.7,color:'#f8faf0',size:5});
       }
       if(n.socialUntil>clock||n.snowPlay||clock<(n.nextChat||0))continue;
-      const friend=near.find(q=>q!==n&&q.town===n.town&&q.type.startsWith('person')&&!(q.socialUntil>clock)&&!q.snowPlay&&Math.hypot(q.x-n.x,q.y-n.y)<90);
+      const friend=near.find(q=>q!==n&&q.town===n.town&&q.type.startsWith('person')&&!(q.fearUntil>clock)&&!(q.socialUntil>clock)&&!q.snowPlay&&Math.hypot(q.x-n.x,q.y-n.y)<90);
       n.nextChat=clock+12+n.phase;
       if(friend){n.chatUntil=friend.chatUntil=n.socialUntil=friend.socialUntil=clock+3;friend.nextChat=clock+15;friend.chatPartner=n;n.chatPartner=friend;n.socialAnimal=friend.socialAnimal=null;}
     }
     for(const n of near){
-      if(!n.type.startsWith('person')||n.cheerUntil>clock||clock<(n.animalNext||0))continue;
+      if(!n.type.startsWith('person')||n.fearUntil>clock||n.cheerUntil>clock||clock<(n.animalNext||0))continue;
       const animal=animals.find(o=>clock>=(o.npcNext||0)&&!(o.socialFleeUntil>clock)&&!(o.ai==='flee'||o.ai==='climb')&&Math.hypot(o.x-n.x,o.y-n.y)<L.npcAnimalRadius);
       if(!animal)continue;n.animalNext=animal.npcNext=clock+L.npcCooldownSeconds;n.socialUntil=clock+L.socialSeconds;n.socialAnimal=animal;
       if(animal.type==='fox'){
@@ -1377,6 +1377,8 @@ window.FROSTLINE_READY = (async () => {
   // Edible creatures for opportunistic predators. Predator kinds (wolf, fox, bear, lurkers)
   // are deliberately absent: predators never hunt each other.
   const CREATURE_TYPES=new Set(['skier','boarder','personRed','personYellow','personGreen','dog','cat','rabbit']);
+  const HUMAN_PREY=new Set(['skier','boarder','personRed','personYellow','personGreen']);
+  function ediblePrey(o){return CREATURE_TYPES.has(o.type)&&!o.eaten&&!o.dead&&(o.r>0||o.type.startsWith('person'));}
   function preyOnPlayerPath(hunter,prey,committed=false){
     // Wolves keep their roaming hunts; Yetis and bears prioritize reaching the player.
     if(!['fast','slow','bear'].includes(hunter?.kind))return true;
@@ -1408,23 +1410,24 @@ window.FROSTLINE_READY = (async () => {
   }
   function nearestPrey(x,y,radius,hunter){
     const p=state.p,pd=Math.hypot(p.x-x,p.y-y);
-    let best=null,bestD=radius;
+    let best=null,bestD=radius,human=null,humanD=radius;
     for(const o of state.objects){
-      if(!CREATURE_TYPES.has(o.type)||o.eaten||o.r<=0||o.dead)continue;
+      if(!ediblePrey(o))continue;
       if(humanArea(o.x,o.y)&&!courseCreature(hunter,o.x,o.y))continue;
       const d=Math.hypot(o.x-x,o.y-y);
-      if(d>=bestD)continue;
+      if(d>=radius)continue;
       // A winding course can put on-route prey farther from the player in a straight line.
       if(!['fast','slow','bear'].includes(hunter?.kind)&&Math.hypot(o.x-p.x,o.y-p.y)>=pd)continue;
       if(!preyOnPlayerPath(hunter,o))continue;
-      bestD=d;best=o;
+      if(HUMAN_PREY.has(o.type)&&d<humanD){humanD=d;human=o;}
+      if(d<bestD){bestD=d;best=o;}
     }
-    return best;
+    return ['fast','slow','bear'].includes(hunter?.kind)?human||best:best;
   }
   function updatePreyTarget(hunter){
     const P=S.predators,prey=hunter.divert;
     if(prey){
-      if(prey.eaten||prey.dead||prey.r<=0||humanArea(prey.x,prey.y)&&!courseCreature(hunter,prey.x,prey.y))hunter.divert=null;
+      if(!ediblePrey(prey)||humanArea(prey.x,prey.y)&&!courseCreature(hunter,prey.x,prey.y))hunter.divert=null;
       else if(!preyOnPlayerPath(hunter,prey,true)){
         hunter.divert=null;hunter.divertOrigin=null;
         hunter.avoidUntil=0;hunter.obstacleDetour=null;
@@ -1444,10 +1447,31 @@ window.FROSTLINE_READY = (async () => {
     const next=nearestPrey(hunter.x,hunter.y,P.divertRadiusMetres*PX_PER_M*endlessSpeedScale(hunter),hunter);
     // An empty scan must not hide a fast encounter for the whole decision interval.
     hunter.nextDivertCheck=clock+(next?P.divertRecheckSeconds:Math.min(.2,P.divertRecheckSeconds));
-    if(next&&Math.random()<P.divertChance){
+    const humanOnWay=next&&HUMAN_PREY.has(next.type)&&['fast','slow','bear'].includes(hunter.kind);
+    if(next&&(humanOnWay||Math.random()<P.divertChance)){
       hunter.divert=next;hunter.divertBestDistance=Math.hypot(next.x-hunter.x,next.y-hunter.y);hunter.divertUntil=clock+P.divertTimeoutSeconds;
       hunter.divertOrigin={x:hunter.x,y:hunter.y};
     }
+  }
+  function contactPrey(hunter,previous){
+    const radius=S.chasers.captureDistance,reachX=radius+Math.abs(hunter.x-previous.x),reachY=radius+Math.abs(hunter.y-previous.y);
+    let meal=null,best=Infinity;
+    for(const o of state.objects){
+      if(!ediblePrey(o)||Math.abs(o.x-hunter.x)>reachX||Math.abs(o.y-hunter.y)>reachY||humanArea(o.x,o.y)&&!courseCreature(hunter,o.x,o.y))continue;
+      if(segmentDistance(o.x,o.y,previous,hunter)>=radius)continue;
+      const distance=Math.hypot(o.x-previous.x,o.y-previous.y);if(distance<best){meal=o;best=distance;}
+    }
+    return meal;
+  }
+  function eatChaserPrey(hunter,meal,previous){
+    const dx=hunter.x-previous.x,dy=hunter.y-previous.y,t=clamp(((meal.x-previous.x)*dx+(meal.y-previous.y)*dy)/(dx*dx+dy*dy||1),0,1);
+    hunter.x=previous.x+dx*t;hunter.y=previous.y+dy*t;
+    hunter.motionVx=hunter.travelSpeed=0;hunter.travelStamp=clock;hunter.running=false;
+    meal.eaten=true;meal.r=0;meal.walking=false;meal.socialUntil=meal.fearUntil=0;
+    state.speech=state.speech.filter(q=>q.object!==meal);
+    hunter.divert=null;hunter.divertOrigin=null;hunter.obstacleDetour=null;hunter.avoidUntil=0;
+    hunter.feedingUntil=clock+S.predators.mealPauseSeconds;hunter.nextDivertCheck=hunter.feedingUntil;
+    say('CHOMP!',hunter,1.2);burst(meal.x,meal.y,C.ice,9);
   }
   function patchAt(x,y){return freshIceCache().find(o=>lakeContains(o,x,y));}
   function ruggedAt(x,y){return state.objects.find(o=>o.type==='rugged'&&lakeContains(o,x,y));}
@@ -1879,15 +1903,41 @@ window.FROSTLINE_READY = (async () => {
     state.cam.x=ease(state.cam.x,p.x,S.render.cameraXFollow,dt);state.cam.y=ease(state.cam.y,p.y-H*S.render.playerScreenY/ZOOM,S.render.cameraYFollow,dt);state.screenShake=Math.max(0,state.screenShake-dt);
   }
   const PED_SOLIDS=new Set(['pine','fir','rock','pebble','lodge','rental','lift','bench','lamp','snowman','stump','breadStand','skiRack']),PED_FLAGS=new Set(['gate','entrance','finish']);
+  function movePedestrianSafely(o,target,speed,dt,solids){
+    const dx=target.x-o.x,dy=target.y-o.y,move=Math.min(speed*dt,Math.hypot(dx,dy)),radius=Math.max(8,o.r)+S.pedestrians.obstacleMargin;
+    if(!move)return;
+    const near=solids.filter(h=>h!==o&&Math.abs(h.x-o.x)<(h.width||h.r*2)+radius+move&&Math.abs(h.y-o.y)<(h.width||h.r*2)+radius+move);
+    const clear=(x,y)=>!patchAt(x,y)&&near.every(h=>{const d=obstacleClearance(h,x,y);return d>=radius||d>obstacleClearance(h,o.x,o.y)+.001;});
+    const desired=Math.atan2(dy,dx),angles=[0,.25,-.25,.5,-.5,.75,-.75,1].map(turn=>desired+turn*Math.PI);
+    if(o.pedAvoidUntil>clock)angles.unshift(o.pedAvoidHeading);
+    for(const angle of angles){
+      const x=o.x+Math.cos(angle)*move,y=o.y+Math.sin(angle)*move,steps=Math.max(1,Math.ceil(move/6));let safe=true;
+      for(let i=1;i<=steps;i++)if(!clear(mix(o.x,x,i/steps),mix(o.y,y,i/steps))){safe=false;break;}
+      if(!safe)continue;
+      if(angle!==desired&&!(o.pedAvoidUntil>clock)){o.pedAvoidHeading=angle;o.pedAvoidUntil=clock+.4;}
+      o.x=x;o.y=y;return;
+    }
+  }
   function updatePedestrians(dt){
-    const P=S.pedestrians,people=[],solids=[],flags=[];
-    for(const o of state.objects){if(o.type.startsWith('person'))people.push(o);if(o.r>0&&PED_SOLIDS.has(o.type))solids.push(o);if(PED_FLAGS.has(o.type))flags.push(o);}
+    const P=S.pedestrians,people=[],solids=[],flags=[],threats=npcPredatorThreats();
+    for(const o of state.objects){if(o.eaten||o.dead)continue;if(o.type.startsWith('person'))people.push(o);if(o.r>0&&PED_SOLIDS.has(o.type))solids.push(o);if(PED_FLAGS.has(o.type))flags.push(o);}
     for(const o of people){
       o.walking=false;
-      if(o.socialUntil>clock)continue;
-      if(Math.hypot(o.x-state.p.x,o.y-state.p.y)>P.activeRadius||o.cheerUntil>clock)continue;
+      if(Math.hypot(o.x-state.p.x,o.y-state.p.y)>P.activeRadius*endlessSpeedScale(o))continue;
       const oldX=o.x,oldY=o.y;
-      if(o.walker&&o.path?.length>1){
+      if(updateNpcFear(o,threats)){
+        const dx=o.x-o.threat.x,dy=o.y-o.threat.y,distance=Math.hypot(dx,dy)||1;
+        o.panicDisplaced=true;o.fleeReturn=null;o.stroll=null;
+        movePedestrianSafely(o,{x:o.x+dx/distance*100,y:o.y+(dy||1)/distance*100},P.walkSpeed[1]*3*endlessSpeedScale(o),dt,solids);
+      }else if(o.panicDisplaced){
+        if(!o.fleeReturn){
+          const index=o.walker&&o.path?.length?o.path.reduce((best,p,i)=>Math.hypot(p.x-o.x,p.y-o.y)<Math.hypot(o.path[best].x-o.x,o.path[best].y-o.y)?i:best,0):null;
+          o.fleeReturn=index===null?{x:o.homeX,y:o.homeY}:{...o.path[index],index};o.pedAvoidUntil=0;
+        }
+        movePedestrianSafely(o,o.fleeReturn,o.walkSpeed||P.walkSpeed[1],dt,solids);
+        if(Math.hypot(o.fleeReturn.x-o.x,o.fleeReturn.y-o.y)<3){if(o.fleeReturn.index!==undefined)o.pathIndex=o.fleeReturn.index;o.fleeReturn=null;o.panicDisplaced=false;o.pauseUntil=clock+1;}
+      }else if(o.socialUntil>clock||o.cheerUntil>clock)continue;
+      else if(o.walker&&o.path?.length>1){
         // Residents keep following their existing village footpaths.
         let remaining=o.walkSpeed*dt;
         for(let i=0;i<o.path.length+1&&remaining>0;i++){
@@ -2062,8 +2112,22 @@ window.FROSTLINE_READY = (async () => {
       }
     }return true;
   }
+  function npcPredatorThreats(){
+    const threats=state.objects.filter(o=>(o.type==='wolf'||o.type==='bear')&&!o.eaten&&!o.dead&&!o.retiring&&o.r>0&&!(o.stunnedUntil>clock)&&(!o.penaltyGate||o.wolfAwake));
+    if(state.started)for(const c of state.chasers)if(['fast','slow','bear'].includes(c.kind)&&!c.dead&&!c.leaving&&!c.waiting&&!(c.wakeUntil>clock)&&!(c.stunnedUntil>clock)&&(!c.chaseRun||activeCourseOwner(c))&&(c.chaseRun||!(state.p.y>c.expires)))threats.push(c);
+    return threats;
+  }
+  function updateNpcFear(o,threats){
+    const protectedArea=humanArea(o.x,o.y);
+    if(o.threat&&(!threats.includes(o.threat)||protectedArea&&!courseCreature(o.threat,o.x,o.y))){o.threat=null;o.fearUntil=0;}
+    let nearest=null,distance=S.wildlife.npcFearDistance*endlessSpeedScale(o);
+    for(const threat of threats){if(protectedArea&&!courseCreature(threat,o.x,o.y))continue;const d=Math.hypot(threat.x-o.x,threat.y-o.y);if(d<distance){distance=d;nearest=threat;}}
+    if(nearest)frighten(o,nearest);
+    return !!o.threat&&o.fearUntil>clock;
+  }
   function frighten(skier,threat){
     skier.threat=threat;skier.fearUntil=clock+S.wildlife.npcFearSeconds;skier.catInterest=null;skier.socialUntil=0;
+    skier.chatUntil=skier.waveUntil=skier.serveUntil=skier.throwUntil=skier.cheerUntil=0;skier.socialAnimal=null;
     const lines=threat.type==='bear'||threat.kind==='bear'?S.dialogue.bearTerrified:threat.kind==='fast'||threat.kind==='slow'?S.dialogue.yetiTerrified:S.dialogue.terrified;
     if(clock>=(skier.speakAt||0)){say(pick(lines),skier);skier.speakAt=clock+S.wildlife.npcSpeechCooldown;}
   }
@@ -2109,9 +2173,7 @@ window.FROSTLINE_READY = (async () => {
     const p=state.p,A=S.wildlife,K=S.skiers;
     const collisionGrid=skierCollisionGrid();
     // Bears/yetis live in the chaser list after waking; wolves and roaming bears are scenery.
-    const threats=state.objects.filter(o=>(o.type==='wolf'||o.type==='bear')&&!o.eaten&&!o.dead&&o.r>0&&!(o.stunnedUntil>clock)&&(!o.penaltyGate||o.wolfAwake));
-    if(state.started)for(const c of state.chasers)if((c.kind==='fast'||c.kind==='slow'||c.kind==='bear')&&!c.dead&&!c.leaving&&!c.waiting&&!(c.wakeUntil>clock)&&!(c.stunnedUntil>clock)&&(!c.chaseRun||activeCourseOwner(c))&&(c.chaseRun||!(p.y>c.expires)))threats.push(c);
-    const liveThreats=new Set(threats);
+    const threats=npcPredatorThreats();
     for(const o of state.objects){
       if((o.type!=='skier'&&o.type!=='boarder')||o.eaten||o.dead||Math.hypot(o.x-p.x,o.y-p.y)>A.activeRadius*endlessSpeedScale(o))continue;
       if(o.npcFallUntil>clock){o.motionVx=o.travelSpeed=0;o.travelStamp=clock;continue;}
@@ -2119,14 +2181,7 @@ window.FROSTLINE_READY = (async () => {
         o.npcFallUntil=0;o.vy=o.npcResumeVy;o.vx=o.npcCrashSide*Math.max(35,o.vy*.6);
         o.skiLaneX=o.x;o.nextSkiTurn=clock+1.2;o.npcRecoveryUntil=clock+1.2;o.skiTurn=o.npcCrashSide;
       }
-      if(o.threat&&!liveThreats.has(o.threat)){o.threat=null;o.fearUntil=0;}
-      let nearest=null,distance=A.npcFearDistance*endlessSpeedScale(o);
-      const protectedArea=humanArea(o.x,o.y);
-      for(const threat of threats){
-        if(protectedArea&&!courseCreature(threat,o.x,o.y))continue;
-        const d=Math.hypot(threat.x-o.x,threat.y-o.y);if(d<distance){distance=d;nearest=threat;}
-      }
-      if(nearest)frighten(o,nearest);
+      updateNpcFear(o,threats);
       const ice=patchAt(o.x,o.y);
       if(!ice&&(o.catInterest||o.socialUntil>clock))continue;
       let vx=o.vx||0,vy=o.vy||0;
@@ -2290,14 +2345,16 @@ window.FROSTLINE_READY = (async () => {
       if(c.wakeUntil>clock)continue;
       if(c.stunnedUntil>clock)continue;
       if(p.y>c.expires){c.leaving=true;c.speed*=.97;continue;}
-      if(c.kind==='fast'||c.kind==='slow'||c.kind==='bear'){
+      if(['fast','slow','bear'].includes(c.kind)&&humanArea(p.x,p.y)&&!courseCreature(c,p.x,p.y))continue;
+      const feeding=c.feedingUntil>clock,previous={x:c.x,y:c.y};
+      if(!feeding&&(c.kind==='fast'||c.kind==='slow'||c.kind==='bear')){
         updatePreyTarget(c);
       }
       const hunt=c.divert||p;
       const routeTarget=endlessPursuitTarget(c,hunt),dx=routeTarget.x-c.x,dy=routeTarget.y-c.y,len=Math.hypot(dx,dy)||1;
       const [vx,vy]=chaseVelocity(dx/len*c.speed,dy/len*c.speed);
       const lethal=['fast','slow','bear'].includes(c.kind),nx=c.x+vx*dt,ny=c.y+vy*dt;
-      if(c.shoreLake&&patchAt(hunt.x,hunt.y)===c.shoreLake){
+      if(feeding||c.shoreLake&&patchAt(hunt.x,hunt.y)===c.shoreLake){
         c.motionVx=0;c.travelSpeed=0;c.travelStamp=clock;
       }else if(pursuit){
         if(insideTown(p.x,p.y)&&!endlessTownAt(p.x,p.y))continue;
@@ -2312,11 +2369,8 @@ window.FROSTLINE_READY = (async () => {
       const contactDistance=Math.hypot(c.x-p.x,c.y-p.y);
       if(c.harmlessDog&&contactDistance>S.chasers.captureDistance*2)c.harmlessDog=false;
       if(contactDistance<S.chasers.knockoutDistance&&knockOut(c,c.kind))continue;
-      if(c.divert&&Math.hypot(c.divert.x-c.x,c.divert.y-c.y)<S.chasers.captureDistance){
-        const meal=c.divert;c.divert=null;
-        meal.eaten=true;meal.r=0;say('CHOMP!',c,1.2);burst(meal.x,meal.y,C.ice,9);
-        continue;
-      }
+      const meal=lethal&&!feeding?contactPrey(c,previous):null;
+      if(meal){eatChaserPrey(c,meal,previous);continue;}
       if(contactDistance<S.chasers.captureDistance&&p.shield<=0&&p.air<=0){
         // Slow dog contacts are harmless until separation; fast ones still tackle.
         if(c.kind==='dog'&&!p.awaitingInput){
@@ -2820,6 +2874,7 @@ window.FROSTLINE_READY = (async () => {
       shadow(s.x,s.y,20,5);sprite(c.waiting?'yetiHappy':'yeti',s.x,s.y,56,{yetiTier:c.arcadeTier});
       text(c.waiting?'...':'!',s.x+(c.waiting?0:18),s.y-(c.waiting?28:18),c.waiting?9:15,c.waiting?C.muted:C.red);return;
     }
+    if(c.feedingUntil>clock&&(c.kind==='fast'||c.kind==='slow')){shadow(s.x,s.y,20,5);sprite(Math.sin(clock*14)>.1?'yetiHappy':'yeti',s.x,s.y+Math.sin(clock*14),56,{yetiTier:c.arcadeTier});return;}
     if(c.kind==='bear'){drawBear(c,s,true);return;}
     if(c.kind==='dog')sprite(Math.sin(clock*8+c.phase)>.3?'dog':'dogLeft',s.x,s.y+bob,39);
     else if(c.kind==='patrol'){sprite(c.motionVx<-5?'left':c.motionVx>5?'right':'skier',s.x,s.y+bob,42,{guest:true,fast:true});line(s.x-5,s.y+3,s.x-5,s.y+12,C.muted);}

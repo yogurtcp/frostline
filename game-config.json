@@ -1982,6 +1982,7 @@
     "yetiCelebrationJumpPixels": 14
   },
   "predators": {
+    "mealPauseSeconds": 0.8,
     "divertChance": 0.5,
     "divertRadiusMetres": 35,
     "divertRecheckSeconds": 1.5,
