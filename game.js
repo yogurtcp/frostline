@@ -1377,11 +1377,10 @@ window.FROSTLINE_READY = (async () => {
   // Edible creatures for opportunistic predators. Predator kinds (wolf, fox, bear, lurkers)
   // are deliberately absent: predators never hunt each other.
   const CREATURE_TYPES=new Set(['skier','boarder','personRed','personYellow','personGreen','dog','cat','rabbit']);
-  const HUMAN_PREY=new Set(['skier','boarder','personRed','personYellow','personGreen']);
   function ediblePrey(o){return CREATURE_TYPES.has(o.type)&&!o.eaten&&!o.dead&&(o.r>0||o.type.startsWith('person'));}
   function preyOnPlayerPath(hunter,prey,committed=false){
-    // Wolves keep their roaming hunts; Yetis and bears prioritize reaching the player.
-    if(!['fast','slow','bear'].includes(hunter?.kind))return true;
+    // Any edible NPC is fair game along a hunter's route toward the player.
+    if(!['fast','slow','bear'].includes(hunter?.kind)&&hunter?.type!=='wolf')return true;
     const p=state.p,P=S.predators;
     const width=(committed?P.divertReleaseWidthMetres:P.divertPathWidthMetres)*PX_PER_M*endlessSpeedScale(hunter);
     const angle=(committed?P.divertReleaseAngleDegrees:P.divertPathAngleDegrees)*Math.PI/180;
@@ -1391,8 +1390,8 @@ window.FROSTLINE_READY = (async () => {
     const dx=goal.x-hunter.x,dy=goal.y-hunter.y,length=Math.hypot(dx,dy);
     if(length<1)return false;
     const qx=prey.x-hunter.x,qy=prey.y-hunter.y,along=(qx*dx+qy*dy)/length,across=Math.abs(qx*dy-qy*dx)/length;
-    // Keep the release cone wide enough to finish a nearby meal instead of shrinking to zero.
-    const angleReach=committed?Math.max(along,width):along;
+    // Nearby prey can be a short sidestep away; the approach cone must not shrink to zero.
+    const angleReach=Math.max(along,width);
     if(along<=0||across>width||across>angleReach*Math.tan(angle))return false;
     if(path){
       if(prey.y<=hunter.y||prey.y>=p.y||Math.abs(prey.x-goal.x)>width)return false;
@@ -1409,20 +1408,16 @@ window.FROSTLINE_READY = (async () => {
     return true;
   }
   function nearestPrey(x,y,radius,hunter){
-    const p=state.p,pd=Math.hypot(p.x-x,p.y-y);
-    let best=null,bestD=radius,human=null,humanD=radius;
+    let best=null,bestD=radius;
     for(const o of state.objects){
       if(!ediblePrey(o))continue;
       if(humanArea(o.x,o.y)&&!courseCreature(hunter,o.x,o.y))continue;
       const d=Math.hypot(o.x-x,o.y-y);
-      if(d>=radius)continue;
-      // A winding course can put on-route prey farther from the player in a straight line.
-      if(!['fast','slow','bear'].includes(hunter?.kind)&&Math.hypot(o.x-p.x,o.y-p.y)>=pd)continue;
+      if(d>=bestD)continue;
       if(!preyOnPlayerPath(hunter,o))continue;
-      if(HUMAN_PREY.has(o.type)&&d<humanD){humanD=d;human=o;}
-      if(d<bestD){bestD=d;best=o;}
+      bestD=d;best=o;
     }
-    return ['fast','slow','bear'].includes(hunter?.kind)?human||best:best;
+    return best;
   }
   function updatePreyTarget(hunter){
     const P=S.predators,prey=hunter.divert;
@@ -1447,8 +1442,7 @@ window.FROSTLINE_READY = (async () => {
     const next=nearestPrey(hunter.x,hunter.y,P.divertRadiusMetres*PX_PER_M*endlessSpeedScale(hunter),hunter);
     // An empty scan must not hide a fast encounter for the whole decision interval.
     hunter.nextDivertCheck=clock+(next?P.divertRecheckSeconds:Math.min(.2,P.divertRecheckSeconds));
-    const humanOnWay=next&&HUMAN_PREY.has(next.type)&&['fast','slow','bear'].includes(hunter.kind);
-    if(next&&(humanOnWay||Math.random()<P.divertChance)){
+    if(next&&(P.divertChance>=1||Math.random()<P.divertChance)){
       hunter.divert=next;hunter.divertBestDistance=Math.hypot(next.x-hunter.x,next.y-hunter.y);hunter.divertUntil=clock+P.divertTimeoutSeconds;
       hunter.divertOrigin={x:hunter.x,y:hunter.y};
     }
@@ -2275,7 +2269,7 @@ window.FROSTLINE_READY = (async () => {
       }}
       if(o.type==='wolf')speed*=endlessSpeedScale(o);
       const route=target&&o.type==='wolf'?endlessPursuitTarget(o,target):target;
-      if(route&&target===p)o.angle=Math.atan2(route.y-o.y,route.x-o.x);
+      if(route)o.angle=Math.atan2(route.y-o.y,route.x-o.x);
       travel(o,o.angle??o.phase,speed,dt,true,false,o.type==='wolf'||o.type==='bear',o.type==='wolf'&&!!target,o.type==='wolf'?route:null);
     }
     for(const o of skis){

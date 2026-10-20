@@ -32,10 +32,10 @@ window.loadFrostlineConfig = async function () {
   config.arcade.stageFlow ??= {};
   config.arcade.stageFlow.townEveryStages ??= 3;
   config.arcade.stageFlow.linkedStageGapMetres ??= 0;
-  config.predators.divertPathWidthMetres ??= 8;
-  config.predators.divertReleaseWidthMetres ??= 12;
-  config.predators.divertPathAngleDegrees ??= 30;
-  config.predators.divertReleaseAngleDegrees ??= 45;
+  config.predators.divertPathWidthMetres ??= 12;
+  config.predators.divertReleaseWidthMetres ??= 16;
+  config.predators.divertPathAngleDegrees ??= 45;
+  config.predators.divertReleaseAngleDegrees ??= 60;
   config.predators.mealPauseSeconds ??= .8;
   function validate(value, schema, path) {
     if (schema.type === 'object') {

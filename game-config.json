@@ -1983,14 +1983,14 @@
   },
   "predators": {
     "mealPauseSeconds": 0.8,
-    "divertChance": 0.5,
+    "divertChance": 1,
     "divertRadiusMetres": 35,
-    "divertRecheckSeconds": 1.5,
+    "divertRecheckSeconds": 0.2,
     "divertTimeoutSeconds": 8,
-    "divertPathWidthMetres": 8,
-    "divertReleaseWidthMetres": 12,
-    "divertPathAngleDegrees": 30,
-    "divertReleaseAngleDegrees": 45,
+    "divertPathWidthMetres": 12,
+    "divertReleaseWidthMetres": 16,
+    "divertPathAngleDegrees": 45,
+    "divertReleaseAngleDegrees": 60,
     "offDownhillSpeedRatio": 0.5
   },
   "skiers": {

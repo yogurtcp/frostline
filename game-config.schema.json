@@ -5188,7 +5188,7 @@
           "type": "number",
           "minimum": 0,
           "maximum": 1,
-          "description": "Selection chance for animal prey and wolf hunts. Yetis and chasing bears reliably choose eligible on-route humans."
+          "description": "Selection chance for all eligible NPC prey, equally for Yetis, bears and wolves. Default 1 guarantees the nearest on-route target, including animals."
         },
         "divertRadiusMetres": {
           "type": "number",
@@ -5200,7 +5200,7 @@
           "type": "number",
           "minimum": 0,
           "exclusiveMinimum": 0,
-          "description": "Interval between NPC prey selection attempts when there is no committed prey target."
+          "description": "Interval between NPC prey selection attempts when there is no committed prey target; default 0.2 seconds."
         },
         "divertTimeoutSeconds": {
           "type": "number",
@@ -5211,24 +5211,24 @@
         "divertPathWidthMetres": {
           "type": "number",
           "exclusiveMinimum": 0,
-          "description": "Yeti/bear prey selection: maximum sideways distance from their direct route to the player (8 m by default)."
+          "description": "Yeti/bear/wolf prey selection: maximum sideways distance from the route to the player (12 m by default)."
         },
         "divertReleaseWidthMetres": {
           "type": "number",
           "exclusiveMinimum": 0,
-          "description": "Yeti/bear committed hunts: maximum prey offset from the current route and maximum hunter/prey offset from the diversion origin-to-player route (12 m by default). Must be at least divertPathWidthMetres."
+          "description": "Yeti/bear/wolf committed hunts: maximum prey offset from the current route and maximum hunter/prey offset from the diversion origin-to-player route (16 m by default). Must be at least divertPathWidthMetres."
         },
         "divertPathAngleDegrees": {
           "type": "number",
           "exclusiveMinimum": 0,
           "maximum": 80,
-          "description": "Yeti/bear prey selection: maximum heading deviation from the player (30 degrees by default). Prey must be ahead, before the player and nearer the player than the hunter."
+          "description": "Yeti/bear/wolf prey selection: maximum heading deviation from the route (45 degrees by default), with room for short nearby sidesteps. Prey must be ahead, before the player and nearer the player than the hunter."
         },
         "divertReleaseAngleDegrees": {
           "type": "number",
           "exclusiveMinimum": 0,
           "maximum": 85,
-          "description": "Yeti/bear committed hunts: heading deviation limit (45 degrees by default). Crossing a route limit resumes player pursuit immediately with one selection interval before reconsidering prey. Must be at least divertPathAngleDegrees."
+          "description": "Yeti/bear/wolf committed hunts: heading deviation limit (60 degrees by default). Crossing a route limit resumes player pursuit immediately with one selection interval before reconsidering prey. Must be at least divertPathAngleDegrees."
         },
         "offDownhillSpeedRatio": {
           "type": "number",

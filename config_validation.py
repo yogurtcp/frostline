@@ -52,8 +52,8 @@ def validate(value, schema, path='config'):
         if endless and endless['lakeRadiusMetres'][0] > endless['lakeRadiusMetres'][1]: fail('endless.lakeRadiusMetres must be ordered')
         if value['wildlife']['packMin'] > value['wildlife']['packMax']: fail('packMin must not exceed packMax')
         predators = value['predators']
-        if predators.get('divertReleaseWidthMetres', 12) < predators.get('divertPathWidthMetres', 8): fail('divertReleaseWidthMetres must be at least divertPathWidthMetres')
-        if predators.get('divertReleaseAngleDegrees', 45) < predators.get('divertPathAngleDegrees', 30): fail('divertReleaseAngleDegrees must be at least divertPathAngleDegrees')
+        if predators.get('divertReleaseWidthMetres', 16) < predators.get('divertPathWidthMetres', 12): fail('divertReleaseWidthMetres must be at least divertPathWidthMetres')
+        if predators.get('divertReleaseAngleDegrees', 60) < predators.get('divertPathAngleDegrees', 45): fail('divertReleaseAngleDegrees must be at least divertPathAngleDegrees')
         features = value['terrainFeatures']
         if features['rollingSnowball']['maxRadiusMetres'] < features['rollingSnowball']['radiusMetres']: fail('rollingSnowball.maxRadiusMetres must be at least radiusMetres')
         log = features['logJump']; units = value['world']['unitsPerMetre']
