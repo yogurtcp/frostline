@@ -465,18 +465,47 @@ window.FROSTLINE_READY = (async () => {
         path.push(point((i+mix(.38,.3,difficulty))/cycles,offset),point((i+.68)/cycles,offset),point((i+1)/cycles,0));
       }
       if(variant===1)e.paths.pop();e.title=['Forked Pines','Winding Grove','Forest Islands'][variant];
+      e.band=Math.max(...e.paths.flat().map(p=>Math.abs(p.x-root.x)))+e.half+350*scale;
     }
     return e;
+  }
+  function populateForestBoundary(e,section,from,to){
+    const own={arcadeRun:section,encounter:e,forestBoundary:true},root=section.endlessRoot,seen=new Set(),radius=23,spacing=60;
+    const tree=(x,y,kind)=>{
+      const key=Math.round(x/10)+','+Math.round(y/10);if(seen.has(key)||encounterClearance(e,x,y,radius,radius)<14)return;
+      seen.add(key);entity(random()<.3?'fir':'pine',x,y,{...own,forestBoundaryKind:kind,width:range(66,87),r:radius});
+    };
+    // Physical tree spacing stays fixed as pace rises, so gaps do not turn into side exits.
+    const edge=(path,y,side)=>{
+      const xs=[encounterPathX(path,y-radius),encounterPathX(path,y),encounterPathX(path,y+radius)];
+      return {x:(side<0?Math.min(...xs):Math.max(...xs))+side*(e.half+radius+14),y};
+    };
+    const step=50,first=Math.max(0,Math.floor((from-e.startY)/step)),last=Math.ceil((to-e.startY)/step);
+    for(let row=first;row<last;row++)for(const path of e.paths)for(const side of [-1,1]){
+      const a=edge(path,e.startY+row*step,side),b=edge(path,Math.min(e.endY,e.startY+(row+1)*step),side);
+      const count=Math.max(1,Math.ceil(Math.hypot(b.x-a.x,b.y-a.y)/spacing));
+      for(let i=0;i<count;i++){const y=mix(a.y,b.y,i/count);if(y>=from&&y<to)tree(mix(a.x,b.x,i/count),y,'bank');}
+    }
+    const mouth=exit=>{
+      for(let row=0;row<3;row++)for(let x=root.x-e.band+(row%2)*spacing/2;x<=root.x+e.band;x+=spacing){
+        const wing=Math.min(90*e.scale,Math.abs(x-root.x)/e.band*90*e.scale);
+        const y=exit?e.endY-(130+row*32)*e.scale+wing:e.startY+(130+row*32)*e.scale-wing;
+        tree(x,y,exit?'exit':'entry');
+      }
+    };
+    if(from===e.startY)mouth(false);
+    if(to===e.endY)mouth(true);
   }
   function populateEndlessEncounter(e,section,toY){
     const scale=e.scale,from=e.generatedY,to=Math.min(e.endY,toY);if(to<=from||e.kind!=='trees')return;
     const own={arcadeRun:section,encounter:e},root=section.endlessRoot;
     if(from===e.startY)entity('encounterTitle',root.x,e.startY-60*scale,{...own,r:0,width:300});
+    populateForestBoundary(e,section,from,to);
     const stepX=mix(62,47,e.difficulty)*scale,stepY=mix(75,54,e.difficulty)*scale,rowStart=e.startY+120*scale,extent=mix(140,210,e.difficulty)*scale;
     for(let y=rowStart+Math.max(0,Math.ceil((from-rowStart)/stepY))*stepY;y<to&&y<e.endY-90*scale;y+=stepY){
       const xs=e.paths.map(path=>encounterPathX(path,y)),minX=Math.min(...xs),maxX=Math.max(...xs);
       for(let x=root.x+Math.floor((minX-root.x-e.half-extent)/stepX)*stepX;x<maxX+e.half+extent;x+=stepX){
-        const d=encounterClearance(e,x,y,23*scale,23*scale);if(d<14*scale||d>extent)continue;
+        const d=encounterClearance(e,x,y,23*scale,23*scale);if(d<60||d>extent)continue;
         entity(random()<.3?'fir':'pine',x,y,{...own,width:range(66,87),r:23});
       }
       if(random()<.1){const path=pick(e.paths),x=encounterPathX(path,y),vy=range(...S.skiers.slowSpeed);entity('skier',x+range(-.4,.4)*e.half,y,{...own,width:42,r:12,vx:0,vy:vy*scale,endlessBaseVy:vy});}
@@ -580,13 +609,15 @@ window.FROSTLINE_READY = (async () => {
         const gear=landmark?(checkpoint%2?'shield':'sword'):(number%E.gates.swordEvery===0?'sword':'shield');
         // Keep approximately the same equipment supply per metre with fewer visible gates.
         const gearWeight=landmark?encounter.chamberLength/(E.gates.spacingMetres*PX_PER_M*gateScale)*2*(gear==='sword'?1/E.gates.swordEvery:1-1/E.gates.swordEvery):1;
-        const half=Math.min(mix(...E.gates.openingMetres,t)*PX_PER_M*gateScale/2,encounter?encounterHalf(encounter,a.nextGateY)-22*encounter.scale:Infinity);
-        const raw=encounter?encounter.paths.map(path=>encounterPathX(path,a.nextGateY)):[root.x+(number%2?-1:1)*mix(...E.gates.swingMetres,t)*PX_PER_M*gateScale];
+        const forest=encounter?.kind==='trees';
+        const half=forest?encounter.half*mix(.28,.24,t):Math.min(mix(...E.gates.openingMetres,t)*PX_PER_M*gateScale/2,encounter?encounterHalf(encounter,a.nextGateY)-22*encounter.scale:Infinity);
+        const offset=forest?(number%2?-1:1)*Math.max(0,encounter.half-half-14*gateScale):0;
+        const raw=encounter?encounter.paths.map(path=>encounterPathX(path,a.nextGateY)+offset):[root.x+(number%2?-1:1)*mix(...E.gates.swingMetres,t)*PX_PER_M*gateScale];
         const spread=Math.max(...raw)-Math.min(...raw),merged=raw.length>1&&spread<half*2.3;
-        const positions=merged?[raw.reduce((a,b)=>a+b,0)/raw.length]:raw,opening=merged?half+spread*.3:half;
+        const positions=merged?[raw.reduce((a,b)=>a+b,0)/raw.length]:raw,opening=merged&&!forest?half+spread*.3:half;
         const group={members:[],checked:false};
         for(const x of positions){
-          const gate=entity('gate',x,a.nextGateY,{half:opening,width:opening*2,r:0,number,color:number%2?C.red:C.blue,checked:false,run:root,gateGroup:group,gear,gearWeight});group.members.push(gate);
+          const gate=entity('gate',x,a.nextGateY,{half:opening,width:opening*2,r:0,number,color:number%2?C.red:C.blue,checked:false,run:root,gateGroup:group,gear,gearWeight,encounter});group.members.push(gate);
         }
         section.arcade.gates.count++;root.totalGates++;a.nextGateY+=E.gates.spacingMetres*PX_PER_M*gateScale;
       }
