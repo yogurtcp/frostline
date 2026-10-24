@@ -1,6 +1,6 @@
 # Yeti concept prompts
 
-Generated with the built-in image_gen tool on 2026-10-24. Concepts only; no replacement game art is selected yet. Each transparent sheet has three poses. Open ../yeti-options.html to compare.
+Generated with the built-in image_gen tool on 2026-10-24. Selected for gameplay: option 1 for regular Yetis, option 2 for fast Yetis, and option 4 for elite/special Yetis. Each transparent sheet has three poses. Open ../yeti-options.html to compare.
 
 ## 1. white-fang
 

@@ -2636,44 +2636,30 @@ window.FROSTLINE_READY = (async () => {
     shadow(s.x,s.y,17,4);sprite(o.type+(runFrame?'Run':''),s.x,s.y+bob,o.width,{flip});
     if(o.feedingUntil>clock)text('...',s.x,s.y-22,9,C.ink);
   }
+  function yetiAppearance(o){
+    const tiers=['slow','fast','elite','special'];
+    const rawSpeed=o.speed??(o.type==='lurker'?topSpeed()*S.wildlife.yetiWildSpeedRatio:0);
+    const speed=o.endlessBaseKmh??o.yetiSpeedKmh??(rawSpeed*S.physics.hudKmhPerSpeed/endlessSpeedScale(o));
+    const tier=o.arcadeTier||(speed>=90?'special':speed>=80?'elite':speed>=72?'fast':'slow');
+    const rank=Math.max(tiers.indexOf(tier),speed>=90?3:speed>=80?2:0);
+    return {rank,tier:tiers[rank],family:['White','Avalanche','Stalker','Stalker'][rank]};
+  }
   function drawYeti(o,s,pose='run',width=58){
-    const tiers=['slow','fast','elite','special'],speed=o.endlessBaseKmh??o.yetiSpeedKmh??((o.speed||0)*S.physics.hudKmhPerSpeed/endlessSpeedScale(o));
-    const tier=o.arcadeTier||(speed>=90?'special':speed>=80?'elite':speed>=68?'fast':'slow');
-    const rank=Math.max(tiers.indexOf(tier),speed>=90?3:speed>=80?2:speed>=68?1:0);
-    const base=S.arcade.yetiTints[tier],rgb=(ratio,add=0)=>'#'+base.map(v=>clamp(Math.round(v*ratio+add),0,255).toString(16).padStart(2,'0')).join('');
-    const outline='#23303b',body=rgb(1),shade=rgb(.65),ridge=rgb(1.15,9),claw='#e5dfc3',eye=['#dbc473','#ec9b54','#ed6b58','#ff496b'][rank];
-    const moving=pose==='run',feeding=pose==='feed',down=pose==='down',phase=clock*(6+rank*2)+(o.phase||0);
-    const stride=moving?Math.sin(phase)*(1.5+rank*.55):0,unit=Math.max(1,Math.round(width*ZOOM/28));
+    const {rank,tier,family}=yetiAppearance(o),phase=clock*(5+rank*1.3)+(o.phase||0);
+    const frame=pose==='run'?(Math.floor(phase)%2?'RunR':'RunL'):'Idle';
+    const feeding=pose==='feed',down=pose==='down';
+    const bob=pose==='run'?-(Math.floor(phase)%2):feeding?(Math.sin(clock*15)>0?1:0):pose==='idle'?(Math.sin(clock*1.7+(o.phase||0))>.65?1:0):0;
+    const lean=down?0:clamp(Math.round((o.motionVx||0)/180),-1,1),x=s.x+lean,y=s.y+bob;
     if(!down)shadow(s.x,s.y,19,5);
-    ctx.save();ctx.translate(Math.round(s.x),Math.round(s.y));if(down)ctx.rotate(Math.PI/2);ctx.scale(unit,unit);
-    ctx.translate(clamp((o.motionVx||0)/80,-2,2),moving?-Math.abs(Math.sin(phase))*(.5+rank*.25):pose==='idle'?2:0);
-    const px=(x,y,w,h,color)=>{ctx.fillStyle=color;ctx.fillRect(Math.round(x),Math.round(y),w,h);};
-    // A hunched, jagged silhouette with long swinging forearms and exposed fangs.
-    const shape=(points,color)=>{ctx.fillStyle=color;ctx.beginPath();for(const [i,p] of points.entries())i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]);ctx.closePath();ctx.fill();};
-    shape([[-12,-23],[-10,-28],[-7,-28],[-6,-32],[-2,-30],[1,-33],[4,-29],[8,-30],[11,-25],[12,-19],[7,-9],[4,-5],[-5,-5],[-9,-12]],outline);
-    shape([[-10,-23],[-8,-27],[-5,-27],[-4,-30],[0,-28],[2,-30],[5,-27],[8,-27],[10,-22],[7,-11],[3,-7],[-4,-7],[-7,-13]],body);
-    for(const side of [-1,1]){
-      const step=side*stride,legX=side<0?-7:2;
-      px(legX,-10,5,7,shade);px(legX+side,-5+step*.3,5,5,outline);px(legX+side,-5+step*.3,4,3,body);
-      px(legX-2,-1+step*.35,8,2,outline);for(let toe=0;toe<3;toe++)px(legX-2+toe*3,-1+step*.35,1,2,claw);
-      const armX=(side<0?-14:9)+side*Math.abs(stride)*.4,armY=-22-side*stride*.7;
-      shape([[armX+1,armY],[armX+5,armY+2],[armX+6,armY+9],[armX+4,armY+13+rank],[armX-2,armY+14+rank],[armX-1,armY+6]],outline);
-      px(armX+1,armY+2,4,7,body);px(armX,armY+8,5,4+rank,shade);
-      for(let finger=0;finger<3;finger++)px(armX-1+finger*2,armY+12+rank,1,2+Math.floor(rank/2),claw);
-      px(side<0?-11:7,-25,4,5,ridge);
-      for(let spike=0;spike<rank+1;spike++)px((side<0?-11:10)+side*spike,-26+spike*3,2,3,shade);
+    // Every family uses the approved tiny atlas: <=30x34 pixels at normal game zoom.
+    sprite('yeti'+family+frame,x,y,width,{yetiTier:tier,rotate:down?Math.PI/2:0});
+    if(feeding){
+      const w=Math.max(2,Math.round(width*ZOOM)),h=Math.round(w*34/30);
+      const mouthY=Math.round(y-h+h*(family==='Stalker'?.42:.41));
+      // A two-pixel bite, rather than a cheerful full-body eating bounce.
+      box(x-2,mouthY,4,Math.sin(clock*15)>0?2:1,'#352c3b');
+      box(x-2,mouthY,1,1,'#e8dec3');box(x+1,mouthY,1,1,'#e8dec3');
     }
-    px(-5,-16,10,8,shade);px(-7,-21,3,6,ridge);px(4,-19,3,5,shade);
-    px(-6,-27,12,10,shade);px(-5,-26,10,8,body);
-    px(-5,-26,4,1,outline);px(-3,-25,3,1,outline);px(1,-25,3,1,outline);px(2,-26,3,1,outline);
-    if(!down){px(-5,-25,3,2,pose==='idle'?shade:eye);px(2,-25,3,2,pose==='idle'?shade:eye);px(-2,-25,4,2,outline);}
-    const jaw=feeding?5+(Math.sin(clock*16)>0?2:0):3+Math.floor(rank/2);
-    px(-5,-22,10,jaw+1,outline);px(-4,-21,8,jaw-1,rank>1?'#582e3b':'#553d3b');
-    for(const x of [-4,3])px(x,-22,1,2+Math.floor(rank/2),claw);
-    for(const x of [-2,1])px(x,-22,1,1,claw);
-    px(-3,-21+jaw,1,1,claw);px(2,-21+jaw,1,1,claw);
-    if(feeding)px(-4,-20+jaw,8,2,shade);
-    ctx.restore();
   }
   function drawKnockedOut(o,s,kind){
     if(['bear','dog','wolf'].includes(kind))sprite(kind==='bear'?'bearRun':kind,s.x,s.y,kind==='bear'?60:52,{rotate:Math.PI/2});
