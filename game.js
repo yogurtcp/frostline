@@ -1504,7 +1504,7 @@ window.FROSTLINE_READY = (async () => {
   function eatChaserPrey(hunter,meal,previous){
     const dx=hunter.x-previous.x,dy=hunter.y-previous.y,t=clamp(((meal.x-previous.x)*dx+(meal.y-previous.y)*dy)/(dx*dx+dy*dy||1),0,1);
     hunter.x=previous.x+dx*t;hunter.y=previous.y+dy*t;
-    hunter.motionVx=hunter.travelSpeed=0;hunter.travelStamp=clock;hunter.running=false;
+    hunter.motionVx=hunter.motionVy=hunter.travelSpeed=0;hunter.travelStamp=clock;hunter.running=false;
     meal.eaten=true;meal.r=0;meal.walking=false;meal.socialUntil=meal.fearUntil=0;
     state.speech=state.speech.filter(q=>q.object!==meal);
     hunter.divert=null;hunter.divertOrigin=null;hunter.obstacleDetour=null;hunter.avoidUntil=0;
@@ -1600,17 +1600,31 @@ window.FROSTLINE_READY = (async () => {
     p.spin=0;p.jumpLock=p.airTotal+S.jump.cooldownSeconds;burst(p.x,p.y,C.ice,7);beep(520,.1);
   }
 
+  function canRamMonster(o,threshold,maxAngle=90){
+    const p=state.p,ratio=S.wildlife.ramSpeedFraction;
+    if(o.dead||o.eaten||p.air>0||p.fall||p.awaitingInput)return false;
+    const dx=o.x-p.x,dy=o.y-p.y,distance=Math.hypot(dx,dy);
+    const radius=(o.r>0?o.r:S.chasers.captureDistance-S.physics.playerRadius)+S.physics.playerRadius;
+    if(distance<.001||distance>radius)return false;
+    const nx=dx/distance,ny=dy/distance,toward=p.vx*nx+p.vy*ny;
+    const required=Math.max(threshold,topSpeed()*S.physics.hudKmhPerSpeed*ratio);
+    if(p.speed*S.physics.hudKmhPerSpeed<=required||toward<=0)return false;
+    // Aim into the actual contact normal, rather than merely pointing downhill.
+    if(Math.acos(clamp(toward/(Math.hypot(p.vx,p.vy)||1),-1,1))*180/Math.PI>maxAngle)return false;
+    const [vx,vy]=objectVelocity(o),closing=(p.vx-vx)*nx+(p.vy-vy)*ny;
+    return toward*S.physics.hudKmhPerSpeed>required&&closing*S.physics.hudKmhPerSpeed>threshold;
+  }
   function knockOut(o,kind){
-    const p=state.p,threshold=kind==='bear'?S.wildlife.bearKnockoutKmh:['fast','slow','lurker'].includes(kind)?S.wildlife.yetiKnockoutKmh:Infinity;
-    const maxAngle=kind==='bear'?S.wildlife.bearMaxImpactAngleDegrees:S.wildlife.yetiMaxImpactAngleDegrees,impactAngle=Math.atan2(Math.abs(p.vx),p.vy)*180/Math.PI;
-    if(o.dead||impactAngle>maxAngle||p.air>0||p.fall||p.awaitingInput||p.speed*S.physics.hudKmhPerSpeed<=threshold||(o.x-p.x)*p.vx+(o.y-p.y)*p.vy<=0)return false;
-    o.dead=true;o.r=0;o.fadeUntil=clock+S.wildlife.predatorFadeSeconds;o.running=false;p.speed*=S.wildlife.knockoutSpeedRetention;p.shield=S.wildlife.knockoutShieldSeconds;
-    burst(o.x,o.y,C.gold,12);say(kind==='bear'?'BEAR DOWN!':'YETI DOWN!',o);beep(190,.12,'triangle');return true;
+    const A=S.wildlife,threshold=kind==='bear'?A.bearKnockoutKmh:['fast','slow','lurker'].includes(kind)?A.yetiKnockoutKmh:kind==='zombie'?A.wolfKillKmh:Infinity;
+    const maxAngle=kind==='bear'?A.bearMaxImpactAngleDegrees:kind==='zombie'?90:A.yetiMaxImpactAngleDegrees;
+    if(!canRamMonster(o,threshold,maxAngle))return false;
+    o.dead=true;o.r=0;o.fadeUntil=clock+A.predatorFadeSeconds;o.running=false;state.p.speed*=A.knockoutSpeedRetention;state.p.shield=A.knockoutShieldSeconds;
+    burst(o.x,o.y,C.gold,12);say(kind==='bear'?'BEAR DOWN!':kind==='zombie'?'ZOMBIE DOWN!':'YETI DOWN!',o);beep(190,.12,'triangle');return true;
   }
   function objectVelocity(o){
     if(o.type==='rollingSnowball'&&o.rollState==='rolling')return [o.vx,o.vy];
     if(o.type==='fallingTree'&&o.fallState==='falling')return [Math.cos(o.fallAngle)*o.treeLength/S.terrainFeatures.fallingTree.fallSeconds,Math.sin(o.fallAngle)*o.treeLength/S.terrainFeatures.fallingTree.fallSeconds];
-    if(o.travelStamp===clock)return [Math.cos(o.angle)*(o.travelSpeed||0),Math.sin(o.angle)*(o.travelSpeed||0)];
+    if(o.travelStamp!==undefined&&clock-o.travelStamp<=S.simulation.stepSeconds*1.5)return [o.motionVx??Math.cos(o.angle)*(o.travelSpeed||0),o.motionVy??Math.sin(o.angle)*(o.travelSpeed||0)];
     return [0,0];
   }
   function tooSlowToCrash(o){
@@ -1696,7 +1710,7 @@ window.FROSTLINE_READY = (async () => {
     }
     if(o.type==='sled'&&fast){o.vx=90*Math.sign(p.vx||1);o.vy=240;p.speed*=S.physics.sledSpeedRetention;say('Express delivery!',o);return;}
     if(o.type==='bush'){o.flatten=true;p.speed*=S.physics.bushSpeedRetention;burst(o.x,o.y,C.gold,7);return;}
-    if(o.type==='lurker'){o.dead=true;o.r=0;o.fadeUntil=clock+S.wildlife.predatorFadeSeconds;o.running=false;slowForEnemy(o);burst(o.x,o.y,C.gold,12);say('YETI DOWN!',o);beep(190,.12,'triangle');return;}
+    if(o.type==='lurker'){if(slowForEnemy(o)){burst(p.x,p.y,C.ice,10);beep(150,.1,'triangle');}return;}
     if(o.type==='bear'){if(slowForEnemy(o)){burst(p.x,p.y,C.ice,10);beep(150,.1,'triangle');}return;}
     if(['personRed','personGreen','personYellow'].includes(o.type))say(uphill?'BACKWARDS? Seriously?':pick(S.dialogue.personBumps),o);
     else if(o.type==='dog'){const dog={kind:'dog',x:o.x,y:o.y,speed:S.chasers.dogContactSpeed,phase:0,expires:p.y+S.chasers.dogContactChaseDistance,talkAt:clock+7};state.chasers.push(dog);o.eaten=true;o.r=0;say('WOOF. WOOF. WOOF.',dog);if(p.speed<=S.physics.walkingBumpLimit)return;}
@@ -2142,17 +2156,17 @@ window.FROSTLINE_READY = (async () => {
       let next=options.find(clear);
       // If a moving target left us inside a newly protected region, walk out continuously.
       if(next===undefined){
-        if(valid(o.x,o.y)){o.running=false;o.motionVx=0;o.travelSpeed=0;o.travelStamp=clock;return;}
+        if(valid(o.x,o.y)){o.running=false;o.motionVx=o.motionVy=0;o.travelSpeed=0;o.travelStamp=clock;return;}
         const escape=options.find(a=>{const m=motion(a);return valid(o.x+m.ux*m.probe*2,o.y+m.uy*m.probe*2);});
         next=escape??(o.avoidUntil>clock?o.avoidHeading:angle+Math.PI/2*turn);
       }
       heading=next;o.avoidHeading=heading;o.avoidUntil=clock+A.avoidCommitSeconds;o.avoidSide=turn;
     }
-    const m=motion(heading);o.motionVx=m.vx;o.angle=chasing?Math.atan2(m.vy,m.vx):heading;o.x+=m.vx*dt;o.y+=m.vy*dt;o.running=m.speed>60;o.travelSpeed=m.speed;o.travelStamp=clock;
+    const m=motion(heading);o.motionVx=m.vx;o.motionVy=m.vy;o.angle=chasing?Math.atan2(m.vy,m.vx):heading;o.x+=m.vx*dt;o.y+=m.vy*dt;o.running=m.speed>60;o.travelSpeed=m.speed;o.travelStamp=clock;
   }
   function killWolf(o){
     const p=state.p,A=S.wildlife;
-    if(o.dead||p.air>0||p.fall||p.awaitingInput||p.speed*S.physics.hudKmhPerSpeed<=A.wolfKillKmh||(o.x-p.x)*p.vx+(o.y-p.y)*p.vy<=0)return false;
+    if(!canRamMonster(o,A.wolfKillKmh))return false;
     o.dead=true;o.animal=false;o.r=0;o.fadeUntil=clock+A.wolfFadeSeconds;p.speed*=A.knockoutSpeedRetention;p.shield=A.knockoutShieldSeconds;
     burst(o.x,o.y,C.ice,18);beep(160,.12,'triangle');
     for(const skier of state.objects){
@@ -2187,7 +2201,7 @@ window.FROSTLINE_READY = (async () => {
     o.npcFallAt=clock;o.npcFallUntil=clock+range(...S.skiers.crashSeconds);
     o.npcResumeVy=Math.max(25,o.vy||o.iceCoastVy||S.skiers.slowSpeed[0]);
     o.npcCrashSide=Math.sign(o.x-(obstacle?.x??o.x))||pick([-1,1]);o.npcCrashObstacle=obstacle;
-    o.vx=o.vy=o.motionVx=o.travelSpeed=0;o.travelStamp=clock;o.onIce=false;delete o.iceCoastVy;
+    o.vx=o.vy=o.motionVx=o.motionVy=o.travelSpeed=0;o.travelStamp=clock;o.onIce=false;delete o.iceCoastVy;
     o.socialUntil=0;o.catInterest=null;burst(o.x,o.y,C.ice,9);
   }
   const NPC_CRASH_SOLIDS=new Set(['pine','fir','rock','pebble','stump','wideLog','fallingTree','rollingSnowball','lodge','rental','sled','skier','boarder','iceBlock','ruinWall']);
@@ -2217,7 +2231,7 @@ window.FROSTLINE_READY = (async () => {
         }
       }
     }
-    if(ice){o.x+=dx;o.y+=dy;o.motionVx=vx;o.angle=o.iceHeading;o.travelSpeed=o.iceSpeed;o.travelStamp=clock;}
+    if(ice){o.x+=dx;o.y+=dy;o.motionVx=vx;o.motionVy=vy;o.angle=o.iceHeading;o.travelSpeed=o.iceSpeed;o.travelStamp=clock;}
     else {const speed=Math.hypot(vx,vy);if(speed)travel(o,Math.atan2(vy,vx),speed,dt,false,false,false,false,null,true);}
   }
   function updateSkiers(dt){
@@ -2227,7 +2241,7 @@ window.FROSTLINE_READY = (async () => {
     const threats=npcPredatorThreats();
     for(const o of state.objects){
       if((o.type!=='skier'&&o.type!=='boarder')||o.eaten||o.dead||Math.hypot(o.x-p.x,o.y-p.y)>A.activeRadius*endlessSpeedScale(o))continue;
-      if(o.npcFallUntil>clock){o.motionVx=o.travelSpeed=0;o.travelStamp=clock;continue;}
+      if(o.npcFallUntil>clock){o.motionVx=o.motionVy=o.travelSpeed=0;o.travelStamp=clock;continue;}
       if(o.npcFallUntil){
         o.npcFallUntil=0;o.vy=o.npcResumeVy;o.vx=o.npcCrashSide*Math.max(35,o.vy*.6);
         o.skiLaneX=o.x;o.nextSkiTurn=clock+1.2;o.npcRecoveryUntil=clock+1.2;o.skiTurn=o.npcCrashSide;
@@ -2407,7 +2421,7 @@ window.FROSTLINE_READY = (async () => {
       const [vx,vy]=chaseVelocity(dx/len*c.speed,dy/len*c.speed);
       const lethal=['fast','slow','bear'].includes(c.kind),nx=c.x+vx*dt,ny=c.y+vy*dt;
       if(feeding||c.shoreLake&&patchAt(hunt.x,hunt.y)===c.shoreLake){
-        c.motionVx=0;c.travelSpeed=0;c.travelStamp=clock;
+        c.motionVx=c.motionVy=0;c.travelSpeed=0;c.travelStamp=clock;
       }else if(pursuit){
         if(insideTown(p.x,p.y)&&!endlessTownAt(p.x,p.y))continue;
         // The course's own yetis can enter pistes and follow far into the wilderness.

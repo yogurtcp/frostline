@@ -5121,6 +5121,12 @@
           "minimum": 0,
           "exclusiveMinimum": 0
         },
+        "ramSpeedFraction": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 1,
+          "description": "Minimum fraction of normal top speed directed into a physical monster ram; relative closing speed must also exceed its species impact threshold. Default .85."
+        },
         "wolfKillKmh": {
           "type": "number",
           "minimum": 0

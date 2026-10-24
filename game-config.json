@@ -1922,6 +1922,7 @@
     "npcSpeechCooldown": 4,
     "npcWolfFallSeconds": 3,
     "wolfKillKmh": 30,
+    "ramSpeedFraction": 0.85,
     "wolfFadeSeconds": 1.5,
     "rescueThanksRadius": 500,
     "rescueThanksCooldown": 8,
