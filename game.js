@@ -360,29 +360,37 @@ window.FROSTLINE_READY = (async () => {
   }
   function planEndlessRegion(e,section){
     const root=section.endlessRoot,R=S.endless.regions,point=(t,x=0)=>({x:root.x+x,y:e.startY+t*(e.endY-e.startY)});
-    e.noFlags=['quiet','lake','denseForest'].includes(e.kind);
-    e.noNewPredators=['quiet','lake','denseForest','cemetery'].includes(e.kind);
+    e.noFlags=['quiet','lake','denseForest','scramble'].includes(e.kind);
+    e.noNewPredators=['quiet','lake','denseForest','scramble','cemetery'].includes(e.kind);
     e.half=e.kind==='cemetery'?mix(...R.cemeteryOpeningMetres.slice().reverse(),e.difficulty)*PX_PER_M*e.scale/2:e.kind==='denseForest'?mix(55,35,e.difficulty)*e.scale:550*e.scale;
     e.band=1000*e.scale;e.paths=[[point(0),point(1)]];
     if(e.kind==='crowd'){e.centerX=state.p.x;e.half=R.crowd.widthMetres*PX_PER_M*e.scale/2-60;e.band=e.half+200;e.paths=[[{x:e.centerX,y:e.startY},{x:e.centerX,y:e.endY}]];}
-    state.objects=state.objects.filter(o=>!o.worldChunk||o.arcadeRun||o.y<e.startY||o.y>e.endY||Math.abs(o.x-(e.centerX??root.x))>e.band);
-    const names={crowd:'Rush Hour Slope',beginner:'Rush Hour Slope',quiet:'Snowy Trail',lake:'Stillwater Lake',denseForest:'Close Pines',forest:'Open Pines',cemetery:'Frost Rest Cemetery'};e.title=names[e.kind];
+    const names={crowd:'Rush Hour Slope',beginner:'Rush Hour Slope',quiet:'Snowy Trail',lake:'Stillwater Lake',denseForest:'Close Pines',scramble:'Wild Patch',forest:'Open Pines',cemetery:'Frost Rest Cemetery'};e.title=names[e.kind];
     if(e.kind==='cemetery'){
       const path=[],bend=mix(250,420,e.difficulty)*e.scale,side=pick([-1,1]);
       for(let i=0;i<=8;i++)path.push(point(i/8,i===0||i===8?0:Math.sin(i*Math.PI/2)*bend*side));
       path.linear=true;e.paths=[path];e.checkpoints=[e.startY+100*e.scale,e.endY-100*e.scale];e.chamberLength=(e.endY-e.startY)/2;
       state.roads.push({surface:'snow',width:e.half*1.2,points:path,cemeteryPath:true,endlessEncounter:e,endlessEndY:e.endY});
     }else if(e.kind==='quiet'){
-      const side=pick([-1,1]);
-      e.paths=[[point(0),point(.3,side*55*e.scale),point(.65,-side*35*e.scale),point(1)]];
-      // Use the same packed-snow surface and width as Arcade's post-village approach.
-      state.roads.push({surface:'snow',width:S.village.mainRoadWidth,points:e.paths[0],endlessEncounter:e,endlessEndY:e.endY});
+      const previous=state.endless.encounters.at(-2)?.town,side=pick([-1,1]);
+      // Continue Arcade's actual village-exit road, including an off-centre approach.
+      const entry=previous&&state.p.y>previous.origin?clamp(state.p.x,previous.x-previous.halfWidth*.8,previous.x+previous.halfWidth*.8):root.x;
+      e.centerX=entry;e.paths=[[{x:entry,y:e.startY},point(.3,(entry-root.x)*.75+side*55*e.scale),point(.65,(entry-root.x)*.35-side*35*e.scale),point(1)]];
+      const road=previous?.approachRoad??{surface:'snow',width:S.village.mainRoadWidth};
+      road.surface='snow';road.width=S.village.mainRoadWidth;
+      road.points=[...(previous?[{x:previous.x,y:previous.roadEndY}]:[]),...e.paths[0]];road.endlessEncounter=e;road.endlessEndY=e.endY;
+      delete road.tiles;delete road.bounds;delete road.tileRows;delete road.tileRowsFor;
+      if(previous){previous.approachEndY=e.endY;for(const path of previous.encounter.paths)if(path.at(-1).y===previous.end)path.at(-1).x=entry;}
+      else state.roads.push(road);
+    }else if(e.kind==='scramble'){
+      e.band=900*e.scale;e.half=600*e.scale;
     }else if(e.kind==='denseForest'){
       e.paths=[Array.from({length:9},(_,i)=>point(i/8,Math.sin(i*Math.PI/2)*190*e.scale))];
     }else if(e.kind==='lake'){
       const length=e.endY-e.startY;
       entity('ice',root.x,(e.startY+e.endY)/2,{rx:Math.max(e.band,length*.65),ry:length/2,width:Math.max(e.band,length*.65)*2,r:0,transitionLake:true,arcadeRun:section,encounter:e,arcadeFeature:true});
     }
+    state.objects=state.objects.filter(o=>!o.worldChunk||o.arcadeRun||o.y<e.startY||o.y>e.endY||(e.kind==='quiet'?Math.abs(o.x-encounterPathX(e.paths[0],o.y))>410:Math.abs(o.x-(e.centerX??root.x))>e.band));
   }
   function populateEndlessRegion(e,section,from,to){
     const R=S.endless.regions,scale=e.scale,length=e.endY-e.startY,root=section.endlessRoot,own={arcadeRun:section,encounter:e};
@@ -408,6 +416,11 @@ window.FROSTLINE_READY = (async () => {
         entity(pick(['personRed','personGreen','personYellow']),walkPath[0].x,walkPath[0].y,{...own,width:30,r:10,walker:true,path:walkPath,pathIndex:1,pathDir:1,walkSpeed:range(...S.village.walkerSpeed)});
       },160*scale);
       rows(110*PX_PER_M*scale,(y,row)=>{if(y>e.endY-120*scale)return;entity('skier',encounterPathX(path,y)+(row%2?-1:1)*12,y,{...own,width:42,r:12,vy:30*scale,vx:0,endlessBaseVy:30});},350*scale);
+      rows(95*PX_PER_M*scale,(y,row)=>{
+        if(y>e.endY-130*scale)return;const side=row%2?-1:1,x=encounterPathX(path,y)+side*78;
+        entity(row%2?'snowman':'bench',x,y,{...own,width:row%2?28:46,r:9});
+        if(row===0){entity('lamp',x+side*18,y-55,{...own,width:20,r:6});entity('personYellow',encounterPathX(path,y)-side*42,y+25,{...own,width:30,r:10});}
+      },260*scale);
     }else if(e.kind==='forest'){
       const rate=mix(...R.forestTreesPer100Metres,e.difficulty),clear=(Math.max(...S.endless.gates.swingMetres)+Math.max(...S.endless.gates.openingMetres)/2)*PX_PER_M*scale+45;
       if(rate>0)rows(100*PX_PER_M*scale/Math.max(.1,rate),(y,row)=>{const x=root.x+pick([-1,1])*range(clear,850*scale);entity(row%3?'pine':'fir',x,y,{...own,width:range(60,86),r:18});});
@@ -416,7 +429,21 @@ window.FROSTLINE_READY = (async () => {
       const jumps=mix(...S.endless.rates.jumps,entry);
       if(jumps>0)rows(100*PX_PER_M*scale/jumps,y=>{if(y>e.endY-250*scale)return;const x=root.x+range(-160,160)*scale;if(patchAt(x,y))return;const hill=createArcadeItem(pick(['smallHill','smallHill','largeHill','rainbow']),x,y,section);hill.encounter=e;},150*scale);
     }else if(e.kind==='denseForest'){
-      rows(mix(90,74,e.difficulty),(y,row)=>{const spacing=mix(78,64,e.difficulty);for(let x=root.x-e.band*.65+(row%2)*spacing/2;x<root.x+e.band*.65;x+=spacing){const xx=x+range(-12,12),yy=y+range(-8,8);if(Math.abs(xx-encounterPathX(e.paths[0],yy))<e.half+36||yy<e.startY+80*scale||yy>e.endY-80*scale)continue;entity(random()<.3?'fir':'pine',xx,yy,{...own,width:range(65,86),r:19});}});
+      const density=Math.sqrt(mix(...R.denseForestDensity,e.difficulty));
+      rows(90/density,(y,row)=>{const spacing=78/density;for(let x=root.x-e.band*.65+(row%2)*spacing/2;x<root.x+e.band*.65;x+=spacing){const xx=x+range(-12,12),yy=y+range(-8,8);if(Math.abs(xx-encounterPathX(e.paths[0],yy))<e.half+36||yy<e.startY+80*scale||yy>e.endY-80*scale)continue;entity(random()<.3?'fir':'pine',xx,yy,{...own,width:range(65,86),r:19});}});
+    }else if(e.kind==='scramble'){
+      const density=Math.sqrt(mix(...R.scrambleDensity,e.difficulty)),spacing=118/density;
+      const pool=['pine','fir','smallPine','spruceTree','crookedTree','cedarTree','alpineTree','rock','rock','stump','bush','pebble','sled','mogul','smallHill','mushroom','skier','boarder'];
+      // Jittered scatter with passable physical gaps, rather than a reserved winding corridor.
+      rows(spacing,(y,row)=>{
+        if(y<e.startY+90*scale||y>e.endY-100*scale)return;
+        for(let x=root.x-e.half+range(0,spacing);x<root.x+e.half;x+=spacing){
+          if(random()<.18)continue;const xx=x+range(-spacing*.3,spacing*.3),yy=clamp(y+range(-spacing*.3,spacing*.3),e.startY+90*scale,e.endY-100*scale),key=pick(pool);
+          const radius=ARCADE_ITEMS[key].r;
+          if(state.objects.some(o=>o.encounter===e&&o.r>0&&Math.abs(o.y-yy)<90&&Math.hypot(o.x-xx,o.y-yy)<o.r+radius+30))continue;
+          const item=createArcadeItem(key,xx,yy,section);item.encounter=e;
+        }
+      });
     }else if(e.kind==='cemetery'){
       // Each family garden has long iron rails, a real opening and ordered burial plots.
       const fence=(ax,ay,bx,by)=>{
@@ -501,7 +528,7 @@ window.FROSTLINE_READY = (async () => {
   }
   function endlessPursuitRoute(c,target){
     if(!state.endless||!activeCourseOwner(c)||target.y<c.y)return null;
-    const e=endlessEncounterAt(c.y+80*state.endless.speedScale);if(!e||['beginner','crowd','quiet','lake','forest'].includes(e.kind)||target.y<e.startY)return null;
+    const e=endlessEncounterAt(c.y+80*state.endless.speedScale);if(!e||['beginner','crowd','quiet','lake','forest','scramble'].includes(e.kind)||target.y<e.startY)return null;
     if(c.encounterRoute?.encounter!==e){
       const y=clamp(c.y,e.startY,e.endY),goal=Math.min(e.endY,c.y+600*e.scale);
       const costs=e.paths.map(path=>Math.abs(encounterPathX(path,y)-c.x)+.35*Math.abs(encounterPathX(path,goal)-target.x));
@@ -651,7 +678,7 @@ window.FROSTLINE_READY = (async () => {
     a.furthestY=Math.max(a.furthestY,state.p.y);const distance=Math.max(0,(a.furthestY-a.startY)/PX_PER_M);
     if(distance>=a.savedMetres+250){a.savedMetres=distance;recordEndless('RUNNING');state.endlessResult=null;}
     const active=endlessEncounterAt(state.p.y);
-    if(active&&!active.entered){active.entered=true;announce(active.town?active.town.name.toUpperCase():active.title.toUpperCase(),active.town?'ENTRY / EXIT FLAGS - YETIS CAN FOLLOW':active.kind==='cemetery'?'KEEP YOUR SPEED - THE DEAD ARE HUNGRY':['beginner','crowd'].includes(active.kind)?'SKI THROUGH THE CROWD':active.noFlags?'NO FLAGS - FOLLOW THE SLOPE':active.paths.length>1?'CHOOSE A BRANCH - EITHER GATE COUNTS':'WIND THROUGH THE PINES',C.teal,3);}
+    if(active&&!active.entered){active.entered=true;announce(active.town?active.town.name.toUpperCase():active.title.toUpperCase(),active.town?'ENTRY / EXIT FLAGS - YETIS CAN FOLLOW':active.kind==='quiet'?'FOLLOW THE SNOW PATH - TAKE A BREATH':active.kind==='scramble'?'FIND A GAP - OR JUMP':active.kind==='cemetery'?'KEEP YOUR SPEED - THE DEAD ARE HUNGRY':['beginner','crowd'].includes(active.kind)?'SKI THROUGH THE CROWD':active.noFlags?'NO FLAGS - FOLLOW THE SLOPE':active.paths.length>1?'CHOOSE A BRANCH - EITHER GATE COUNTS':'WIND THROUGH THE PINES',C.teal,3);}
     state.roads=state.roads.filter(r=>!r.endlessEncounter||(r.endlessEndY??r.endlessEncounter.endY)>state.p.y-S.world.sceneryRetentionBehind);
     state.villages=state.villages.filter(t=>!t.endlessRun||t.end>state.p.y-S.world.sceneryRetentionBehind);
     const view=viewBounds();
@@ -844,7 +871,7 @@ window.FROSTLINE_READY = (async () => {
   }
   function prepareArcadeTerrain(run){
     // Plan every configured object below the viewport; no hidden mixed spawn tables.
-    state.objects=state.objects.filter(o=>o.arcadeRun&&(o.arcadeRun!==run||run.endlessRoot)||o.y<run.startY-100||o.y>run.endY||Math.abs(o.x-centerAt(o.y,run))>S.world.safeCourseHalfWidth+100||o.penaltyGate||!o.worldChunk&&['gate','courseStart','finish','entrance','personRed','personGreen','personYellow'].includes(o.type));
+    state.objects=state.objects.filter(o=>run.endlessRoot&&o.worldChunk&&endlessEncounterAt(o.y)?.kind==='quiet'&&Math.abs(o.x-encounterPathX(endlessEncounterAt(o.y).paths[0],o.y))>410||o.arcadeRun&&(o.arcadeRun!==run||run.endlessRoot)||o.y<run.startY-100||o.y>run.endY||Math.abs(o.x-centerAt(o.y,run))>S.world.safeCourseHalfWidth+100||o.penaltyGate||!o.worldChunk&&['gate','courseStart','finish','entrance','personRed','personGreen','personYellow'].includes(o.type));
     const gates=state.objects.filter(o=>o.type==='gate'&&o.run===(run.endlessRoot||run)&&o.y>=run.startY&&o.y<run.endY);
     const iceGates=[...gates];for(let i=iceGates.length-1;i>0;i--){const j=Math.floor(random()*(i+1));[iceGates[i],iceGates[j]]=[iceGates[j],iceGates[i]];}
     for(const g of iceGates.slice(0,Math.round(gates.length*(run.arcade.gates.icePercent||0)/100)))entity('ice',g.x,g.y,{gateIce:true,arcadeFeature:true,arcadeRun:run,rx:g.half+45,ry:Math.min(run.arcade.spacing*.25,80),width:(g.half+45)*2,r:0});
@@ -1649,7 +1676,7 @@ window.FROSTLINE_READY = (async () => {
         // Arcade owns all in-course scenery; ambient chunks only populate the surrounding forest.
         const encounter=endlessEncounterAt(y),forest=encounter?.kind==='trees';
         const forestBank=forest&&(Math.min(y-encounter.startY,encounter.endY-y)<240*encounter.scale&&Math.abs(x-state.course.x)<encounter.band+60||encounter.paths.some(path=>Math.abs(x-encounterPathX(path,y))<encounter.half+mix(140,210,encounter.difficulty)*encounter.scale+80));
-        const forestOutside=forest&&!forestBank||encounter&&encounter.kind!=='trees'&&!encounter.town&&Math.abs(x-(encounter.centerX??state.course.x))>encounter.band+60;
+        const forestOutside=encounter?.kind==='quiet'?Math.abs(x-encounterPathX(encounter.paths[0],y))>410:forest&&!forestBank||encounter&&encounter.kind!=='trees'&&!encounter.town&&Math.abs(x-(encounter.centerX??state.course.x))>encounter.band+60;
         if(encounter&&!forestOutside)continue;
         if(state.safeTrails.some(r=>!(forestOutside&&r===state.course)&&r.arcade&&y>r.startY-120&&y<r.endY+60&&Math.abs(x-centerAt(y,r))<S.world.safeCourseHalfWidth+100))continue;
         if(nearArcadeFeature(x,y)||nearMushroom(x,y)||patchAt(x,y)||insideTown(x,y)||state.villages.some(t=>roadDistance(t.approachRoad,x,y)<t.approachRoad.width/2+30)||(!state.course&&state.zone.kind==='start'&&Math.abs(x)<S.world.meadowHalfWidth&&y>S.world.meadowTop&&y<S.world.meadowBottom))continue;

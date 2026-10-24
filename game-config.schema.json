@@ -9079,7 +9079,8 @@
                   "cemetery",
                   "denseForest",
                   "forest",
-                  "crowd"
+                  "crowd",
+                  "scramble"
                 ]
               }
             },
@@ -9161,6 +9162,16 @@
                   "items": {
                     "type": "number",
                     "minimum": 80
+                  }
+                },
+                "scramble": {
+                  "type": "array",
+                  "minItems": 2,
+                  "maxItems": 2,
+                  "items": {
+                    "type": "number",
+                    "minimum": 40,
+                    "maximum": 180
                   }
                 }
               },
@@ -9276,6 +9287,28 @@
                   }
                 }
               }
+            },
+            "denseForestDensity": {
+              "type": "array",
+              "minItems": 2,
+              "maxItems": 2,
+              "items": {
+                "type": "number",
+                "minimum": 1,
+                "maximum": 3
+              },
+              "description": "First/final visit obstacle density multiplier; fixed within each appearance."
+            },
+            "scrambleDensity": {
+              "type": "array",
+              "minItems": 2,
+              "maxItems": 2,
+              "items": {
+                "type": "number",
+                "minimum": 1,
+                "maximum": 3
+              },
+              "description": "First/final visit obstacle density multiplier; fixed within each appearance."
             }
           }
         },
