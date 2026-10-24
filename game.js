@@ -3122,12 +3122,14 @@ window.FROSTLINE_READY = (async () => {
   }
   function playerPose(){
     const p=state.p;
-    if(p.fall)return {name:'fall',rotation:0,flip:false};
+    if(p.fall>0)return {name:'fall',rotation:0,flip:false};
     if(p.air>0)return {name:'skier',skiAngle:p.airPose*Math.PI/3,rotation:p.airPose*.18,tuck:p.airTuck,flip:false};
-    if(p.mode==='walk'||Math.cos(p.desiredHeading)<-S.physics.downhillCosMinimum)return {name:p.speed>3&&p.mode==='walk'?'uphill':'still',rotation:0,flip:p.desiredHeading<0};
-    if(p.mode==='still'||p.mode==='traverse')return {name:'still',rotation:0,flip:Math.sin(p.desiredHeading)<0};
-    const angle=Math.abs(p.heading)<.18?0:Math.sign(p.heading)*(Math.abs(p.heading)<Math.PI/4?Math.PI/6:Math.PI/3);
-    return {name:'skier',skiAngle:angle,rotation:p.air>0&&p.spin>1.3?p.spin:0,flip:false};
+    // Ice locks the real heading while controls change intent; braking also retains momentum.
+    // Neither should leave a moving skier in a standing or requested-direction pose.
+    if(p.awaitingInput||p.speed<=3)return {name:'still',rotation:0,flip:Math.sin(p.heading)<0};
+    if(!p.onIce&&Math.cos(p.heading)<-S.physics.downhillCosMinimum)return {name:'uphill',rotation:0,flip:p.heading<0,step:Math.floor(clock*6)%2};
+    const magnitude=Math.abs(p.heading),angle=p.onIce&&magnitude>Math.PI/2?Math.round(p.heading/(Math.PI/6))*Math.PI/6:magnitude<.18?0:Math.sign(p.heading)*(magnitude<Math.PI/4?Math.PI/6:magnitude<5*Math.PI/12?Math.PI/3:Math.PI/2);
+    return {name:'skier',skiAngle:angle,rotation:0,flip:false};
   }
   function drawSlidingSkier(x,y,pose){
     const p=state.p,a=pose.skiAngle,dx=Math.sin(a),dy=Math.cos(a),nx=dy,ny=-dx;
@@ -3216,7 +3218,7 @@ window.FROSTLINE_READY = (async () => {
       ctx.save();ctx.translate(Math.sin(clock*43),Math.round(Math.sin(clock*34)));
     }
     if(pose.skiAngle!==undefined)drawSlidingSkier(s.x,s.y+16*ZOOM-jump,pose);
-    else sprite(pose.name,s.x,s.y+16*ZOOM-jump,p.fall?S.render.fallWidth:S.render.playerWidth,{rotate:pose.rotation,flip:pose.flip});
+    else sprite(pose.name,s.x,s.y+16*ZOOM-jump-(pose.step||0),p.fall?S.render.fallWidth:S.render.playerWidth,{rotate:pose.rotation,flip:pose.flip});
     if(rough)ctx.restore();
     if(p.fall)text('…',s.x,s.y-26,12,C.ink);
     if(p.onIce){for(let i=0;i<3;i++)line(s.x-10+i*10,s.y+15,s.x-10+i*10,s.y+28,'#a8ced7',1);}
