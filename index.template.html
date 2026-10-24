@@ -4,12 +4,23 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#eef5f1">
+<meta name="frostline-build" content="__BUILD_VERSION__">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="assets/icon-192.png">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
 <title>Frostline — ski into trouble</title>
 <style>
 *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;overscroll-behavior:none;background:#b9cecc}body{display:flex;justify-content:center;background:radial-gradient(ellipse at 50% 30%,#e1ebe5,#a9c5c6 90%)}main{height:100%;height:100dvh;width:100%;max-width:540px;position:relative;box-shadow:0 0 80px #214c542b;background:#f0f6f1}canvas{display:block;width:100%;height:100%;touch-action:none;image-rendering:pixelated;outline:none;-webkit-user-select:none;user-select:none}noscript{position:absolute;top:20%;padding:30px;font:16px monospace;color:#234350} @media(min-aspect-ratio:1/1){main{max-width:min(540px,64vh)}}
 </style>
+<style>
+body{padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)}main{height:calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom))}#app-status{position:absolute;z-index:5;inset:0;display:grid;place-items:center;background:#eef5f1;color:#244451;font:14px monospace}#app-status[hidden]{display:none}#install-app{position:absolute;z-index:3;right:12px;bottom:12px;border:1px solid #8faeaa;background:#eef5f1;color:#244451;padding:8px 12px;font:12px monospace;border-radius:5px}#install-app[hidden]{display:none}#install-help{max-width:320px;border:1px solid #8faeaa;border-radius:8px;background:#eef5f1;color:#244451;padding:22px;font:15px/1.5 system-ui}#install-help::backdrop{background:#24445166}#install-help button{padding:8px 16px;color:#244451;background:#d5e5df;border:1px solid #8faeaa;border-radius:4px}#install-help a{color:#24716d}
+</style>
 </head>
-<body><main><canvas id="slope" tabindex="0" aria-label="Frostline skiing game. Drag from any starting touch point or use arrow keys to ski. Enter courses by skiing between their start posts. M toggles sound. Space jumps. No menus."></canvas><noscript>Enable JavaScript to ski.</noscript></main>
+<body><main><canvas id="slope" tabindex="0" aria-label="Frostline skiing game. Drag from any starting touch point or use arrow keys to ski. Enter courses by skiing between their start posts. M toggles sound. Space jumps. No menus."></canvas><div id="app-status" role="status">Loading slope…</div><button id="install-app" hidden>Install app</button><noscript><style>#app-status{display:none}</style>Enable JavaScript to ski.</noscript></main>
+<dialog id="install-help" aria-labelledby="install-title"><h2 id="install-title">Install Frostline</h2><p id="install-instructions"></p><p>Once saved, Frostline plays offline. Online startups check for updates. Installing this same site keeps your scores and settings. A downloaded file or a different browser uses a separate save.</p><p><a href="https://yogurtcp.github.io/frostline/">Open published game</a></p><button id="close-install-help">Done</button></dialog>
+<script>__APP_CODE__</script>
 <script>window.FROSTLINE_ASSETS=__ASSET_DATA__;window.FROSTLINE_CONFIG=__CONFIG__;window.FROSTLINE_SCHEMA=__SCHEMA__;</script>
 <script>__CONFIG_CODE__</script>
 <script>__GAME_CODE__</script>

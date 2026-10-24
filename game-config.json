@@ -87,8 +87,8 @@
         55
       ],
       "townPeople": [
-        18,
-        60
+        36,
+        120
       ],
       "townStreetWidthMetres": [
         14.4,
@@ -375,31 +375,31 @@
       "rollingSnowball": "slightlyRare"
     },
     "yetiColors": {
-      "slow": "#4babb0",
-      "fast": "#d18143",
-      "elite": "#91649e",
-      "special": "#c844a2"
+      "slow": "#718f99",
+      "fast": "#8f6252",
+      "elite": "#594462",
+      "special": "#772d4b"
     },
     "yetiTints": {
       "slow": [
-        173,
-        209,
-        208
+        113,
+        143,
+        153
       ],
       "fast": [
-        227,
-        192,
-        157
+        143,
+        98,
+        82
       ],
       "elite": [
-        200,
-        180,
-        216
+        89,
+        68,
+        98
       ],
       "special": [
-        212,
-        30,
-        156
+        64,
+        38,
+        57
       ]
     },
     "maxActiveYetis": 160,
@@ -1593,16 +1593,17 @@
     "accelerationBase": 96,
     "accelerationDownhill": 196,
     "turnFollow": 10,
+    "releaseTurnFollow": 3,
     "acrossSpeedFraction": 0.36,
     "downhillSpeedFraction": 0.64,
-    "brakeDeceleration": 390,
+    "brakeDeceleration": 240,
     "overSpeedDeceleration": 90,
-    "turnDeceleration": 180,
+    "turnDeceleration": 120,
     "overSpeedRatio": 1.1,
     "walkSpeed": 62,
     "walkFollow": 8,
     "traverseSpeed": 145,
-    "traverseFollow": 12,
+    "traverseFollow": 3,
     "walkingBumpLimit": 150,
     "stopEpsilon": 0.5,
     "roadWalkSpeed": 25,
@@ -1704,6 +1705,7 @@
     ]
   },
   "village": {
+    "populationMultiplier": 2,
     "houseCount": 84,
     "rows": 12,
     "firstRow": 350,

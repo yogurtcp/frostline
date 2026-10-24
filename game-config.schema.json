@@ -3688,6 +3688,11 @@
         "ruggedSpeedRatio"
       ],
       "properties": {
+        "releaseTurnFollow": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Heading easing after releasing a downhill turn; default 3."
+        },
         "speedMultiplier": {
           "type": "number",
           "minimum": 0,
@@ -4236,6 +4241,12 @@
         "randomization"
       ],
       "properties": {
+        "populationMultiplier": {
+          "type": "number",
+          "minimum": 1,
+          "maximum": 5,
+          "description": "Total ordinary-town people multiplier, supplied by extra walkers. Endless uses its explicit townPeople counts."
+        },
         "houseCount": {
           "type": "integer",
           "minimum": 0,
@@ -5222,7 +5233,7 @@
           "type": "number",
           "exclusiveMinimum": 0,
           "maximum": 80,
-          "description": "Yeti/bear/wolf prey selection: maximum heading deviation from the route (45 degrees by default), with room for short nearby sidesteps. Prey must be ahead, before the player and nearer the player than the hunter."
+          "description": "Yeti/bear/wolf prey selection: maximum heading deviation from the route (45 degrees by default), with room for short nearby sidesteps. Prey must be generally ahead; a short overshoot beyond the player up to the route width is allowed."
         },
         "divertReleaseAngleDegrees": {
           "type": "number",

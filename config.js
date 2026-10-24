@@ -2,9 +2,10 @@
 window.loadFrostlineConfig = async function () {
   let config = window.FROSTLINE_CONFIG;
   if (['http:', 'https:'].includes(window.location.protocol)) {
-    const response = await fetch(new URL('game-config.json', window.location.href), { cache: 'no-store' });
-    if (!response.ok) throw new Error(`Cannot load game-config.json (${response.status})`);
-    config = await response.json();
+    const url = new URL('game-config.json', window.location.href);if(window.FROSTLINE_DEV)url.searchParams.set('dev','1');
+    let response;
+    try { response = await fetch(url, { cache: 'no-store' }); } catch (_) { /* Network loss: the embedded snapshot is playable offline. */ }
+    if(response){if (!response.ok) throw new Error(`Cannot load game-config.json (${response.status})`);config = await response.json();}
   }
   config.endless ??= {"autoStart":false,"recordVersion":1,"playerSpeedKmh":90,"sectionMetres":240,"lookAheadMetres":180,"difficultyRampMetres":2800,"waveMetres":900,"itemSpreadMetres":55,"gates":{"spacingMetres":38,"openingMetres":[19,14],"swingMetres":[11,16],"swordEvery":8},"rates":{"trees":[0.9,3.8],"skiers":[0.8,4.8],"fastSkiers":[0,0.7],"lakes":[0.12,0.85],"jumps":[0.12,0.5]},"lakeRadiusMetres":[20,34],"firstLakeMetres":350,"yetis":{"firstMetres":700,"additionalEveryMetres":900,"intervalMetres":[650,300],"speedKmh":[68,94],"maxActive":4,"wakeSeconds":2.5,"retireBehindMetres":180}};
   config.endless.yetis.maxNearbyHunters ??= config.endless.yetis.maxActive ?? 4;
@@ -15,7 +16,7 @@ window.loadFrostlineConfig = async function () {
   config.endless.encounters.difficultyVisits ??= 6;
   config.endless.encounters.routeSwingMetres ??= [38,55];
   config.endless.encounters.townStreetWidthMetres ??= [14.4,23];
-  config.endless.encounters.townPeople ??= [18,60];
+  config.endless.encounters.townPeople ??= [36,120];
   config.endless.yetis.wakeMetres ??= 140;
   config.endless.wildlife ??= {firstMetres:650,intervalMetres:[360,200],maxNearby:6,wolfPackSize:[2,3],noticeMetres:55};
   config.skiers.crashSeconds ??= [4,5];
@@ -25,8 +26,8 @@ window.loadFrostlineConfig = async function () {
   config.chasers.yetiCelebrationSeconds ??= 2.2;
   config.chasers.yetiCelebrationHopsPerSecond ??= 2.4;
   config.chasers.yetiCelebrationJumpPixels ??= 14;
-  config.arcade.yetiColors.special ??= '#c844a2';
-  config.arcade.yetiTints.special ??= [212,30,156];
+  config.arcade.yetiColors.special ??= '#772d4b';
+  config.arcade.yetiTints.special ??= [64,38,57];
   config.village.names ??= ['Snowdrift','Pinehaven','Whitecap','Glacier Bend'];
   config.village.backRoute ??= {enabled:true,width:100,offset:310};
   config.arcade.stageFlow ??= {};
@@ -37,6 +38,8 @@ window.loadFrostlineConfig = async function () {
   config.predators.divertPathAngleDegrees ??= 45;
   config.predators.divertReleaseAngleDegrees ??= 60;
   config.predators.mealPauseSeconds ??= .8;
+  config.physics.releaseTurnFollow ??= 3;
+  config.village.populationMultiplier ??= 2;
   function validate(value, schema, path) {
     if (schema.type === 'object') {
       if (!value || typeof value !== 'object' || Array.isArray(value)) throw new Error(`${path} must be an object`);
@@ -101,6 +104,7 @@ window.loadFrostlineConfig = async function () {
 };
 window.showFrostlineError = function (error) {
   console.error(error);
+  const status=document.getElementById('app-status');if(status)status.hidden=true;
   const message = document.createElement('pre');
   message.textContent = `Frostline could not start.\n${error.message}\nCheck game-config.json and reload.`;
   message.style.cssText = 'position:absolute;inset:20px;white-space:pre-wrap;font:14px monospace;color:#244451';

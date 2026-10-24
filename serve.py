@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Serve Frostline locally; JSON edits apply on refresh without rebuilding."""
+"""Serve Frostline locally; ?dev=1 bypasses the installed app's cache for editing."""
 import argparse
 from functools import partial
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
@@ -17,7 +17,7 @@ if __name__ == '__main__':
     parser.add_argument('--port', type=int, default=8765)
     args = parser.parse_args()
     with ThreadingHTTPServer(('127.0.0.1', args.port), partial(Handler, directory=str(Path(__file__).resolve().parent))) as server:
-        print(f'Frostline: http://127.0.0.1:{args.port}/ — edit game-config.json and reload. Ctrl+C stops the server.', flush=True)
+        print(f'Frostline dev: http://127.0.0.1:{args.port}/?dev=1 — edit game-config.json and reload. Ctrl+C stops the server.', flush=True)
         try:
             server.serve_forever()
         except KeyboardInterrupt:

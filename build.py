@@ -2,6 +2,7 @@
 from pathlib import Path
 import base64
 import json
+import hashlib
 
 root = Path(__file__).resolve().parent
 assets = {name: 'data:image/png;base64,' + base64.b64encode((root / 'assets' / file).read_bytes()).decode()
@@ -17,5 +18,13 @@ validate(config, schema)
 encode = lambda data: json.dumps(data).replace('<', '\\u003c')
 page = page.replace('__CONFIG__', encode(config)).replace('__SCHEMA__', encode(schema)).replace('__CONFIG_CODE__', (root / 'config.js').read_text())
 page = page.replace('__ASSET_DATA__', json.dumps(assets)).replace('__GAME_CODE__', (root / 'game.js').read_text())
+page = page.replace('__APP_CODE__', (root / 'app.js').read_text())
+worker = (root / 'sw.template.js').read_text()
+release = hashlib.sha256(page.encode() + worker.encode() + (root / 'manifest.webmanifest').read_bytes())
+for name in ['icon-192.png', 'icon-512.png', 'apple-touch-icon.png']:
+    release.update((root / 'assets' / name).read_bytes())
+version = release.hexdigest()[:16]
+page = page.replace('__BUILD_VERSION__', version)
+(root / 'sw.js').write_text(worker.replace('__BUILD_VERSION__', version))
 (root / 'index.html').write_text(page)
-print(f'Built {root / "index.html"} ({len(page):,} characters)')
+print(f'Built {root / "index.html"} ({len(page):,} characters), version {version}')
