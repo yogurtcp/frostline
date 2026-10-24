@@ -18,6 +18,9 @@ window.loadFrostlineConfig = async function () {
   config.endless.encounters.townStreetWidthMetres ??= [14.4,23];
   config.endless.encounters.townPeople ??= [36,120];
   config.endless.yetis.wakeMetres ??= 140;
+  const regionDefaults = {"enabled":true,"order":["beginner","quiet","trees","lake","quiet","town","quiet","cemetery","denseForest","forest"],"firstMetres":0,"gapMetres":[0,0],"lengthMetres":{"beginner":[320,400],"quiet":[180,250],"lake":[240,330],"denseForest":[110,160],"forest":[300,450],"cemetery":[650,850]},"beginnerPeople":[65,140],"quietTreesPer100Metres":1.5,"forestTreesPer100Metres":[12,26],"cemeteryOpeningMetres":[9,16],"zombies":{"count":[40,95],"speedKmh":[7,11],"noticeMetres":65}};
+  config.endless.regions ??= regionDefaults;
+  for(const [key,value] of Object.entries(regionDefaults))config.endless.regions[key] ??= value;
   config.endless.wildlife ??= {firstMetres:650,intervalMetres:[360,200],maxNearby:6,wolfPackSize:[2,3],noticeMetres:55};
   config.skiers.crashSeconds ??= [4,5];
   config.skiers.getUpSeconds ??= .6;
@@ -45,6 +48,8 @@ window.loadFrostlineConfig = async function () {
   config.wildlife.ramSpeedFraction ??= .85;
   config.physics.releaseTurnFollow ??= 3;
   config.village.populationMultiplier ??= 2;
+  const regionRanges = ['gapMetres','beginnerPeople','forestTreesPer100Metres','cemeteryOpeningMetres'].map(key=>config.endless.regions[key]).concat(Object.values(config.endless.regions.lengthMetres),[config.endless.regions.zombies.count,config.endless.regions.zombies.speedKmh]);
+  if(regionRanges.some(pair=>pair[0]>pair[1]))throw new Error('endless.regions ranges must be ordered');
   if(config.controls.swipeLongPixels<=config.controls.swipeShortPixels)throw new Error('controls.swipeLongPixels must exceed swipeShortPixels');
   function validate(value, schema, path) {
     if (schema.type === 'object') {

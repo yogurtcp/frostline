@@ -48,6 +48,11 @@ def validate(value, schema, path='config'):
         if endless and endless.get('maxPlayerSpeedKmh', 130) < endless['playerSpeedKmh']: fail('endless.maxPlayerSpeedKmh must be at least playerSpeedKmh')
         for key, pair in (endless or {}).get('encounters', {}).items():
             if isinstance(pair, list) and pair[0] > pair[1]: fail('endless.encounters.' + key + ' must be ordered')
+        regions = (endless or {}).get('regions', {})
+        ranges = [regions.get(key, []) for key in ['gapMetres', 'beginnerPeople', 'forestTreesPer100Metres', 'cemeteryOpeningMetres']]
+        ranges += list(regions.get('lengthMetres', {}).values()) + list(regions.get('zombies', {}).get(key, []) for key in ['count', 'speedKmh'])
+        for pair in ranges:
+            if pair and pair[0] > pair[1]: fail('endless.regions ranges must be ordered')
         wildlife = (endless or {}).get('wildlife', {})
         pack = wildlife.get('wolfPackSize', [2, 3])
         if pack[0] > pack[1]: fail('endless.wildlife.wolfPackSize must be ordered')

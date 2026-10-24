@@ -9055,6 +9055,180 @@
             }
           }
         },
+        "regions": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "enabled": {
+              "type": "boolean"
+            },
+            "order": {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 32,
+              "items": {
+                "type": "string",
+                "enum": [
+                  "beginner",
+                  "quiet",
+                  "trees",
+                  "lake",
+                  "town",
+                  "cemetery",
+                  "denseForest",
+                  "forest"
+                ]
+              }
+            },
+            "firstMetres": {
+              "type": "number",
+              "minimum": 0
+            },
+            "gapMetres": {
+              "type": "array",
+              "items": {
+                "type": "number",
+                "minimum": 0
+              },
+              "minItems": 2,
+              "maxItems": 2
+            },
+            "lengthMetres": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "beginner": {
+                  "type": "array",
+                  "items": {
+                    "type": "number",
+                    "minimum": 20
+                  },
+                  "minItems": 2,
+                  "maxItems": 2
+                },
+                "quiet": {
+                  "type": "array",
+                  "items": {
+                    "type": "number",
+                    "minimum": 20
+                  },
+                  "minItems": 2,
+                  "maxItems": 2
+                },
+                "lake": {
+                  "type": "array",
+                  "items": {
+                    "type": "number",
+                    "minimum": 20
+                  },
+                  "minItems": 2,
+                  "maxItems": 2
+                },
+                "denseForest": {
+                  "type": "array",
+                  "items": {
+                    "type": "number",
+                    "minimum": 20
+                  },
+                  "minItems": 2,
+                  "maxItems": 2
+                },
+                "forest": {
+                  "type": "array",
+                  "items": {
+                    "type": "number",
+                    "minimum": 20
+                  },
+                  "minItems": 2,
+                  "maxItems": 2
+                },
+                "cemetery": {
+                  "type": "array",
+                  "items": {
+                    "type": "number",
+                    "minimum": 20
+                  },
+                  "minItems": 2,
+                  "maxItems": 2
+                }
+              },
+              "required": [
+                "beginner",
+                "quiet",
+                "lake",
+                "denseForest",
+                "forest",
+                "cemetery"
+              ]
+            },
+            "beginnerPeople": {
+              "type": "array",
+              "minItems": 2,
+              "maxItems": 2,
+              "items": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 300
+              }
+            },
+            "quietTreesPer100Metres": {
+              "type": "number",
+              "minimum": 0
+            },
+            "forestTreesPer100Metres": {
+              "type": "array",
+              "items": {
+                "type": "number",
+                "minimum": 0
+              },
+              "minItems": 2,
+              "maxItems": 2
+            },
+            "cemeteryOpeningMetres": {
+              "type": "array",
+              "items": {
+                "type": "number",
+                "minimum": 4
+              },
+              "minItems": 2,
+              "maxItems": 2
+            },
+            "zombies": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "count",
+                "speedKmh",
+                "noticeMetres"
+              ],
+              "properties": {
+                "count": {
+                  "type": "array",
+                  "minItems": 2,
+                  "maxItems": 2,
+                  "items": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 160
+                  }
+                },
+                "speedKmh": {
+                  "type": "array",
+                  "items": {
+                    "type": "number",
+                    "minimum": 0.1
+                  },
+                  "minItems": 2,
+                  "maxItems": 2
+                },
+                "noticeMetres": {
+                  "type": "number",
+                  "exclusiveMinimum": 0
+                }
+              }
+            }
+          }
+        },
         "wildlife": {
           "type": "object",
           "additionalProperties": false,

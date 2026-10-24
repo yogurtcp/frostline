@@ -95,6 +95,76 @@
         23
       ]
     },
+    "regions": {
+      "enabled": true,
+      "order": [
+        "beginner",
+        "quiet",
+        "trees",
+        "lake",
+        "quiet",
+        "town",
+        "quiet",
+        "cemetery",
+        "denseForest",
+        "forest"
+      ],
+      "firstMetres": 0,
+      "gapMetres": [
+        0,
+        0
+      ],
+      "lengthMetres": {
+        "beginner": [
+          320,
+          400
+        ],
+        "quiet": [
+          180,
+          250
+        ],
+        "lake": [
+          240,
+          330
+        ],
+        "denseForest": [
+          110,
+          160
+        ],
+        "forest": [
+          300,
+          450
+        ],
+        "cemetery": [
+          650,
+          850
+        ]
+      },
+      "beginnerPeople": [
+        65,
+        140
+      ],
+      "quietTreesPer100Metres": 1.5,
+      "forestTreesPer100Metres": [
+        12,
+        26
+      ],
+      "cemeteryOpeningMetres": [
+        9,
+        16
+      ],
+      "zombies": {
+        "count": [
+          40,
+          95
+        ],
+        "speedKmh": [
+          7,
+          11
+        ],
+        "noticeMetres": 65
+      }
+    },
     "wildlife": {
       "firstMetres": 650,
       "intervalMetres": [
