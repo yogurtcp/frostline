@@ -50,7 +50,7 @@ New predators never spawn inside course towns, while existing pursuers can enter
 
 Yetis notice approaching skiers from at least 140 base metres, with additional lookahead/shorter wake delay for fast ice approaches. Dedicated encounters add alternating wolf packs and bears outside towns. Wolves/bears notice from at least 55 base metres and can continue their pursuit through course towns. Endless suppresses unrelated ambient wolves, bears and sleeping Yetis; unengaged course threats left offscreen behind you are removed, while active pursuers remain.
 
-Five alternative monster concepts are available in [the Yeti design gallery](yeti-options.html), with three poses per design and [saved generation prompts](design/yeti-concepts-prompts.md). They await a user choice before replacing the game art.
+Five alternative monsters are available in [the Yeti pixel preview](yeti-options.html): 30-pixel sprites on snow beside the real skier/trees, plus 4× enlargements of the exact same pixels. The preview uses the production sprite renderer, palette and zoom copied automatically by build.py, and can animate two running poses. Source concept sheets and [generation prompts](design/yeti-concepts-prompts.md) are retained. They await a user choice before replacing the game art. Edit yeti-options.template.html and rebuild; yeti-options.html is generated.
 
 Current Yeti art uses angular hunched bodies, long claws, fangs and a jaw animation. Faster tiers have darker blue-grey/rust/violet/burgundy bodies, brighter eyes, more spikes and a faster, longer-striding gait; hitboxes and chase speeds are unchanged.
 
