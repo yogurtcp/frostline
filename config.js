@@ -38,8 +38,11 @@ window.loadFrostlineConfig = async function () {
   config.predators.divertPathAngleDegrees ??= 45;
   config.predators.divertReleaseAngleDegrees ??= 60;
   config.predators.mealPauseSeconds ??= .8;
+  config.controls.swipeShortPixels ??= 22;
+  config.controls.swipeLongPixels ??= 88;
   config.physics.releaseTurnFollow ??= 3;
   config.village.populationMultiplier ??= 2;
+  if(config.controls.swipeLongPixels<=config.controls.swipeShortPixels)throw new Error('controls.swipeLongPixels must exceed swipeShortPixels');
   function validate(value, schema, path) {
     if (schema.type === 'object') {
       if (!value || typeof value !== 'object' || Array.isArray(value)) throw new Error(`${path} must be an object`);

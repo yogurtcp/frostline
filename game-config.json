@@ -1633,7 +1633,9 @@
     "pointerDeadZone": 11,
     "pointerScale": 68,
     "keyRepeatSeconds": 0.17,
-    "stepDegrees": 30
+    "stepDegrees": 30,
+    "swipeShortPixels": 22,
+    "swipeLongPixels": 88
   },
   "jump": {
     "baseSeconds": 1.05,

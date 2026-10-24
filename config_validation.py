@@ -28,6 +28,8 @@ def validate(value, schema, path='config'):
     elif kind == 'string' and not isinstance(value, str): fail('expected string')
     if 'enum' in schema and value not in schema['enum']: fail('unknown value')
     if path == 'config':
+        controls = value['controls']
+        if controls.get('swipeLongPixels', 88) <= controls.get('swipeShortPixels', 22): fail('controls.swipeLongPixels must exceed swipeShortPixels')
         for course, target in value['timing']['targets'].items():
             if target['goldSeconds'] >= target['parSeconds']: fail(f'{course}: goldSeconds must be below parSeconds')
         if not value['arcade']['stages']: fail('arcade.stages needs at least one stage')

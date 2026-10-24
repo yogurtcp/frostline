@@ -3878,11 +3878,13 @@
       "properties": {
         "pointerDeadZone": {
           "type": "number",
-          "minimum": 0
+          "minimum": 0,
+          "description": "Legacy analog-drag setting, retained for config compatibility; swipes use swipeShortPixels."
         },
         "pointerScale": {
           "type": "number",
-          "minimum": 0
+          "minimum": 0,
+          "description": "Legacy analog-drag setting, retained for config compatibility; swipes use swipeLongPixels."
         },
         "keyRepeatSeconds": {
           "type": "number",
@@ -3893,6 +3895,16 @@
           "type": "number",
           "minimum": 0,
           "exclusiveMinimum": 0
+        },
+        "swipeShortPixels": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Minimum swipe displacement in CSS pixels for one keyboard steering press (default 22)."
+        },
+        "swipeLongPixels": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Horizontal displacement in CSS pixels for a second steering press within the same swipe (default 88); must exceed swipeShortPixels."
         }
       }
     },

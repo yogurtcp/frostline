@@ -1566,7 +1566,7 @@ window.FROSTLINE_READY = (async () => {
 
   function inputVector() {
     const k=state.input;let x=0,y=0,held=false;
-    if(k.pointer) {const dx=k.pointer.x-k.pointer.sx,dy=k.pointer.y-k.pointer.sy,len=Math.hypot(dx,dy);held=true;if(len>8){x=clamp(dx/S.controls.pointerScale,-1,1);y=clamp(dy/S.controls.pointerScale,-1,1);}}
+    if(k.pointer?.direction){held=true;x=k.pointer.direction==='right'?1:k.pointer.direction==='left'?-1:0;y=k.pointer.direction==='down'?1:k.pointer.direction==='up'?-1:0;}
     if(k.left||k.right||k.up||k.down){held=true;x=(k.right?1:0)-(k.left?1:0);y=(k.down?1:0)-(k.up?1:0);}
     return {x,y,held};
   }
@@ -1718,11 +1718,7 @@ window.FROSTLINE_READY = (async () => {
     // Resolve the surface before release handling so ice keeps the incoming momentum.
     const ice=p.air<=0?patchAt(p.x,p.y):null;
     p.onRugged=p.air<=0&&!ice&&!!ruggedAt(p.x,p.y);
-    if(state.input.pointer&&p.air<=0){
-      const t=state.input.pointer,dx=t.x-t.sx,dy=t.y-t.sy;
-      if(Math.hypot(dx,dy)>S.controls.pointerDeadZone){p.desiredHeading=Math.atan2(dx,dy);const c=Math.cos(p.desiredHeading);p.mode=c>S.physics.downhillCosMinimum?'slide':c<-S.physics.downhillCosMinimum?'walk':'traverse';if(p.mode==='traverse')p.desiredHeading=Math.sign(dx)*Math.PI/2;}
-      p.releasing=false;
-    }else if((p.mode==='walk'||p.mode==='traverse')&&!inp.held&&!ice&&p.air<=0){p.mode='still';p.desiredHeading=p.heading;p.releasing=true;}
+    if((p.mode==='walk'||p.mode==='traverse')&&!inp.held&&!ice&&p.air<=0){p.mode='still';p.desiredHeading=p.heading;p.releasing=true;}
     if(ice&&p.icePushPending){p.heading=p.desiredHeading;p.speed=p.mode==='traverse'?S.physics.traverseSpeed:p.mode==='walk'?S.physics.walkSpeed:S.physics.iceRestartSlideSpeed;p.vx=Math.sin(p.heading)*p.speed;p.vy=Math.cos(p.heading)*p.speed;p.onIce=false;p.icePushPending=false;}
     if(ice&&!p.onIce){p.iceHeading=p.speed>S.physics.iceHeadingSpeedMinimum?Math.atan2(p.vx,p.vy):p.heading;announce('BLACK ICE','No steering. Hold on to your scarf.',C.blue,2);}
     p.onIce=!!ice;
@@ -1759,9 +1755,22 @@ window.FROSTLINE_READY = (async () => {
     state.trails=state.trails.filter(t=>t.y>p.y-H/ZOOM&&t.y<p.y+H/ZOOM).slice(-S.render.trailLimit);
   }
   function releasePointer(){
-    const p=state.p;state.input.pointer=null;if(p.air>0)return;
-    p.releasing=true;
-    if(p.mode==='slide'&&Math.cos(p.desiredHeading)>S.physics.downhillCosMinimum){p.desiredHeading=0;p.mode='slide';}else {p.mode='still';p.desiredHeading=p.heading;}
+    // A swipe releases its virtual key. Diagonal/downhill steering persists like the keyboard.
+    state.input.pointer=null;
+  }
+  function updateSwipe(e){
+    const t=state.input.pointer;if(!t||t.id!==e.pointerId)return;
+    Object.assign(t,pointerCoords(e));
+    const dx=e.clientX-t.clientStartX,dy=e.clientY-t.clientStartY;
+    if(!t.direction){
+      if(Math.max(Math.abs(dx),Math.abs(dy))<S.controls.swipeShortPixels)return;
+      t.direction=Math.abs(dx)>=Math.abs(dy)?(dx<0?'left':'right'):(dy<0?'up':'down');
+    }
+    const horizontal=t.direction==='left'||t.direction==='right';
+    const distance=t.direction==='left'?-dx:t.direction==='right'?dx:t.direction==='up'?-dy:dy;
+    const presses=horizontal&&distance>=S.controls.swipeLongPixels?2:1;
+    while(t.presses<presses){keyboardDirection(t.direction);t.presses++;}
+    state.control='pointer';
   }
   function keyboardDirection(key,repeat=false){
     if(state.p.air>0)return;
@@ -3033,11 +3042,13 @@ window.FROSTLINE_READY = (async () => {
   }
   function touchControl() {
     const t=state.input.pointer;if(!t)return;
-    text('TAP WITH ANOTHER FINGER TO JUMP',W/2,H-(state.arcade||state.endless?125:78),9,C.teal);
-    const sx=t.sx,sy=t.sy,dx=clamp(t.x-sx,-42,42),dy=clamp(t.y-sy,-42,42);
-    ctx.globalAlpha=.6;ctx.strokeStyle='#527f8c';ctx.lineWidth=1.5;ctx.setLineDash([3,4]);ctx.beginPath();ctx.arc(sx,sy,43,0,TAU);ctx.stroke();ctx.setLineDash([]);
-    for(const [x,y,label] of [[sx,sy-58,'↑'],[sx-58,sy,'←'],[sx+58,sy,'→'],[sx,sy+58,'↓']]){box(x-10,y-10,20,20,'#e1eee7');text(label,x,y,15,C.teal);}
-    line(sx,sy,sx+dx,sy+dy,'#76a7af',2);ctx.fillStyle='#548f9c';ctx.beginPath();ctx.arc(sx+dx,sy+dy,7,0,TAU);ctx.fill();ctx.globalAlpha=1;
+    text('SECOND FINGER TO JUMP',W/2,H-(state.arcade||state.endless?125:78),9,C.teal);
+    const dx=clamp(t.x-t.sx,-70,70),dy=clamp(t.y-t.sy,-70,70);
+    ctx.globalAlpha=.7;
+    line(t.sx,t.sy,t.sx+dx,t.sy+dy,'#76a7af',2);
+    ctx.fillStyle='#548f9c';ctx.beginPath();ctx.arc(t.sx+dx,t.sy+dy,5,0,TAU);ctx.fill();
+    if(t.direction)text({left:'LEFT',right:'RIGHT',up:'UP',down:'DOWN'}[t.direction]+(t.presses===2?' x2':''),t.sx+dx,t.sy+dy-18,9,C.teal);
+    ctx.globalAlpha=1;
   }
   function render() {
     ctx.imageSmoothingEnabled=false;ctx.save();
@@ -3064,9 +3075,9 @@ window.FROSTLINE_READY = (async () => {
     const r=canvas.getBoundingClientRect();H=clamp(Math.round(W*(r.height||S.render.defaultHeight)/(r.width||S.render.width)),S.render.minHeight,S.render.maxHeight);canvas.width=W;canvas.height=H;ctx.imageSmoothingEnabled=false;state.cam.y=state.p.y-H*S.render.playerScreenY/ZOOM;
   }
   function pointerCoords(e){const r=canvas.getBoundingClientRect();return {x:(e.clientX-r.left)*W/r.width,y:(e.clientY-r.top)*H/r.height};}
-  canvas.addEventListener('pointerdown',e=>{e.preventDefault();if(state.input.pointer){if(e.pointerId!==state.input.pointer.id&&!state.p.awaitingInput)state.input.jump=true;return;}if(!startMoving())return;const p=pointerCoords(e);state.control='pointer';state.input.pointer={id:e.pointerId,sx:p.x,sy:p.y,...p};canvas.setPointerCapture(e.pointerId);});
-  canvas.addEventListener('pointermove',e=>{const p=state.input.pointer;if(!p||p.id!==e.pointerId)return;e.preventDefault();Object.assign(p,pointerCoords(e));});
-  const release=e=>{if(state.input.pointer?.id===e.pointerId)releasePointer();};canvas.addEventListener('pointerup',release);canvas.addEventListener('pointercancel',release);
+  canvas.addEventListener('pointerdown',e=>{e.preventDefault();if(state.input.pointer){if(e.pointerId!==state.input.pointer.id&&!state.p.awaitingInput)state.input.jump=true;return;}if(!startMoving())return;const p=pointerCoords(e);state.control='pointer';state.input.pointer={id:e.pointerId,sx:p.x,sy:p.y,...p,clientStartX:e.clientX,clientStartY:e.clientY,direction:null,presses:0};canvas.setPointerCapture(e.pointerId);});
+  canvas.addEventListener('pointermove',e=>{if(state.input.pointer?.id!==e.pointerId)return;e.preventDefault();updateSwipe(e);});
+  canvas.addEventListener('pointerup',e=>{if(state.input.pointer?.id!==e.pointerId)return;updateSwipe(e);releasePointer();});const cancel=e=>{if(state.input.pointer?.id===e.pointerId)releasePointer();};canvas.addEventListener('pointercancel',cancel);canvas.addEventListener('lostpointercapture',cancel);
   window.addEventListener('keydown',e=>{if(e.target?.closest?.('button,dialog,a'))return;const key={ArrowLeft:'left',ArrowRight:'right',ArrowUp:'up',ArrowDown:'down',a:'left',d:'right',w:'up',s:'down'}[e.key];if(key){e.preventDefault();if((state.p.awaitingInput&&e.repeat)||!startMoving())return;state.input[key]=true;keyboardDirection(key,e.repeat);}if(e.code==='Space'){e.preventDefault();if((state.p.awaitingInput&&e.repeat)||!startMoving())return;state.input.jump=true;}if(e.key.toLowerCase()==='m'&&!e.repeat){state.muted=!state.muted;save();announce(state.muted?'SOUND OFF':'SOUND ON','',C.teal,1);}});
   window.addEventListener('keyup',e=>{const key={ArrowLeft:'left',ArrowRight:'right',ArrowUp:'up',ArrowDown:'down',a:'left',d:'right',w:'up',s:'down'}[e.key];if(key)state.input[key]=false;});
   window.addEventListener('blur',()=>{state.input.left=state.input.right=state.input.up=state.input.down=false;if(state.input.pointer)releasePointer();});
