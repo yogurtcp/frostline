@@ -5125,7 +5125,7 @@
           "type": "number",
           "exclusiveMinimum": 0,
           "maximum": 1,
-          "description": "Minimum fraction of normal top speed directed into a physical monster ram; relative closing speed must also exceed its species impact threshold. Default .85."
+          "description": "Minimum fraction of the normal speed cap for the current heading during a player-initiated impact. Default .85; relative closing must exceed physics.minimumCollisionKmh."
         },
         "wolfKillKmh": {
           "type": "number",
@@ -5242,11 +5242,13 @@
           "minimum": 0
         },
         "bearMaxImpactAngleDegrees": {
+          "description": "Legacy setting retained for config compatibility. Actual contact and closing motion now decide player rams, without a narrow aiming cone.",
           "type": "number",
           "exclusiveMinimum": 0,
           "maximum": 90
         },
         "yetiMaxImpactAngleDegrees": {
+          "description": "Legacy setting retained for config compatibility. Actual contact and closing motion now decide player rams, without a narrow aiming cone.",
           "type": "number",
           "exclusiveMinimum": 0,
           "maximum": 90
@@ -9076,7 +9078,8 @@
                   "town",
                   "cemetery",
                   "denseForest",
-                  "forest"
+                  "forest",
+                  "crowd"
                 ]
               }
             },
@@ -9150,6 +9153,15 @@
                   },
                   "minItems": 2,
                   "maxItems": 2
+                },
+                "crowd": {
+                  "type": "array",
+                  "minItems": 2,
+                  "maxItems": 2,
+                  "items": {
+                    "type": "number",
+                    "minimum": 80
+                  }
                 }
               },
               "required": [
@@ -9224,6 +9236,44 @@
                 "noticeMetres": {
                   "type": "number",
                   "exclusiveMinimum": 0
+                }
+              }
+            },
+            "crowd": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "firstMetres": {
+                  "type": "number",
+                  "minimum": 450
+                },
+                "chance": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                "minimumGapMetres": {
+                  "type": "number",
+                  "minimum": 0
+                },
+                "maximumGapMetres": {
+                  "type": "number",
+                  "minimum": 0
+                },
+                "widthMetres": {
+                  "type": "number",
+                  "minimum": 160,
+                  "maximum": 600
+                },
+                "people": {
+                  "type": "array",
+                  "minItems": 2,
+                  "maxItems": 2,
+                  "items": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 600
+                  }
                 }
               }
             }

@@ -50,6 +50,9 @@ def validate(value, schema, path='config'):
             if isinstance(pair, list) and pair[0] > pair[1]: fail('endless.encounters.' + key + ' must be ordered')
         regions = (endless or {}).get('regions', {})
         ranges = [regions.get(key, []) for key in ['gapMetres', 'beginnerPeople', 'forestTreesPer100Metres', 'cemeteryOpeningMetres']]
+        ranges += [regions.get('crowd', {}).get('people', [])]
+        crowd = regions.get('crowd', {})
+        if crowd.get('maximumGapMetres', 4200) < crowd.get('minimumGapMetres', 1600): fail('crowd maximumGapMetres must be at least minimumGapMetres')
         ranges += list(regions.get('lengthMetres', {}).values()) + list(regions.get('zombies', {}).get(key, []) for key in ['count', 'speedKmh'])
         for pair in ranges:
             if pair and pair[0] > pair[1]: fail('endless.regions ranges must be ordered')

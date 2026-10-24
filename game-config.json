@@ -98,18 +98,17 @@
     "regions": {
       "enabled": true,
       "order": [
-        "beginner",
+        "town",
         "quiet",
         "trees",
         "lake",
         "quiet",
-        "town",
-        "quiet",
         "cemetery",
         "denseForest",
-        "forest"
+        "forest",
+        "quiet"
       ],
-      "firstMetres": 0,
+      "firstMetres": 450,
       "gapMetres": [
         0,
         0
@@ -138,6 +137,10 @@
         "cemetery": [
           650,
           850
+        ],
+        "crowd": [
+          320,
+          400
         ]
       },
       "beginnerPeople": [
@@ -163,6 +166,17 @@
           11
         ],
         "noticeMetres": 65
+      },
+      "crowd": {
+        "firstMetres": 1200,
+        "chance": 0.55,
+        "minimumGapMetres": 1600,
+        "maximumGapMetres": 4200,
+        "widthMetres": 240,
+        "people": [
+          200,
+          420
+        ]
       }
     },
     "wildlife": {
