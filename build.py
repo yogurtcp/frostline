@@ -9,6 +9,9 @@ assets = {name: 'data:image/png;base64,' + base64.b64encode((root / 'assets' / f
           for name, file in [('ski', 'ski-sprites.png'), ('village', 'village-sprites.png'), ('wildlife', 'wildlife-sprites.png'), ('trees', 'tree-sprites.png')]}
 for name, file in [('hillSmall', 'hill-small.png'), ('hillLarge', 'hill-large.png'), ('fallingTree', 'falling-tree.png'), ('wideLog', 'wide-log-v2.png'), ('rollingSnowball', 'rolling-snowball.png'), ('bears', 'bear-sprites.png'), ('people', 'people-animations.png'), ('cozyBuildings', 'cozy-buildings.png'), ('yetis', 'yeti-sprites.png')]:
     assets[name] = 'data:image/png;base64,' + base64.b64encode((root / 'assets' / file).read_bytes()).decode()
+scenes = json.loads((root / 'assets/scenes/manifest.json').read_text())
+for scene in scenes['images']:
+    assets['scene:' + scene['key']] = 'data:image/png;base64,' + base64.b64encode((root / 'assets/scenes' / scene['file']).read_bytes()).decode()
 page = (root / 'index.template.html').read_text()
 config = json.loads((root / 'game-config.json').read_text())
 schema = json.loads((root / 'game-config.schema.json').read_text())

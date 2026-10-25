@@ -5126,9 +5126,10 @@
           "type": "number",
           "exclusiveMinimum": 0,
           "maximum": 1,
-          "description": "Minimum fraction of the normal speed cap for the current heading during a player-initiated impact. Default .85; relative closing must exceed physics.minimumCollisionKmh."
+          "description": "Minimum fraction of the attainable sliding/traverse speed cap for the current heading during a player-initiated impact. Default .85; relative closing must exceed physics.minimumCollisionKmh."
         },
         "wolfKillKmh": {
+          "description": "Legacy setting accepted for config compatibility. Monster rams now use wildlife.ramSpeedFraction of the attainable sliding/traverse speed, plus real approach and closing motion.",
           "type": "number",
           "minimum": 0
         },
@@ -5146,10 +5147,12 @@
           "minimum": 0
         },
         "bearKnockoutKmh": {
+          "description": "Legacy setting accepted for config compatibility. Monster rams now use wildlife.ramSpeedFraction of the attainable sliding/traverse speed, plus real approach and closing motion.",
           "type": "number",
           "minimum": 0
         },
         "yetiKnockoutKmh": {
+          "description": "Legacy setting accepted for config compatibility. Monster rams now use wildlife.ramSpeedFraction of the attainable sliding/traverse speed, plus real approach and closing motion.",
           "type": "number",
           "minimum": 0
         },

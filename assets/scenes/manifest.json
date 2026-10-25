@@ -1,0 +1,93 @@
+{
+  "durationSeconds": 5,
+  "images": [
+    {
+      "key": "death-wolf",
+      "file": "death-wolf.png",
+      "source": "exec-4b4e092f-5458-4838-ad29-04152cc179c6.png",
+      "width": 320,
+      "height": 200,
+      "colors": 64
+    },
+    {
+      "key": "death-bear",
+      "file": "death-bear.png",
+      "source": "exec-9d287890-4032-4f9e-9d4c-9756334880bf.png",
+      "width": 320,
+      "height": 200,
+      "colors": 64
+    },
+    {
+      "key": "death-zombie",
+      "file": "death-zombie.png",
+      "source": "exec-aafa11f1-2008-4107-b991-e2b48b2f4f7d.png",
+      "width": 320,
+      "height": 200,
+      "colors": 64
+    },
+    {
+      "key": "death-yeti-white",
+      "file": "death-yeti-white.png",
+      "source": "exec-2a8ff4a0-191e-4d04-a9af-d471ae9aff85.png",
+      "width": 320,
+      "height": 200,
+      "colors": 64
+    },
+    {
+      "key": "death-yeti-avalanche",
+      "file": "death-yeti-avalanche.png",
+      "source": "exec-8def5330-1b38-4992-af84-a987593d47d4.png",
+      "width": 320,
+      "height": 200,
+      "colors": 64
+    },
+    {
+      "key": "death-yeti-violet",
+      "file": "death-yeti-violet.png",
+      "source": "exec-4cc2f85b-c870-472e-8e7f-257eb94a2d68.png",
+      "width": 320,
+      "height": 200,
+      "colors": 64
+    },
+    {
+      "key": "death-yeti-burgundy",
+      "file": "death-yeti-burgundy-v2.png",
+      "source": "exec-46432d5a-ff0d-4db9-9347-1258e6c1bb93.png",
+      "width": 320,
+      "height": 200,
+      "colors": 64
+    },
+    {
+      "key": "finish",
+      "file": "finish.png",
+      "source": "exec-3f53358c-1c7d-4d2b-9366-38dec0eaced6.png",
+      "width": 320,
+      "height": 200,
+      "colors": 64
+    },
+    {
+      "key": "perfect",
+      "file": "perfect.png",
+      "source": "exec-e6c47d86-197c-4e13-9b54-72de998117b5.png",
+      "width": 320,
+      "height": 200,
+      "colors": 64
+    },
+    {
+      "key": "victory",
+      "file": "victory.png",
+      "source": "exec-52883948-99cf-47ee-af95-32c163d38c4a.png",
+      "width": 320,
+      "height": 200,
+      "colors": 64
+    },
+    {
+      "key": "cocoa",
+      "file": "cocoa.png",
+      "source": "exec-9805a19f-5c02-4771-8ad5-44e03c7dcb59.png",
+      "width": 320,
+      "height": 200,
+      "colors": 64
+    }
+  ]
+}
