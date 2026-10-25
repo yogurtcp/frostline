@@ -4089,6 +4089,7 @@
           "minimum": 0
         },
         "enemySlowRetention": {
+          "description": "Legacy setting retained for config compatibility. Solid non-ram monster impacts now crash the skier instead of applying a slowdown.",
           "type": "number",
           "minimum": 0
         },
