@@ -2377,8 +2377,10 @@ window.FROSTLINE_READY = (async () => {
         if(o.stroll){
           const d=Math.hypot(o.stroll.x-o.x,o.stroll.y-o.y),move=Math.min(d,o.walkSpeed*dt);
           const x=o.x+(o.stroll.x-o.x)/(d||1)*move,y=o.y+(o.stroll.y-o.y)/(d||1)*move*cemeteryYScale(o.x,o.y);
-          if(clear(x,y)){o.x=x;o.y=y;}else {o.stroll=null;o.pauseUntil=clock+range(...P.pauseSeconds);}
-          if(Math.hypot(o.stroll.x-o.x,o.stroll.y-o.y)<.1){o.stroll=null;o.pauseUntil=clock+range(...P.pauseSeconds);}
+          if(clear(x,y)){
+            o.x=x;o.y=y;
+            if(Math.hypot(o.stroll.x-o.x,o.stroll.y-o.y)<.1){o.stroll=null;o.pauseUntil=clock+range(...P.pauseSeconds);}
+          }else {o.stroll=null;o.pauseUntil=clock+range(...P.pauseSeconds);}
         }
       }
       const distance=Math.hypot(o.x-oldX,o.y-oldY);o.walking=distance>0;
