@@ -1,5 +1,5 @@
 {
-  "dismissal": "button-or-key",
+  "dismissal": "tap-or-key",
   "images": [
     {
       "key": "death-wolf",
