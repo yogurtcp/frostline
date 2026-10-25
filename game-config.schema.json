@@ -9294,6 +9294,12 @@
                 }
               }
             },
+            "minimumWidthMetres": {
+              "type": "number",
+              "minimum": 240,
+              "maximum": 1200,
+              "description": "Minimum full width of Endless challenge terrain, in base metres. Entry pace scales it; central lane widths and visit difficulty are independent. Quiet/ordinary forest keep their relief layouts."
+            },
             "denseForestDensity": {
               "type": "array",
               "minItems": 2,

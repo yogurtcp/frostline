@@ -17,6 +17,7 @@ window.FROSTLINE_READY = (async () => {
   const range = (a,b) => a + random()*(b-a);
   const C = S.colors, stages = S.courses;
   const MONSTER_KINDS=new Set(['wolf','bear','lurker','zombie','fast','slow']);
+  const WIDE_REGIONS=new Set(['town','trees','cemetery','denseForest','scramble','crowd','beginner']);
   // Source rectangles in the actual generated PNG atlases. No stand-in art.
   const atlas = S.atlas;
   const images = {}, spriteCache = new Map();
@@ -359,6 +360,10 @@ window.FROSTLINE_READY = (async () => {
       if(variant===1)e.paths.pop();e.title=['Forked Pines','Winding Grove','Forest Islands'][variant];
       e.band=Math.max(...e.paths.flat().map(p=>Math.abs(p.x-root.x)))+e.half+350*scale;
     }
+    e.coreBand=e.band;
+    if(WIDE_REGIONS.has(kind)||kind==='lake')e.band=Math.max(e.band,R.minimumWidthMetres*PX_PER_M*scale/2);
+    if(e.town){e.town.halfWidth=e.band;populateForestBoundary(e,section,e.startY,e.endY,{banks:false});}
+    if(WIDE_REGIONS.has(kind)||kind==='lake')state.objects=state.objects.filter(o=>!o.worldChunk||o.arcadeRun||o.y<e.startY||o.y>e.endY||Math.abs(o.x-(e.centerX??root.x))>e.band);
     return e;
   }
   function planEndlessRegion(e,section){
@@ -367,7 +372,7 @@ window.FROSTLINE_READY = (async () => {
     e.noNewPredators=['quiet','lake','denseForest','scramble','cemetery'].includes(e.kind);
     e.half=e.kind==='cemetery'?mix(...R.cemeteryOpeningMetres.slice().reverse(),e.difficulty)*PX_PER_M*e.scale/2:e.kind==='denseForest'?mix(55,35,e.difficulty)*e.scale:550*e.scale;
     e.band=1000*e.scale;e.paths=[[point(0),point(1)]];
-    if(e.kind==='crowd'){e.centerX=state.p.x;e.half=R.crowd.widthMetres*PX_PER_M*e.scale/2-60;e.band=e.half+200;e.paths=[[{x:e.centerX,y:e.startY},{x:e.centerX,y:e.endY}]];}
+    if(['crowd','beginner'].includes(e.kind)){e.centerX=e.kind==='crowd'?state.p.x:root.x;e.crowdWidthMetres=Math.max(e.kind==='crowd'?R.crowd.widthMetres:0,R.minimumWidthMetres);e.half=e.crowdWidthMetres*PX_PER_M*e.scale/2-60;e.band=e.half+200;e.paths=[[{x:e.centerX,y:e.startY},{x:e.centerX,y:e.endY}]];}
     const names={crowd:'Rush Hour Slope',beginner:'Rush Hour Slope',quiet:'Snowy Trail',lake:'Stillwater Lake',denseForest:'Close Pines',scramble:'Wild Patch',forest:'Open Pines',cemetery:'Frost Rest Cemetery'};e.title=names[e.kind];
     if(e.kind==='cemetery'){
       const path=[],bend=mix(250,420,e.difficulty)*e.scale,side=pick([-1,1]);
@@ -391,7 +396,7 @@ window.FROSTLINE_READY = (async () => {
       e.paths=[Array.from({length:9},(_,i)=>point(i/8,Math.sin(i*Math.PI/2)*190*e.scale))];
     }else if(e.kind==='lake'){
       const length=e.endY-e.startY;
-      entity('ice',root.x,(e.startY+e.endY)/2,{rx:Math.max(e.band,length*.65),ry:length/2,width:Math.max(e.band,length*.65)*2,r:0,transitionLake:true,arcadeRun:section,encounter:e,arcadeFeature:true});
+      entity('ice',root.x,(e.startY+e.endY)/2,{rx:Math.max(R.minimumWidthMetres*PX_PER_M*e.scale/2,e.band,length*.65),ry:length/2,width:Math.max(R.minimumWidthMetres*PX_PER_M*e.scale/2,e.band,length*.65)*2,r:0,transitionLake:true,arcadeRun:section,encounter:e,arcadeFeature:true});
     }
     state.objects=state.objects.filter(o=>!o.worldChunk||o.arcadeRun||o.y<e.startY||o.y>e.endY||(e.kind==='quiet'?Math.abs(o.x-encounterPathX(e.paths[0],o.y))>410:Math.abs(o.x-(e.centerX??root.x))>e.band));
   }
@@ -401,11 +406,11 @@ window.FROSTLINE_READY = (async () => {
     const rows=(step,callback,offset=0)=>{for(let row=Math.max(0,Math.ceil((from-e.startY-offset)/step));;row++){const y=e.startY+offset+row*step;if(y>=to||y>=e.endY)break;callback(y,row);}};
     if(e.kind==='beginner'||e.kind==='crowd'){
       const crowd=e.kind==='crowd',center=e.centerX??root.x;
-      if(crowd)populateForestBoundary(e,section,from,to);
-      const count=Math.min(600,Math.round(crowd?mix(...R.crowd.people,e.difficulty)*R.crowd.widthMetres/240:mix(...R.beginnerPeople,e.difficulty))),step=(length-300*scale)/Math.max(1,count);
+      populateForestBoundary(e,section,from,to,{banks:crowd});
+      const count=Math.min(600,Math.round((crowd?mix(...R.crowd.people,e.difficulty):mix(...R.beginnerPeople,e.difficulty))*e.crowdWidthMetres/240)),step=(length-300*scale)/Math.max(1,count);
       if(count>0&&length>300*scale)rows(step,(y,row)=>{if(row>=count||y<e.startY+200*scale||y>e.endY-100*scale)return;const type=row%(crowd?17:5)===0?pick(['personRed','personYellow','personGreen']):row%7===0?'boarder':'skier',base=range(...S.skiers.slowSpeed);
-        const spread=crowd?e.half+1:380*scale,lane=(row*5)%13,jitter=lane===0?range(.01,.2):lane===12?range(.8,.99):range(.08,.92);
-        const x=crowd?center-spread+(lane+jitter)*spread*2/13:center+range(-spread,spread);
+        const spread=e.half+1,lane=(row*5)%13,jitter=lane===0?range(.01,.2):lane===12?range(.8,.99):range(.08,.92);
+        const x=center-spread+(lane+jitter)*spread*2/13;
         entity(type,x,y,{...own,width:type.startsWith('person')?30:42,r:10,vy:type.startsWith('person')?0:base*scale,vx:0,endlessBaseVy:type.startsWith('person')?undefined:base});},200*scale);
       const y=e.startY+Math.min(length*.55,180*PX_PER_M*scale);
       if(!e.introYeti&&to>y){e.introYeti=true;const live=state.chasers.filter(c=>activeCourseOwner(c)&&!c.dead&&!c.leaving&&Math.abs(c.y-state.p.y)<S.endless.yetis.nearbyMetres*PX_PER_M*scale).length;
@@ -432,9 +437,11 @@ window.FROSTLINE_READY = (async () => {
       const jumps=mix(...S.endless.rates.jumps,entry);
       if(jumps>0)rows(100*PX_PER_M*scale/jumps,y=>{if(y>e.endY-250*scale)return;const x=root.x+range(-160,160)*scale;if(patchAt(x,y))return;const hill=createArcadeItem(pick(['smallHill','smallHill','largeHill','rainbow']),x,y,section);hill.encounter=e;},150*scale);
     }else if(e.kind==='denseForest'){
+      populateForestBoundary(e,section,from,to,{banks:false});
       const density=Math.sqrt(mix(...R.denseForestDensity,e.difficulty));
-      rows(90/density,(y,row)=>{const spacing=78/density;for(let x=root.x-e.band*.65+(row%2)*spacing/2;x<root.x+e.band*.65;x+=spacing){const xx=x+range(-12,12),yy=y+range(-8,8);if(Math.abs(xx-encounterPathX(e.paths[0],yy))<e.half+36||yy<e.startY+80*scale||yy>e.endY-80*scale)continue;entity(random()<.3?'fir':'pine',xx,yy,{...own,width:range(65,86),r:19});}});
+      rows(90/density,(y,row)=>{const spacing=78/density;for(let x=root.x-e.coreBand*.65+(row%2)*spacing/2;x<root.x+e.coreBand*.65;x+=spacing){const xx=x+range(-12,12),yy=y+range(-8,8);if(Math.abs(xx-encounterPathX(e.paths[0],yy))<e.half+36||yy<e.startY+80*scale||yy>e.endY-80*scale)continue;entity(random()<.3?'fir':'pine',xx,yy,{...own,width:range(65,86),r:19});}});
     }else if(e.kind==='scramble'){
+      populateForestBoundary(e,section,from,to,{banks:false});
       const density=Math.sqrt(mix(...R.scrambleDensity,e.difficulty)),spacing=118/density;
       const pool=['pine','fir','smallPine','spruceTree','crookedTree','cedarTree','alpineTree','rock','rock','stump','bush','pebble','sled','mogul','smallHill','mushroom','skier','boarder'];
       // Jittered scatter with passable physical gaps, rather than a reserved winding corridor.
@@ -474,10 +481,10 @@ window.FROSTLINE_READY = (async () => {
           for(const yy of [middle-gap,middle+gap])entity('cemeteryPillar',inner(yy),yy,{...own,width:24,r:10});
         }
       },130*scale);
-      if(from===e.startY)for(const side of [-1,1]){
-        const y=e.startY+100*scale,center=encounterPathX(e.paths[0],y);
-        fence(center+side*(e.half+20),y,center+side*(e.half+450*scale),y);
-        entity('cemeteryPillar',center+side*(e.half+20),y,{...own,width:36,r:14,entry:true});
+      for(const exit of [false,true])if(exit?to===e.endY:from===e.startY)for(const side of [-1,1]){
+        const y=exit?e.endY-100*scale:e.startY+100*scale,center=encounterPathX(e.paths[0],y);
+        fence(center+side*(e.half+20),y,(e.centerX??root.x)+side*e.band,y);
+        entity('cemeteryPillar',center+side*(e.half+20),y,{...own,width:36,r:14,entry:!exit});
       }
       const count=Math.round(mix(...R.zombies.count,e.difficulty));
       if(count>0&&length>320*scale)rows((length-320*scale)/Math.max(1,count),(y,row)=>{if(row>=count||y<e.startY+200*scale||y>e.endY-120*scale)return;let x=encounterPathX(e.paths[0],y)+range(-.9,.9)*e.half;
@@ -486,7 +493,7 @@ window.FROSTLINE_READY = (async () => {
       },200*scale);
     }
   }
-  function populateForestBoundary(e,section,from,to){
+  function populateForestBoundary(e,section,from,to,{banks=true}={}){
     const own={arcadeRun:section,encounter:e,forestBoundary:true},root={x:e.centerX??section.endlessRoot.x},seen=new Set(),radius=23,spacing=60;
     const tree=(x,y,kind)=>{
       const key=Math.round(x/10)+','+Math.round(y/10);if(seen.has(key)||encounterClearance(e,x,y,radius,radius)<14)return;
@@ -498,7 +505,7 @@ window.FROSTLINE_READY = (async () => {
       return {x:(side<0?Math.min(...xs):Math.max(...xs))+side*(e.half+radius+14),y};
     };
     const step=50,first=Math.max(0,Math.floor((from-e.startY)/step)),last=Math.ceil((to-e.startY)/step);
-    for(let row=first;row<last;row++)for(const path of e.paths)for(const side of [-1,1]){
+    if(banks)for(let row=first;row<last;row++)for(const path of e.paths)for(const side of [-1,1]){
       const a=edge(path,e.startY+row*step,side),b=edge(path,Math.min(e.endY,e.startY+(row+1)*step),side);
       const count=Math.max(1,Math.ceil(Math.hypot(b.x-a.x,b.y-a.y)/spacing));
       for(let i=0;i<count;i++){const y=mix(a.y,b.y,i/count);if(y>=from&&y<to)tree(mix(a.x,b.x,i/count),y,'bank');}
@@ -532,6 +539,8 @@ window.FROSTLINE_READY = (async () => {
   function endlessPursuitRoute(c,target){
     if(!state.endless||!activeCourseOwner(c)||target.y<c.y)return null;
     const e=endlessEncounterAt(c.y+80*state.endless.speedScale);if(!e||['beginner','crowd','quiet','lake','forest','scramble'].includes(e.kind)||target.y<e.startY)return null;
+    // The expanded side terrain is playable too; do not pull its hunters back to the central lane.
+    if(encounterClearance(e,target.x,clamp(target.y,e.startY,e.endY))>180*e.scale){c.encounterRoute=null;return null;}
     if(c.encounterRoute?.encounter!==e){
       const y=clamp(c.y,e.startY,e.endY),goal=Math.min(e.endY,c.y+600*e.scale);
       const costs=e.paths.map(path=>Math.abs(encounterPathX(path,y)-c.x)+.35*Math.abs(encounterPathX(path,goal)-target.x));
@@ -1564,7 +1573,7 @@ window.FROSTLINE_READY = (async () => {
   }
   function lakeGeometry(o){
     if(o.lake)return o.lake;
-    if(o.transitionLake){const points=Array.from({length:64},(_,i)=>[Math.cos(i/64*TAU)*o.rx,Math.sin(i/64*TAU)*o.ry]);return o.lake={points,holes:[],radius:Math.max(o.rx,o.ry)};}
+    if(o.transitionLake){const rounded=v=>Math.sign(v)*Math.abs(v)**.35,points=Array.from({length:64},(_,i)=>[rounded(Math.cos(i/64*TAU))*o.rx,rounded(Math.sin(i/64*TAU))*o.ry]);return o.lake={points,holes:[],radius:Math.max(o.rx,o.ry)};}
     if(o.gateIce){const x=o.rx,y=o.ry;return o.lake={points:[[-x,-y*.5],[-x*.75,-y],[x*.65,-y],[x,-y*.55],[x,y*.6],[x*.7,y],[-x*.7,y],[-x,y*.5]],holes:[],radius:Math.ceil(Math.max(x,y)*1.15/4)*4};}
     const points=[],phase=o.phase||0,shape=Math.floor((o.id||0)*4),rotation=Math.sin(phase)*.32;
     for(let i=0;i<64;i++){
@@ -1694,10 +1703,57 @@ window.FROSTLINE_READY = (async () => {
     const roads=state.roads.filter(r=>{const b=r.bounds||roadBBox(r);return x>b.left&&x<b.right&&y>b.top&&y<b.bottom&&roadDistance(r,x,y)<r.width/2;});
     return !roads.some(r=>r.surface==='snow')&&roads.some(r=>r.surface!=='snow');
   }
+  function populateEndlessFlanks(chunk,key){
+    if(!state.endless)return;
+    const size=S.world.chunkSize,x0=chunk.tx*size,x1=x0+size,y0=chunk.ty*size,y1=y0+size,root=state.course;
+    for(const e of state.endless.encounters){
+      const center=e.centerX??root.x;
+      if(!WIDE_REGIONS.has(e.kind)||['crowd','beginner'].includes(e.kind)||y1<=e.startY||y0>=e.endY||x1<center-e.band||x0>center+e.band||chunk.themes?.has(e.id))continue;
+      (chunk.themes??=new Set()).add(e.id);
+      let flankSeed=(Math.imul(e.id,73856093)^Math.imul(chunk.tx,19349663)^Math.imul(chunk.ty,83492791))>>>0;
+      const random=()=>{flankSeed=(Math.imul(flankSeed,1664525)+1013904223)>>>0;return flankSeed/4294967296;},range=(a,b)=>mix(a,b,random()),pick=items=>items[Math.floor(random()*items.length)];
+      const own={arcadeRun:root,encounter:e,worldChunk:key,regionFlank:true},scale=e.scale;
+      const clear=(x,y,hw=0,hh=0)=>{
+        if(y-hh<e.startY+220*scale||y+hh>e.endY-220*scale||Math.abs(x-center)+hw>e.band-60)return false;
+        if(e.kind==='town')return Math.abs(x-center)-hw>e.coreBand+60;
+        if(e.kind==='trees')return encounterClearance(e,x,y,hw,hh)>mix(140,210,e.difficulty)*scale+80;
+        if(e.kind==='cemetery')return Math.abs(x-encounterPathX(e.paths[0],y))-hw>e.half+390*scale;
+        return Math.abs(x-center)-hw>(e.kind==='denseForest'?e.coreBand*.65:e.half)+90;
+      };
+      const grid=(spacing,fn,rowSpacing=spacing)=>{for(let row=Math.ceil((y0-e.startY)/rowSpacing);;row++){const y=e.startY+row*rowSpacing;if(y>=y1)break;for(let col=Math.ceil((x0-center)/spacing);;col++){const x=center+col*spacing;if(x>=x1)break;fn(x,y,row,col);}}};
+      if(e.kind==='cemetery'){
+        grid(400,(x,y,row,col)=>{
+          if(!clear(x,y,175,175))return;
+          const fence=(ax,ay,bx,by)=>entity('cemeteryFence',(ax+bx)/2,(ay+by)/2,{...own,r:5,width:Math.abs(bx-ax)+10,depth:Math.abs(by-ay)+10,ax,ay,bx,by});
+          entity('cemeteryPlot',x,y,{...own,r:0,width:310,depth:300,side:Math.sign(col),plotStart:y-150,plotEnd:y+150});
+          fence(x-155,y-150,x+155,y-150);fence(x-155,y-150,x-155,y+150);fence(x+155,y-150,x+155,y+150);
+          fence(x-155,y+150,x-60,y+150);fence(x+60,y+150,x+155,y+150);
+          if((row+col)%4===0)entity('mausoleum',x,y+40,{...own,width:80,r:30,style:Math.abs(row)%3});
+          else for(let i=0;i<3;i++)entity('grave',x+(i-1)*85,y-35+((row+i)%2)*65,{...own,width:32,r:10,style:Math.abs(row+col+i)%6});
+          const flankSpawnId=e.id+':'+row+':'+col;
+          if(mix(...S.endless.regions.zombies.count,e.difficulty)>0&&(row+col)%3===0&&!state.objects.some(o=>o.flankSpawnId===flankSpawnId&&!o.dead&&!o.eaten))entity('zombie',x,y+200,{...own,flankSpawnId,zombieStyle:Math.abs(row+col)%5,width:34,r:10,zombieBaseKmh:mix(...S.endless.regions.zombies.speedKmh,e.difficulty),awake:false,angle:Math.PI/2});
+        });
+      }else if(e.kind==='town'){
+        grid(310,(x,y,row,col)=>{
+          const xx=x+range(-75,75),yy=y+range(-24,24);if(!clear(xx,yy,115,110))return;
+          const width=range(...S.village.houseWidth),town=e.town;
+          entity((row+col)%3?'lodge':'rental',xx,yy,{...own,town,width,r:width*S.village.houseFootWidthRatio,houseStyle:Math.abs(col)%4,buildingKind:(row+col)%4?'chalet':'inn',cozyStyle:Math.abs(row)%3});
+          if((row+col)%3===0)entity('snowman',xx+95,yy+60,{...own,town,width:28,r:9});
+        },S.village.rowSpacing);
+      }else{
+        const scatter=e.kind==='scramble',dense=e.kind==='denseForest',density=Math.sqrt(mix(...S.endless.regions[dense?'denseForestDensity':'scrambleDensity'],e.difficulty)),spacing=(scatter?125:dense?115:140)/density;
+        grid(spacing,(x,y,row,col)=>{
+          const xx=x+range(-18,18),yy=y+range(-18,18);if(!clear(xx,yy,35,35))return;
+          if(scatter){const key=pick(['pine','fir','smallPine','spruceTree','rock','stump','bush','sled','mogul','smallHill']);const o=createArcadeItem(key,xx,yy,root);Object.assign(o,own);}
+          else entity((row+col)%3?'pine':'fir',xx,yy,{...own,width:range(64,86),r:20});
+        });
+      }
+    }
+  }
   function ensureWorld(initial=false){
     const b=viewBounds(),size=S.world.chunkSize;
     for(let tx=Math.floor((b.left-S.world.chunkMarginX)/size);tx<=Math.floor((b.right+S.world.chunkMarginX)/size);tx++)for(let ty=Math.floor((b.top-S.world.chunkMarginAbove)/size);ty<=Math.floor((b.bottom+S.world.chunkMarginBelow)/size);ty++){
-      const key=tx+','+ty;if(state.chunks.has(key))continue;state.chunks.set(key,{tx,ty});
+      const key=tx+','+ty;if(state.chunks.has(key)){populateEndlessFlanks(state.chunks.get(key),key);continue;}state.chunks.set(key,{tx,ty});
       for(let i=0;i<(ty<0?S.world.uphillCount:S.world.ambientCount);i++){
         const x=tx*size+range(65,size-65),y=ty*size+range(80,size-60);
         // Arcade owns all in-course scenery; ambient chunks only populate the surrounding forest.
@@ -1715,9 +1771,14 @@ window.FROSTLINE_READY = (async () => {
         const widths={pine:range(60,90),fir:range(52,74),rock:44,pebble:28,skier:42,personGreen:30,rabbit:20,fox:39,wolf:43,bear:60,cat:25,lurker:55,bush:35};
         entity(type,x,y,{worldChunk:key,fast,width:widths[type],r:['lurker','bear'].includes(type)?18:type==='rabbit'?5:12,animal:['rabbit','fox','wolf','bear','cat'].includes(type),humanVisitor:humanArea(x,y)||random()<S.world.animalVisitorChance,ai:'idle',nextAI:clock+range(1,5),climb:0,vy:type==='skier'?(fast?range(...S.skiers.fastSpeed):range(...S.skiers.slowSpeed)):0});
       }
+      populateEndlessFlanks(state.chunks.get(key),key);
       if(random()<S.world.lakeChance){const x=(tx+.5)*size,y=(ty+.5)*size;if(!endlessEncounterAt(y)&&!insideTown(x,y)&&!safeApproach(x,y)&&!classicArea(x,y,360)&&!state.safeTrails.some(r=>r.arcade&&y>r.startY-360&&y<r.endY+360&&Math.abs(x-centerAt(y,r))<S.world.safeCourseHalfWidth+360)&&y>S.world.lakeMinY&&!state.objects.some(o=>o.type==='gate'&&Math.hypot(o.x-x,o.y-y)<260||o.collectible&&Math.hypot(o.x-x,o.y-y)<360))entity('ice',x,y,{worldChunk:key,rx:range(...S.world.lakeRadiusX),ry:range(...S.world.lakeRadiusY),width:330,r:0});}
     }
     for(const [key,t] of state.chunks)if(Math.abs(t.ty*size-state.p.y) >S.world.chunkRetention||Math.abs(t.tx*size-state.p.x) >S.world.chunkRetention){state.chunks.delete(key);state.objects=state.objects.filter(o=>o.worldChunk!==key);}
+    // Only keep streamed flank props near the generation window; authored routes stay intact.
+    const expired=new Set();
+    for(const [key,chunk] of state.chunks)if(chunk.themes?.size&&(chunk.tx*size+size<b.left-S.world.chunkMarginX-size||chunk.tx*size>b.right+S.world.chunkMarginX+size||chunk.ty*size+size<b.top-S.world.chunkMarginAbove-size||chunk.ty*size>b.bottom+S.world.chunkMarginBelow+size)){expired.add(key);chunk.themes.clear();}
+    if(expired.size)state.objects=state.objects.filter(o=>!o.regionFlank||!o.worldChunk||!expired.has(o.worldChunk));
     removeInactiveEnemies();
   }
 
@@ -2544,7 +2605,7 @@ window.FROSTLINE_READY = (async () => {
     for(const o of state.objects){
       if(o.type!=='zombie'||o.dead||o.eaten)continue;
       const scale=endlessSpeedScale(o),distance=Math.hypot(o.x-p.x,o.y-p.y);
-      if(!o.awake&&distance<Math.max(Z.noticeMetres*PX_PER_M*scale,p.speed*1.1)){o.awake=true;o.wakeAt=clock;}
+      if(!o.awake&&distance<Math.max(Z.noticeMetres*PX_PER_M*scale,p.speed*1.1)){o.awake=true;o.wakeAt=clock;delete o.worldChunk;}
       if(!o.awake){o.motionVx=o.motionVy=o.travelSpeed=0;o.travelStamp=clock;continue;}
       const near=distance<Math.max(H/ZOOM+600,p.speed*2+600);
       o.zombieTime=(o.zombieTime||0)+dt;
@@ -3470,7 +3531,7 @@ window.FROSTLINE_READY = (async () => {
     if(state.zone.kind==='start'){
       const s=screen(0,-128);text('S K I  I N T O  T R O U B L E',s.x,s.y,12,C.teal);text('CHOOSE A TRAIL. OR KEEP GOING FOREVER.',s.x,s.y+21,8,C.muted);
     }
-    const layers=state.objects.filter(o=>(o.type!=='ramp'&&o.type!=='mogul'&&o.type!=='smallHill'&&o.type!=='largeHill'&&o.type!=='logBump'&&o.type!=='rugged')&&o.type!=='cemeteryPlot'&&o.y+(o.type==='cemeteryFence'?o.depth/2:0)>state.cam.y-200&&o.y-(o.type==='cemeteryFence'?o.depth/2:0)<state.cam.y+H/ZOOM+200).map(o=>({y:o.y,draw:()=>drawObject(o)}));
+    const layers=state.objects.filter(o=>Math.abs(o.x-state.cam.x)<W/(2*ZOOM)+Math.max(460,(o.width||0)/2+60,o.treeLength||0)&&(o.type!=='ramp'&&o.type!=='mogul'&&o.type!=='smallHill'&&o.type!=='largeHill'&&o.type!=='logBump'&&o.type!=='rugged')&&o.type!=='cemeteryPlot'&&o.y+(o.type==='cemeteryFence'?o.depth/2:0)>state.cam.y-200&&o.y-(o.type==='cemeteryFence'?o.depth/2:0)<state.cam.y+H/ZOOM+200).map(o=>({y:o.y,draw:()=>drawObject(o)}));
     layers.push({y:state.p.y,draw:drawPlayer});for(const c of state.chasers)layers.push({y:c.y,draw:()=>drawChaser(c)});
     layers.sort((a,b)=>a.y-b.y);for(const layer of layers)layer.draw();
     for(const q of state.particles){const s=screen(q.x,q.y);ctx.globalAlpha=q.totalLife?clamp(q.life/q.totalLife,0,1):1;box(s.x,s.y,q.size||3,q.size||3,q.color);}ctx.globalAlpha=1;
