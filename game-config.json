@@ -158,10 +158,12 @@
         26
       ],
       "cemeteryOpeningMetres": [
-        9,
-        16
+        5.4,
+        7.4
       ],
       "zombies": {
+        "wandererCount": [12, 26],
+        "wandererSpeedKmh": [2, 3.5],
         "count": [
           40,
           95
@@ -200,6 +202,7 @@
       ],
       "minimumWidthMetres": 600,
       "cemetery": {
+        "chokeWidthMetres": [3.8, 5.2],
         "ySpeedScale": 0.4,
         "blendMetres": 25,
         "crossingMetres": [280, 360],
