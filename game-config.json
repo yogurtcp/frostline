@@ -170,7 +170,14 @@
           7,
           11
         ],
-        "noticeMetres": 65
+        "noticeMetres": 65,
+        "ambush": {
+          "rangeMetres": 24,
+          "windupSeconds": 0.6,
+          "leapSeconds": 0.65,
+          "maxLeapMetres": 50,
+          "heightWorld": 60
+        }
       },
       "crowd": {
         "firstMetres": 1200,
@@ -191,7 +198,13 @@
         1,
         1.35
       ],
-      "minimumWidthMetres": 600
+      "minimumWidthMetres": 600,
+      "cemetery": {
+        "ySpeedScale": 0.4,
+        "blendMetres": 25,
+        "crossingMetres": [280, 360],
+        "rows": [6, 7]
+      }
     },
     "wildlife": {
       "firstMetres": 650,

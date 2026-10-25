@@ -9231,6 +9231,32 @@
                 "noticeMetres"
               ],
               "properties": {
+                "ambush": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "rangeMetres": {
+                      "type": "number",
+                      "exclusiveMinimum": 0
+                    },
+                    "windupSeconds": {
+                      "type": "number",
+                      "exclusiveMinimum": 0
+                    },
+                    "leapSeconds": {
+                      "type": "number",
+                      "exclusiveMinimum": 0
+                    },
+                    "maxLeapMetres": {
+                      "type": "number",
+                      "exclusiveMinimum": 0
+                    },
+                    "heightWorld": {
+                      "type": "number",
+                      "exclusiveMinimum": 0
+                    }
+                  }
+                },
                 "count": {
                   "type": "array",
                   "minItems": 2,
@@ -9290,6 +9316,41 @@
                     "type": "integer",
                     "minimum": 0,
                     "maximum": 600
+                  }
+                }
+              }
+            },
+            "cemetery": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "ySpeedScale": {
+                  "type": "number",
+                  "exclusiveMinimum": 0,
+                  "maximum": 1
+                },
+                "blendMetres": {
+                  "type": "number",
+                  "minimum": 0
+                },
+                "crossingMetres": {
+                  "type": "array",
+                  "minItems": 2,
+                  "maxItems": 2,
+                  "items": {
+                    "type": "number",
+                    "minimum": 100,
+                    "maximum": 500
+                  }
+                },
+                "rows": {
+                  "type": "array",
+                  "minItems": 2,
+                  "maxItems": 2,
+                  "items": {
+                    "type": "integer",
+                    "minimum": 3,
+                    "maximum": 12
                   }
                 }
               }
