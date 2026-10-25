@@ -5157,10 +5157,12 @@
           "minimum": 0
         },
         "knockoutSpeedRetention": {
+          "description": "Legacy compatibility setting. A successful physical monster ram now causes a normal player crash, stopping the skier.",
           "type": "number",
           "minimum": 0
         },
         "knockoutShieldSeconds": {
+          "description": "Legacy compatibility setting. Physical monster rams no longer grant immunity; they cause the normal player fall.",
           "type": "number",
           "minimum": 0,
           "exclusiveMinimum": 0

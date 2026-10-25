@@ -3,7 +3,7 @@ window.FROSTLINE_READY = (async () => {
   'use strict';
   if(window.FROSTLINE_BOOT)await window.FROSTLINE_BOOT;
   const S = await window.loadFrostlineConfig();
-  const canvas = document.getElementById('slope');
+  const canvas = document.getElementById('slope'), sceneContinue = document.getElementById('scene-continue');
   const ctx = canvas.getContext('2d', { alpha: false });
   const W = S.render.width, PX_PER_M = S.world.unitsPerMetre, ZOOM = S.render.zoom, TAU = Math.PI * 2;
   let H = S.render.defaultHeight, clock = 0, lastTime = 0, accumulator = 0, audio = null;
@@ -1084,7 +1084,7 @@ window.FROSTLINE_READY = (async () => {
     if(state.arcade){recordArcade(state.arcade.endReason||'RUN ENDED');state.arcade=null;}
     stages.arcade={...S.courses.slalom,fee:0,name:'Arcade',sub:S.arcade.stages.length+' STAGES - ONE RUN',color:S.arcade.yetiColors.elite};
     if(!lift)state.patrolPenalty=null;else if(state.patrolPenalty)state.patrolPenalty.nextWave=0;
-    state.sceneCard=null;state.cocoaEffect=null;state.deathYeti=null;state.p=newPlayer();state.results=null;state.course=null;state.zone={kind:'start',origin:0};state.objects=[];state.trails=[];state.snowballTrails=[];state.chasers=[];state.particles=[];state.speech=[];state.messages=[];
+    state.sceneCard=null;sceneContinue.hidden=true;state.cocoaEffect=null;state.deathYeti=null;state.p=newPlayer();state.results=null;state.course=null;state.zone={kind:'start',origin:0};state.objects=[];state.trails=[];state.snowballTrails=[];state.chasers=[];state.particles=[];state.speech=[];state.messages=[];
     state.roads=[];state.villages=[];state.safeTrails=[];state.liftRoutes=[];state.chunks.clear();state.plannedTown=null;state.generated=0;state.lastTrack=null;state.started=false;state.activeTime=0;state.keyboardStep=0;state.control='keyboard';state.input={left:false,right:false,up:false,down:false,pointer:null,jump:false};state.deathTimer=state.liftTimer=0;state.elevated=0;state.nextFastSkier=clock+2;
     state.cam={x:0,y:-H*S.render.playerScreenY/ZOOM};startMeadow();state.liftRoutes.push({x0:S.lift.x,x1:S.lift.x,y0:S.lift.startY,y1:Infinity});ensureWorld(true);
     if(S.endless.autoStart){autoStartEndless();return;}
@@ -1727,10 +1727,19 @@ window.FROSTLINE_READY = (async () => {
   }
   function showSceneCard(key,title,detail,after='resume'){
     if(state.sceneCard)return false;
-    state.sceneCard={key,title,detail,after,remaining:5,total:5};
+    state.sceneCard={key,title,detail,after};
+    sceneContinue.hidden=false;sceneContinue.focus({preventScroll:true});
     state.input={left:false,right:false,up:false,down:false,pointer:null,jump:false};
     return true;
   }
+  function dismissSceneCard(){
+    const card=state.sceneCard;if(!card)return;
+    state.sceneCard=null;sceneContinue.hidden=true;
+    state.input={left:false,right:false,up:false,down:false,pointer:null,jump:false};
+    if(card.after==='summit')resetSummit();
+    canvas.focus({preventScroll:true});render();
+  }
+  sceneContinue.addEventListener('click',dismissSceneCard);
   function deathScene(cause,attacker){
     if(cause!=='YETI')return {key:'death-'+cause.toLowerCase(),title:{WOLF:'PACKED LUNCH',BEAR:'BEAR-LY A SNACK',ZOMBIE:'DEAD TIRED'}[cause],detail:{WOLF:'The pack insists you were complimentary.',BEAR:'The beanie was apparently the cherry on top.',ZOMBIE:'They came for the boots. Stayed for lunch.'}[cause]};
     const hunter=attacker||state.chasers.find(c=>!c.dead&&['fast','slow'].includes(c.kind))||{},look=yetiAppearance(hunter);
@@ -1806,11 +1815,35 @@ window.FROSTLINE_READY = (async () => {
     // Use the real impact, not perfect centre aim or the speed after another collision.
     return toward*S.physics.hudKmhPerSpeed>S.physics.minimumCollisionKmh&&closing*S.physics.hudKmhPerSpeed>S.physics.minimumCollisionKmh;
   }
-  function knockOut(o,kind){
-    const A=S.wildlife;
-    if(!['bear','fast','slow','lurker','zombie'].includes(kind)||!canRamMonster(o,kind))return false;
-    o.dead=true;o.r=0;o.fadeUntil=clock+A.predatorFadeSeconds;o.running=false;state.p.speed*=A.knockoutSpeedRetention;state.p.shield=A.knockoutShieldSeconds;
-    burst(o.x,o.y,C.gold,12);say(kind==='bear'?'BEAR DOWN!':kind==='zombie'?'ZOMBIE DOWN!':'YETI DOWN!',o);beep(190,.12,'triangle');return true;
+  function enemyKind(o){return o.kind||o.type;}
+  function resolveEnemyContact(o,{passive=o.waiting||o.wakeUntil>clock||o.stunnedUntil>clock||o.type==='lurker'||o.type==='bear'||o.type==='wolf'&&!(o.wolfAwake||o.alertUntil>clock||o.linkedChase),ramOnly=false}={}){
+    const kind=enemyKind(o),monster=['wolf','bear','lurker','zombie','fast','slow'].includes(kind),p=state.p,A=S.wildlife;
+    if(!monster||state.deathTimer||!monsterContact(o))return false;
+    if(canRamMonster(o,kind)){
+      // A physical ram defeats the creature AND causes the normal skier crash.
+      // This is not a sword/shield save: neither inventory nor immunity cancels the fall.
+      o.dead=true;o.animal=false;o.running=false;o.r=0;o.vx=o.vy=o.roam=0;
+      o.motionVx=o.motionVy=o.travelSpeed=0;o.travelStamp=clock;
+      o.fadeUntil=clock+(kind==='wolf'?A.wolfFadeSeconds:A.predatorFadeSeconds);
+      crash(o,S.physics.crashSeconds,true);
+      burst(o.x,o.y,kind==='wolf'?C.ice:C.gold,kind==='wolf'?18:12);
+      say(kind==='wolf'?'WOLF DOWN!':kind==='bear'?'BEAR DOWN!':kind==='zombie'?'ZOMBIE DOWN!':'YETI DOWN!',o);
+      if(kind==='wolf')thankWolfRescue(o);
+      return true;
+    }
+    if(ramOnly)return false;
+    if(p.shield>0)return true;
+    if(passive){
+      if(kind==='wolf'){o.wolfAwake=true;o.angle=Math.atan2(o.y-p.y,o.x-p.x);o.nextAI=clock+2;o.running=true;}
+      if(!p.awaitingInput&&!p.slowContacts.has(o)&&!tooSlowForObstacle(o))crash(o);
+      return true;
+    }
+    if(useArcadeSword(o))return true;
+    if(state.course&&!p.awaitingInput)state.course.hits++;
+    if(kind==='zombie')o.feedingUntil=clock+3;
+    burst(p.x,p.y,C.ice,12);
+    die(kind==='wolf'?'WOLF':kind==='bear'?'BEAR':kind==='zombie'?'ZOMBIE':'YETI',o);
+    return true;
   }
   function objectVelocity(o){
     if(o.type==='rollingSnowball'&&o.rollState==='rolling')return [o.vx,o.vy];
@@ -1837,7 +1870,7 @@ window.FROSTLINE_READY = (async () => {
   function hit(o) {
     if(o.mischief||o.type==='snowman'){if(!state.p.fall&&state.p.air<=0)touchVillageProp(o);return;}
     if(o.collectible){collectMushroom(o);return;}
-    const p=state.p;if(o.dead||o.stunnedUntil>clock)return;
+    const p=state.p;if(o.dead||o.stunnedUntil>clock&&!['wolf','bear','lurker','zombie'].includes(o.type))return;
     if(p.air>0&&['wideLog','fallingTree','rollingSnowball'].includes(o.type))return;
     if(o.type==='logBump'){
       if(p.awaitingInput||p.fall||p.air>0||p.vy<=S.physics.walkingBumpLimit)return;
@@ -1865,10 +1898,8 @@ window.FROSTLINE_READY = (async () => {
     }
     // Remember slow overlaps during recovery too, until the player moves fully clear.
     if(tooSlowForObstacle(o))p.slowContacts.add(o);
-    if(o.type==='wolf'&&killWolf(o))return;
-    if(['bear','lurker','zombie'].includes(o.type)&&knockOut(o,o.type))return;
+    if(['wolf','bear','lurker','zombie'].includes(o.type)){resolveEnemyContact(o);return;}
     if(p.awaitingInput||p.shield>0||o===p.crashObstacle)return;
-    if(o.type==='zombie'){if(p.air>0)return;if(useArcadeSword(o))return;die('ZOMBIE',o);return;}
     if(o.touched&&['sled','bush','cat'].includes(o.type))return;
     const uphill=p.vy<0,fast=p.speed>S.physics.fastImpactSpeed;
     if(o.type==='cat'){
@@ -1878,7 +1909,6 @@ window.FROSTLINE_READY = (async () => {
       return;
     }
     if(['rabbit','fox'].includes(o.type)){greetSmallAnimal(o,true);return;}
-    if(o.type==='wolf'){o.wolfAwake=true;o.angle=Math.atan2(o.y-p.y,o.x-p.x);o.nextAI=clock+2;o.running=true;if(!tooSlowForObstacle(o))crash(o);return;}
 
     // Accelerating inside an existing slow contact must not cause another fall.
     if(p.slowContacts.has(o))return;
@@ -1901,8 +1931,6 @@ window.FROSTLINE_READY = (async () => {
     }
     if(o.type==='sled'&&fast){o.vx=90*Math.sign(p.vx||1);o.vy=240;p.speed*=S.physics.sledSpeedRetention;say('Express delivery!',o);return;}
     if(o.type==='bush'){o.flatten=true;p.speed*=S.physics.bushSpeedRetention;burst(o.x,o.y,C.gold,7);return;}
-    if(o.type==='lurker'){if(!tooSlowForObstacle(o))crash(o);return;}
-    if(o.type==='bear'){if(!tooSlowForObstacle(o))crash(o);return;}
     if(['personRed','personGreen','personYellow'].includes(o.type))say(uphill?'BACKWARDS? Seriously?':pick(S.dialogue.personBumps),o);
     else if(o.type==='dog'){const dog={kind:'dog',x:o.x,y:o.y,speed:S.chasers.dogContactSpeed,phase:0,expires:p.y+S.chasers.dogContactChaseDistance,talkAt:clock+7};state.chasers.push(dog);o.eaten=true;o.r=0;say('WOOF. WOOF. WOOF.',dog);if(p.speed<=S.physics.walkingBumpLimit)return;}
     else if(o.type==='skier'||o.type==='boarder'){say(pick(o.fast?S.dialogue.fastBumps:S.dialogue.skierBumps),o);o.speakAt=clock+S.skiers.bumpSpeechCooldownSeconds;}
@@ -2114,7 +2142,7 @@ window.FROSTLINE_READY = (async () => {
   }
   function step(dt) {
     if(!ready)return;
-    if(state.sceneCard){const card=state.sceneCard;card.remaining=Math.max(0,card.remaining-dt);if(card.remaining<=1e-8){state.sceneCard=null;if(card.after==='summit')resetSummit();}return;}
+    if(state.sceneCard)return;
     clock+=dt;
     if(state.deathTimer>0){state.deathTimer-=dt;if(state.deathTimer<=0)resetSummit();return;}
     if(state.liftTimer>0){state.liftTimer-=dt;state.p.y-=S.lift.rideSpeed*dt;state.cam.y=ease(state.cam.y,state.p.y-H*S.render.playerScreenY/ZOOM,S.render.cameraYFollow,dt);if(state.liftTimer<=0)resetSummit(true);return;}
@@ -2134,6 +2162,7 @@ window.FROSTLINE_READY = (async () => {
       }
       const creature=o.type==='wolf'||o.type==='bear'||o.type==='lurker'||o.type==='zombie';
       if(creature&&monsterContact(o))hit(o);
+      if(state.sceneCard)return;
       if(o.dead)continue;
       if(state.started&&!(o.stunnedUntil>clock)&&!o.retiring&&o.type==='lurker'&&(courseCreature(o,p.x,p.y)||!humanArea(o.x,o.y)&&!humanArea(p.x,p.y))&&(Math.hypot(o.x-p.x,o.y-p.y)<yetiWakeDistance(o)||o.shoreLake&&state.objects.some(q=>['skier','boarder'].includes(q.type)&&!q.eaten&&!q.dead&&q.r>0&&Math.hypot(q.x-o.x,q.y-o.y)<S.wildlife.yetiWakeDistance*endlessSpeedScale(o)&&!patchAt(q.x,q.y)))){o.type='awakened';o.r=0;state.chasers.push({kind:o.arcadeTier==='slow'?'slow':'fast',arcadeTier:o.arcadeTier,chaseRun:o.arcadeRun,shoreLake:o.shoreLake,endlessBaseKmh:o.endlessBaseKmh,x:o.x,y:o.y,speed:o.arcadeRun?o.yetiSpeedKmh/S.physics.hudKmhPerSpeed:topSpeed()*S.wildlife.yetiWildSpeedRatio,wakeUntil:clock+yetiWakeDelay(o),phase:o.phase,expires:p.y+S.wildlife.yetiWildChaseDistance,talkAt:clock+6});say('Oh. Breakfast.',o);}
       if(o.type==='gate'&&o.run===state.course&&!o.checked&&previous.y<o.y&&p.y>=o.y)crossCourseGate(o,previous,p);
@@ -2363,18 +2392,15 @@ window.FROSTLINE_READY = (async () => {
     }
     const m=motion(heading);o.motionVx=m.vx;o.motionVy=m.vy;o.angle=chasing?Math.atan2(m.vy,m.vx):heading;o.x+=m.vx*dt;o.y+=m.vy*dt;o.running=m.speed>60;o.travelSpeed=m.speed;o.travelStamp=clock;
   }
-  function killWolf(o){
-    const p=state.p,A=S.wildlife;
-    if(!canRamMonster(o,'wolf'))return false;
-    o.dead=true;o.animal=false;o.r=0;o.fadeUntil=clock+A.wolfFadeSeconds;p.speed*=A.knockoutSpeedRetention;p.shield=A.knockoutShieldSeconds;
-    burst(o.x,o.y,C.ice,18);beep(160,.12,'triangle');
+  function thankWolfRescue(o){
+    const A=S.wildlife;
     for(const skier of state.objects){
       if(!['skier','boarder'].includes(skier.type)||Math.hypot(skier.x-o.x,skier.y-o.y)>A.rescueThanksRadius)continue;
       if(skier.threat===o||o.targetSkier===skier||skier.fearUntil>clock&&skier.threat?.type==='wolf'&&skier.threat.packId===o.packId){
         if(clock>=(skier.thanksAt||0)){say(pick(S.dialogue.rescued),skier,3);skier.thanksAt=clock+A.rescueThanksCooldown;skier.speakAt=clock+A.npcSpeechCooldown;}
         if(skier.threat===o){skier.threat=null;skier.fearUntil=0;}
       }
-    }return true;
+    }
   }
   function npcPredatorThreats(){
     const threats=state.objects.filter(o=>(o.type==='wolf'||o.type==='bear'||o.type==='zombie'&&o.awake)&&!o.eaten&&!o.dead&&!o.retiring&&o.r>0&&!(o.stunnedUntil>clock)&&(!o.penaltyGate||o.wolfAwake));
@@ -2504,10 +2530,7 @@ window.FROSTLINE_READY = (async () => {
       const elapsed=o.zombieTime;o.zombieTime=0;
       const target=endlessPursuitTarget(o,p),angle=Math.atan2(target.y-o.y,target.x-o.x),speed=(o.zombieBaseKmh??Z.speedKmh[0])*scale/S.physics.hudKmhPerSpeed;
       travel(o,angle,speed*(.86+.14*Math.sin(clock*2+o.phase)),elapsed,false,true,true,true,target);
-      if(monsterContact(o)){
-        if(knockOut(o,'zombie'))continue;
-        if(p.air<=0&&p.shield<=0){if(useArcadeSword(o))continue;if(state.course&&!p.awaitingInput)state.course.hits++;o.feedingUntil=clock+3;die('ZOMBIE',o);return;}
-      }
+      resolveEnemyContact(o);if(state.deathTimer)return;
     }
   }
   function updateWildlife(dt){
@@ -2519,7 +2542,7 @@ window.FROSTLINE_READY = (async () => {
       const linkedWolf=o.type==='wolf'&&activeCourseOwner(o)&&(o.linkedChase||o.wolfAwake||o.alertUntil>clock);
       if(linkedWolf)o.linkedChase=true;
       if(o.eaten||o.dead||o.stunnedUntil>clock||!o.animal||o.penaltyGate&&!o.wolfAwake||!linkedWolf&&Math.hypot(o.x-p.x,o.y-p.y)>A.activeRadius)continue;
-      if(o.type==='bear'&&knockOut(o,'bear'))continue;
+      if(o.type==='bear'){resolveEnemyContact(o,{passive:true});if(o.dead)continue;}
       if(state.started&&o.type==='bear'&&(courseCreature(o,p.x,p.y)||!humanArea(o.x,o.y)&&!humanArea(p.x,p.y))&&Math.hypot(o.x-p.x,o.y-p.y)<endlessAnimalNotice(o,A.bearWakeDistance)){o.animal=false;o.type='awakened';o.r=0;state.chasers.push({kind:'bear',chaseRun:o.arcadeRun,x:o.x,y:o.y,speed:A.bearChaseSpeed,endlessBaseKmh:state.endless&&activeCourseOwner(o)?A.bearChaseSpeed*S.physics.hudKmhPerSpeed:undefined,phase:o.phase,expires:p.y+A.bearChaseDistance,talkAt:Infinity});continue;}
       if(['rabbit','fox'].includes(o.type)&&moveSocialAnimal(o,dt,hunters))continue;
       if(o.feedingUntil>clock){o.running=false;continue;}
@@ -2560,7 +2583,7 @@ window.FROSTLINE_READY = (async () => {
         if(leader&&leader!==o&&Math.hypot(leader.x-o.x,leader.y-o.y)>A.packFollowDistance){o.angle=Math.atan2(leader.y-o.y,leader.x-o.x);speed=A.packFollowSpeed;}
       }
       if(target){o.angle=Math.atan2(target.y-o.y,target.x-o.x);if(Math.hypot(target.x-o.x,target.y-o.y)<A.captureDistance){
-        if(target===p){if(killWolf(o))continue;if(p.shield<=0&&p.air<=0){if(useArcadeSword(o))continue;die('WOLF',o);return;}}
+        if(target===p){if(resolveEnemyContact(o)){if(state.deathTimer)return;continue;}}
         else {target.eaten=true;target.r=0;o.divert=null;o.hunting=false;o.feedingUntil=clock+A.feedingSeconds;o.nextAI=clock+A.satedSeconds;burst(target.x,target.y,C.ice,9);say('CHOMP!',o,1.2);continue;}
       }}
       if(o.type==='wolf')speed*=endlessSpeedScale(o);
@@ -2629,8 +2652,8 @@ window.FROSTLINE_READY = (async () => {
       if(pursuit)c.expires=Infinity;
       if(['fast','slow','bear'].includes(c.kind)&&humanArea(p.x,p.y)&&!courseCreature(c,p.x,p.y))continue;
       // Waking/waiting creatures still have physical bodies and can be rammed.
-      if(knockOut(c,c.kind))continue;
-      if((c.waiting||c.wakeUntil>clock)&&monsterContact(c)&&!p.awaitingInput&&p.shield<=0&&!tooSlowForObstacle(c))crash(c);
+      if(resolveEnemyContact(c,{ramOnly:true}))continue;
+      if(c.waiting||c.wakeUntil>clock||c.stunnedUntil>clock)resolveEnemyContact(c);
       if(c.waiting){
         if(!c.chaseRun.timingStarted)continue;
         c.waiting=false;c.wakeUntil=clock+(c.chaseRun.arcade.yetiWakeSeconds??S.arcade.wakeSeconds);c.talkAt=c.wakeUntil+S.chasers.slowTalkSeconds;
@@ -2662,9 +2685,10 @@ window.FROSTLINE_READY = (async () => {
       if(c.kind==='slow'&&clock>c.talkAt){say(pick(S.dialogue.politeYeti),c);c.talkAt=clock+S.chasers.slowTalkSeconds;}
       const contactDistance=Math.hypot(c.x-p.x,c.y-p.y);
       if(c.harmlessDog&&contactDistance>S.chasers.captureDistance*2)c.harmlessDog=false;
-      if(knockOut(c,c.kind))continue;
+      if(resolveEnemyContact(c,{ramOnly:true}))continue;
       const meal=lethal&&!feeding?contactPrey(c,previous):null;
       if(meal){eatChaserPrey(c,meal,previous);continue;}
+      if(lethal){resolveEnemyContact(c);if(state.deathTimer)break;continue;}
       if(monsterContact(c)&&p.shield<=0&&p.air<=0){
         // Slow dog contacts are harmless until separation; fast ones still tackle.
         if(c.kind==='dog'&&!p.awaitingInput){
@@ -2672,8 +2696,6 @@ window.FROSTLINE_READY = (async () => {
           if(c.harmlessDog)continue;
         }
         if(!lethal&&(p.awaitingInput||tooSlowToCrash(c)))continue;
-        if(['fast','slow','bear'].includes(c.kind)&&useArcadeSword(c))continue;
-        if(['fast','slow','bear'].includes(c.kind)){if(state.course&&!p.awaitingInput)state.course.hits++;burst(p.x,p.y,C.ice,12);die(c.kind==='bear'?'BEAR':'YETI',c);break;}
         crash(null,S.chasers.patrolFallSeconds,c.kind==='dog');announce(c.kind==='dog'?'AGGRESSIVELY LOVED':'A WORD FROM SKI PATROL',c.kind==='dog'?'Covered in slobber. Wallet intact.':'They are very disappointed.',C.red,3);for(const other of state.chasers)if(!other.patrolPass&&other.kind!=='bear'&&(!other.chaseRun||!activeCourseOwner(other)))other.expires=p.y-1;burst(p.x,p.y,C.ice,20);break;
       }
     }
@@ -3399,17 +3421,17 @@ window.FROSTLINE_READY = (async () => {
   }
   function drawSceneCard(){
     ctx.globalAlpha=1;
-    const card=state.sceneCard,img=images['scene:'+card.key],width=W-40,height=Math.round(width*200/320),top=Math.round((H-height-158)/2),left=20;
+    const card=state.sceneCard,img=images['scene:'+card.key],width=W-40,height=Math.round(width*200/320),caption=176,top=Math.round((H-height-caption)/2),left=20;
     box(0,0,W,H,'#18333f');
     for(let i=0;i<35;i++)box((i*137)%W,(i*197)%H,2,1,i%3?'#45606c':'#73938f');
-    box(left-5,top-5,width+10,height+168,'#0e2632');box(left-3,top-3,width+6,height+164,'#c7a474');
-    box(left,top,width,height+158,'#f3ead5');
+    box(left-5,top-5,width+10,height+caption+10,'#0e2632');box(left-3,top-3,width+6,height+caption+6,'#c7a474');
+    box(left,top,width,height+caption,'#f3ead5');
     if(img){ctx.imageSmoothingEnabled=false;ctx.drawImage(img,left,top,width,height);}else box(left,top,width,height,'#dbe5d9');
     text(card.title,W/2,top+height+25,14,C.teal);
     const words=card.detail.split(' '),lines=[''],maxChars=Math.floor((width-36)/12);for(const word of words){const i=lines.length-1;if((lines[i]+' '+word).length>maxChars)lines.push(word);else lines[i]+=(lines[i]?' ':'')+word;}
     lines.slice(0,2).forEach((line,i)=>text(line,W/2,top+height+58+i*21,14,C.ink));
-    const footer=card.after==='summit'?'BACK TO THE SUMMIT':'BACK TO THE SLOPE';text(footer+' IN '+Math.ceil(card.remaining),W/2,top+height+119,14,C.ink);
-    box(left+14,top+height+143,width-28,3,'#d3c7af');box(left+14,top+height+143,(width-28)*card.remaining/card.total,3,C.teal);
+    sceneContinue.style.top=((top+height+94)/H*100)+'%';
+    sceneContinue.textContent=card.after==='summit'?'Back to summit':'Continue';
   }
   function render() {
     if(state.sceneCard){drawSceneCard();return;}
@@ -3440,9 +3462,10 @@ window.FROSTLINE_READY = (async () => {
   canvas.addEventListener('pointerdown',e=>{e.preventDefault();if(state.input.pointer){if(e.pointerId!==state.input.pointer.id&&!state.p.awaitingInput)state.input.jump=true;return;}if(!startMoving())return;const p=pointerCoords(e);state.control='pointer';state.input.pointer={id:e.pointerId,sx:p.x,sy:p.y,...p,clientStartX:e.clientX,clientStartY:e.clientY,direction:null,presses:0};canvas.setPointerCapture(e.pointerId);});
   canvas.addEventListener('pointermove',e=>{if(state.input.pointer?.id!==e.pointerId)return;e.preventDefault();updateSwipe(e);});
   canvas.addEventListener('pointerup',e=>{if(state.input.pointer?.id!==e.pointerId)return;updateSwipe(e);releasePointer();});const cancel=e=>{if(state.input.pointer?.id===e.pointerId)releasePointer();};canvas.addEventListener('pointercancel',cancel);canvas.addEventListener('lostpointercapture',cancel);
-  window.addEventListener('keydown',e=>{if(e.target?.closest?.('button,dialog,a'))return;const key={ArrowLeft:'left',ArrowRight:'right',ArrowUp:'up',ArrowDown:'down',a:'left',d:'right',w:'up',s:'down'}[e.key];if(key){e.preventDefault();if((state.p.awaitingInput&&e.repeat)||!startMoving())return;state.input[key]=true;keyboardDirection(key,e.repeat);}if(e.code==='Space'){e.preventDefault();if((state.p.awaitingInput&&e.repeat)||!startMoving())return;state.input.jump=true;}if(e.key.toLowerCase()==='m'&&!e.repeat){state.muted=!state.muted;save();announce(state.muted?'SOUND OFF':'SOUND ON','',C.teal,1);}});
-  window.addEventListener('keyup',e=>{const key={ArrowLeft:'left',ArrowRight:'right',ArrowUp:'up',ArrowDown:'down',a:'left',d:'right',w:'up',s:'down'}[e.key];if(key)state.input[key]=false;});
-  window.addEventListener('blur',()=>{state.input.left=state.input.right=state.input.up=state.input.down=false;if(state.input.pointer)releasePointer();});
+  const sceneHeldKeys=new Set();
+  window.addEventListener('keydown',e=>{if(state.sceneCard&&!e.target?.closest?.('dialog,#install-app')){e.preventDefault();sceneHeldKeys.add(e.code);if(!e.repeat&&!['Shift','Control','Alt','Meta'].includes(e.key))dismissSceneCard();return;}if(sceneHeldKeys.has(e.code)){e.preventDefault();return;}if(e.target?.closest?.('button,dialog,a'))return;const key={ArrowLeft:'left',ArrowRight:'right',ArrowUp:'up',ArrowDown:'down',a:'left',d:'right',w:'up',s:'down'}[e.key];if(key){e.preventDefault();if((state.p.awaitingInput&&e.repeat)||!startMoving())return;state.input[key]=true;keyboardDirection(key,e.repeat);}if(e.code==='Space'){e.preventDefault();if((state.p.awaitingInput&&e.repeat)||!startMoving())return;state.input.jump=true;}if(e.key.toLowerCase()==='m'&&!e.repeat){state.muted=!state.muted;save();announce(state.muted?'SOUND OFF':'SOUND ON','',C.teal,1);}});
+  window.addEventListener('keyup',e=>{sceneHeldKeys.delete(e.code);const key={ArrowLeft:'left',ArrowRight:'right',ArrowUp:'up',ArrowDown:'down',a:'left',d:'right',w:'up',s:'down'}[e.key];if(key)state.input[key]=false;});
+  window.addEventListener('blur',()=>{sceneHeldKeys.clear();state.input.left=state.input.right=state.input.up=state.input.down=false;if(state.input.pointer)releasePointer();});
   window.addEventListener('resize',resize);
   document.addEventListener('visibilitychange',()=>{lastTime=0;accumulator=0;});
   function frame(t) {const elapsed=lastTime?Math.min(S.simulation.maxFrameSeconds,(t-lastTime)/1000):0;lastTime=t;if(!document.hidden){accumulator+=elapsed;while(accumulator>=S.simulation.stepSeconds){step(S.simulation.stepSeconds);accumulator-=S.simulation.stepSeconds;}render();}requestAnimationFrame(frame);}

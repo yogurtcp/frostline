@@ -37,4 +37,6 @@ These are suggestions, not active area types:
 - **Jump meadow:** optional chains of hills offer faster routes, while occasional gate placements reward staying grounded and choosing a line.
 - **Frozen river:** narrow snow crossings and short slippery ice shortcuts create a choice between precise steering and committing to an angle.
 
-Towns each have one cocoa shop, claimed once at its front window for one shield and a cozy five-second card. The simulation and pursuers pause during the card, then resume at the same position. Normal shields fill the current run inventory; overflow/free-play gifts enter a saved cocoa-shield reserve. Predator deaths also show five-second funny aftermath cards, with attacker-matched Yeti art, before returning to the summit.
+Towns each have one cocoa shop, claimed once at its front window for one shield and a cozy card dismissed by button/key. The simulation and pursuers pause during the card, then resume at the same position. Normal shields fill the current run inventory; overflow/free-play gifts enter a saved cocoa-shield reserve. Predator deaths also show funny aftermath cards dismissed by button/key, with attacker-matched Yeti art, before returning to the summit.
+
+All killable enemies share `resolveEnemyContact`: successful rams kill the creature **and crash the skier**, using normal stopped-motion/fall/recovery behavior with no new immunity or equipment consumption.
