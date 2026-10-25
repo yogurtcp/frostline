@@ -1748,7 +1748,7 @@ window.FROSTLINE_READY = (async () => {
   }
   function showSceneCard(key,title,detail,after='resume'){
     if(state.sceneCard)return false;
-    state.sceneCard={key,title,detail,after};window.FrostlineApp?.playing(true);
+    state.sceneCard={key,title,detail,after,minimumRemaining:3,shown:false};window.FrostlineApp?.playing(true);
     canvas.setAttribute('role','button');canvas.setAttribute('aria-label',title+'. '+detail);canvas.focus({preventScroll:true});
     state.input={left:false,right:false,up:false,down:false,pointer:null,jump:false};
     return true;
@@ -1757,7 +1757,7 @@ window.FROSTLINE_READY = (async () => {
     state.sceneCard=null;canvas.removeAttribute('role');canvas.setAttribute('aria-label',skiingLabel);
   }
   function dismissSceneCard(){
-    const card=state.sceneCard;if(!card)return;
+    const card=state.sceneCard;if(!card||card.minimumRemaining>1e-8)return;
     clearSceneCard();
     state.input={left:false,right:false,up:false,down:false,pointer:null,jump:false};
     if(card.after==='summit')resetSummit();
@@ -2165,7 +2165,7 @@ window.FROSTLINE_READY = (async () => {
   }
   function step(dt) {
     if(!ready)return;
-    if(state.sceneCard)return;
+    if(state.sceneCard){if(state.sceneCard.shown)state.sceneCard.minimumRemaining=Math.max(0,state.sceneCard.minimumRemaining-dt);return;}
     clock+=dt;
     if(state.deathTimer>0){state.deathTimer-=dt;if(state.deathTimer<=0)resetSummit();return;}
     if(state.liftTimer>0){state.liftTimer-=dt;state.p.y-=S.lift.rideSpeed*dt;state.cam.y=ease(state.cam.y,state.p.y-H*S.render.playerScreenY/ZOOM,S.render.cameraYFollow,dt);if(state.liftTimer<=0)resetSummit(true);return;}
@@ -3453,6 +3453,7 @@ window.FROSTLINE_READY = (async () => {
     text(card.title,W/2,top+height+25,14,C.teal);
     const words=card.detail.split(' '),lines=[''],maxChars=Math.floor((width-36)/12);for(const word of words){const i=lines.length-1;if((lines[i]+' '+word).length>maxChars)lines.push(word);else lines[i]+=(lines[i]?' ':'')+word;}
     lines.slice(0,2).forEach((line,i)=>text(line,W/2,top+height+58+i*21,14,C.ink));
+    card.shown=true;
   }
   function render() {
     if(state.sceneCard){drawSceneCard();return;}

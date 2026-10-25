@@ -1,5 +1,6 @@
 {
   "dismissal": "tap-or-key",
+  "minimumSeconds": 3,
   "images": [
     {
       "key": "death-wolf",
