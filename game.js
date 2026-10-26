@@ -319,12 +319,16 @@ window.FROSTLINE_READY = (async () => {
     return best;
   }
   function cemeteryHalfAt(e,along){return e.half;}
+  function mausoleumForecourt(e,x,y,margin=0){
+    const m=e.mausoleum;return !!m&&Math.abs(x-m.x)<m.width*.55+60*e.scale+margin&&y>m.y-m.width*.6-margin&&y<m.y+150*e.scale+margin;
+  }
   function cemeteryZombie(x,y,extra){
     const e=extra.encounter;let grave=null,best=Infinity;
     for(const o of state.objects)if(o.encounter===e&&o.type==='grave'&&!o.restingOccupant){const distance=Math.hypot(o.x-x,o.y-y);if(distance<best){grave=o;best=distance;}}
     if(!grave||best>230*e.scale){
       const side=(extra.zombieStyle??0)%2?1:-1;
-      grave=entity('grave',x+side*(e.half+34*e.scale),y,{arcadeRun:extra.arcadeRun,encounter:e,worldChunk:extra.worldChunk,regionFlank:extra.regionFlank,width:32,r:10,style:(extra.zombieStyle??0)%6});
+      let gx=x+side*(e.half+34*e.scale);if(mausoleumForecourt(e,gx,y,16))gx=e.mausoleum.x+(Math.sign(gx-e.mausoleum.x)||side)*(e.mausoleum.width*.55+100*e.scale);
+      grave=entity('grave',gx,y,{arcadeRun:extra.arcadeRun,encounter:e,worldChunk:extra.worldChunk,regionFlank:extra.regionFlank,width:32,r:10,style:(extra.zombieStyle??0)%6});
     }
     const dx=x-grave.x;
     const nearby=state.objects.filter(o=>o.r>0&&['grave','mausoleum','cemeteryFence','cemeteryPillar','zombie'].includes(o.type)&&Math.abs(o.x-grave.x)<200&&Math.abs(o.y-grave.y)<200);
@@ -344,7 +348,7 @@ window.FROSTLINE_READY = (async () => {
     const at=(dx,dy)=>({x:x+(dx*cos-dy*sin)*scale,y:y+(dx*sin+dy*cos)*scale});
     const prop=(type,p,extra)=>{
       if(p.y<e.startY+210*scale||p.y>e.endY-210*scale||Math.abs(p.x-e.centerX)>e.band-70*scale)return;
-      if(encounterClearance(e,p.x,p.y,extra.r,extra.r)<10*scale)return;
+      if(encounterClearance(e,p.x,p.y,extra.r,extra.r)<10*scale||mausoleumForecourt(e,p.x,p.y,extra.r))return;
       return entity(type,p.x,p.y,{...own,...extra});
     };
     for(let row=0;row<rows;row++)for(let col=0;col<cols;col++){
@@ -435,6 +439,8 @@ window.FROSTLINE_READY = (async () => {
       const path=[point(0),point(.28,side*210*e.scale),point(.65,-side*170*e.scale),point(1)];path.linear=true;e.paths=[path];
       const lengths=[0];for(let i=1;i<path.length;i++)lengths.push(lengths.at(-1)+Math.hypot(path[i].x-path[i-1].x,path[i].y-path[i-1].y));e.cemeteryRoute={points:path,lengths,length:lengths.at(-1)};
       e.band=C.widthScreens*W/ZOOM/2;e.checkpoints=[e.startY+100*e.scale,e.endY-100*e.scale];e.chamberLength=length/2;
+      const at=cemeteryPoint(e,e.cemeteryRoute.length*.42),width=280,cryptSide=e.variant%2?-1:1;
+      e.mausoleum=entity('mausoleum',at.x+cryptSide*(e.half+width*.45+60*e.scale),at.y,{arcadeRun:section,encounter:e,width,r:width*.45,grandMausoleum:true,waveSize:Math.round(mix(...C.mausoleum.count,e.difficulty)),released:0});
     }else if(e.kind==='quiet'){
       const previous=state.endless.encounters.at(-2)?.town,side=pick([-1,1]);
       // Continue Arcade's actual village-exit road, including an off-centre approach.
@@ -550,7 +556,7 @@ window.FROSTLINE_READY = (async () => {
         const candidates=[{x:center+side*e.half*.2,y:p.y},{x:center,y:p.y},{x:p.x-side*e.half*.35,y:p.y+25*scale},{x:p.x,y:p.y},{x:p.x,y:p.y-45*scale},{x:p.x,y:p.y+50*scale}];
         for(const radius of [40,70,100,140])for(let j=0;j<8;j++)candidates.push({x:p.x+Math.cos(j*Math.PI/4)*radius,y:p.y+Math.sin(j*Math.PI/4)*radius});
         const nearby=state.objects.filter(o=>o.r>0&&!o.dead&&!o.eaten&&Math.abs(o.x-p.x)<300*scale&&Math.abs(o.y-p.y)<300*scale);
-        const spot=candidates.find(p=>Math.abs(p.x-root.x)<e.band-35&&p.y>entry+100*scale&&p.y<exit-100*scale&&nearby.every(o=>obstacleClearance(o,p.x,p.y)>=14));if(!spot)continue;
+        const spot=candidates.find(p=>!mausoleumForecourt(e,p.x,p.y,16)&&Math.abs(p.x-root.x)<e.band-35&&p.y>entry+100*scale&&p.y<exit-100*scale&&nearby.every(o=>obstacleClearance(o,p.x,p.y)>=14));if(!spot)continue;
         entity('zombie',spot.x,spot.y,{...own,zombieRole:'wanderer',zombieRoamer:true,zombieState:'wandering',zombieStyle:i%4,width:[32,36,30,34][i%4],r:10,awake:false,homeX:spot.x,homeY:spot.y,phase:random()*TAU,zombieBaseKmh:mix(...R.zombies.wandererSpeedKmh,e.difficulty)});
       }
     }
@@ -1962,7 +1968,7 @@ window.FROSTLINE_READY = (async () => {
   }
 
   function monsterContact(o){
-    const p=state.p;if(o.type==='zombie'&&(o.zombieState==='hidden'||o.zombieState==='leaping'&&(o.leapProgress||0)<.82))return false;if(p.air>0||o.dead||o.eaten||o.retiring||o.leaving)return false;
+    const p=state.p;if(o.type==='zombie'&&(['hidden','emerging'].includes(o.zombieState)||o.zombieState==='leaping'&&(o.leapProgress||0)<.82))return false;if(p.air>0||o.dead||o.eaten||o.retiring||o.leaving)return false;
     const body=o.r>0,radius=body?o.r+S.physics.playerRadius:S.chasers.captureDistance,ys=body?S.physics.collisionYScale:1;
     const dx=p.x-o.x,dy=(p.y-o.y)*ys;
     if(dx*dx+dy*dy<radius*radius)return true;
@@ -2395,7 +2401,7 @@ window.FROSTLINE_READY = (async () => {
       const landing=p.landingFeedback;p.landingFeedback=null;
       if(state.p===p&&!p.fall&&!p.awaitingInput&&!state.deathTimer){announce(landing.title,`+${landing.points} points`,C.blue,1.5);beep(710,.08);}
     }
-    state.objects=state.objects.filter(o=>!o.eaten&&!o.collected&&o.type!=='awakened'&&(!o.dead||clock<o.fadeUntil)&&(o.worldChunk||(o.type==='wolf'&&o.linkedChase||o.type==='zombie'&&o.awake&&o.zombieState!=='spent')&&activeCourseOwner(o)||o.y>p.y-S.world.sceneryRetentionBehind));
+    state.objects=state.objects.filter(o=>!o.eaten&&!o.collected&&o.type!=='awakened'&&(!o.dead||clock<o.fadeUntil)&&(o.worldChunk||o.grandMausoleum&&o.triggerAt!==undefined&&o.released<o.waveSize||(o.type==='wolf'&&o.linkedChase||o.type==='zombie'&&o.awake&&o.zombieState!=='spent')&&activeCourseOwner(o)||o.y>p.y-S.world.sceneryRetentionBehind));
     state.snowballTrails=state.snowballTrails.filter(t=>t.until>clock&&t.by>p.y-S.world.sceneryRetentionBehind);
     for(const q of state.particles){q.x+=q.vx*dt;q.y+=q.vy*dt;q.vy+=80*dt;q.life-=dt;}state.particles=state.particles.filter(q=>q.life>0);state.speech=state.speech.filter(q=>q.until>clock);state.messages=state.messages.filter(q=>q.until>clock);
     state.cam.x=ease(state.cam.x,p.x,S.render.cameraXFollow,dt);state.cam.y=ease(state.cam.y,p.y-H*S.render.playerScreenY/ZOOM,S.render.cameraYFollow,dt);state.screenShake=Math.max(0,state.screenShake-dt);
@@ -2727,14 +2733,37 @@ window.FROSTLINE_READY = (async () => {
       moveSkier(o,vx,vy,dt,collisionGrid,false);
     }
   }
+  function updateMausoleums(){
+    const p=state.p,M=S.endless.regions.cemetery.mausoleum;
+    for(const m of state.objects){
+      if(!m.grandMausoleum||!activeCourseOwner(m))continue;
+      const scale=m.encounter.scale;
+      if(m.triggerAt===undefined){
+        if(Math.hypot(p.x-m.x,p.y-(m.y+20))>M.noticeMetres*PX_PER_M*scale)continue;
+        m.triggerAt=clock;m.nextRelease=clock+M.windupSeconds;burst(m.x,m.y,'#b8c3b0',8);beep(125,.18,'triangle');
+      }
+      while(m.released<m.waveSize&&clock>=m.nextRelease){
+        const i=m.released++,x=m.x+(i%3-1)*12,y=m.y+2;
+        entity('zombie',x,y,{arcadeRun:m.arcadeRun,encounter:m.encounter,width:[34,36,32,34][i%4],r:0,zombieRole:'wanderer',zombieState:'emerging',zombieStyle:i%4,mausoleumSpawn:m,emergeAt:clock,emergeX:x,emergeY:y,awake:true,zombieSpeedMultiplier:M.speedMultiplier,zombieBaseKmh:mix(...S.endless.regions.zombies.wandererSpeedKmh,m.encounter.difficulty)});
+        m.nextRelease+=M.releaseSeconds;
+      }
+    }
+  }
   function updateZombies(dt){
     if(!state.started)return;
+    updateMausoleums();
     const p=state.p,Z=S.endless.regions.zombies,A=Z.ambush;
     for(const o of state.objects){
       if(o.type!=='zombie'||o.dead||o.eaten)continue;
       o.zombieState??='hidden';const scale=endlessSpeedScale(o);
       if(o.zombieRole==='wanderer'){
         o.zombieRushing=false;
+        if(o.zombieState==='emerging'){
+          const t=clamp((clock-o.emergeAt)/.5,0,1);o.x=o.emergeX+(o.emergeX-o.mausoleumSpawn.x)*t;o.y=o.emergeY+58*t;
+          o.motionVx=o.motionVy=o.travelSpeed=0;o.travelStamp=clock;
+          if(t<1)continue;
+          o.zombieState='wandering';o.r=10;
+        }
         if(o.zombieState==='resting'){
           o.motionVx=o.motionVy=o.travelSpeed=0;o.travelStamp=clock;
           if(Math.hypot(o.x-p.x,o.y-p.y)>Z.noticeMetres*PX_PER_M*scale){resolveEnemyContact(o);if(state.deathTimer)return;continue;}
@@ -2759,7 +2788,7 @@ window.FROSTLINE_READY = (async () => {
           target=o.wanderTarget;
         }
         o.zombieRushing=o.awake&&p.fall>0&&distance<Z.noticeMetres*PX_PER_M*scale;
-        const speed=(o.zombieBaseKmh??Z.wandererSpeedKmh[0])*scale/S.physics.hudKmhPerSpeed*(o.zombieRushing?Z.downedSpeedMultiplier:1);
+        const speed=(o.zombieBaseKmh??Z.wandererSpeedKmh[0])*(o.zombieSpeedMultiplier??1)*scale/S.physics.hudKmhPerSpeed*(o.zombieRushing?Z.downedSpeedMultiplier:1);
         if(Math.hypot(target.x-o.x,target.y-o.y)>4)travel(o,Math.atan2(target.y-o.y,target.x-o.x),speed,elapsed,false,false,true,true,target,true);
         else {o.motionVx=o.motionVy=o.travelSpeed=0;o.travelStamp=clock;}
         resolveEnemyContact(o);if(state.deathTimer)return;continue;
@@ -3066,9 +3095,17 @@ window.FROSTLINE_READY = (async () => {
     }
   }
   function drawCemeteryPillar(o,s){drawCachedCemetery(o,s,true);}
-  function drawCemeteryObject(o,s){drawCachedCemetery(o,s,false);}
+  function drawCemeteryObject(o,s){
+    drawCachedCemetery(o,s,false);
+    if(o.grandMausoleum){
+      const w=Math.round(o.width*ZOOM),open=o.triggerAt===undefined?0:clamp((clock-o.triggerAt)/S.endless.regions.cemetery.mausoleum.windupSeconds,0,1),half=Math.round(w*.12*(1-open)),top=s.y-w*.47,height=w*.43;
+      box(s.x-w*.12,top,half,height,'#43545b');box(s.x+w*.12-half,top,half,height,'#43545b');
+      if(half>3){box(s.x-half+2,top+height*.55,1,3,'#b5a46c');box(s.x+half-3,top+height*.55,1,3,'#b5a46c');}
+      if(open>0){ctx.save();ctx.globalAlpha=.25+Math.sin(clock*4)*.08;box(s.x-w*.1,s.y-4,w*.2,5,'#a5bc88');ctx.restore();}
+    }
+  }
   function drawCachedCemetery(o,s,pillar){
-    const w=Math.round(o.width*ZOOM),key=o.type+':'+w+':'+(o.style||0)+':'+!!o.entry;
+    const w=Math.round(o.width*ZOOM),key=o.type+':'+w+':'+(o.style||0)+':'+!!o.entry+':'+!!o.grandMausoleum;
     let tile=cemeteryTiles.get(key);
     const width=w+24,height=Math.ceil(w*1.8)+40,x=Math.floor(width/2),y=height-16;
     if(!tile){tile=cemeteryTile(width,height,(box,line,shadow)=>{const item={...o,width:w/ZOOM},at={x,y};pillar?paintCemeteryPillar(item,at,box):paintCemeteryObject(item,at,box,shadow);});cemeteryTiles.set(key,tile);}
@@ -3088,6 +3125,22 @@ window.FROSTLINE_READY = (async () => {
   function paintCemeteryObject(o,s,box,shadow){
     const w=Math.round(o.width*ZOOM),x=s.x,y=s.y;
     shadow(x,y,o.type==='grave'?16:38,4);
+    if(o.grandMausoleum){
+      shadow(x,y,o.width*.52,8);
+      const left=x-w/2,top=y-w*.96;
+      box(left-7,y+3,w+14,4,'#81918e');box(left-11,y+7,w+22,3,'#cbd7d0');
+      box(left,top+23,w,w*.96-23,'#5c6c79');box(left+5,top+27,w-10,w*.96-31,'#a4b4b4');
+      for(let row=0;row<8;row++){
+        const yy=top+32+row*10;box(left+7,yy,w-14,1,'#829592');
+        for(let xx=left+10+(row%2)*10;xx<left+w-8;xx+=22)box(xx,yy-8,1,8,'#8fa19e');
+      }
+      for(let i=0;i<7;i++){box(left-4+i*9,top+20-i*3,w+8-i*18,4,'#687b85');box(left-3+i*9,top+19-i*3,w+6-i*18,2,'#dce6df');}
+      for(const side of [-1,1]){const cx=x+side*w*.38;box(cx-5,top+26,10,w*.96-26,'#637983');box(cx-3,top+28,6,w*.96-30,'#c1ccc5');box(cx-7,top+25,14,3,'#dfe7dc');box(cx-7,y-3,14,4,'#dfe7dc');}
+      box(x-w*.16,y-w*.51,w*.32,w*.49,'#60747b');box(x-w*.12,y-w*.47,w*.24,w*.43,'#233c45');
+      box(x-6,top+26,12,14,'#617c7d');box(x-4,top+28,8,10,'#a5b992');box(x-1,top+26,2,14,'#6b7e7d');box(x-6,top+32,12,2,'#6b7e7d');
+      for(const side of [-1,1]){const lx=x+side*w*.26;box(lx-3,y-w*.37,6,9,'#405660');box(lx-2,y-w*.36,4,6,'#d6ba78');box(lx-1,y-w*.4,2,3,'#607780');}
+      box(x-4,top-9,8,10,'#647a80');box(x-10,top-6,20,3,'#647a80');box(x-3,top-10,6,2,'#dce6df');return;
+    }
     if(o.type==='grave'){
       const h=Math.round(w*1.12),left=x-Math.round(w/2),top=y-h,stone=o.style===1?'#a9b7bb':'#b9c7c5';
       box(left-2,y+1,w+4,Math.round(w*.8),'#bbc9bf');box(left,y+3,w,Math.round(w*.65),'#d2ddd2');
@@ -3108,8 +3161,8 @@ window.FROSTLINE_READY = (async () => {
     }
   }
   const zombieTiles=new Map();
-  function zombieTile(style,frame,role='wanderer'){
-    const key=role+':'+style+':'+frame;if(zombieTiles.has(key))return zombieTiles.get(key);
+  function zombieTile(style,frame,role='wanderer',fast=false){
+    const key=role+':'+style+':'+frame+':'+fast;if(zombieTiles.has(key))return zombieTiles.get(key);
     const tile=document.createElement('canvas'),crawl=style===4;tile.width=crawl?24:18;tile.height=crawl?13:24;
     const t=tile.getContext('2d'),px=(x,y,w,h,c)=>{t.fillStyle=c;t.fillRect(x,y,w,h);},ink='#334a4d',skin=['#91a77b','#8b9e88','#8c9b77','#a1aea0','#91a797'][style],coat=['#786273','#5c7466','#788a85','#9baba3','#776e58'][style];
     if(role==='ambusher'){
@@ -3151,13 +3204,15 @@ window.FROSTLINE_READY = (async () => {
       if(style===2){px(5,2,9,7,'#8c9b77');px(6,4,2,1,ink);px(11,4,2,1,ink);px(4,11,10,7,'#77725c');px(6,16,2,3,'#8c9b77');px(11,14,3,2,'#8c9b77');}
       if(style===3){px(3,1,12,3,'#bdc7ba');px(3,4,2,9,'#bdc7ba');px(13,4,2,12,'#829891');px(4,14,10,6,'#a8b7aa');px(3,19,4,3,'#a8b7aa');px(9,19,5,2+frame,'#a8b7aa');px(7,13,1,4,'#6d8882');}
     }
+    if(fast){const lean=style===0?frame:0,bob=style===1?frame:0;px(6+lean,style===2?4:5+bob,2,1,'#d8e8a1');px(style===2?11:10+lean,style===2?4:5+bob,2,1,'#d8e8a1');px(6,10,6,2,'#8a5267');}
     zombieTiles.set(key,tile);return tile;
   }
   function drawZombie(o,s){
     const resting=['hidden','resting'].includes(o.zombieState)&&!o.dead,stirring=['rising','stirring'].includes(o.zombieState)&&!o.dead,leaping=o.zombieState==='leaping'&&!o.dead;
-    const role=o.zombieRole??'ambusher',frame=resting||role==='ambusher'&&o.zombieState==='spent'?2:stirring?(clock-o.riseAt<S.endless.regions.zombies.ambush.windupSeconds*.5?2:3):leaping?1:role==='wanderer'&&o.travelSpeed>1?Math.floor(clock*(o.zombieRushing?4:2)+o.phase)%2:0;
-    const tile=zombieTile(o.zombieStyle??0,frame,role),width=Math.round(o.width*ZOOM),height=Math.round(width*tile.height/tile.width),lift=leaping?Math.sin((o.leapProgress||0)*Math.PI)*S.endless.regions.zombies.ambush.heightWorld*ZOOM:0;
-    shadow(s.x,s.y,resting?14:10,3);ctx.save();ctx.translate(s.x,s.y-lift);if(!o.dead&&o.zombieRushing&&o.travelSpeed>1)ctx.translate(0,Math.floor(clock*8)%2?-1:0);if((o.motionVx||o.leapVx||0)<-2)ctx.scale(-1,1);
+    const role=o.zombieRole??'ambusher',frame=resting||role==='ambusher'&&o.zombieState==='spent'?2:stirring?(clock-o.riseAt<S.endless.regions.zombies.ambush.windupSeconds*.5?2:3):leaping?1:role==='wanderer'&&o.travelSpeed>1?Math.floor(clock*(o.zombieRushing?4:2)*(o.mausoleumSpawn?2:1)+o.phase)%2:0;
+    const tile=zombieTile(o.zombieStyle??0,frame,role,!!o.mausoleumSpawn),width=Math.round(o.width*ZOOM),height=Math.round(width*tile.height/tile.width),lift=leaping?Math.sin((o.leapProgress||0)*Math.PI)*S.endless.regions.zombies.ambush.heightWorld*ZOOM:0;
+    shadow(s.x,s.y,resting?14:10,3);ctx.save();ctx.translate(s.x,s.y-lift);if(!o.dead&&(o.zombieRushing||o.mausoleumSpawn)&&o.travelSpeed>1)ctx.translate(0,Math.floor(clock*8)%2?-1:0);if((o.motionVx||o.leapVx||0)<-2)ctx.scale(-1,1);
+    if(o.zombieState==='emerging')ctx.globalAlpha=.35+.65*clamp((clock-o.emergeAt)/.5,0,1);
     if(o.dead||o.stunnedUntil>clock)ctx.rotate(Math.PI/2);ctx.drawImage(tile,-Math.round(width/2),-height,width,height);ctx.restore();
   }
   function drawTransitionLake(o){
@@ -3772,7 +3827,7 @@ window.FROSTLINE_READY = (async () => {
     const layers=[],top=state.cam.y-200,bottom=state.cam.y+H/ZOOM+200;
     for(const o of state.objects){
       if(['ramp','mogul','smallHill','largeHill','logBump','rugged','cemeteryPlot'].includes(o.type))continue;
-      const extent=o.type==='cemeteryFence'?(o.depth||0)/2:0;
+      const extent=o.grandMausoleum?o.width*1.1:o.type==='cemeteryFence'?(o.depth||0)/2:0;
       if(o.y+extent<=top||o.y-extent>=bottom||Math.abs(o.x-state.cam.x)>=W/(2*ZOOM)+Math.max(460,(o.width||0)/2+60,o.treeLength||0))continue;layers.push(o);
     }
     for(const c of state.chasers)if(c.y>top&&c.y<bottom&&Math.abs(c.x-state.cam.x)<W/(2*ZOOM)+230)layers.push(c);

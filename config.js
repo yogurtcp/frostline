@@ -26,6 +26,8 @@ window.loadFrostlineConfig = async function () {
   for(const [key,value] of Object.entries(regionDefaults.crowd))config.endless.regions.crowd[key] ??= value;
   config.endless.regions.cemetery ??= {};
   for(const [key,value] of Object.entries({widthScreens:3.5,ySpeedScale:.7,blendMetres:25,clusterSpacingMetres:[34,42]}))config.endless.regions.cemetery[key] ??= value;
+  config.endless.regions.cemetery.mausoleum ??= {};
+  for(const [key,value] of Object.entries({count:[6,10],noticeMetres:42,windupSeconds:.8,releaseSeconds:.45,speedMultiplier:4}))config.endless.regions.cemetery.mausoleum[key] ??= value;
   config.endless.regions.zombies.roamerCount ??= [18,36];
   config.endless.regions.zombies.downedSpeedMultiplier ??= 2;
   config.endless.regions.zombies.wandererCount ??= [36,72];
@@ -63,7 +65,7 @@ window.loadFrostlineConfig = async function () {
   config.wildlife.ramSpeedFraction ??= .85;
   config.physics.releaseTurnFollow ??= 3;
   config.village.populationMultiplier ??= 2;
-  const regionRanges = ['gapMetres','beginnerPeople','forestTreesPer100Metres','cemeteryOpeningMetres','denseForestDensity','scrambleDensity'].map(key=>config.endless.regions[key]).concat(Object.values(config.endless.regions.lengthMetres),[config.endless.regions.cemetery.clusterSpacingMetres,config.endless.regions.zombies.wandererCount,config.endless.regions.zombies.roamerCount,config.endless.regions.zombies.wandererSpeedKmh,config.endless.regions.zombies.count,config.endless.regions.zombies.speedKmh,config.endless.regions.crowd.people],['crossingMetres','rows','chokeWidthMetres'].map(key=>config.endless.regions.cemetery[key]).filter(Array.isArray));
+  const regionRanges = ['gapMetres','beginnerPeople','forestTreesPer100Metres','cemeteryOpeningMetres','denseForestDensity','scrambleDensity'].map(key=>config.endless.regions[key]).concat(Object.values(config.endless.regions.lengthMetres),[config.endless.regions.cemetery.clusterSpacingMetres,config.endless.regions.cemetery.mausoleum.count,config.endless.regions.zombies.wandererCount,config.endless.regions.zombies.roamerCount,config.endless.regions.zombies.wandererSpeedKmh,config.endless.regions.zombies.count,config.endless.regions.zombies.speedKmh,config.endless.regions.crowd.people],['crossingMetres','rows','chokeWidthMetres'].map(key=>config.endless.regions.cemetery[key]).filter(Array.isArray));
   if(config.endless.regions.crowd.maximumGapMetres<config.endless.regions.crowd.minimumGapMetres)throw new Error('crowd maximumGapMetres must be at least minimumGapMetres');
   if(regionRanges.some(pair=>pair[0]>pair[1]))throw new Error('endless.regions ranges must be ordered');
   if(config.controls.swipeLongPixels<=config.controls.swipeShortPixels)throw new Error('controls.swipeLongPixels must exceed swipeShortPixels');

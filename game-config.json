@@ -208,6 +208,13 @@
       "minimumWidthMetres": 600,
       "cemetery": {
         "widthScreens": 3.5,
+        "mausoleum": {
+          "count": [6, 10],
+          "noticeMetres": 42,
+          "windupSeconds": 0.8,
+          "releaseSeconds": 0.45,
+          "speedMultiplier": 4
+        },
         "clusterSpacingMetres": [34, 42],
         "ySpeedScale": 0.7,
         "blendMetres": 25

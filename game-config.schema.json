@@ -9357,6 +9357,17 @@
               "type": "object",
               "additionalProperties": false,
               "properties": {
+                "mausoleum": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "count": { "type": "array", "minItems": 2, "maxItems": 2, "items": { "type": "integer", "minimum": 1, "maximum": 24 } },
+                    "noticeMetres": { "type": "number", "minimum": 10, "maximum": 100 },
+                    "windupSeconds": { "type": "number", "minimum": 0.3, "maximum": 3 },
+                    "releaseSeconds": { "type": "number", "minimum": 0.2, "maximum": 2 },
+                    "speedMultiplier": { "type": "number", "minimum": 1, "maximum": 8 }
+                  }
+                },
                 "widthScreens": {
                   "type": "number",
                   "minimum": 3,
