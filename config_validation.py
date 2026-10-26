@@ -54,6 +54,9 @@ def validate(value, schema, path='config'):
         ranges += [regions.get('cemetery', {}).get(key, []) for key in ['crossingMetres', 'rows', 'chokeWidthMetres', 'clusterSpacingMetres']]
         ranges.append(regions.get('cemetery', {}).get('mausoleum', {}).get('count', []))
         ranges.append(regions.get('zombies', {}).get('graveWake', {}).get('count', []))
+        special = regions.get('specialAreas', {}).get('rivalRace', {})
+        ranges += [special.get('count', []), special.get('speedRatio', [])]
+        if special.get('draftRangeMetres', 28) <= special.get('draftMinMetres', 4): fail('draftRangeMetres must exceed draftMinMetres')
         crowd = regions.get('crowd', {})
         if crowd.get('maximumGapMetres', 4200) < crowd.get('minimumGapMetres', 1600): fail('crowd maximumGapMetres must be at least minimumGapMetres')
         ranges += list(regions.get('lengthMetres', {}).values()) + list(regions.get('zombies', {}).get(key, []) for key in ['count', 'speedKmh', 'wandererCount', 'wandererSpeedKmh', 'roamerCount'])

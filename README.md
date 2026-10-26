@@ -174,7 +174,7 @@ Cemeteries retain 70% downhill motion, with normal sideways steering. The fenced
 
 Crowded Endless fields now contain 180→280 people in total, down from the former 500→600; Arcade Rush Hour traffic is lighter too. Static collision grids, road chunks, pixel text and predator candidate lists reuse cached work, with smaller long-obstacle bounds and less offscreen drawing. Saves and offline startup updates retain their existing behavior.
 
-For quick Endless debugging, press a number from the summit or during an Endless run. Each jump starts a fresh preview at the area’s remembered visit step (initially 1), at normal starting pace, clears the old course actors, and waits for an arrow to start skiing. The current legitimate distance is saved before switching; the debug run cannot set an Endless distance record. Other modes, focused inputs/dialogs, modifier shortcuts and held repeats ignore these numbers. Scene cards still require their normal minimum display time and consume the continuing key.
+For quick Arcade debugging, press a number or Q/W/E from the summit or during an Endless run. Each jump starts a fresh preview at the area’s remembered visit step (initially 1), at normal starting pace, clears the old course actors, and waits for an arrow to start skiing. The current legitimate distance is saved before switching; the debug run cannot set an Endless distance record. Other modes, focused inputs/dialogs, modifier shortcuts and held repeats ignore these numbers. Scene cards still require their normal minimum display time and consume the continuing key.
 
 | Key | Area |
 | --- | --- |
@@ -187,8 +187,11 @@ For quick Endless debugging, press a number from the summit or during an Endless
 | 7 | Clear lake |
 | 8 | Dense forest |
 | 9 | Wild Patch |
+| Q | Rival Race |
+| W | Frozen Marsh |
+| E | Powder Bowls |
 
-The number row and numeric keypad both work. The debug HUD identifies the run; returning to normal play restores ordinary distance recording.
+The number row and numeric keypad both work. Q/W/E use the same preview rules and remembered difficulty. W is the marsh shortcut at the summit/in Arcade; use ArrowUp to climb there. W retains its ordinary up alias in other modes. The debug HUD identifies the run; returning to normal play restores ordinary distance recording.
 
 After selecting an area, `[` / `-` makes its preview easier and `]` / `+` makes it harder (`=` and keypad add/subtract also work). These use the actual repeat-visit progression: visits 1–6 with the default settings, clamped at both ends. The visit step appears in the toast/HUD. Each area remembers its own step for this session, including after returning to the summit. Switching back with its number restores that step. The area’s preview seed stays fixed, so comparing difficulty does not roll a completely new base layout; the preview restarts at the entrance after each change. Before an area is selected these keys do nothing. Quiet trails and clear lakes retain their deliberately unscaled relief designs; global distance-based speed progression is held at starting pace for these previews.
 
@@ -199,3 +202,5 @@ The cemetery is now one enclosed graveyard, 3½ screens wide, with a single entr
 Each cemetery has one large mausoleum near the main line. Approaching within 75 base metres opens its doors over 0.4 seconds; 6→10 zombies then emerge one by one, 0.45 seconds apart, once per cemetery. These pale-eyed runners use eight times the normal walker speed (80→144 km/h baseline, before existing local slope/pace scaling) and the usual nearby fallen-player boost. Shared contact, ram kill+crash, jumping and swords apply after they step outside. A clear forecourt keeps their exit free of graves.
 
 Cemetery grave crowds now rise in staggered groups: approaching a resting walker queues up to 8→14 nearby graves, with one starting to rise every quarter-second. Further groups join the same sequence and continue after you leave. There are 72→144 grave-side zombies plus 18→36 roaming walkers; resting zombies each occupy a separate grave. All walking zombies, including mausoleum runners, move twice as fast as the preceding build.
+
+Arcade now includes **Rival Race**, **Frozen Marsh** and **Powder Bowls** in its ordinary area sequence. Rival Race has named competitors with distinct pace/lines; follow within 4–28 m and roughly 4 m sideways to charge up to 24% slipstream speed, then pass. Clear at least 75% of its race checkpoints to place and earn a small one-time coin reward; preview races grant no coins. Frozen Marsh mixes dark water/soft snow, irregular firm islands, narrow boardwalks and amber reeds. Soft patches gradually build drag; firm ground recovers grip and jumping clears the drag. There is no automatic marsh death, and ordinary walking still lets you recover. Powder Bowls have broad sculpted banks, ski tracks and jump lips: aligned downhill carving builds speed, while cutting the soft centre costs it. Some gates ask you to leave the fast bank. Later visits add faster rivals, narrower marsh footing/deeper drag and tighter bowls with stronger bank/centre contrast. These areas each span 3½ logical screens with a single enclosed entry/exit; existing pursuers can follow.
