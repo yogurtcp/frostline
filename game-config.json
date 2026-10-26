@@ -210,10 +210,10 @@
         "widthScreens": 3.5,
         "mausoleum": {
           "count": [6, 10],
-          "noticeMetres": 42,
-          "windupSeconds": 0.8,
+          "noticeMetres": 75,
+          "windupSeconds": 0.4,
           "releaseSeconds": 0.45,
-          "speedMultiplier": 4
+          "speedMultiplier": 8
         },
         "clusterSpacingMetres": [34, 42],
         "ySpeedScale": 0.7,
