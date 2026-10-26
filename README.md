@@ -176,7 +176,7 @@ Cemeteries retain 70% downhill motion, with normal sideways steering. The fenced
 
 Crowded Endless fields now contain 180→280 people in total, down from the former 500→600; Arcade Rush Hour traffic is lighter too. Static collision grids, road chunks, pixel text and predator candidate lists reuse cached work, with smaller long-obstacle bounds and less offscreen drawing. Saves and offline startup updates retain their existing behavior.
 
-For quick Endless debugging, press a number from the summit or during an Endless run. Each jump starts a fresh first-visit area at normal starting pace, clears the old course actors, and waits for an arrow to start skiing. The current legitimate distance is saved before switching; the debug run cannot set an Endless distance record. Other modes, focused inputs/dialogs, modifier shortcuts and held repeats ignore these numbers. Scene cards still require their normal minimum display time and consume the continuing key.
+For quick Endless debugging, press a number from the summit or during an Endless run. Each jump starts a fresh preview at the area’s remembered visit step (initially 1), at normal starting pace, clears the old course actors, and waits for an arrow to start skiing. The current legitimate distance is saved before switching; the debug run cannot set an Endless distance record. Other modes, focused inputs/dialogs, modifier shortcuts and held repeats ignore these numbers. Scene cards still require their normal minimum display time and consume the continuing key.
 
 | Key | Area |
 | --- | --- |
@@ -191,3 +191,5 @@ For quick Endless debugging, press a number from the summit or during an Endless
 | 9 | Wild Patch |
 
 The number row and numeric keypad both work. The debug HUD identifies the run; returning to normal play restores ordinary distance recording.
+
+After selecting an area, `[` / `-` makes its preview easier and `]` / `+` makes it harder (`=` and keypad add/subtract also work). These use the actual repeat-visit progression: visits 1–6 with the default settings, clamped at both ends. The visit step appears in the toast/HUD. Each area remembers its own step for this session, including after returning to the summit. Switching back with its number restores that step. The area’s preview seed stays fixed, so comparing difficulty does not roll a completely new base layout; the preview restarts at the entrance after each change. Before an area is selected these keys do nothing. Quiet trails and clear lakes retain their deliberately unscaled relief designs; global distance-based speed progression is held at starting pace for these previews.

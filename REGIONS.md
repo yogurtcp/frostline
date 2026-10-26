@@ -51,4 +51,6 @@ Cemeteries use `regions.cemetery`: `ySpeedScale: 0.7` blends over 25 base metres
 
 The former `cemetery.rows`, `crossingMetres` and `chokeWidthMetres` are accepted only for older JSON; the open layout no longer uses them. They are omitted from the published configuration. `cemeteryOpeningMetres: [12,18]` now reserves preferred clear gaps between clusters, not the width of a fenced path. Adjacent gaps can also be used, and moving zombies can obstruct either choice.
 
-Number keys 1–9 jump to fresh first-visit debug areas: forest, tree corridors, town, crowd, quiet trail, cemetery, lake, dense forest, Wild Patch. Available at the summit or within Endless; press an arrow to ski from the entrance. Debug distance is excluded from records. See [README.md](README.md) for the key table.
+Number keys 1–9 jump to debug areas at each theme’s remembered visit: forest, tree corridors, town, crowd, quiet trail, cemetery, lake, dense forest, Wild Patch. Available at the summit or within Endless; press an arrow to ski from the entrance. Debug distance is excluded from records. See [README.md](README.md) for the key table.
+
+With an area selected, `[` / `-` previews its previous visit and `]` / `+` its next visit (default range 1–6). The same preview seed and normal starting pace make the real per-theme progression easier to compare. The step is remembered per area during the session; relief areas keep their existing unscaled design.
