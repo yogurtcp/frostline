@@ -168,7 +168,7 @@
         ],
         "downedSpeedMultiplier": 2,
         "wandererCount": [36, 72],
-        "wandererSpeedKmh": [2.5, 4.5],
+        "wandererSpeedKmh": [5, 9],
         "count": [
           8,
           14
