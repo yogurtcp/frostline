@@ -163,12 +163,12 @@
       ],
       "zombies": {
         "roamerCount": [
-          12,
-          24
+          18,
+          36
         ],
         "downedSpeedMultiplier": 2,
-        "wandererCount": [24, 48],
-        "wandererSpeedKmh": [2, 3.5],
+        "wandererCount": [36, 72],
+        "wandererSpeedKmh": [2.5, 4.5],
         "count": [
           8,
           14
@@ -207,6 +207,7 @@
       ],
       "minimumWidthMetres": 600,
       "cemetery": {
+        "widthScreens": 3.5,
         "clusterSpacingMetres": [34, 42],
         "ySpeedScale": 0.7,
         "blendMetres": 25

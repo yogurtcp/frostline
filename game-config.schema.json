@@ -9357,6 +9357,12 @@
               "type": "object",
               "additionalProperties": false,
               "properties": {
+                "widthScreens": {
+                  "type": "number",
+                  "minimum": 3,
+                  "maximum": 4,
+                  "description": "Full enclosed cemetery width in logical screen widths, independent of pace scaling."
+                },
                 "clusterSpacingMetres": {
                   "type": "array",
                   "minItems": 2,
