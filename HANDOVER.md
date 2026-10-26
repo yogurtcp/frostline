@@ -972,7 +972,7 @@ Runners visibly step from the door for0.5s as zombieState emerging, then set rad
 
 Build f43815121e2af3cc; syntax/strict build/diff checks passed. Chrome verified one landmark, far/no trigger,42m near trigger,0.8s warning, visible nonblocking doorway emergence, exact6 first/10 final wave targets, complete activation, no retrigger after leaving/returning, actual4× velocities70/126worldY units/s and doubled140/252 while fallen after cemetery0.7 projection. Fast-runner ram+crash/rear capture/jump/sword paths passed. Real RAF released all6 and continued without page errors; closed/emerging/open/live screenshots inspected. First/final safe populations, normal-walker movement/capture/contact and skeleton regressions passed. All six cemetery difficulty steps and all nine debug area entrances passed; unrelated mode guards passed. Reversed mausoleum wave count rejected by Python validation. Scratch checks/logs/screenshots: /tmp/frostline-mausoleum. No save/PWA lifecycle changes or human/phone playthrough claimed.
 
-## 76. Earlier mausoleum release and double runner speed (2026-10-27)
+## 76. Earlier mausoleum release and double runner speed (2026-10-26)
 
 User wanted the mausoleum to open earlier and its zombies faster. `endless.regions.cemetery.mausoleum.noticeMetres`75 replaces42; `windupSeconds`0.4 replaces0.8; `speedMultiplier`8 replaces4. Matching browser defaults/docs and generated build4751fd59071d4358 updated. Regular walkers, wave counts6→10, inter-release interval0.45s and emergence0.5s remain unchanged. Runners now use nominal40→72km/h before the usual cemetery/pace projection and nearby fallen-player multiplier.
 
