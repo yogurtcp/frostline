@@ -162,6 +162,11 @@
         18
       ],
       "zombies": {
+        "roamerCount": [
+          12,
+          24
+        ],
+        "downedSpeedMultiplier": 2,
         "wandererCount": [24, 48],
         "wandererSpeedKmh": [2, 3.5],
         "count": [
@@ -911,7 +916,7 @@
   },
   "courses": {
     "endless": {
-      "name": "Endless Mixed Slalom",
+      "name": "Arcade",
       "sub": "ONE SLOPE. NO FINISH.",
       "length": 540,
       "fee": 0,
@@ -1010,7 +1015,7 @@
       "kind": "free"
     },
     "arcade": {
-      "name": "Arcade",
+      "name": "Legacy Campaign",
       "sub": "12 STAGES - ONE RUN",
       "length": 540,
       "fee": 0,
@@ -1813,7 +1818,6 @@
     "entryChoices": [
       "endless",
       "slalom",
-      "arcade",
       "freestyle",
       "forest"
     ],

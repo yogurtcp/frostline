@@ -9280,6 +9280,19 @@
                   "type": "number",
                   "exclusiveMinimum": 0
                 },
+                "roamerCount": {
+                  "type": "array",
+                  "minItems": 2,
+                  "maxItems": 2,
+                  "items": { "type": "integer", "minimum": 0, "maximum": 120 },
+                  "description": "Additional first/final-visit zombies already patrolling the open gaps."
+                },
+                "downedSpeedMultiplier": {
+                  "type": "number",
+                  "minimum": 1,
+                  "maximum": 4,
+                  "description": "Nearby alert walking zombies move this much faster while the skier is knocked down."
+                },
                 "wandererCount": {
                   "type": "array",
                   "items": {

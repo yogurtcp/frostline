@@ -26,6 +26,8 @@ window.loadFrostlineConfig = async function () {
   for(const [key,value] of Object.entries(regionDefaults.crowd))config.endless.regions.crowd[key] ??= value;
   config.endless.regions.cemetery ??= {};
   for(const [key,value] of Object.entries({ySpeedScale:.7,blendMetres:25,clusterSpacingMetres:[34,42]}))config.endless.regions.cemetery[key] ??= value;
+  config.endless.regions.zombies.roamerCount ??= [12,24];
+  config.endless.regions.zombies.downedSpeedMultiplier ??= 2;
   config.endless.regions.zombies.wandererCount ??= [24,48];
   config.endless.regions.zombies.wandererSpeedKmh ??= [2,3.5];
   config.endless.regions.zombies.ambush ??= {};
@@ -33,7 +35,11 @@ window.loadFrostlineConfig = async function () {
   config.endless.wildlife ??= {firstMetres:650,intervalMetres:[360,200],maxNearby:6,wolfPackSize:[2,3],noticeMetres:55};
   config.skiers.crashSeconds ??= [4,5];
   config.skiers.getUpSeconds ??= .6;
-  config.courses.endless ??= {"name":"Endless Mixed Slalom","sub":"ONE SLOPE. NO FINISH.","length":540,"fee":0,"pace":156,"spacing":380,"density":1,"color":"#24716d","kind":"forest"};
+  config.courses.endless ??= {"name":"Arcade","sub":"ONE SLOPE. NO FINISH.","length":540,"fee":0,"pace":156,"spacing":380,"density":1,"color":"#24716d","kind":"forest"};
+  // Keep the old infinite-run ID and records; retire campaign entrances in older configs too.
+  config.courses.endless.name = 'Arcade';
+  for(const key of ['entryChoices','villageChoices'])config.race[key]=[...new Set(config.race[key].map(id=>id==='arcade'?'endless':id))];
+  if(config.arcade.autoStart){config.endless.autoStart=true;config.arcade.autoStart=false;}
   config.arcade.gear.comboColors ??= ['#739391','#327f91','#bd7041'];
   config.chasers.yetiCelebrationSeconds ??= 2.2;
   config.chasers.yetiCelebrationHopsPerSecond ??= 2.4;
@@ -57,7 +63,7 @@ window.loadFrostlineConfig = async function () {
   config.wildlife.ramSpeedFraction ??= .85;
   config.physics.releaseTurnFollow ??= 3;
   config.village.populationMultiplier ??= 2;
-  const regionRanges = ['gapMetres','beginnerPeople','forestTreesPer100Metres','cemeteryOpeningMetres','denseForestDensity','scrambleDensity'].map(key=>config.endless.regions[key]).concat(Object.values(config.endless.regions.lengthMetres),[config.endless.regions.cemetery.clusterSpacingMetres,config.endless.regions.zombies.wandererCount,config.endless.regions.zombies.wandererSpeedKmh,config.endless.regions.zombies.count,config.endless.regions.zombies.speedKmh,config.endless.regions.crowd.people],['crossingMetres','rows','chokeWidthMetres'].map(key=>config.endless.regions.cemetery[key]).filter(Array.isArray));
+  const regionRanges = ['gapMetres','beginnerPeople','forestTreesPer100Metres','cemeteryOpeningMetres','denseForestDensity','scrambleDensity'].map(key=>config.endless.regions[key]).concat(Object.values(config.endless.regions.lengthMetres),[config.endless.regions.cemetery.clusterSpacingMetres,config.endless.regions.zombies.wandererCount,config.endless.regions.zombies.roamerCount,config.endless.regions.zombies.wandererSpeedKmh,config.endless.regions.zombies.count,config.endless.regions.zombies.speedKmh,config.endless.regions.crowd.people],['crossingMetres','rows','chokeWidthMetres'].map(key=>config.endless.regions.cemetery[key]).filter(Array.isArray));
   if(config.endless.regions.crowd.maximumGapMetres<config.endless.regions.crowd.minimumGapMetres)throw new Error('crowd maximumGapMetres must be at least minimumGapMetres');
   if(regionRanges.some(pair=>pair[0]>pair[1]))throw new Error('endless.regions ranges must be ordered');
   if(config.controls.swipeLongPixels<=config.controls.swipeShortPixels)throw new Error('controls.swipeLongPixels must exceed swipeShortPixels');

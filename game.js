@@ -532,6 +532,15 @@ window.FROSTLINE_READY = (async () => {
         const along=(i+.55)/wanderers*e.cemeteryRoute.length,p=cemeteryPoint(e,along);if(p.y<from||p.y>=to)continue;
         cemeteryZombie(p.x,p.y,{...own,zombieRole:'wanderer',zombieStyle:i%4,width:[32,36,30,34][i%4],phase:random()*TAU,zombieBaseKmh:mix(...R.zombies.wandererSpeedKmh,e.difficulty)});
       }
+      const roamers=Math.round(mix(...R.zombies.roamerCount,e.difficulty));
+      for(let i=0;i<roamers;i++){
+        const p=cemeteryPoint(e,(i+1)/(roamers+1)*e.cemeteryRoute.length);if(p.y<from||p.y>=to)continue;
+        const center=i%3===0?root.x:p.x,side=i%2?-1:1;
+        const candidates=[{x:center+side*e.half*.2,y:p.y},{x:center,y:p.y},{x:p.x-side*e.half*.35,y:p.y+25*scale},{x:p.x,y:p.y},{x:p.x,y:p.y-45*scale},{x:p.x,y:p.y+50*scale}];
+        const nearby=state.objects.filter(o=>o.r>0&&!o.dead&&!o.eaten&&Math.abs(o.x-p.x)<Math.abs(center-p.x)+260*scale&&Math.abs(o.y-p.y)<180*scale);
+        const spot=candidates.find(p=>nearby.every(o=>obstacleClearance(o,p.x,p.y)>=14));if(!spot)continue;
+        entity('zombie',spot.x,spot.y,{...own,zombieRole:'wanderer',zombieRoamer:true,zombieState:'wandering',zombieStyle:i%4,width:[32,36,30,34][i%4],r:10,awake:false,homeX:spot.x,homeY:spot.y,phase:random()*TAU,zombieBaseKmh:mix(...R.zombies.wandererSpeedKmh,e.difficulty)});
+      }
     }
   }
   function populateForestBoundary(e,section,from,to,{banks=true}={}){
@@ -615,7 +624,7 @@ window.FROSTLINE_READY = (async () => {
     // The course schedules its own reachable threats; unrelated ambient sleepers add dead space.
     state.objects=state.objects.filter(o=>o.arcadeRun||!['lurker','wolf','bear'].includes(o.type)||o.dead||o.eaten);
     for(const o of state.objects)if(o.type==='entrance')o.selected=o===gate;
-    entity('courseStart',run.x,startY,{r:0,width:700,name:'ENDLESS MIXED SLALOM'});
+    entity('courseStart',run.x,startY,{r:0,width:700,name:'ARCADE'});
     const route=state.liftRoutes.at(-1);if(route)route.y1=Math.min(route.y1,startY);
     extendEndless();
     if(debugKind){
@@ -623,7 +632,7 @@ window.FROSTLINE_READY = (async () => {
       Object.assign(p,{x:encounterPathX(e.paths[0],y),y,heading:0,desiredHeading:0,mode:'slide',speed:0,vx:0,vy:0});
       state.cam={x:p.x,y:p.y-H*S.render.playerScreenY/ZOOM};a.furthestY=p.y;e.entered=true;
       extendEndless();ensureWorld();announce('DEBUG - '+e.title.toUpperCase(),'VISIT '+debugVisit+'/'+E.encounters.difficultyVisits+' - ARROWS TO SKI',C.teal,4);
-    }else announce('ENDLESS MIXED SLALOM','GATES FOR GEAR - HOW FAR CAN YOU GO?',stages.endless.color,5);
+    }else announce('ARCADE','GATES FOR GEAR - HOW FAR CAN YOU GO?',stages.endless.color,5);
     state.transitions.push({kind:'start',id:'endless',y:p.y,paid:true});return true;
   }
   function debugEndlessArea(number,visit=null){
@@ -781,10 +790,10 @@ window.FROSTLINE_READY = (async () => {
     state.speech=state.speech.filter(s=>!owned(s.object));
   }
   function startCourse(id,gate) {
+    if(id==='arcade')id='endless'; // Public Arcade now launches the infinite slope.
     if(state.course||state.endless||state.arcade&&id!=='arcade')return false;
     if(id==='endless')return startEndless(gate);
     state.endlessResult=null;
-    if(id==='arcade')return startArcadeBlock(gate);
     const s=stages[id],p=state.p,paid=state.bank>=s.fee;
     if(paid){state.bank-=s.fee;save();}
     const startY=belowView(S.race.courseOffscreenMargin),endY=startY+s.length*PX_PER_M;
@@ -1152,7 +1161,7 @@ window.FROSTLINE_READY = (async () => {
     state.p.fall=2;state.p.speed=0;state.p.vx=state.p.vy=0;
     if(state.arcade)state.arcade.endReason='CAUGHT BY '+cause;
     if(state.endless)recordEndless('CAUGHT BY '+cause);
-    announce(cause==='BEAR'?'THE BEAR CAUGHT YOU.':cause==='WOLF'?'THE PACK CAUGHT YOU.':cause==='ZOMBIE'?'THE DEAD CAUGHT YOU.':'THE YETI GOT YOU.',state.endless?'ENDLESS RUN OVER - BACK TO THE SUMMIT':state.arcade?'ARCADE RUN OVER - BACK TO THE SUMMIT':`Back to the summit. Your ${state.bank} coins are safe.`,C.red,3);
+    announce(cause==='BEAR'?'THE BEAR CAUGHT YOU.':cause==='WOLF'?'THE PACK CAUGHT YOU.':cause==='ZOMBIE'?'THE DEAD CAUGHT YOU.':'THE YETI GOT YOU.',state.endless?'ARCADE RUN OVER - BACK TO THE SUMMIT':state.arcade?'ARCADE RUN OVER - BACK TO THE SUMMIT':`Back to the summit. Your ${state.bank} coins are safe.`,C.red,3);
     beep(110,.3,'triangle');save();
     if(['YETI','WOLF','BEAR','ZOMBIE'].includes(cause)){const scene=deathScene(cause,attacker);showSceneCard(scene.key,scene.title,scene.detail,'summit');}
   }
@@ -2586,7 +2595,7 @@ window.FROSTLINE_READY = (async () => {
     }
   }
   function npcPredatorThreats(){
-    const threats=state.objects.filter(o=>(o.type==='wolf'||o.type==='bear'||o.type==='zombie'&&o.awake&&o.zombieState!=='spent')&&!o.eaten&&!o.dead&&!o.retiring&&o.r>0&&!(o.stunnedUntil>clock)&&(!o.penaltyGate||o.wolfAwake));
+    const threats=state.objects.filter(o=>(o.type==='wolf'||o.type==='bear'||o.type==='zombie'&&(o.awake||o.zombieRoamer)&&o.zombieState!=='spent')&&!o.eaten&&!o.dead&&!o.retiring&&o.r>0&&!(o.stunnedUntil>clock)&&(!o.penaltyGate||o.wolfAwake));
     if(state.started)for(const c of state.chasers)if(['fast','slow','bear'].includes(c.kind)&&!c.dead&&!c.leaving&&!c.waiting&&!(c.wakeUntil>clock)&&!(c.stunnedUntil>clock)&&(!c.chaseRun||activeCourseOwner(c))&&(c.chaseRun||!(state.p.y>c.expires)))threats.push(c);
     return threats;
   }
@@ -2704,6 +2713,7 @@ window.FROSTLINE_READY = (async () => {
       if(o.type!=='zombie'||o.dead||o.eaten)continue;
       o.zombieState??='hidden';const scale=endlessSpeedScale(o);
       if(o.zombieRole==='wanderer'){
+        o.zombieRushing=false;
         if(o.zombieState==='resting'){
           o.motionVx=o.motionVy=o.travelSpeed=0;o.travelStamp=clock;
           if(Math.hypot(o.x-p.x,o.y-p.y)>Z.noticeMetres*PX_PER_M*scale){resolveEnemyContact(o);if(state.deathTimer)return;continue;}
@@ -2727,7 +2737,8 @@ window.FROSTLINE_READY = (async () => {
           }
           target=o.wanderTarget;
         }
-        const speed=(o.zombieBaseKmh??Z.wandererSpeedKmh[0])*scale/S.physics.hudKmhPerSpeed;
+        o.zombieRushing=o.awake&&p.fall>0&&distance<Z.noticeMetres*PX_PER_M*scale;
+        const speed=(o.zombieBaseKmh??Z.wandererSpeedKmh[0])*scale/S.physics.hudKmhPerSpeed*(o.zombieRushing?Z.downedSpeedMultiplier:1);
         if(Math.hypot(target.x-o.x,target.y-o.y)>4)travel(o,Math.atan2(target.y-o.y,target.x-o.x),speed,elapsed,false,false,true,true,target,true);
         else {o.motionVx=o.motionVy=o.travelSpeed=0;o.travelStamp=clock;}
         resolveEnemyContact(o);if(state.deathTimer)return;continue;
@@ -3115,9 +3126,9 @@ window.FROSTLINE_READY = (async () => {
   }
   function drawZombie(o,s){
     const resting=['hidden','resting'].includes(o.zombieState)&&!o.dead,stirring=['rising','stirring'].includes(o.zombieState)&&!o.dead,leaping=o.zombieState==='leaping'&&!o.dead;
-    const role=o.zombieRole??'ambusher',frame=resting||role==='ambusher'&&o.zombieState==='spent'?2:stirring?(clock-o.riseAt<S.endless.regions.zombies.ambush.windupSeconds*.5?2:3):leaping?1:role==='wanderer'&&o.travelSpeed>1?Math.floor(clock*2+o.phase)%2:0;
+    const role=o.zombieRole??'ambusher',frame=resting||role==='ambusher'&&o.zombieState==='spent'?2:stirring?(clock-o.riseAt<S.endless.regions.zombies.ambush.windupSeconds*.5?2:3):leaping?1:role==='wanderer'&&o.travelSpeed>1?Math.floor(clock*(o.zombieRushing?4:2)+o.phase)%2:0;
     const tile=zombieTile(o.zombieStyle??0,frame,role),width=Math.round(o.width*ZOOM),height=Math.round(width*tile.height/tile.width),lift=leaping?Math.sin((o.leapProgress||0)*Math.PI)*S.endless.regions.zombies.ambush.heightWorld*ZOOM:0;
-    shadow(s.x,s.y,resting?14:10,3);ctx.save();ctx.translate(s.x,s.y-lift);if((o.motionVx||o.leapVx||0)<-2)ctx.scale(-1,1);
+    shadow(s.x,s.y,resting?14:10,3);ctx.save();ctx.translate(s.x,s.y-lift);if(!o.dead&&o.zombieRushing&&o.travelSpeed>1)ctx.translate(0,Math.floor(clock*8)%2?-1:0);if((o.motionVx||o.leapVx||0)<-2)ctx.scale(-1,1);
     if(o.dead||o.stunnedUntil>clock)ctx.rotate(Math.PI/2);ctx.drawImage(tile,-Math.round(width/2),-height,width,height);ctx.restore();
   }
   function drawTransitionLake(o){
@@ -3217,7 +3228,7 @@ window.FROSTLINE_READY = (async () => {
   function drawEntrance(o,s) {
     const st=stages[o.stage],half=o.half*ZOOM;
     // Labels sit on the snow beside the physical start flags.
-    text(o.stage==='arcade'?'ARCADE':o.summit&&o.stage==='endless'?'ENDLESS':st.name.toUpperCase(),s.x,s.y-39,9,st.color);
+    text(['arcade','endless'].includes(o.stage)?'ARCADE':st.name.toUpperCase(),s.x,s.y-39,9,st.color);
     text(o.stage==='endless'?'DISTANCE RECORD':o.stage==='arcade'?S.arcade.stages.length+(o.summit?' STAGES':' STAGES - NO COINS'):st.fee?st.fee+' COINS':st.length+' m · FREE',s.x,s.y-24,8,st.fee?C.red:C.muted);
     flag(s.x-half,s.y,st.color,1);flag(s.x+half,s.y,st.color,-1);
     text('↓',s.x,s.y-4,10,'#96b8b3');
@@ -3302,6 +3313,32 @@ window.FROSTLINE_READY = (async () => {
     shadow(s.x,s.y,22,4);
     sprite(frame,s.x,s.y-(run&&alternate?1:0),o.width||60,{flip});
   }
+  let cocoaCupTile;
+  function drawCocoaPickup(o){
+    if(!cocoaCupTile){
+      // One native-pixel tile, enlarged with the same crisp edges as the game sprites.
+      cocoaCupTile=document.createElement('canvas');cocoaCupTile.width=16;cocoaCupTile.height=15;
+      const t=cocoaCupTile.getContext('2d'),b=(x,y,w,h,c)=>{t.fillStyle=c;t.fillRect(x,y,w,h);};
+      b(2,13,12,1,'#9b7155');b(1,12,14,1,'#fff0cc');
+      b(11,4,4,6,'#72503e');b(12,5,2,4,'#f9e5b8');b(12,6,1,2,'#72503e');
+      b(2,3,10,8,'#72503e');b(3,4,8,7,'#fff0cc');b(4,11,6,1,'#c59b72');
+      b(3,3,8,2,'#f9d9a0');b(4,3,6,1,'#623d32');b(5,4,4,1,'#93614a');
+      b(3,6,2,4,'#ffffff');b(7,7,3,2,'#c55d54');b(8,6,1,4,'#c55d54');
+    }
+    const at=screen(o.x,o.y+52),phase=clock*2+(o.phase||0),x=Math.round(at.x),y=Math.round(at.y-7+Math.sin(phase)*2);
+    ctx.save();ctx.globalAlpha=.22;box(x-15,at.y-2,30,4,'#dbb653');ctx.globalAlpha=1;
+    ctx.drawImage(cocoaCupTile,x-16,y-28,32,30);
+    for(let i=0;i<3;i++){
+      const rise=(clock*.65+i/3)%1,sx=Math.round(x-6+i*5+Math.sin(rise*6+i)*2),sy=Math.round(y-31-rise*14);
+      ctx.globalAlpha=(1-rise)*.8;box(sx,sy,2,4,'#fff8df');box(sx+1,sy-2,2,2,'#fff8df');
+    }
+    for(let i=0;i<4;i++){
+      const angle=i*Math.PI/2+phase*.22,sx=Math.round(x+Math.cos(angle)*24),sy=Math.round(y-15+Math.sin(angle)*18),shine=(Math.sin(phase*2+i*1.7)+1)/2;
+      ctx.globalAlpha=.35+shine*.65;const arm=shine>.6?3:2;
+      box(sx-arm,sy,arm*2+1,1,'#e6b741');box(sx,sy-arm,1,arm*2+1,'#e6b741');box(sx,sy,1,1,'#fffdf0');
+    }
+    ctx.restore();
+  }
   function drawHouse(o,s){
     const A=S.houseAnimation,w=o.width*ZOOM,a=atlas[o.houseSprite||o.type],h=w*a[4]/a[3],style=o.houseStyle??0;
     const floors=o.floors||1,pixelH=Math.round(Math.round(w)*a[4]/a[3]),storey=Math.floor(pixelH*.87)-Math.floor(pixelH*.55),extra=(floors-1)*storey;
@@ -3335,7 +3372,7 @@ window.FROSTLINE_READY = (async () => {
         if(floor>0)for(const side of [-1,1]){box(s.x+side*w*.19-2,by-14,5,6,warm);box(s.x+side*w*.19,by-14,1,6,'#735e58');}
       }
     }
-    if(o.cocoaShop){const at=screen(o.x,o.y+45);if(!o.town.cocoaClaimed){gearIcon('shield',at.x,at.y,1);text('COCOA +1',at.x,at.y+14,8,C.teal);}else text('THANK YOU!',at.x,at.y+10,8,C.muted);}
+    if(o.cocoaShop){if(!o.town.cocoaClaimed)drawCocoaPickup(o);else{const at=screen(o.x,o.y+52);text('THANK YOU!',at.x,at.y+10,8,C.muted);}}
     const label=!o.houseSprite&&(o.shopName||{hotel:'HOTEL',inn:'INN',cafe:'CAFE',rental:'SKIS'}[o.buildingKind]);
     if(label){
       const ly=s.y-h*.41-extra*.2,sw=label.length*5+6;
@@ -3617,7 +3654,7 @@ window.FROSTLINE_READY = (async () => {
     ctx.fillStyle='rgba(243,247,240,.93)';ctx.fillRect(0,0,W,67);
     line(18,66,W-18,66,'#cfdfd7');
     text('FROSTLINE',20,24,12,C.ink,'left');
-    if(state.endless)text('ENDLESS',W-19,24,12,C.teal,'right');else if(state.arcade)text((state.arcade.practice?'PRACTICE ':'ARCADE ')+state.arcade.stage+'/'+S.arcade.stages.length,W-19,24,12,C.teal,'right');else{sprite('star',W-96,31,15,{ui:true});text(state.bank.toLocaleString(),W-19,24,15,C.ink,'right');}
+    if(state.endless)text('ARCADE',W-19,24,12,C.teal,'right');else if(state.arcade)text((state.arcade.practice?'PRACTICE ':'ARCADE ')+state.arcade.stage+'/'+S.arcade.stages.length,W-19,24,12,C.teal,'right');else{sprite('star',W-96,31,15,{ui:true});text(state.bank.toLocaleString(),W-19,24,15,C.ink,'right');}
     const region=run?.endless?endlessEncounterAt(p.y):null;
     const name=region?(region.town?.name||region.title):run?stages[run.id].name+(p.y<run.startY?' · approach':''):state.zone.kind==='village'?state.zone.name+' Village':'Choose your first trail';
     text(name,20,48,10,C.teal,'left');
@@ -3637,7 +3674,7 @@ window.FROSTLINE_READY = (async () => {
     if(state.arcade||state.endless)drawGearHUD();
     if(state.cocoaShields){gearIcon('shield',26,H-63,1);text('COCOA +'+state.cocoaShields,37,H-63,9,C.teal,'left');}
     const er=state.endlessResult;
-    if(er&&er.until>clock){const y=H-188;box(45,y,W-90,87,'#fbf7e9');box(45,y,3,87,C.teal);text('ENDLESS RUN - '+er.distance+' m',W/2,y+20,12,C.teal);text('BEST '+er.best+' m',W/2,y+41,10,C.ink);text('SKI THROUGH ENDLESS TO TRY AGAIN',W/2,y+65,9,C.teal);}
+    if(er&&er.until>clock){const y=H-188;box(45,y,W-90,87,'#fbf7e9');box(45,y,3,87,C.teal);text('ARCADE RUN - '+er.distance+' m',W/2,y+20,12,C.teal);text('BEST '+er.best+' m',W/2,y+41,10,C.ink);text('SKI THROUGH ARCADE TO TRY AGAIN',W/2,y+65,9,C.teal);}
     const ar=state.arcadeResult;
     if(ar&&ar.until>clock){
       const y=H-245;box(35,y,W-70,112,'#fbf7e9');box(35,y,3,112,C.teal);

@@ -1,4 +1,6 @@
-# Arcade stage editor
+# Archived campaign stage editor
+
+The old stage campaign is retired from course selection. **Arcade** now names the infinite mixed slope. This file documents retained legacy stage configuration and shared implementation details; its `arcade` config key is not the current public mode ID. Current Arcade tuning remains under `endless` to preserve records and configuration compatibility.
 
 ## Rollback and design intent
 
