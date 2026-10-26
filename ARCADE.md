@@ -219,3 +219,5 @@ Endless Mixed Slalom is a separate summit entrance, on the left of the summit en
 Shared NPC behavior: skiers/boarders now tumble on collisions and recover after 4–5 seconds; predators can eat them while down. Player falls no longer give temporary immunity to predators, so a nearby Yeti can catch you before you get back up. This applies in Arcade as well as Endless.
 
 Illustrated finish cards dismissed by tap/key appear when a block ends at town and for the final campaign victory. Internal linked-stage joins remain seamless. Perfect-gate block finishes have their own celebration art. Each town also has one cocoa shop/front-window claim for one shield and a cocoa card dismissed by tap/key; the whole simulation pauses during scene cards so no pursuer advances and course timing stays unchanged.
+
+Rush Hour keeps 40 gates and its existing Yetis, with lighter traffic rates: skier 6, boarder 1, fastSkier 0.4 and overtakingSkier 0.4. Endless crowd fields have separate 180→280 total people settings in `endless.regions.crowd.people`.

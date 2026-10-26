@@ -162,11 +162,11 @@
         7.4
       ],
       "zombies": {
-        "wandererCount": [12, 26],
+        "wandererCount": [24, 48],
         "wandererSpeedKmh": [2, 3.5],
         "count": [
-          40,
-          95
+          18,
+          36
         ],
         "speedKmh": [
           7,
@@ -188,8 +188,8 @@
         "maximumGapMetres": 4200,
         "widthMetres": 240,
         "people": [
-          200,
-          420
+          180,
+          280
         ]
       },
       "denseForestDensity": [
@@ -205,8 +205,8 @@
         "chokeWidthMetres": [3.8, 5.2],
         "ySpeedScale": 0.4,
         "blendMetres": 25,
-        "crossingMetres": [280, 360],
-        "rows": [6, 7]
+        "crossingMetres": [90, 120],
+        "rows": [4, 5]
       }
     },
     "wildlife": {
@@ -808,10 +808,10 @@
         "yetiColor": "orange",
         "itemSpreadMetres": 28,
         "itemRates": {
-          "skier": 10,
-          "boarder": 1.5,
-          "fastSkier": 0.6,
-          "overtakingSkier": 0.6
+          "skier": 6,
+          "boarder": 1,
+          "fastSkier": 0.4,
+          "overtakingSkier": 0.4
         },
         "briefing": "FIND THE GAPS IN THE CROWD",
         "tierRates": {
