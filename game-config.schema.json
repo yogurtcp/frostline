@@ -9287,6 +9287,16 @@
                   "items": { "type": "integer", "minimum": 0, "maximum": 120 },
                   "description": "Additional first/final-visit zombies already patrolling the open gaps."
                 },
+                "graveWake": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "count": { "type": "array", "minItems": 2, "maxItems": 2, "items": { "type": "integer", "minimum": 1, "maximum": 32 } },
+                    "radiusMetres": { "type": "number", "minimum": 20, "maximum": 250 },
+                    "intervalSeconds": { "type": "number", "minimum": 0.1, "maximum": 2 }
+                  },
+                  "description": "A nearby grave wakes a finite group in sequence; later local groups append to the same cemetery queue."
+                },
                 "downedSpeedMultiplier": {
                   "type": "number",
                   "minimum": 1,

@@ -167,8 +167,13 @@
           36
         ],
         "downedSpeedMultiplier": 2,
-        "wandererCount": [36, 72],
-        "wandererSpeedKmh": [5, 9],
+        "graveWake": {
+          "count": [8, 14],
+          "radiusMetres": 140,
+          "intervalSeconds": 0.25
+        },
+        "wandererCount": [72, 144],
+        "wandererSpeedKmh": [10, 18],
         "count": [
           8,
           14

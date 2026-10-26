@@ -780,7 +780,7 @@ window.FROSTLINE_READY = (async () => {
     }
     extendEndlessTownLanes();
     a.sections=a.sections.filter(r=>r.endY>state.p.y-S.world.sceneryRetentionBehind);
-    a.encounters=a.encounters.filter(e=>e.endY>state.p.y-S.world.sceneryRetentionBehind||state.chasers.some(c=>activeCourseOwner(c)&&!c.dead&&!c.leaving&&c.y>=e.startY-200*e.scale&&c.y<=e.endY)||state.objects.some(o=>(o.type==='wolf'&&o.linkedChase||o.type==='zombie'&&o.awake&&o.zombieState!=='spent')&&activeCourseOwner(o)&&o.y>=e.startY-200*e.scale&&o.y<=e.endY));
+    a.encounters=a.encounters.filter(e=>e.endY>state.p.y-S.world.sceneryRetentionBehind||state.chasers.some(c=>activeCourseOwner(c)&&!c.dead&&!c.leaving&&c.y>=e.startY-200*e.scale&&c.y<=e.endY)||state.objects.some(o=>(o.type==='wolf'&&o.linkedChase||o.type==='zombie'&&(o.awake||o.graveWakeAt!==undefined)&&o.zombieState!=='spent')&&activeCourseOwner(o)&&o.y>=e.startY-200*e.scale&&o.y<=e.endY));
   }
   function updateEndless(){
     const a=state.endless;if(!a)return;
@@ -2401,7 +2401,7 @@ window.FROSTLINE_READY = (async () => {
       const landing=p.landingFeedback;p.landingFeedback=null;
       if(state.p===p&&!p.fall&&!p.awaitingInput&&!state.deathTimer){announce(landing.title,`+${landing.points} points`,C.blue,1.5);beep(710,.08);}
     }
-    state.objects=state.objects.filter(o=>!o.eaten&&!o.collected&&o.type!=='awakened'&&(!o.dead||clock<o.fadeUntil)&&(o.worldChunk||o.grandMausoleum&&o.triggerAt!==undefined&&o.released<o.waveSize||(o.type==='wolf'&&o.linkedChase||o.type==='zombie'&&o.awake&&o.zombieState!=='spent')&&activeCourseOwner(o)||o.y>p.y-S.world.sceneryRetentionBehind));
+    state.objects=state.objects.filter(o=>!o.eaten&&!o.collected&&o.type!=='awakened'&&(!o.dead||clock<o.fadeUntil)&&(o.worldChunk||o.grandMausoleum&&o.triggerAt!==undefined&&o.released<o.waveSize||(o.type==='wolf'&&o.linkedChase||o.type==='zombie'&&(o.awake||o.graveWakeAt!==undefined)&&o.zombieState!=='spent')&&activeCourseOwner(o)||o.y>p.y-S.world.sceneryRetentionBehind));
     state.snowballTrails=state.snowballTrails.filter(t=>t.until>clock&&t.by>p.y-S.world.sceneryRetentionBehind);
     for(const q of state.particles){q.x+=q.vx*dt;q.y+=q.vy*dt;q.vy+=80*dt;q.life-=dt;}state.particles=state.particles.filter(q=>q.life>0);state.speech=state.speech.filter(q=>q.until>clock);state.messages=state.messages.filter(q=>q.until>clock);
     state.cam.x=ease(state.cam.x,p.x,S.render.cameraXFollow,dt);state.cam.y=ease(state.cam.y,p.y-H*S.render.playerScreenY/ZOOM,S.render.cameraYFollow,dt);state.screenShake=Math.max(0,state.screenShake-dt);
@@ -2749,6 +2749,15 @@ window.FROSTLINE_READY = (async () => {
       }
     }
   }
+  function wakeGraveWave(origin){
+    const Z=S.endless.regions.zombies,G=Z.graveWake,e=origin.encounter,scale=endlessSpeedScale(origin);
+    const count=Math.round(mix(...G.count,e?.difficulty??0)),radius=G.radiusMetres*PX_PER_M*scale;
+    const candidates=state.objects.filter(o=>o.type==='zombie'&&o.zombieRole==='wanderer'&&o.zombieState==='resting'&&!o.dead&&!o.eaten&&o.graveWakeAt===undefined&&o.encounter===e&&Math.hypot(o.x-origin.x,o.y-origin.y)<=radius);
+    candidates.sort((a,b)=>a===origin?-1:b===origin?1:Math.hypot(a.x-origin.x,a.y-origin.y)-Math.hypot(b.x-origin.x,b.y-origin.y));
+    let at=Math.max(clock,e?.nextGraveWakeAt??clock);
+    for(const o of candidates.slice(0,count)){o.graveWakeAt=at;at+=G.intervalSeconds;}
+    if(e)e.nextGraveWakeAt=at;
+  }
   function updateZombies(dt){
     if(!state.started)return;
     updateMausoleums();
@@ -2766,8 +2775,9 @@ window.FROSTLINE_READY = (async () => {
         }
         if(o.zombieState==='resting'){
           o.motionVx=o.motionVy=o.travelSpeed=0;o.travelStamp=clock;
-          if(Math.hypot(o.x-p.x,o.y-p.y)>Z.noticeMetres*PX_PER_M*scale){resolveEnemyContact(o);if(state.deathTimer)return;continue;}
-          o.zombieState='stirring';o.riseAt=clock;o.awake=true;delete o.worldChunk;
+          if(o.graveWakeAt===undefined&&Math.hypot(o.x-p.x,o.y-p.y)<=Z.noticeMetres*PX_PER_M*scale)wakeGraveWave(o);
+          if(o.graveWakeAt===undefined||clock+1e-8<o.graveWakeAt){resolveEnemyContact(o);if(state.deathTimer)return;continue;}
+          o.zombieState='stirring';o.riseAt=clock;o.awake=true;delete o.graveWakeAt;delete o.worldChunk;burst(o.x,o.y,'#a5b0a0',4);
         }
         if(o.zombieState==='stirring'){
           o.motionVx=o.motionVy=o.travelSpeed=0;o.travelStamp=clock;
@@ -3209,7 +3219,8 @@ window.FROSTLINE_READY = (async () => {
   }
   function drawZombie(o,s){
     const resting=['hidden','resting'].includes(o.zombieState)&&!o.dead,stirring=['rising','stirring'].includes(o.zombieState)&&!o.dead,leaping=o.zombieState==='leaping'&&!o.dead;
-    const role=o.zombieRole??'ambusher',frame=resting||role==='ambusher'&&o.zombieState==='spent'?2:stirring?(clock-o.riseAt<S.endless.regions.zombies.ambush.windupSeconds*.5?2:3):leaping?1:role==='wanderer'&&o.travelSpeed>1?Math.floor(clock*(o.zombieRushing?4:2)*(o.mausoleumSpawn?2:1)+o.phase)%2:0;
+    const walkRate=Math.min(10,2*(o.zombieBaseKmh??S.endless.regions.zombies.wandererSpeedKmh[0])/5*(o.zombieRushing?2:1)*(o.mausoleumSpawn?2:1));
+    const role=o.zombieRole??'ambusher',frame=resting||role==='ambusher'&&o.zombieState==='spent'?2:stirring?(clock-o.riseAt<S.endless.regions.zombies.ambush.windupSeconds*.5?2:3):leaping?1:role==='wanderer'&&o.travelSpeed>1?Math.floor(clock*walkRate+o.phase)%2:0;
     const tile=zombieTile(o.zombieStyle??0,frame,role,!!o.mausoleumSpawn),width=Math.round(o.width*ZOOM),height=Math.round(width*tile.height/tile.width),lift=leaping?Math.sin((o.leapProgress||0)*Math.PI)*S.endless.regions.zombies.ambush.heightWorld*ZOOM:0;
     shadow(s.x,s.y,resting?14:10,3);ctx.save();ctx.translate(s.x,s.y-lift);if(!o.dead&&(o.zombieRushing||o.mausoleumSpawn)&&o.travelSpeed>1)ctx.translate(0,Math.floor(clock*8)%2?-1:0);if((o.motionVx||o.leapVx||0)<-2)ctx.scale(-1,1);
     if(o.zombieState==='emerging')ctx.globalAlpha=.35+.65*clamp((clock-o.emergeAt)/.5,0,1);
