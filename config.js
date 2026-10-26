@@ -18,14 +18,14 @@ window.loadFrostlineConfig = async function () {
   config.endless.encounters.townStreetWidthMetres ??= [14.4,23];
   config.endless.encounters.townPeople ??= [36,120];
   config.endless.yetis.wakeMetres ??= 140;
-  const regionDefaults = {"enabled":true,"minimumWidthMetres":600,"order":["town","quiet","trees","lake","quiet","cemetery","denseForest","forest","scramble","quiet"],"firstMetres":450,"gapMetres":[0,0],"lengthMetres":{"beginner":[320,400],"quiet":[180,250],"lake":[240,330],"denseForest":[110,160],"forest":[300,450],"cemetery":[650,850],"crowd":[320,400],"scramble":[70,110]},"beginnerPeople":[65,140],"quietTreesPer100Metres":8,"forestTreesPer100Metres":[12,26],"cemeteryOpeningMetres":[5.4,7.4],"zombies":{"count":[18,36],"speedKmh":[7,11],"noticeMetres":65},"crowd":{"firstMetres":1200,"chance":0.55,"minimumGapMetres":1600,"maximumGapMetres":4200,"widthMetres":240,"people":[180,280]},"denseForestDensity":[1,2],"scrambleDensity":[1,1.35]};
+  const regionDefaults = {"enabled":true,"minimumWidthMetres":600,"order":["town","quiet","trees","lake","quiet","cemetery","denseForest","forest","scramble","quiet"],"firstMetres":450,"gapMetres":[0,0],"lengthMetres":{"beginner":[320,400],"quiet":[180,250],"lake":[240,330],"denseForest":[110,160],"forest":[300,450],"cemetery":[650,850],"crowd":[320,400],"scramble":[70,110]},"beginnerPeople":[65,140],"quietTreesPer100Metres":8,"forestTreesPer100Metres":[12,26],"cemeteryOpeningMetres":[12,18],"zombies":{"count":[8,14],"speedKmh":[7,11],"noticeMetres":22},"crowd":{"firstMetres":1200,"chance":0.55,"minimumGapMetres":1600,"maximumGapMetres":4200,"widthMetres":240,"people":[180,280]},"denseForestDensity":[1,2],"scrambleDensity":[1,1.35]};
   config.endless.regions ??= regionDefaults;
   for(const [key,value] of Object.entries(regionDefaults))config.endless.regions[key] ??= value;
   for(const [key,value] of Object.entries(regionDefaults.lengthMetres))config.endless.regions.lengthMetres[key] ??= value;
   config.endless.regions.crowd ??= regionDefaults.crowd;
   for(const [key,value] of Object.entries(regionDefaults.crowd))config.endless.regions.crowd[key] ??= value;
   config.endless.regions.cemetery ??= {};
-  for(const [key,value] of Object.entries({ySpeedScale:.4,blendMetres:25,chokeWidthMetres:[3.8,5.2],crossingMetres:[90,120],rows:[4,5]}))config.endless.regions.cemetery[key] ??= value;
+  for(const [key,value] of Object.entries({ySpeedScale:.7,blendMetres:25,clusterSpacingMetres:[34,42]}))config.endless.regions.cemetery[key] ??= value;
   config.endless.regions.zombies.wandererCount ??= [24,48];
   config.endless.regions.zombies.wandererSpeedKmh ??= [2,3.5];
   config.endless.regions.zombies.ambush ??= {};
@@ -57,7 +57,7 @@ window.loadFrostlineConfig = async function () {
   config.wildlife.ramSpeedFraction ??= .85;
   config.physics.releaseTurnFollow ??= 3;
   config.village.populationMultiplier ??= 2;
-  const regionRanges = ['gapMetres','beginnerPeople','forestTreesPer100Metres','cemeteryOpeningMetres','denseForestDensity','scrambleDensity'].map(key=>config.endless.regions[key]).concat(Object.values(config.endless.regions.lengthMetres),[config.endless.regions.cemetery.crossingMetres,config.endless.regions.cemetery.rows,config.endless.regions.cemetery.chokeWidthMetres,config.endless.regions.zombies.wandererCount,config.endless.regions.zombies.wandererSpeedKmh,config.endless.regions.zombies.count,config.endless.regions.zombies.speedKmh,config.endless.regions.crowd.people]);
+  const regionRanges = ['gapMetres','beginnerPeople','forestTreesPer100Metres','cemeteryOpeningMetres','denseForestDensity','scrambleDensity'].map(key=>config.endless.regions[key]).concat(Object.values(config.endless.regions.lengthMetres),[config.endless.regions.cemetery.clusterSpacingMetres,config.endless.regions.zombies.wandererCount,config.endless.regions.zombies.wandererSpeedKmh,config.endless.regions.zombies.count,config.endless.regions.zombies.speedKmh,config.endless.regions.crowd.people],['crossingMetres','rows','chokeWidthMetres'].map(key=>config.endless.regions.cemetery[key]).filter(Array.isArray));
   if(config.endless.regions.crowd.maximumGapMetres<config.endless.regions.crowd.minimumGapMetres)throw new Error('crowd maximumGapMetres must be at least minimumGapMetres');
   if(regionRanges.some(pair=>pair[0]>pair[1]))throw new Error('endless.regions ranges must be ordered');
   if(config.controls.swipeLongPixels<=config.controls.swipeShortPixels)throw new Error('controls.swipeLongPixels must exceed swipeShortPixels');

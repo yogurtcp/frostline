@@ -17,6 +17,7 @@ window.FROSTLINE_READY = (async () => {
   const range = (a,b) => a + random()*(b-a);
   const C = S.colors, stages = S.courses;
   const MONSTER_KINDS=new Set(['wolf','bear','lurker','zombie','fast','slow']);
+  const ENDLESS_DEBUG_AREAS=['forest','trees','town','crowd','quiet','cemetery','lake','denseForest','scramble'];
   const WIDE_REGIONS=new Set(['town','trees','cemetery','denseForest','scramble','crowd','beginner']);
   // Source rectangles in the actual generated PNG atlases. No stand-in art.
   const atlas = S.atlas;
@@ -317,38 +318,40 @@ window.FROSTLINE_READY = (async () => {
     for(let i=1;i<r.points.length;i++){const a=r.points[i-1],b=r.points[i],dx=b.x-a.x,dy=b.y-a.y,t=clamp(((x-a.x)*dx+(y-a.y)*dy)/(dx*dx+dy*dy||1),0,1),px=a.x+t*dx,py=a.y+t*dy,distance=Math.hypot(x-px,y-py);if(distance<best.distance)best={x:px,y:py,distance,along:mix(r.lengths[i-1],r.lengths[i],t)};}
     return best;
   }
-  function cemeteryHalfAt(e,along){
-    let half=e.half;
-    for(let i=0;i<e.cemeterySweeps.length;i++){
-      if(i%3===0)continue;
-      const row=e.cemeterySweeps[i],t=(along-row.from)/(row.to-row.from),center=i%2?.38:.64;
-      if(t>0&&t<1){const pinch=clamp((.23-Math.abs(t-center))/.1,0,1);half=mix(half,e.chokeHalf,pinch);}
-    }
-    return half;
-  }
-  function cemeteryRailGeometry(e){
-    const r=e.cemeteryRoute,samples=[];
-    for(let i=1;i<r.points.length;i++){
-      const distances=[r.lengths[i-1],r.lengths[i]],row=e.cemeterySweeps.find(row=>row.index===i-1),rowIndex=row?e.cemeterySweeps.indexOf(row):-1;
-      if(row&&rowIndex%3!==0){const center=rowIndex%2?.38:.64;for(const t of [center-.23,center-.13,center+.13,center+.23])distances.push(mix(row.from,row.to,t));}
-      distances.sort((a,b)=>a-b);
-      for(const along of distances)if(!samples.length||along>samples.at(-1).along+.001)samples.push({...cemeteryPoint(e,along),along});
-    }
-    const rails=[[],[]];
-    for(let i=0;i<samples.length;i++){
-      const a=samples[Math.max(0,i-1)],p=samples[i],b=samples[Math.min(samples.length-1,i+1)],d1=Math.hypot(p.x-a.x,p.y-a.y)||1,d2=Math.hypot(b.x-p.x,b.y-p.y)||1;
-      let nx=-(p.y-a.y)/d1-(b.y-p.y)/d2,ny=(p.x-a.x)/d1+(b.x-p.x)/d2,d=Math.hypot(nx,ny)||1;nx/=d;ny/=d;
-      const dx=i? (p.x-a.x)/d1:(b.x-p.x)/d2,dy=i?(p.y-a.y)/d1:(b.y-p.y)/d2;
-      const offset=(cemeteryHalfAt(e,p.along)+6*e.scale)/Math.max(.7,nx*-dy+ny*dx);
-      for(let side=0;side<2;side++)rails[side].push({x:p.x+nx*offset*(side?1:-1),y:p.y+ny*offset*(side?1:-1)});
-    }
-    e.cemeteryRails=rails;
-  }
+  function cemeteryHalfAt(e,along){return e.half;}
   function cemeteryZombie(x,y,extra){
-    let grave=null,best=Infinity;
-    for(const o of state.objects)if(o.encounter===extra.encounter&&o.type==='grave'){const distance=Math.hypot(o.x-x,o.y-y);if(distance<best){grave=o;best=distance;}}
-    if(grave&&best<500*extra.encounter.scale){const dx=x-grave.x,dy=y-grave.y,d=Math.hypot(dx,dy)||1;x=grave.x+dx/d*30;y=grave.y+dy/d*30;}
-    return entity('zombie',x,y,{...extra,zombieRole:'ambusher',zombieState:'hidden',hideGrave:grave,awake:false,r:10});
+    const e=extra.encounter;let grave=null,best=Infinity;
+    for(const o of state.objects)if(o.encounter===e&&o.type==='grave'&&!o.restingOccupant){const distance=Math.hypot(o.x-x,o.y-y);if(distance<best){grave=o;best=distance;}}
+    if(!grave||best>230*e.scale){
+      const side=(extra.zombieStyle??0)%2?1:-1;
+      grave=entity('grave',x+side*(e.half+34*e.scale),y,{arcadeRun:extra.arcadeRun,encounter:e,worldChunk:extra.worldChunk,regionFlank:extra.regionFlank,width:32,r:10,style:(extra.zombieStyle??0)%6});
+    }
+    const dx=x-grave.x;
+    const nearby=state.objects.filter(o=>o.r>0&&['grave','mausoleum','cemeteryFence','cemeteryPillar','zombie'].includes(o.type)&&Math.abs(o.x-grave.x)<200&&Math.abs(o.y-grave.y)<200);
+    let spot=null;
+    for(const radius of [36,52,72,100]){
+      for(const angle of [Math.PI/4,Math.PI*.75,Math.PI/2,0,Math.PI,-Math.PI/4,-Math.PI*.75]){
+        const p={x:grave.x+Math.cos(angle)*radius*(Math.sign(dx)||1),y:grave.y+Math.sin(angle)*radius};
+        if(nearby.every(o=>obstacleClearance(o,p.x,p.y)>=13)){spot=p;break;}
+      }
+      if(spot)break;
+    }
+    x=spot?.x??grave.x+24;y=spot?.y??grave.y+52;
+    const o=entity('zombie',x,y,{...extra,zombieRole:extra.zombieRole??'ambusher',zombieState:'resting',hideGrave:grave,homeX:x,homeY:y,awake:false,r:10});grave.restingOccupant=o;return o;
+  }
+  function cemeteryCluster(e,x,y,own,random){
+    const scale=e.scale,angle=(random()-.5)*1.1,cos=Math.cos(angle),sin=Math.sin(angle),cols=3+Math.floor(random()*3),rows=random()<.7?2:1,crypt=random()<.28;
+    const at=(dx,dy)=>({x:x+(dx*cos-dy*sin)*scale,y:y+(dx*sin+dy*cos)*scale});
+    const prop=(type,p,extra)=>{
+      if(p.y<e.startY+210*scale||p.y>e.endY-210*scale||Math.abs(p.x-e.centerX)>e.band-70*scale)return;
+      if(encounterClearance(e,p.x,p.y,extra.r,extra.r)<10*scale)return;
+      return entity(type,p.x,p.y,{...own,...extra});
+    };
+    for(let row=0;row<rows;row++)for(let col=0;col<cols;col++){
+      const p=at((col-(cols-1)/2)*34+(random()-.5)*9,(row-.5)*42+(random()-.5)*12);
+      prop('grave',p,{width:28+random()*9,r:10,style:Math.floor(random()*6)});
+    }
+    if(crypt)prop('mausoleum',at((random()-.5)*90,-76),{width:74+random()*14,r:30,style:Math.floor(random()*3)});
   }
   function encounterPathX(path,y){
     if(y<=path[0].y)return path[0].x;
@@ -380,9 +383,10 @@ window.FROSTLINE_READY = (async () => {
   }
   function planEndlessEncounter(section,startY){
     const a=state.endless,Cf=S.endless.encounters,root=section.endlessRoot;
-    const R=S.endless.regions,kind=R.enabled?nextEndlessRegionKind(a,startY):a.encounterCount?(a.lastEncounterKind==='town'?'trees':'town'):'town';
+    const R=S.endless.regions,forcedKind=a.debugNextKind;delete a.debugNextKind;
+    const kind=forcedKind??(R.enabled?nextEndlessRegionKind(a,startY):a.encounterCount?(a.lastEncounterKind==='town'?'trees':'town'):'town');
     const visit=a.themeVisits[kind]=(a.themeVisits[kind]||0)+1,difficulty=clamp((visit-1)/(Cf.difficultyVisits-1),0,1);
-    const scale=endlessScaleAt((startY-a.startY)/PX_PER_M),length=range(...(R.enabled&&(R.lengthMetres[kind]||(kind==='crowd'?R.lengthMetres.beginner:null))||Cf.lengthMetres))*PX_PER_M*scale;
+    const scale=endlessScaleAt((startY-a.startY)/PX_PER_M),length=range(...((R.enabled||forcedKind)&&(R.lengthMetres[kind]||(kind==='crowd'?R.lengthMetres.beginner:null))||Cf.lengthMetres))*PX_PER_M*scale;
     const widths=kind==='town'?Cf.townStreetWidthMetres:Cf.corridorWidthMetres;
     const half=mix(widths[1],widths[0],difficulty)*PX_PER_M*(kind==='town'?1:scale)/2;
     const variant=Math.floor(random()*3),cycles=5+Math.round(difficulty),e={id:++a.encounterCount,kind,visit,difficulty,variant,scale,startY,endY:startY+length,half,paths:[],band:1000,chamberLength:length/cycles,generatedY:startY};
@@ -425,21 +429,12 @@ window.FROSTLINE_READY = (async () => {
     if(['crowd','beginner'].includes(e.kind)){e.centerX=e.kind==='crowd'?state.p.x:root.x;e.crowdWidthMetres=Math.max(e.kind==='crowd'?R.crowd.widthMetres:0,R.minimumWidthMetres);e.half=e.crowdWidthMetres*PX_PER_M*e.scale/2-60;e.band=e.half+200;e.paths=[[{x:e.centerX,y:e.startY},{x:e.centerX,y:e.endY}]];}
     const names={crowd:'Rush Hour Slope',beginner:'Rush Hour Slope',quiet:'Snowy Trail',lake:'Stillwater Lake',denseForest:'Close Pines',scramble:'Wild Patch',forest:'Open Pines',cemetery:'Frost Rest Cemetery'};e.title=names[e.kind];
     if(e.kind==='cemetery'){
-      const C=R.cemetery,length=e.endY-e.startY,legs=Math.round(mix(...C.rows,e.difficulty)),requestedSwing=mix(...C.crossingMetres,e.difficulty)*PX_PER_M*e.scale/2,side=pick([-1,1]);
-      // Diagonals match one keyboard steering step after the local Y projection.
-      // Short downhill stems connect them into one readable aisle.
-      const grade=C.ySpeedScale/Math.tan(S.controls.stepDegrees*Math.PI/180),swing=Math.min(requestedSwing,Math.max(20*e.scale,(length-800*e.scale-80*e.scale*(legs-1))/((legs-1)*2*grade))),drop=(legs-1)*swing*2*grade;
-      const gap=Math.max(80*e.scale,(length-800*e.scale-drop)/(legs-1)),path=[point(0),{x:root.x,y:e.startY+220*e.scale}],sweeps=[];
-      let y=e.startY+400*e.scale,x=root.x;
-      for(let i=0;i<legs;i++){
-        const a={x,y},bx=i===legs-1?root.x:root.x+side*(i%2?-1:1)*swing,b={x:bx,y:y+Math.abs(bx-x)*grade};path.push(a,b);sweeps.push({a,b,index:path.length-2});x=bx;y=b.y+gap;
-      }
-      path.push({x:root.x,y:e.endY-100*e.scale},point(1));path.linear=true;e.paths=[path];e.cemeterySweeps=sweeps;
-      e.chokeHalf=mix(...C.chokeWidthMetres.slice().reverse(),e.difficulty)*PX_PER_M*e.scale/2;
-      const lengths=[0];for(let i=1;i<path.length;i++)lengths.push(lengths.at(-1)+Math.hypot(path[i].x-path[i-1].x,path[i].y-path[i-1].y));e.cemeteryRoute={points:path,lengths,length:lengths.at(-1)};e.band=Math.max(e.band,swing+e.half+400*e.scale);
-      for(const row of sweeps){row.from=lengths[row.index];row.to=lengths[row.index+1];}cemeteryRailGeometry(e);
-      e.checkpoints=[e.startY+100*e.scale,e.endY-100*e.scale];e.chamberLength=length/2;
-      state.roads.push({surface:'snow',width:e.half*1.2,points:path,cemeteryPath:true,endlessEncounter:e,endlessEndY:e.endY});
+      const C=R.cemetery,length=e.endY-e.startY,side=pick([-1,1]);e.openCemetery=true;e.centerX=root.x;
+      e.clusterSpacing=mix(...C.clusterSpacingMetres.slice().reverse(),e.difficulty)*PX_PER_M*e.scale;
+      // A loose clear line guarantees fair gaps; it is neither painted nor fenced in.
+      const path=[point(0),point(.28,side*210*e.scale),point(.65,-side*170*e.scale),point(1)];path.linear=true;e.paths=[path];
+      const lengths=[0];for(let i=1;i<path.length;i++)lengths.push(lengths.at(-1)+Math.hypot(path[i].x-path[i-1].x,path[i].y-path[i-1].y));e.cemeteryRoute={points:path,lengths,length:lengths.at(-1)};
+      e.band=e.clusterSpacing*3+200*e.scale;e.checkpoints=[e.startY+100*e.scale,e.endY-100*e.scale];e.chamberLength=length/2;
     }else if(e.kind==='quiet'){
       const previous=state.endless.encounters.at(-2)?.town,side=pick([-1,1]);
       // Continue Arcade's actual village-exit road, including an off-centre approach.
@@ -516,61 +511,26 @@ window.FROSTLINE_READY = (async () => {
         }
       });
     }else if(e.kind==='cemetery'){
-      const fence=(ax,ay,bx,by,{routeRail=false,solidWall=false}={})=>{
-        if(Math.min(ay,by)<e.startY+80*scale||Math.max(ay,by)>e.endY-80*scale)return;
-        const path=e.paths[0];if(!routeRail&&!solidWall)for(let i=1;i<path.length;i++)if(obstacleSegmentSeparation(ax,ay,bx,by,path[i-1].x,path[i-1].y,path[i].x,path[i].y)<e.half+16)return;
-        const count=Math.max(1,Math.ceil(Math.hypot(bx-ax,by-ay)/360));
-        for(let i=0;i<count;i++){const x0=mix(ax,bx,i/count),y0=mix(ay,by,i/count),x1=mix(ax,bx,(i+1)/count),y1=mix(ay,by,(i+1)/count);entity('cemeteryFence',(x0+x1)/2,(y0+y1)/2,{...own,solidWall,r:solidWall?9:5,width:Math.abs(x1-x0)+18,depth:Math.abs(y1-y0)+10,ax:x0,ay:y0,bx:x1,by:y1});}
-      };
-      e.aislePieces??=new Set();
-      const piece=(key,ax,ay,bx,by,options)=>{
-        if(Math.max(ay,by)<from||Math.min(ay,by)>=to||e.aislePieces.has(key))return;e.aislePieces.add(key);fence(ax,ay,bx,by,options);
-      };
-      for(let side=0;side<2;side++){const rail=e.cemeteryRails[side];for(let i=1;i<rail.length;i++)piece('rail'+side+':'+i,rail[i-1].x,rail[i-1].y,rail[i].x,rail[i].y,{routeRail:true});}
-      // A few broad shoulders guide the same aisle, rather than creating terraces/branches.
-      for(let i=1;i<e.cemeterySweeps.length;i+=2){
-        const bend=e.cemeterySweeps[i].a,gap=e.half+45*scale;
-        for(const side of [-1,1])piece('wall'+i+':'+side,root.x+side*e.band,bend.y,bend.x+side*gap,bend.y,{solidWall:true});
+      const spacing=e.clusterSpacing;
+      for(let row=0;e.startY+260*scale+row*spacing<e.endY-220*scale;row++)for(let col=-3;col<=3;col++){
+        let seed=(Math.imul(e.id,73856093)^Math.imul(row+1,19349663)^Math.imul(col+7,83492791))>>>0;
+        const random=()=>{seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed/4294967296;};
+        const x=root.x+col*spacing+(random()-.5)*spacing*.65,y=e.startY+260*scale+row*spacing+(random()-.5)*spacing*.3;
+        if(y<from||y>=to)continue;cemeteryCluster(e,x,y,own,random);
       }
-      e.gardenSweeps??=new Set();
-      for(let row=0;row<e.cemeterySweeps.length;row++){
-        const {a,b}=e.cemeterySweeps[row];if(a.y>=to||b.y<from||e.gardenSweeps.has(row))continue;e.gardenSweeps.add(row);
-        const dx=b.x-a.x,dy=b.y-a.y,d=Math.hypot(dx,dy),tx=dx/d,ty=dy/d,nx=-ty,ny=tx;
-        const point=(along,offset)=>({x:a.x+tx*along+nx*offset,y:a.y+ty*along+ny*offset});
-        const prop=(type,p,extra)=>{if(p.y<e.startY+140*scale||p.y>e.endY-140*scale||cemeteryProjection(e,p.x,p.y).distance<e.half+45)return;return entity(type,p.x,p.y,{...own,...extra});};
-        for(let start=150*scale;start<d-300*scale;start+=900*scale){const end=Math.min(start+700*scale,d-150*scale),middle=(start+end)/2;
-          for(const side of [-1,1]){
-            const at=(along,offset)=>point(along,side*(e.half+offset*scale)),rail=(u,v,off)=>{const p=at(u,off),q=at(v,off);fence(p.x,p.y,q.x,q.y);};
-            rail(start,end,335);
-            for(const along of [start,end]){const p=at(along,145),q=at(along,335);fence(p.x,p.y,q.x,q.y);}
-            const c=at(middle,188);prop('cemeteryPlot',c,{r:0,width:Math.abs(tx)*(end-start)+Math.abs(nx)*285*scale,depth:Math.abs(ty)*(end-start)+Math.abs(ny)*285*scale,side,plotStart:c.y-(Math.abs(ty)*(end-start)+Math.abs(ny)*285*scale)/2,plotEnd:c.y+(Math.abs(ty)*(end-start)+Math.abs(ny)*285*scale)/2,plotCorners:[at(start,42),at(end,42),at(end,335),at(start,335)]});
-            for(let r=0;r<4;r++)for(let col=0;col<2;col++){const p=at(mix(start,end,(r+.6)/4.5),115+col*125),crypt=row%3===1&&side===1&&r===1;if(crypt){if(!col)prop('mausoleum',at(mix(start,end,(r+.6)/4.5),185),{width:80,r:30,style:row%3});}else prop('grave',p,{width:range(27,38),r:10,style:(row+r+col+(side>0?2:0))%6});}
-          }
-        }
-      }
-      // Headstones and small crypts crowd the aisle without blocking its clear centre.
-      const decorationCount=Math.ceil(e.cemeteryRoute.length/(145*scale));
-      for(let i=0;i<decorationCount;i++){
-        const along=(i+.5)/decorationCount*e.cemeteryRoute.length,p=cemeteryPoint(e,along),q=cemeteryPoint(e,Math.min(e.cemeteryRoute.length,along+5)),dx=q.x-p.x,dy=q.y-p.y,d=Math.hypot(dx,dy)||1;
-        if(p.y<from||p.y>=to)continue;
-        for(const side of [-1,1]){
-          const crypt=i%9===4,offset=cemeteryHalfAt(e,along)+(crypt?65:33)*scale,x=p.x-dy/d*offset*side,y=p.y+dx/d*offset*side;
-          if(encounterClearance(e,x,y,crypt?42:13,crypt?30:13)<8*scale)continue;
-          if(state.objects.some(o=>o.solidWall&&obstacleClearance(o,x,y)<(crypt?50:20)*scale))continue;
-          entity(crypt?'mausoleum':'grave',x,y,{...own,width:crypt?70:range(28,36),r:crypt?29:10,style:(i+(side>0?2:0))%6});
-        }
-      }
+      // Only boundary wings remain; every interior opening is a real choice.
       for(const exit of [false,true])if(exit?to===e.endY:from===e.startY)for(const side of [-1,1]){
-        const y=exit?e.endY-100*scale:e.startY+100*scale,center=encounterPathX(e.paths[0],y);
-        fence(center+side*(e.half+20),y,(e.centerX??root.x)+side*e.band,y);
-        entity('cemeteryPillar',center+side*(e.half+20),y,{...own,width:36,r:14,entry:!exit});
+        const y=exit?e.endY-100*scale:e.startY+100*scale,gap=220*scale;
+        const a=root.x+side*gap,b=root.x+side*e.band,n=Math.ceil(Math.abs(b-a)/360);
+        for(let i=0;i<n;i++){const ax=mix(a,b,i/n),bx=mix(a,b,(i+1)/n);entity('cemeteryFence',(ax+bx)/2,y,{...own,r:5,width:Math.abs(bx-ax)+10,depth:10,ax,ay:y,bx,by:y});}
+        entity('cemeteryPillar',root.x+side*gap,y,{...own,width:36,r:14,entry:!exit});
       }
       const count=Math.round(mix(...R.zombies.count,e.difficulty));
-      for(let row=0;row<count;row++){const p=cemeteryPoint(e,(row+.5)/count*e.cemeteryRoute.length);if(p.y<from||p.y>=to)continue;cemeteryZombie(p.x,p.y,{...own,zombieStyle:row%5,width:[32,36,28,34,42][row%5],zombieBaseKmh:mix(...R.zombies.speedKmh,e.difficulty),angle:Math.PI/2,phase:random()*TAU});}
+      for(let i=0;i<count;i++){const p=cemeteryPoint(e,(i+.5)/count*e.cemeteryRoute.length);if(p.y<from||p.y>=to)continue;cemeteryZombie(p.x,p.y,{...own,zombieStyle:2,width:34,zombieBaseKmh:mix(...R.zombies.speedKmh,e.difficulty),phase:random()*TAU});}
       const wanderers=Math.round(mix(...R.zombies.wandererCount,e.difficulty));
       for(let i=0;i<wanderers;i++){
         const along=(i+.55)/wanderers*e.cemeteryRoute.length,p=cemeteryPoint(e,along);if(p.y<from||p.y>=to)continue;
-        entity('zombie',p.x,p.y,{...own,zombieRole:'wanderer',zombieState:'wandering',zombieStyle:i%4,width:[32,36,28,34][i%4],r:10,awake:false,homeAlong:along,phase:random()*TAU,angle:Math.PI/2,zombieBaseKmh:mix(...R.zombies.wandererSpeedKmh,e.difficulty)});
+        cemeteryZombie(p.x,p.y,{...own,zombieRole:'wanderer',zombieStyle:i%4,width:[32,36,30,34][i%4],phase:random()*TAU,zombieBaseKmh:mix(...R.zombies.wandererSpeedKmh,e.difficulty)});
       }
     }
   }
@@ -619,7 +579,7 @@ window.FROSTLINE_READY = (async () => {
   }
   function endlessPursuitRoute(c,target){
     if(!state.endless||!activeCourseOwner(c))return null;
-    const e=endlessEncounterAt(c.y+80*state.endless.speedScale);if(!e||['beginner','crowd','quiet','lake','forest','scramble'].includes(e.kind)||target.y<e.startY)return null;
+    const e=endlessEncounterAt(c.y+80*state.endless.speedScale);if(!e||e.openCemetery||['beginner','crowd','quiet','lake','forest','scramble'].includes(e.kind)||target.y<e.startY)return null;
     // The expanded side terrain is playable too; do not pull its hunters back to the central lane.
     if(encounterClearance(e,target.x,clamp(target.y,e.startY,e.endY))>180*e.scale){c.encounterRoute=null;return null;}
     if(e.cemeteryRoute)return {encounter:e,index:0,cemetery:true};
@@ -640,24 +600,40 @@ window.FROSTLINE_READY = (async () => {
     return {x:encounterPathX(e.paths[route.index],y),y};
   }
   function recordEndless(reason){
-    const a=state.endless;if(!a)return;
+    const a=state.endless;if(!a||a.debug)return;
     const distance=Math.max(0,Math.floor((a.furthestY-a.startY)/PX_PER_M)),best=Math.max(state.endlessRecord.distance||0,distance);
     state.endlessRecord={version:S.endless.recordVersion,distance:best,previousVersion:state.endlessRecord.previousVersion||null,last:{distance,cleared:state.course?.cleared||0,missed:state.course?.missed||0,reason}};
     state.endlessResult={distance,best,reason,until:clock+6};save();
   }
-  function startEndless(gate){
+  function startEndless(gate,debugKind=null){
     const E=S.endless,p=state.p,startY=belowView(S.race.courseOffscreenMargin),pace=E.playerSpeedKmh/(S.physics.speedMultiplier*S.physics.hudKmhPerSpeed);
     stages.endless={...S.courses.endless,pace,length:Infinity};
     const block={},run={id:'endless',endless:true,arcade:{trees:true},block,x:gate?.x??p.x,selectionY:gate?.y??p.y,startY,endY:Infinity,objective:'gates',points:0,hits:0,cleared:0,missed:0,tricks:0,time:0,totalGates:0,shieldGateCharge:S.arcade.gear.shieldsPerStage/35};
     state.endless={startY,furthestY:startY,plannedY:startY,nextGateY:startY+300,nextLakeY:startY+E.firstLakeMetres*PX_PER_M,nextYetiY:startY+E.yetis.firstMetres*PX_PER_M,nextWildlifeY:startY+E.wildlife.firstMetres*PX_PER_M,wildlifeNumber:0,sections:[],encounters:[],encounterCount:0,themeVisits:{},townNames:[],nextEncounterY:startY+(E.regions.enabled?E.regions.firstMetres:E.encounters.firstMetres)*PX_PER_M,speedScale:1,gateNumber:0,shields:0,swords:0,shieldCharge:0,swordCharge:0,shieldsUsed:0,swordsUsed:0,combo:0,savedMetres:0};
+    if(debugKind){state.endless.debug=true;state.endless.debugNextKind=debugKind;state.endless.nextEncounterY=startY;state.endless.nextGateY=startY+80;state.endless.regionOrderIndex=Math.max(0,E.regions.order.indexOf(debugKind)+1);}
     state.course=run;state.zone={kind:'course',origin:startY};state.safeTrails.push(run);state.chasers=[];state.patrolPenalty=null;state.plannedTown=null;state.results=null;state.arcadeResult=null;state.endlessResult=null;
     // The course schedules its own reachable threats; unrelated ambient sleepers add dead space.
     state.objects=state.objects.filter(o=>o.arcadeRun||!['lurker','wolf','bear'].includes(o.type)||o.dead||o.eaten);
     for(const o of state.objects)if(o.type==='entrance')o.selected=o===gate;
     entity('courseStart',run.x,startY,{r:0,width:700,name:'ENDLESS MIXED SLALOM'});
     const route=state.liftRoutes.at(-1);if(route)route.y1=Math.min(route.y1,startY);
-    extendEndless();announce('ENDLESS MIXED SLALOM','GATES FOR GEAR - HOW FAR CAN YOU GO?',stages.endless.color,5);
+    extendEndless();
+    if(debugKind){
+      const a=state.endless,e=a.encounters[0],y=e.startY+20*e.scale;
+      Object.assign(p,{x:encounterPathX(e.paths[0],y),y,heading:0,desiredHeading:0,mode:'slide',speed:0,vx:0,vy:0});
+      state.cam={x:p.x,y:p.y-H*S.render.playerScreenY/ZOOM};a.furthestY=p.y;e.entered=true;
+      extendEndless();ensureWorld();announce('DEBUG - '+e.title.toUpperCase(),'ARROWS TO SKI - NO DISTANCE RECORD',C.teal,4);
+    }else announce('ENDLESS MIXED SLALOM','GATES FOR GEAR - HOW FAR CAN YOU GO?',stages.endless.color,5);
     state.transitions.push({kind:'start',id:'endless',y:p.y,paid:true});return true;
+  }
+  function debugEndlessArea(number){
+    const kind=ENDLESS_DEBUG_AREAS[number-1];
+    if(!ready||!kind||state.sceneCard||!state.endless&&(state.course||state.zone.kind!=='start'))return false;
+    if(state.endless){
+      state.endless.furthestY=Math.max(state.endless.furthestY,state.p.y);
+      recordEndless('DEBUG SHORTCUT');state.endless.debug=true;
+    }
+    resetSummit(false,kind);return true;
   }
   function yetiWakeDistance(o){
     if(!state.endless||!activeCourseOwner(o))return S.wildlife.yetiWakeDistance*endlessSpeedScale(o);
@@ -774,7 +750,7 @@ window.FROSTLINE_READY = (async () => {
     a.furthestY=Math.max(a.furthestY,state.p.y);const distance=Math.max(0,(a.furthestY-a.startY)/PX_PER_M);
     if(distance>=a.savedMetres+250){a.savedMetres=distance;recordEndless('RUNNING');state.endlessResult=null;}
     const active=endlessEncounterAt(state.p.y);
-    if(active&&!active.entered){active.entered=true;announce(active.town?active.town.name.toUpperCase():active.title.toUpperCase(),active.town?'ENTRY / EXIT FLAGS - YETIS CAN FOLLOW':active.kind==='quiet'?'FOLLOW THE SNOW PATH - TAKE A BREATH':active.kind==='scramble'?'FIND A GAP - OR JUMP':active.kind==='cemetery'?'FLAT GROUND - FOLLOW THE AISLES':['beginner','crowd'].includes(active.kind)?'SKI THROUGH THE CROWD':active.noFlags?'NO FLAGS - FOLLOW THE SLOPE':active.paths.length>1?'CHOOSE A BRANCH - EITHER GATE COUNTS':'WIND THROUGH THE PINES',C.teal,3);}
+    if(active&&!active.entered){active.entered=true;announce(active.town?active.town.name.toUpperCase():active.title.toUpperCase(),active.town?'ENTRY / EXIT FLAGS - YETIS CAN FOLLOW':active.kind==='quiet'?'FOLLOW THE SNOW PATH - TAKE A BREATH':active.kind==='scramble'?'FIND A GAP - OR JUMP':active.kind==='cemetery'?'PICK YOUR GAP - WATCH THE BONES':['beginner','crowd'].includes(active.kind)?'SKI THROUGH THE CROWD':active.noFlags?'NO FLAGS - FOLLOW THE SLOPE':active.paths.length>1?'CHOOSE A BRANCH - EITHER GATE COUNTS':'WIND THROUGH THE PINES',C.teal,3);}
     state.roads=state.roads.filter(r=>!r.endlessEncounter||(r.endlessEndY??r.endlessEncounter.endY)>state.p.y-S.world.sceneryRetentionBehind);
     state.villages=state.villages.filter(t=>!t.endlessRun||t.end>state.p.y-S.world.sceneryRetentionBehind);
     const view=viewBounds();
@@ -1175,7 +1151,7 @@ window.FROSTLINE_READY = (async () => {
     state.p.x=state.course.x;state.p.y=state.course.startY-200;
     state.cam={x:state.p.x,y:state.p.y-H*S.render.playerScreenY/ZOOM};
   }
-  function resetSummit(lift=false){
+  function resetSummit(lift=false,debugKind=null){
     window.FrostlineApp?.playing(false);
     if(state.endless){recordEndless(state.endlessResult?.reason||'RUN ENDED');state.endless=null;}
     if(state.arcade){recordArcade(state.arcade.endReason||'RUN ENDED');state.arcade=null;}
@@ -1185,6 +1161,7 @@ window.FROSTLINE_READY = (async () => {
     clearSceneCard();state.cocoaEffect=null;state.deathYeti=null;state.p=newPlayer();state.results=null;state.course=null;state.zone={kind:'start',origin:0};state.objects=[];state.trails=[];state.snowballTrails=[];state.chasers=[];state.particles=[];state.speech=[];state.messages=[];
     state.roads=[];state.villages=[];state.safeTrails=[];state.liftRoutes=[];state.chunks.clear();state.plannedTown=null;state.generated=0;state.lastTrack=null;state.started=false;state.activeTime=0;state.keyboardStep=0;state.control='keyboard';state.input={left:false,right:false,up:false,down:false,pointer:null,jump:false};state.deathTimer=state.liftTimer=0;state.elevated=0;state.nextFastSkier=clock+2;
     state.cam={x:0,y:-H*S.render.playerScreenY/ZOOM};startMeadow();state.liftRoutes.push({x0:S.lift.x,x1:S.lift.x,y0:S.lift.startY,y1:Infinity});ensureWorld(true);
+    if(debugKind){startEndless({x:state.p.x,y:state.p.y},debugKind);return;}
     if(S.endless.autoStart){autoStartEndless();return;}
     if(S.arcade.autoStart){autoStartArcade();return;}
     announce(lift?'BACK AT THE SUMMIT':'ANOTHER DAY. SAME WALLET.',`${state.bank} coins  ·  Choose a trail and ski.`,C.teal,3.5);
@@ -1813,21 +1790,16 @@ window.FROSTLINE_READY = (async () => {
         if(y-hh<e.startY+220*scale||y+hh>e.endY-220*scale||Math.abs(x-center)+hw>e.band-60)return false;
         if(e.kind==='town')return Math.abs(x-center)-hw>e.coreBand+60;
         if(e.kind==='trees')return encounterClearance(e,x,y,hw,hh)>mix(140,210,e.difficulty)*scale+80;
-        if(e.kind==='cemetery')return cemeteryProjection(e,x,y).distance-Math.hypot(hw,hh)>e.half+390*scale;
+        if(e.kind==='cemetery')return Math.abs(x-center)-hw>e.coreBand+70*scale;
         return Math.abs(x-center)-hw>(e.kind==='denseForest'?e.coreBand*.65:e.half)+90;
       };
       const grid=(spacing,fn,rowSpacing=spacing)=>{for(let row=Math.ceil((y0-e.startY)/rowSpacing);;row++){const y=e.startY+row*rowSpacing;if(y>=y1)break;for(let col=Math.ceil((x0-center)/spacing);;col++){const x=center+col*spacing;if(x>=x1)break;fn(x,y,row,col);}}};
       if(e.kind==='cemetery'){
-        grid(400,(x,y,row,col)=>{
-          if(!clear(x,y,175,175))return;
-          const fence=(ax,ay,bx,by)=>entity('cemeteryFence',(ax+bx)/2,(ay+by)/2,{...own,r:5,width:Math.abs(bx-ax)+10,depth:Math.abs(by-ay)+10,ax,ay,bx,by});
-          entity('cemeteryPlot',x,y,{...own,r:0,width:310,depth:300,side:Math.sign(col),plotStart:y-150,plotEnd:y+150});
-          fence(x-155,y-150,x+155,y-150);fence(x-155,y-150,x-155,y+150);fence(x+155,y-150,x+155,y+150);
-          fence(x-155,y+150,x-60,y+150);fence(x+60,y+150,x+155,y+150);
-          if((row+col)%4===0)entity('mausoleum',x,y+40,{...own,width:80,r:30,style:Math.abs(row)%3});
-          else for(let i=0;i<3;i++)entity('grave',x+(i-1)*85,y-35+((row+i)%2)*65,{...own,width:32,r:10,style:Math.abs(row+col+i)%6});
+        grid(400*scale,(x,y,row,col)=>{
+          x+=(random()-.5)*160*scale;y+=(random()-.5)*100*scale;if(!clear(x,y,150*scale,150*scale))return;
+          cemeteryCluster(e,x,y,own,random);
           const flankSpawnId=e.id+':'+row+':'+col;
-          if(mix(...S.endless.regions.zombies.count,e.difficulty)>0&&(row+col)%3===0&&!state.objects.some(o=>o.flankSpawnId===flankSpawnId&&!o.dead&&!o.eaten))cemeteryZombie(x,y+200,{...own,flankSpawnId,zombieStyle:Math.abs(row+col)%5,width:34,r:10,zombieBaseKmh:mix(...S.endless.regions.zombies.speedKmh,e.difficulty),awake:false,angle:Math.PI/2});
+          if(mix(...S.endless.regions.zombies.count,e.difficulty)>0&&(row+col)%5===0&&!state.objects.some(o=>o.flankSpawnId===flankSpawnId&&!o.dead&&!o.eaten))cemeteryZombie(x,y+70*scale,{...own,flankSpawnId,zombieStyle:2,width:34,zombieBaseKmh:mix(...S.endless.regions.zombies.speedKmh,e.difficulty)});
         });
       }else if(e.kind==='town'){
         grid(310,(x,y,row,col)=>{
@@ -2722,6 +2694,16 @@ window.FROSTLINE_READY = (async () => {
       if(o.type!=='zombie'||o.dead||o.eaten)continue;
       o.zombieState??='hidden';const scale=endlessSpeedScale(o);
       if(o.zombieRole==='wanderer'){
+        if(o.zombieState==='resting'){
+          o.motionVx=o.motionVy=o.travelSpeed=0;o.travelStamp=clock;
+          if(Math.hypot(o.x-p.x,o.y-p.y)>Z.noticeMetres*PX_PER_M*scale){resolveEnemyContact(o);if(state.deathTimer)return;continue;}
+          o.zombieState='stirring';o.riseAt=clock;o.awake=true;delete o.worldChunk;
+        }
+        if(o.zombieState==='stirring'){
+          o.motionVx=o.motionVy=o.travelSpeed=0;o.travelStamp=clock;
+          if(clock-o.riseAt<Z.ambush.windupSeconds){resolveEnemyContact(o);if(state.deathTimer)return;continue;}
+          o.zombieState='wandering';o.hideGrave=null;
+        }
         const distance=Math.hypot(o.x-p.x,o.y-p.y);
         if(distance<Z.noticeMetres*PX_PER_M*scale){o.awake=true;delete o.worldChunk;}
         o.wanderElapsed=(o.wanderElapsed||0)+dt;
@@ -2731,7 +2713,7 @@ window.FROSTLINE_READY = (async () => {
         if(o.awake)target=endlessPursuitTarget(o,p);
         else {
           if(!o.wanderTarget||Math.hypot(o.x-o.wanderTarget.x,o.y-o.wanderTarget.y)<8||clock>(o.nextWander||0)){
-            o.wanderTarget=cemeteryPoint(o.encounter,clamp(o.homeAlong+Math.sin(clock*.5+o.phase)*65*scale,0,o.encounter.cemeteryRoute.length));o.nextWander=clock+range(3,6);
+            o.wanderTarget=o.encounter?.openCemetery?{x:o.homeX+Math.sin(clock*.5+o.phase)*70*scale,y:o.homeY+Math.cos(clock*.35+o.phase)*45*scale}:cemeteryPoint(o.encounter,clamp((o.homeAlong??0)+Math.sin(clock*.5+o.phase)*65*scale,0,o.encounter.cemeteryRoute.length));o.nextWander=clock+range(3,6);
           }
           target=o.wanderTarget;
         }
@@ -2740,7 +2722,7 @@ window.FROSTLINE_READY = (async () => {
         else {o.motionVx=o.motionVy=o.travelSpeed=0;o.travelStamp=clock;}
         resolveEnemyContact(o);if(state.deathTimer)return;continue;
       }
-      if(o.zombieState==='hidden'){
+      if(o.zombieState==='hidden'||o.zombieState==='resting'){
         o.motionVx=o.motionVy=o.travelSpeed=0;o.travelStamp=clock;
         if(Math.hypot(o.x-p.x,o.y-p.y)>A.rangeMetres*PX_PER_M*scale||state.objects.some(w=>w.solidWall&&obstacleSegmentSeparation(o.x,o.y,p.x,p.y,w.ax,w.ay,w.bx,w.by)<w.r+5))continue;
         o.zombieState='rising';o.riseAt=clock;o.awake=true;delete o.worldChunk;burst(o.x,o.y,C.ice,4);beep(100,.12,'triangle',.01);
@@ -3079,16 +3061,31 @@ window.FROSTLINE_READY = (async () => {
   function zombieTile(style,frame,role='wanderer'){
     const key=role+':'+style+':'+frame;if(zombieTiles.has(key))return zombieTiles.get(key);
     const tile=document.createElement('canvas'),crawl=style===4;tile.width=crawl?24:18;tile.height=crawl?13:24;
-    const t=tile.getContext('2d'),px=(x,y,w,h,c)=>{t.fillStyle=c;t.fillRect(x,y,w,h);},ink='#334a4d',skin=['#91a77b','#8b9e88','#c8c7ae','#a1aea0','#91a797'][style],coat=['#786273','#5c7466','#788a85','#9baba3','#776e58'][style];
+    const t=tile.getContext('2d'),px=(x,y,w,h,c)=>{t.fillStyle=c;t.fillRect(x,y,w,h);},ink='#334a4d',skin=['#91a77b','#8b9e88','#8c9b77','#a1aea0','#91a797'][style],coat=['#786273','#5c7466','#788a85','#9baba3','#776e58'][style];
     if(role==='ambusher'){
-      tile.width=22;tile.height=20;
-      const dark='#254264',body=['#488ab2','#559bc0','#4484a9','#669cbb','#417797'][style],light='#90cce0';
-      px(5,8,12,7,dark);px(6,8,10,5,body);px(9,3,9,7,dark);px(10,3,7,6,body);px(11,2,5,2,light);
-      px(11,5,2,1,'#e0f5ed');px(15,5,2,1,'#e0f5ed');px(12,8,4,1,dark);
-      px(frame?0:2,frame?7:11,6,3,body);px(frame?0:2,frame?6:13,2,3,light);
-      px(16,frame?8:12,5,3,body);px(20,frame?6:14,2,3,light);
-      px(frame?3:6,14,4,4,dark);px(frame?0:4,17,7,2,body);px(frame?15:12,14,4,4,dark);px(frame?17:12,18,5,2,body);
-      px(7,8,2,2,light);zombieTiles.set(key,tile);return tile;
+      tile.width=22;tile.height=24;const bone='#d7d0b2',shade='#a9ae9c',dark='#3b4b50';
+      if(frame===2){
+        px(2,11,8,8,dark);px(3,11,6,6,bone);px(4,13,2,2,dark);px(7,13,2,2,dark);px(5,17,4,1,dark);
+        px(10,16,8,2,bone);px(11,18,1,3,shade);px(14,18,1,3,shade);px(17,18,1,3,shade);px(9,21,8,1,bone);px(17,21,4,2,bone);px(8,20,2,3,bone);
+      }else{
+        const crouch=frame===3?4:0,head=frame===1?1:2+crouch;
+        px(7,head,8,8,dark);px(8,head,6,7,bone);px(8,head+2,2,2,dark);px(12,head+2,2,2,dark);px(10,head+4,1,2,dark);px(9,head+6,4,1,dark);
+        px(10,head+8,2,8,bone);for(let i=0;i<3;i++){px(6,head+8+i*2,11,1,bone);px(6,head+9+i*2,1,1,shade);px(16,head+9+i*2,1,1,shade);}
+        px(7,head+15,9,2,bone);
+        if(frame===1){px(3,7,2,7,bone);px(1,5,4,2,bone);px(18,6,2,7,bone);px(18,4,4,2,bone);px(5,18,2,4,bone);px(2,21,5,2,bone);px(15,18,2,4,bone);px(16,22,5,2,bone);}
+        else {px(4,head+9,2,7,bone);px(2,head+15,4,1,bone);px(17,head+9,2,6,bone);px(17,head+14,4,1,bone);px(7,head+17,2,Math.max(1,5-crouch),bone);px(14,head+17,2,Math.max(1,5-crouch),bone);px(5,23,5,1,shade);px(14,23,5,1,shade);}
+      }
+      zombieTiles.set(key,tile);return tile;
+    }
+    if(frame===2||frame===3){
+      const raised=frame===3?3:0,coatColor=['#786273','#5c7466','#77725c','#9baba3'][style%4];
+      px(4,7-raised,8,8,ink);px(5,7-raised,6,6,skin);px(5,9-raised,2,1,ink);px(9,9-raised,2,1,ink);px(7,12-raised,3,1,'#53615b');
+      px(3,15-raised,11,6+raised,ink);px(4,15-raised,9,5+raised,coatColor);px(2,17-raised,3,4,skin);px(12,16-raised,4,3,skin);
+      px(6,21,10,2,ink);px(13,22,5,2,ink);px(3,22,6,2,'#53615b');
+      if(style===0){px(3,6-raised,10,2,'#526477');px(6,4-raised,6,3,'#526477');}
+      if(style===1){px(3,6-raised,10,2,'#645f50');px(5,4-raised,7,3,'#645f50');}
+      if(style===3){px(2,5-raised,12,3,'#bdc7ba');px(2,8-raised,2,10,'#bdc7ba');}
+      zombieTiles.set(key,tile);return tile;
     }
     if(crawl){
       px(2,5,14,6,ink);px(3,5,12,4,coat);px(3,10,7,2,'#4d625c');px(frame?0:2,11,6,2,ink);
@@ -3101,20 +3098,16 @@ window.FROSTLINE_READY = (async () => {
       px(1,11+frame,5,3,coat);px(0,13+frame,3,2,skin);px(12,12-frame,5,3,coat);px(15,14-frame,3,2,skin);
       if(style===0){px(6+lean,1,7,3,'#526477');px(4+lean,3,10,2,'#526477');px(7,10,2,7,'#a38b6c');px(6,16,3,2,skin);}
       if(style===1){px(4,1+bob,11,3,'#645f50');px(6,0+bob,7,2,'#645f50');px(7,10,4,8,'#4b5b57');px(13,8,1,15,'#927e5d');px(11,20,5,4,'#778e92');px(12,20,3,1,'#bdcac1');}
-      if(style===2){px(5,2,9,7,'#d5d1b8');px(6,4,2,3,ink);px(11,4,2,3,ink);px(9,7,1,2,ink);px(7,9,5,1,skin);px(8,11,2,8,skin);for(let i=0;i<3;i++)px(5,11+i*2,8,1,skin);px(5,19,2,3,skin);px(11,19,2,3,skin);}
+      if(style===2){px(5,2,9,7,'#8c9b77');px(6,4,2,1,ink);px(11,4,2,1,ink);px(4,11,10,7,'#77725c');px(6,16,2,3,'#8c9b77');px(11,14,3,2,'#8c9b77');}
       if(style===3){px(3,1,12,3,'#bdc7ba');px(3,4,2,9,'#bdc7ba');px(13,4,2,12,'#829891');px(4,14,10,6,'#a8b7aa');px(3,19,4,3,'#a8b7aa');px(9,19,5,2+frame,'#a8b7aa');px(7,13,1,4,'#6d8882');}
     }
     zombieTiles.set(key,tile);return tile;
   }
   function drawZombie(o,s){
-    if(o.zombieState==='hidden'&&!o.dead){
-      const tile=zombieTile(o.zombieStyle??0,0,'ambusher'),width=Math.round(o.width*ZOOM),reveal=Math.max(7,Math.round(width*Math.ceil(tile.height*.55)/tile.width));
-      shadow(s.x,s.y,9,2);ctx.drawImage(tile,0,0,tile.width,Math.ceil(tile.height*.55),s.x-Math.round(width/2),s.y-reveal,width,reveal);
-      box(s.x-width/2-1,s.y-1,width+2,2,'#d4ded8');return;
-    }
-    const style=o.zombieStyle??0,leaping=o.zombieState==='leaping'&&!o.dead,rising=o.zombieState==='rising'&&!o.dead,frame=leaping?1:o.zombieRole==='wanderer'&&o.travelSpeed>1?Math.floor(clock*2+o.phase)%2:0,tile=zombieTile(style,frame,o.zombieRole??'ambusher'),width=Math.round(o.width*ZOOM),height=Math.round(width*tile.height/tile.width),lift=leaping?Math.sin((o.leapProgress||0)*Math.PI)*S.endless.regions.zombies.ambush.heightWorld*ZOOM:0;
-    shadow(s.x,s.y,leaping?9:style===4?18:12,3);ctx.save();ctx.translate(s.x,s.y-lift);if((o.motionVx||o.leapVx||0)<-2)ctx.scale(-1,1);
-    if(rising){const reveal=mix(.55,1,clamp((clock-o.riseAt)/S.endless.regions.zombies.ambush.windupSeconds,0,1)),sourceHeight=Math.ceil(tile.height*reveal),visibleHeight=Math.round(width*sourceHeight/tile.width);ctx.drawImage(tile,0,0,tile.width,sourceHeight,-Math.round(width/2),-visibleHeight,width,visibleHeight);ctx.restore();return;}
+    const resting=['hidden','resting'].includes(o.zombieState)&&!o.dead,stirring=['rising','stirring'].includes(o.zombieState)&&!o.dead,leaping=o.zombieState==='leaping'&&!o.dead;
+    const role=o.zombieRole??'ambusher',frame=resting||role==='ambusher'&&o.zombieState==='spent'?2:stirring?(clock-o.riseAt<S.endless.regions.zombies.ambush.windupSeconds*.5?2:3):leaping?1:role==='wanderer'&&o.travelSpeed>1?Math.floor(clock*2+o.phase)%2:0;
+    const tile=zombieTile(o.zombieStyle??0,frame,role),width=Math.round(o.width*ZOOM),height=Math.round(width*tile.height/tile.width),lift=leaping?Math.sin((o.leapProgress||0)*Math.PI)*S.endless.regions.zombies.ambush.heightWorld*ZOOM:0;
+    shadow(s.x,s.y,resting?14:10,3);ctx.save();ctx.translate(s.x,s.y-lift);if((o.motionVx||o.leapVx||0)<-2)ctx.scale(-1,1);
     if(o.dead||o.stunnedUntil>clock)ctx.rotate(Math.PI/2);ctx.drawImage(tile,-Math.round(width/2),-height,width,height);ctx.restore();
   }
   function drawTransitionLake(o){
@@ -3627,7 +3620,7 @@ window.FROSTLINE_READY = (async () => {
     }
     else if(state.activeTime>15){text(state.arcade?'NEXT STAGE AT THE END OF TOWN':'SKI THROUGH A GATE TO ENTER',W/2,H-23,9,C.muted);}
     if(run&&!run.arcade&&S.timing.enabled&&(run.totalGates||run.totalMushrooms)){const best=courseRecord(run.id)?.bestSeconds;text(`TIME ${formatTime(run.time)}${best?'  BEST '+formatTime(best):'  SET A BEST TIME'}`,20,H-40,10,C.ink,'left');}
-    if(state.endless)text('BEST '+Math.max(state.endlessRecord.distance||0,Math.floor((state.endless.furthestY-state.endless.startY)/PX_PER_M))+' m',20,H-40,10,C.ink,'left');
+    if(state.endless)text(state.endless.debug?'DEBUG - NO RECORD':'BEST '+Math.max(state.endlessRecord.distance||0,Math.floor((state.endless.furthestY-state.endless.startY)/PX_PER_M))+' m',20,H-40,10,C.ink,'left');
     if(state.arcade)text('DISTANCE '+Math.floor((state.arcade.furthestY-state.arcade.startY)/PX_PER_M)+' m  -  BEST '+(state.arcadeRecord.distance||0)+' m',20,H-40,10,C.ink,'left');
     if(!state.started||state.activeTime<10&&!run?.timingStarted){const alpha=state.activeTime>7?(10-state.activeTime)/3:1;ctx.globalAlpha=alpha;text('SWIPE TO SKI - SECOND FINGER TO JUMP',W/2,H-(state.arcade||state.endless?155:64),11,C.ink);text('ARROWS: SKI  ·  SPACE: JUMP  ·  M: SOUND',W/2,H-(state.arcade||state.endless?137:46),9,C.muted);ctx.globalAlpha=1;}
     if(p.awaitingInput&&p.fall===0){text('TAKE A BREATH.',W/2,91,12,C.teal);text('PRESS AN ARROW OR TOUCH TO SKI AGAIN',W/2,109,9,C.ink);}
@@ -3722,7 +3715,7 @@ window.FROSTLINE_READY = (async () => {
   canvas.addEventListener('pointermove',e=>{if(state.input.pointer?.id!==e.pointerId)return;e.preventDefault();updateSwipe(e);});
   canvas.addEventListener('pointerup',e=>{if(state.input.pointer?.id!==e.pointerId)return;updateSwipe(e);releasePointer();});const cancel=e=>{if(state.input.pointer?.id===e.pointerId)releasePointer();};canvas.addEventListener('pointercancel',cancel);canvas.addEventListener('lostpointercapture',cancel);
   const sceneHeldKeys=new Set();
-  window.addEventListener('keydown',e=>{if(state.sceneCard&&!e.target?.closest?.('dialog,#install-app')){e.preventDefault();sceneHeldKeys.add(e.code);if(!e.repeat&&!['Shift','Control','Alt','Meta'].includes(e.key))dismissSceneCard();return;}if(sceneHeldKeys.has(e.code)){e.preventDefault();return;}if(e.target?.closest?.('button,dialog,a'))return;const key={ArrowLeft:'left',ArrowRight:'right',ArrowUp:'up',ArrowDown:'down',a:'left',d:'right',w:'up',s:'down'}[e.key];if(key){e.preventDefault();if((state.p.awaitingInput&&e.repeat)||!startMoving())return;state.input[key]=true;keyboardDirection(key,e.repeat);}if(e.code==='Space'){e.preventDefault();if((state.p.awaitingInput&&e.repeat)||!startMoving())return;state.input.jump=true;}if(e.key.toLowerCase()==='m'&&!e.repeat){state.muted=!state.muted;save();announce(state.muted?'SOUND OFF':'SOUND ON','',C.teal,1);}});
+  window.addEventListener('keydown',e=>{if(state.sceneCard&&!e.target?.closest?.('dialog,#install-app')){e.preventDefault();sceneHeldKeys.add(e.code);if(!e.repeat&&!['Shift','Control','Alt','Meta'].includes(e.key))dismissSceneCard();return;}if(sceneHeldKeys.has(e.code)){e.preventDefault();return;}if(e.target?.closest?.('button,dialog,a,input,textarea,select,[contenteditable]'))return;const number=Number(e.key)||Number(e.code.match(/^(?:Digit|Numpad)([1-9])$/)?.[1]);if(number>=1&&number<=9&&!e.ctrlKey&&!e.metaKey&&!e.altKey&&!e.shiftKey){if(!e.repeat&&debugEndlessArea(number)){e.preventDefault();return;}}const key={ArrowLeft:'left',ArrowRight:'right',ArrowUp:'up',ArrowDown:'down',a:'left',d:'right',w:'up',s:'down'}[e.key];if(key){e.preventDefault();if((state.p.awaitingInput&&e.repeat)||!startMoving())return;state.input[key]=true;keyboardDirection(key,e.repeat);}if(e.code==='Space'){e.preventDefault();if((state.p.awaitingInput&&e.repeat)||!startMoving())return;state.input.jump=true;}if(e.key.toLowerCase()==='m'&&!e.repeat){state.muted=!state.muted;save();announce(state.muted?'SOUND OFF':'SOUND ON','',C.teal,1);}});
   window.addEventListener('keyup',e=>{sceneHeldKeys.delete(e.code);const key={ArrowLeft:'left',ArrowRight:'right',ArrowUp:'up',ArrowDown:'down',a:'left',d:'right',w:'up',s:'down'}[e.key];if(key)state.input[key]=false;});
   window.addEventListener('blur',()=>{sceneHeldKeys.clear();state.input.left=state.input.right=state.input.up=state.input.down=false;if(state.input.pointer)releasePointer();});
   window.addEventListener('resize',resize);
@@ -3732,5 +3725,5 @@ window.FROSTLINE_READY = (async () => {
   const loaded=Promise.all(Object.entries(window.FROSTLINE_ASSETS).map(([key,src])=>new Promise((resolve,reject)=>{const im=new Image();im.onload=()=>{images[key]=im;resolve();};im.onerror=()=>reject(new Error('Cannot load sprite atlas: '+key));im.src=src;})));
   loaded.then(()=>{ready=true;window.FrostlineApp?.ready();if(S.endless.autoStart)autoStartEndless();else if(S.arcade.autoStart)autoStartArcade();render();requestAnimationFrame(frame);}).catch(window.showFrostlineError);
   // Kept out of the UI: deterministic hooks for simulation and renderer checks.
-  window.Frostline={config:S,state,stages,atlas,loaded,step,render,startCourse,creditRun,makeVillage,hit,triggerAmbush,addChasers,startMoving,resize,launch,playerPose,keyboardDirection,releasePointer,ensureWorld,updateWildlife,updateSkiers,crashSkier,endlessPressure,endlessScaleAt,obstacleClearance,encounterPathX,encounterClearance,endlessTownAt,extendEndless,die,resetSummit,patchAt,onRoad,entity,topSpeed,viewBounds,humanArea,lakeContains,pickWarningChaser,get ready(){return ready;},get height(){return H;}};
+  window.Frostline={debugEndlessArea,debugAreas:ENDLESS_DEBUG_AREAS,config:S,state,stages,atlas,loaded,step,render,startCourse,creditRun,makeVillage,hit,triggerAmbush,addChasers,startMoving,resize,launch,playerPose,keyboardDirection,releasePointer,ensureWorld,updateWildlife,updateSkiers,crashSkier,endlessPressure,endlessScaleAt,obstacleClearance,encounterPathX,encounterClearance,endlessTownAt,extendEndless,die,resetSummit,patchAt,onRoad,entity,topSpeed,viewBounds,humanArea,lakeContains,pickWarningChaser,get ready(){return ready;},get height(){return H;}};
 })().catch(window.showFrostlineError);

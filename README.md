@@ -46,7 +46,7 @@ The player top gradually rises from 90 toward 130 km/h over a gentler 4,800 m sp
 
 The original first 450 metres retain their sparse trees and light traffic. Crowded Rush Hour Slopes cannot appear before 1,200 m and are inserted randomly after quiet/open-forest areas, with a minimum gap between crowds. Their broad slope follows the player's approach, spreads skiers across the whole width and uses dense side tree banks to prevent an easy edge bypass. They retain hunting Yetis and grow busier between visits.
 
-Quiet trails extend the actual village-exit snow road along the approach, with nearby trees, walkers, slow skiers, a bench/lamp, a snowman and no gates; sparse woods continue beside the trail. Clear transition lakes and short dense forests also have no gates. A clear winding passage remains through each dense forest, while tree density doubles over repeated visits. Wild Patch is a separate 70–110-base-metre burst of randomized trees, rocks, stumps, bushes, sleds, small jumps and traffic, with no flags or reserved winding corridor. Normal forest keeps slalom gates, smaller random lakes, traffic and occasional hills/rainbows. Cemeteries have long iron-fenced burial gardens, stone gateposts, six monument styles, small mausoleums and distinct animated zombie designs (including skeletons, shrouded walkers and crouched blue ambushers); only entry/exit checkpoints are flagged. Low fences have real openings and can be jumped; tall cemetery masonry shoulders require their openings. Zombies can eat a stopped or fallen player, be jumped over, killed by a sword or rammed at sufficient speed. Long forest corridors retain their branching routes, weaving gates and dense entrance/exit banks.
+Quiet trails extend the actual village-exit snow road along the approach, with nearby trees, walkers, slow skiers, a bench/lamp, a snowman and no gates; sparse woods continue beside the trail. Clear transition lakes and short dense forests also have no gates. A clear winding passage remains through each dense forest, while tree density doubles over repeated visits. Wild Patch is a separate 70–110-base-metre burst of randomized trees, rocks, stumps, bushes, sleds, small jumps and traffic, with no flags or reserved winding corridor. Normal forest keeps slalom gates, smaller random lakes, traffic and occasional hills/rainbows. Cemeteries are open slaloms between irregular grave and crypt clusters, with several gaps to choose from and boundary fences only. Regular zombies visibly sit beside graves before stirring and slowly approaching. Bare skeletons are the jumpers: they rattle/rise, leap once and collapse into a stationary pile. Only entry/exit checkpoints are flagged; jumps, swords and true kill-and-crash rams retain their usual rules. Long forest corridors retain their branching routes, weaving gates and dense entrance/exit banks.
 
 Towns still use the actual Arcade village generator: irregular streets, houses/shops/hotels, footpaths, animated residents and a snowy back route. House rows keep Arcade spacing while street widths narrow between town appearances. Resident count grows from 36 toward 120, and either route is selectable between the shared entry/exit checkpoints. Ordinary Arcade/course villages remain protected and retain their doubled population.
 
@@ -172,6 +172,22 @@ Protected areas do not display inert hostile creatures. Ambient wolves/bears/Yet
 
 Endless challenge areas now cover at least 600 base metres across, with wider entry/exit barriers and matching terrain on the flanks. Going sideways through a cemetery still meets burial gardens and zombies; towns retain chalet blocks, and forests/Wild Patches retain their obstacles. Clear lakes have broad shores instead of tapering into an easy side bypass. The width is configurable under `endless.regions.minimumWidthMetres`.
 
-Cemeteries slow Y movement to 40%, with responsive sideways steering. One downhill aisle connects moderate diagonal crossings and straight downhill stretches; occasional stone shoulders follow the same route. Low railings and close headstones/crypts tighten selected aisles. Blue ambushers visibly peek above the snow beside graves, rise as a warning, leap once and remain where they land. More slow green/brown wanderers patrol the aisles and eat grounded skiers on contact. A blue ambush knocks you down; that attacker cannot immediately eat you, but another zombie or a Yeti can catch you while down. Turn away or jump to evade the committed leap.
+Cemeteries retain 70% downhill motion, with normal sideways steering. The fenced aisle and sideways detours are gone; choose your own openings between burial clusters while slow zombies gradually obstruct them. Green/brown zombies rest by their graves before getting up. Skeletons are fully visible at rest and have a short rise/rattle warning before one committed leap. That attack knocks you down; another undead creature or a pursuing predator can catch you while fallen.
 
 Crowded Endless fields now contain 180→280 people in total, down from the former 500→600; Arcade Rush Hour traffic is lighter too. Static collision grids, road chunks, pixel text and predator candidate lists reuse cached work, with smaller long-obstacle bounds and less offscreen drawing. Saves and offline startup updates retain their existing behavior.
+
+For quick Endless debugging, press a number from the summit or during an Endless run. Each jump starts a fresh first-visit area at normal starting pace, clears the old course actors, and waits for an arrow to start skiing. The current legitimate distance is saved before switching; the debug run cannot set an Endless distance record. Other modes, focused inputs/dialogs, modifier shortcuts and held repeats ignore these numbers. Scene cards still require their normal minimum display time and consume the continuing key.
+
+| Key | Area |
+| --- | --- |
+| 1 | Regular forest |
+| 2 | Tree corridors |
+| 3 | Town |
+| 4 | Crowded slope |
+| 5 | Quiet snowy trail |
+| 6 | Cemetery |
+| 7 | Clear lake |
+| 8 | Dense forest |
+| 9 | Wild Patch |
+
+The number row and numeric keypad both work. The debug HUD identifies the run; returning to normal play restores ordinary distance recording.
