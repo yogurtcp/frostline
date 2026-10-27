@@ -60,6 +60,7 @@ def validate(value, schema, path='config'):
         crowd = regions.get('crowd', {})
         if crowd.get('maximumGapMetres', 4200) < crowd.get('minimumGapMetres', 1600): fail('crowd maximumGapMetres must be at least minimumGapMetres')
         ranges += [v for v in regions.get('festivals', {}).values() if isinstance(v, list)]
+        ranges += [v for v in regions.get('festivals', {}).get('christmasParade', {}).values() if isinstance(v, list)]
         ranges += list(regions.get('lengthMetres', {}).values()) + list(regions.get('zombies', {}).get(key, []) for key in ['count', 'speedKmh', 'wandererCount', 'wandererSpeedKmh', 'roamerCount'])
         for pair in ranges:
             if pair and pair[0] > pair[1]: fail('endless.regions ranges must be ordered')

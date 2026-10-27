@@ -394,13 +394,14 @@ window.FROSTLINE_READY = (async () => {
     const visit=a.themeVisits[kind]=(a.themeVisits[kind]||0)+1,difficulty=clamp((visit-1)/(Cf.difficultyVisits-1),0,1);
     const scale=endlessScaleAt((startY-a.startY)/PX_PER_M),length=range(...((R.enabled||forcedKind)&&(R.lengthMetres[kind]||(kind==='crowd'?R.lengthMetres.beginner:null))||Cf.lengthMetres))*PX_PER_M*scale;
     const townKind=kind==='town'||FESTIVAL_KINDS.has(kind),widths=townKind?Cf.townStreetWidthMetres:Cf.corridorWidthMetres;
-    const half=mix(widths[1],widths[0],difficulty)*PX_PER_M*(townKind?1:scale)/2;
+    const streetWidths=kind==='christmas'?R.festivals.christmasParade.streetWidthMetres:widths;
+    const half=mix(streetWidths[1],streetWidths[0],difficulty)*PX_PER_M*(townKind?1:scale)/2;
     const variant=Math.floor(random()*3),cycles=5+Math.round(difficulty),e={id:++a.encounterCount,kind,visit,difficulty,variant,scale,startY,endY:startY+length,half,paths:[],band:1000,chamberLength:length/cycles,generatedY:startY};
     e.night=!!(Math.floor(Math.max(0,(a.regionOrderIndex||1)-1)/R.order.length)%2);
     a.encounters.push(e);a.lastEncounterKind=kind;if(kind==='crowd')a.lastCrowdEndY=e.endY;
     if(townKind){
       let names=S.village.names.filter(name=>!a.townNames.includes(name));if(!names.length){a.townNames=[];names=S.village.names;}const name=pick(names);a.townNames.push(name);
-      const town=makeVillage(startY,root.x,false,{endlessRun:root,name,layoutSeed:FESTIVAL_KINDS.has(kind)?Math.floor(random()*4294967296):undefined,festival:FESTIVAL_KINDS.has(kind)?kind:null,lengthWorld:length,deferLanes:true,people:Math.round(mix(...Cf.townPeople,difficulty)*(FESTIVAL_KINDS.has(kind)?R.festivals.peopleMultiplier:1)),village:{corridorHalfWidth:half,mainRoadWidth:S.village.mainRoadWidth*half/S.village.corridorHalfWidth}});
+      const town=kind==='christmas'?makeChristmasParade(e,root,name):makeVillage(startY,root.x,false,{endlessRun:root,name,layoutSeed:FESTIVAL_KINDS.has(kind)?Math.floor(random()*4294967296):undefined,festival:FESTIVAL_KINDS.has(kind)?kind:null,lengthWorld:length,deferLanes:true,people:Math.round(mix(...Cf.townPeople,difficulty)*(FESTIVAL_KINDS.has(kind)?R.festivals.peopleMultiplier:1)),village:{corridorHalfWidth:half,mainRoadWidth:S.village.mainRoadWidth*half/S.village.corridorHalfWidth}});
       e.town=town;town.encounter=e;e.title=town.name;e.band=town.halfWidth;
       for(const route of [town.route,town.backRoute?.points].filter(Boolean)){
         const path=[{x:root.x,y:startY},...route,{x:root.x,y:e.endY}];path.linear=true;e.paths.push(path);

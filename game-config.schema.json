@@ -9710,6 +9710,37 @@
                     "minimum": 0,
                     "maximum": 200
                   }
+                },
+                "christmasParade": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "streetWidthMetres": {
+                      "type": "array",
+                      "minItems": 2,
+                      "maxItems": 2,
+                      "items": {
+                        "type": "number",
+                        "minimum": 24,
+                        "maximum": 60
+                      }
+                    },
+                    "people": {
+                      "type": "array",
+                      "minItems": 2,
+                      "maxItems": 2,
+                      "items": {
+                        "type": "integer",
+                        "minimum": 30,
+                        "maximum": 400
+                      }
+                    },
+                    "houseSpacingMetres": {
+                      "type": "number",
+                      "minimum": 16,
+                      "maximum": 27
+                    }
+                  }
                 }
               }
             }

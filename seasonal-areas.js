@@ -29,9 +29,44 @@ function addRouteLamps(path,town,from,to,encounter=null){
       if(roadDistance(route,px,py)<offset-.01||roads.some(r=>roadDistance(r,px,py)<r.width/2+24))continue;
       if(state.objects.some(o=>(HOUSE_TYPES.has(o.type)&&houseClearance(o,px,py)<16)||(TREE_TYPES.has(o.type)&&obstacleClearance(o,px,py)<16)||(o.type==='lamp'&&Math.hypot(o.x-px,o.y-py)<45)))continue;
       const plaza=town?.festivalPlaza;if(plaza&&Math.hypot(px-plaza.x,py-plaza.y)<(town.festival==='halloween'?165:75))continue;
-      entity('lamp',px,py,{width:20,r:5,town,encounter:encounter??town?.encounter,arcadeRun:town?.endlessRun,roadLamp:true});break;
+      // A broad parade needs light to reach across the avenue while its posts stay on the shoulders.
+      const lightRadiusWorld=town?.parade?Math.max(S.night.lampRadiusMetres*PX_PER_M,Math.hypot(offset,spacing/2)+40):undefined;
+      entity('lamp',px,py,{width:20,r:5,town,encounter:encounter??town?.encounter,arcadeRun:town?.endlessRun,roadLamp:true,lightRadiusWorld});break;
     }
   }
+}
+function makeChristmasParade(e,root,name){
+  const P=S.endless.regions.festivals.christmasParade,V=S.village,base=root.x,half=e.half;
+  const town={origin:e.startY,x:base,name,festival:'christmas',parade:true,mainRoadWidth:half*2,end:e.endY,roadEndY:e.endY-120,approachEndY:e.endY,endlessRun:root,halfWidth:V.halfWidth+150,plazaRows:[],layoutSeed:Math.floor(random()*4294967296)};
+  town.route=[{x:base,y:e.startY+120},{x:base,y:town.roadEndY}];
+  town.approachRoad={surface:'snow',width:town.mainRoadWidth,points:[town.route.at(-1),{x:base,y:e.endY}],town};
+  town.festivalPlaza={x:base,y:mix(e.startY,e.endY,.53)};
+  state.villages.push(town);
+  state.roads.push({surface:'snow',width:town.mainRoadWidth,points:town.route,town},town.approachRoad);
+  entity('villageTitle',base,e.startY+10,{r:0,width:300,town});
+  // The two facades stay exactly aligned; variety belongs to the buildings, not the street plan.
+  const width=160,houseX=half+width*V.houseFootWidthRatio+35,step=P.houseSpacingMetres*PX_PER_M,houses=[],rowYs=[],centers=[];
+  for(let y=e.startY+340,row=0;y<e.endY-220;y+=step,row++){
+    rowYs.push(y);centers.push(base);
+    for(const side of [-1,1])houses.push(entity((row+(side>0?1:0))%3?'rental':'lodge',base+side*houseX,y,{width,r:width*V.houseFootWidthRatio,town,houseStyle:(row+(side>0?2:0))%S.houseAnimation.trimRGB.length,band:row}));
+    if(row%6===1)entity('paradeGarland',base,y-22,{town,width:houseX*2,r:0});
+  }
+  const decorate=(type,x,y,extra)=>{
+    if(Math.abs(x-base)<half+(extra.r||0)+12||houses.some(h=>houseClearance(h,x,y)<(extra.r||0)+8))return;
+    return entity(type,x,y,{...extra,town});
+  };
+  const shuffle=items=>{const out=[...items];for(let i=out.length-1;i>0;i--){const j=Math.floor(random()*(i+1));[out[i],out[j]]=[out[j],out[i]];}return out;};
+  populateVillageLife(town,houses,rowYs,centers,decorate,shuffle);
+  const n=Math.round(mix(...P.people,e.difficulty)),first=e.startY+260,last=e.endY-220;
+  for(let i=0;i<n;i++){
+    const side=i%2?1:-1,y=mix(first,last,(i+.25+random()*.5)/n),crossing=i%4===0&&Math.abs(y-town.festivalPlaza.y)>190;
+    const edge=half-range(28,52),x=base+(crossing?range(-edge,edge):side*edge),p={x,y};
+    // Short local paths keep a continuous audience and crossings all the way down the avenue.
+    const path=crossing?[{x:base-edge,y:y-45},{x:base+edge,y:y+45}]:[p,{x:base+side*(edge-range(0,24)),y:Math.min(last,y+range(45,100))}];
+    entity(['personRed','personGreen','personYellow'][i%3],x,y,{town,width:32,r:10,paradeGuest:true,paradeCrossing:crossing,walker:true,path,pathIndex:crossing?(i%8?0:1):1,pathDir:i%8?-1:1,walkSpeed:range(...V.walkerSpeed)});
+  }
+  addRouteLamps(town.route,town,town.origin,town.end);
+  return town;
 }
 function festivalPoint(e,t,side=0,pathIndex=0){
   const y=mix(e.startY+300,e.endY-300,t),x=encounterPathX(e.paths[pathIndex]||e.paths[0],y)+side*e.half*.65;return {x,y};
@@ -190,6 +225,16 @@ function drawFestivalHouse(o,s){
 function drawSeasonalProp(o,s){
   if(o.eaten||o.dead)return false;
   if(o.costume){drawFestivalGuest(o,s);return true;}
+  if(o.type==='paradeGarland'){
+    const half=o.width*ZOOM/2,y=s.y-53;
+    for(let i=0;i<12;i++){
+      const a=i/12,b=(i+1)/12;
+      line(s.x-half+a*half*2,y+Math.sin(a*Math.PI)*14,s.x-half+b*half*2,y+Math.sin(b*Math.PI)*14,'#3b6b53',3);
+    }
+    for(let i=1;i<12;i++){const x=s.x-half+i/12*half*2,yy=y+Math.sin(i/12*Math.PI)*14;box(x-1,yy,3,4,['#cf6870','#e5c477','#7fa790'][i%3]);}
+    for(const side of [-1,1]){const x=s.x+side*half*.5;box(x-6,y+8,5,5,'#b74d59');box(x+1,y+8,5,5,'#b74d59');box(x-1,y+8,3,9,'#dfb66e');}
+    return true;
+  }
   if(o.type==='christmasTree'){
     const tile=specialTile('christmas-tree',96,138,(t,px,poly)=>{
       px(44,117,9,17,'#705943');px(39,128,21,5,'#957251');
@@ -221,7 +266,7 @@ function drawSeasonalProp(o,s){
 }
 // Static light is cached in world coordinates. Moving bodies are lit every render.
 const NIGHT_TILE_SIZE=256,NIGHT_LIGHT_RESOLUTION=4,NIGHT_TILE_LIMIT=96;
-const NIGHT_STATIC_TYPES=new Set(['lamp','lodge','rental','mausoleum','iceBlock','ruinWall','gate','entrance','finish','courseStart','raceRail','christmasTree','jackLantern','mistletoe','ramp','rainbow','lift','liftLabel','trailChoices']);
+const NIGHT_STATIC_TYPES=new Set(['lamp','lodge','rental','mausoleum','iceBlock','ruinWall','gate','entrance','finish','courseStart','raceRail','christmasTree','paradeGarland','jackLantern','mistletoe','ramp','rainbow','lift','liftLabel','trailChoices']);
 const nightMask=document.createElement('canvas'),nightMaskCtx=nightMask.getContext('2d'),nightGlow=document.createElement('canvas'),nightGlowCtx=nightGlow.getContext('2d');
 const nightTileGlow=document.createElement('canvas'),nightTileGlowCtx=nightTileGlow.getContext('2d');
 nightTileGlow.width=nightTileGlow.height=NIGHT_TILE_SIZE/NIGHT_LIGHT_RESOLUTION;
@@ -244,7 +289,7 @@ function appendNightLights(o,lights){
   const x=o.x*ZOOM,y=o.y*ZOOM,w=(o.width||40)*ZOOM;
   const add=(px,py,r,color='#ffc277',strength=1,core=false)=>{const light={x:px,y:py,r,color,strength,core};lights.push(light);return light;};
   if(o===state.p){const lift=o.air>0&&o.airTotal?Math.sin(o.air/o.airTotal*Math.PI)*o.jumpHeight*ZOOM:0;add(x,y-8-lift,S.night.playerRadiusMetres*PX_PER_M*ZOOM,'#efc48b');}
-  else if(o.type==='lamp')add(x,y-22,S.night.lampRadiusMetres*PX_PER_M*ZOOM,'#ffbd70',1,true);
+  else if(o.type==='lamp')add(x,y-22,(o.lightRadiusWorld??S.night.lampRadiusMetres*PX_PER_M)*ZOOM,'#ffbd70',1,true);
   else if(o.grandMausoleum){add(x-w*.35,y-w*.35,58,'#dcb0a1',1,true);add(x+w*.35,y-w*.35,58,'#dcb0a1',1,true);}
   else if(HOUSE_TYPES.has(o.type)){
     add(x,y-w*.34,w*.8+12,'#ffc277');for(const side of [-1,1])add(x+side*w*.19,y-w*.25,20,'#ffd28d',.9,true);
@@ -256,6 +301,8 @@ function appendNightLights(o,lights){
   else if(o.type==='christmasTree'){
     add(x,y-80,128,'#eac28b');add(x,y-165,42,'#ffda87',1,true).star=true;
     for(let i=0;i<12;i++)add(x+Math.sin(i*2.4)*(12+i*3),y-135+i*10,22,['#ffb692','#d2a1c8','#bfda9a','#f9cf85'][i%4],1,true);
+  }else if(o.type==='paradeGarland'){
+    for(let i=1;i<12;i++)add(x-w/2+i/12*w,y-53+Math.sin(i/12*Math.PI)*14,26,['#ecaa96','#f4d08b','#bfd1a1'][i%3],.8,true);
   }else if(o.type==='jackLantern')add(x,y-6,44,'#ffab5b',1,true);
   else if(o.type==='mistletoe')add(x,y-24,60,'#eeb0b3');
   else if(['ramp','rainbow','lift','liftLabel','trailChoices'].includes(o.type))add(x,y-10,40,'#e8c18d',1,true);
@@ -278,7 +325,7 @@ function syncNightStaticLights(){
   for(const o of state.objects){
     if(!NIGHT_STATIC_TYPES.has(o.type)||o.dead||o.eaten||o.collected)continue;
     const old=nightLightObjects.get(o);
-    if(old&&old.x===o.x&&old.y===o.y&&old.width===o.width&&old.half===o.half&&old.type===o.type&&old.festival===o.festival&&old.grand===o.grandMausoleum&&old.lampRadius===S.night.lampRadiusMetres){old.seen=epoch;continue;}
+    if(old&&old.x===o.x&&old.y===o.y&&old.width===o.width&&old.half===o.half&&old.type===o.type&&old.festival===o.festival&&old.grand===o.grandMausoleum&&old.lampRadius===S.night.lampRadiusMetres&&old.lightRadiusWorld===o.lightRadiusWorld){old.seen=epoch;continue;}
     if(old)removeNightLightEntry(old);
     const sources=[];appendNightLights(o,sources);
     for(const source of sources){
@@ -288,7 +335,7 @@ function syncNightStaticLights(){
         bucket.sources.set(source.id,source);bucket.version++;source.cells.push(key);
       }
     }
-    nightLightObjects.set(o,{x:o.x,y:o.y,width:o.width,half:o.half,type:o.type,festival:o.festival,grand:o.grandMausoleum,lampRadius:S.night.lampRadiusMetres,sources,seen:epoch});
+    nightLightObjects.set(o,{x:o.x,y:o.y,width:o.width,half:o.half,type:o.type,festival:o.festival,grand:o.grandMausoleum,lampRadius:S.night.lampRadiusMetres,lightRadiusWorld:o.lightRadiusWorld,sources,seen:epoch});
   }
   let count=0;for(const [o,entry] of nightLightObjects)if(entry.seen!==epoch){removeNightLightEntry(entry);nightLightObjects.delete(o);}else count+=entry.sources.length;
   nightLightingStats.staticSources=count;

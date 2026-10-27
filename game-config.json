@@ -105,12 +105,13 @@
         "quiet",
         "rivalRace",
         "forest",
-        "christmas",
-        "quiet",
         "cemetery",
         "denseForest",
-        "halloween",
         "scramble",
+        "quiet",
+        "christmas",
+        "quiet",
+        "halloween",
         "quiet"
       ],
       "firstMetres": 450,
@@ -299,7 +300,18 @@
         "skeletons": [
           8,
           14
-        ]
+        ],
+        "christmasParade": {
+          "streetWidthMetres": [
+            28,
+            40
+          ],
+          "people": [
+            150,
+            240
+          ],
+          "houseSpacingMetres": 20
+        }
       }
     },
     "wildlife": {
