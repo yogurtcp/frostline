@@ -256,7 +256,8 @@
           "draftWidthMetres": 4,
           "draftChargeSeconds": 0.8,
           "draftBoost": 0.24,
-          "gateQuota": 0.75
+          "gateQuota": 0.75,
+          "predators": true
         },
         "marsh": {
           "islandRadiusMetres": [
@@ -1841,6 +1842,7 @@
     "pointerScale": 68,
     "keyRepeatSeconds": 0.17,
     "stepDegrees": 30,
+    "tapBottomFraction": 0.24,
     "swipeShortPixels": 22,
     "swipeLongPixels": 88
   },

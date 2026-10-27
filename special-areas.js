@@ -13,7 +13,7 @@ const RIVAL_PROFILES=[
 ];
 function planSpecialArea(e,section){
   const A=S.endless.regions.specialAreas,scale=e.scale,length=e.endY-e.startY,root=section.endlessRoot;
-  e.specialArea=true;e.centerX=root.x;e.band=A.widthScreens*W/ZOOM/2;e.noNewPredators=true;e.noFlags=false;
+  e.specialArea=true;e.centerX=root.x;e.band=A.widthScreens*W/ZOOM/2;e.noNewPredators=e.kind==='rivalRace'?!A.rivalRace.predators:true;e.noFlags=false;
   e.entryHalf=(e.kind==='marsh'?200:e.kind==='bowls'?720:320)*scale;e.half=(e.kind==='rivalRace'?240:180)*scale;
   e.title={rivalRace:'Rival Race',marsh:'Frozen Marsh',bowls:'Powder Bowls'}[e.kind];
   const path=[{x:root.x,y:e.startY}];

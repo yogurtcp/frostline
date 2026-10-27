@@ -22,7 +22,7 @@ window.loadFrostlineConfig = async function () {
   config.endless.regions ??= regionDefaults;
   for(const [key,value] of Object.entries(regionDefaults))config.endless.regions[key] ??= value;
   for(const [key,value] of Object.entries(regionDefaults.lengthMetres))config.endless.regions.lengthMetres[key] ??= value;
-  const specialDefaults = {"widthScreens":3.5,"rivalRace":{"count":[3,5],"speedRatio":[1,1.08],"draftMinMetres":4,"draftRangeMetres":28,"draftWidthMetres":4,"draftChargeSeconds":0.8,"draftBoost":0.24,"gateQuota":0.75},"marsh":{"islandRadiusMetres":[12,8],"boardwalkWidthMetres":[5,3.2],"sinkSeconds":[2.4,1.5],"minimumSpeedRatio":[0.55,0.35]},"bowls":{"radiusMetres":[60,50],"spacingMetres":95,"bankBoost":[0.28,0.42],"powderSpeedRatio":[0.7,0.5]}};
+  const specialDefaults = {"widthScreens":3.5,"rivalRace":{"count":[3,5],"speedRatio":[1,1.08],"draftMinMetres":4,"draftRangeMetres":28,"draftWidthMetres":4,"draftChargeSeconds":0.8,"draftBoost":0.24,"gateQuota":0.75,"predators":true},"marsh":{"islandRadiusMetres":[12,8],"boardwalkWidthMetres":[5,3.2],"sinkSeconds":[2.4,1.5],"minimumSpeedRatio":[0.55,0.35]},"bowls":{"radiusMetres":[60,50],"spacingMetres":95,"bankBoost":[0.28,0.42],"powderSpeedRatio":[0.7,0.5]}};
   config.endless.regions.specialAreas ??= {};
   for(const [key,value] of Object.entries(specialDefaults)){
     config.endless.regions.specialAreas[key] ??= value;
@@ -67,6 +67,7 @@ window.loadFrostlineConfig = async function () {
   config.predators.divertPathAngleDegrees ??= 45;
   config.predators.divertReleaseAngleDegrees ??= 60;
   config.predators.mealPauseSeconds ??= .8;
+  config.controls.tapBottomFraction ??= .24;
   config.controls.swipeShortPixels ??= 22;
   config.controls.swipeLongPixels ??= 88;
   const yetiFrames = {"yetiWhiteIdle":["yetis",0,0,30,34],"yetiWhiteRunL":["yetis",30,0,30,34],"yetiWhiteRunR":["yetis",60,0,30,34],"yetiAvalancheIdle":["yetis",90,0,30,34],"yetiAvalancheRunL":["yetis",120,0,30,34],"yetiAvalancheRunR":["yetis",150,0,30,34],"yetiStalkerIdle":["yetis",180,0,30,34],"yetiStalkerRunL":["yetis",210,0,30,34],"yetiStalkerRunR":["yetis",240,0,30,34]};
