@@ -1207,7 +1207,7 @@ window.FROSTLINE_READY = (async () => {
     stages.arcade={...S.courses.slalom,fee:0,name:'Arcade',sub:S.arcade.stages.length+' STAGES - ONE RUN',color:S.arcade.yetiColors.elite};
     if(!lift)state.patrolPenalty=null;else if(state.patrolPenalty)state.patrolPenalty.nextWave=0;
     for(const cache of [houseSolids,treeSolids,skierSolids,preyCache])for(const key of Object.keys(cache))delete cache[key];
-    clearSceneCard();nightMaskStamp=-Infinity;state.pedestrianElapsed=state.villageLifeElapsed=0;activePointers.clear();state.deathAnimation=null;state.specialResultUntil=0;state.cocoaEffect=null;state.deathYeti=null;state.p=newPlayer();state.results=null;state.course=null;state.zone={kind:'start',origin:0};state.objects=[];state.trails=[];state.snowballTrails=[];state.chasers=[];state.particles=[];state.speech=[];state.messages=[];
+    clearSceneCard();resetNightLighting();state.pedestrianElapsed=state.villageLifeElapsed=0;activePointers.clear();state.deathAnimation=null;state.specialResultUntil=0;state.cocoaEffect=null;state.deathYeti=null;state.p=newPlayer();state.results=null;state.course=null;state.zone={kind:'start',origin:0};state.objects=[];state.trails=[];state.snowballTrails=[];state.chasers=[];state.particles=[];state.speech=[];state.messages=[];
     state.roads=[];state.villages=[];state.safeTrails=[];state.liftRoutes=[];state.chunks.clear();state.plannedTown=null;state.generated=0;state.lastTrack=null;state.started=false;state.activeTime=0;state.keyboardStep=0;state.control='keyboard';state.input={left:false,right:false,up:false,down:false,pointer:null,jump:false};state.deathTimer=state.liftTimer=0;state.elevated=0;state.nextFastSkier=clock+2;
     state.cam={x:0,y:-H*S.render.playerScreenY/ZOOM};startMeadow();state.liftRoutes.push({x0:S.lift.x,x1:S.lift.x,y0:S.lift.startY,y1:Infinity});ensureWorld(true);
     if(debugKind){startEndless({x:state.p.x,y:state.p.y},debugKind,debugVisit);return;}
@@ -2543,6 +2543,7 @@ window.FROSTLINE_READY = (async () => {
   const HOUSE_CELL=128,HOUSE_REACH=64,TREE_CELL=96;
   const HOUSE_TYPES=new Set(['lodge','rental','mausoleum','iceBlock','ruinWall']);
   const TREE_TYPES=new Set(['pine','fir','smallPine','spruceTree','crookedTree','cedarTree','alpineTree','wideLog','fallingTree','christmasTree','grave','cemeteryFence','areaBarrier','cemeteryPillar']);
+  const TIGHT_DRAW_TYPES=new Set([...HOUSE_TYPES,...TREE_TYPES,'skier','boarder','personRed','personYellow','personGreen','dog','cat','wolf','bear','rabbit','fox'].filter(type=>!['fallingTree','wideLog','cemeteryFence','areaBarrier'].includes(type)));
   const houseSolids={},treeSolids={},skierSolids={};
   function solidBounds(o){
     if(['wideLog','fallingTree','cemeteryFence','areaBarrier'].includes(o.type)){const [ax,ay,bx,by]=obstacleSegment(o);return [Math.min(ax,bx)-o.r,Math.min(ay,by)-o.r,Math.max(ax,bx)+o.r,Math.max(ay,by)+o.r];}
@@ -3535,7 +3536,7 @@ window.FROSTLINE_READY = (async () => {
       ctx.globalAlpha=(1-t)*.32;box(chimneyX+Math.sin(t*5+o.phase)*4,chimneyY-7-t*22,size,size,'#91a5ab');
     }ctx.globalAlpha=1;
     drawFestivalHouse(o,s);
-    const warm=Math.sin(clock*A.lampFlickerSpeed+o.phase)>.15?'#f2c98f':'#d39b61';
+    const warm=(state.nightBlend||0)>.003?'#f2bc78':Math.sin(clock*A.lampFlickerSpeed+o.phase)>.15?'#f2c98f':'#d39b61';
     for(const side of [-1,1]){box(s.x+side*w*.19-2,s.y-h*.25,4,5,warm);box(s.x+side*w*.19,s.y-h*.25,1,5,'#714a37');}
     if(o.cozyStyle===0)for(const side of [-1,1]){
       const x=s.x+side*w*.19;box(x-4,s.y-h*.25+5,9,3,'#916951');
@@ -3613,6 +3614,8 @@ window.FROSTLINE_READY = (async () => {
     const s=screen(o.x,o.y);
     const margin=['wideLog','logBump','cemeteryFence','areaBarrier'].includes(o.type)?Math.max(230,o.width*ZOOM/2):230,vertical=['cemeteryFence','areaBarrier'].includes(o.type)?o.depth*ZOOM/2:0;
     if(s.x<-margin||s.x>W+margin||s.y<-80-vertical||s.y>H+230+vertical)return;
+    // Ordinary bodies do not need the long-obstacle drawing margin. Keep harnesses and moving trunks broad.
+    if(TIGHT_DRAW_TYPES.has(o.type)&&!o.santaSleigh){const half=(o.width||40)*ZOOM*.75+24;if(s.x+half<0||s.x-half>W)return;}
     if(drawSeasonalProp(o,s)||drawSpecialProp(o,s))return;
     if(o.villageDetail){drawVillageDetail(o,s);return;}
     if(o.type==='encounterTitle'){text(o.encounter.title.toUpperCase(),s.x,s.y,13,C.teal);return;}
