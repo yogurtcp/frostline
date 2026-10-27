@@ -392,7 +392,7 @@ window.FROSTLINE_READY = (async () => {
     const R=S.endless.regions,forcedKind=a.debugNextKind;delete a.debugNextKind;
     const kind=forcedKind??(R.enabled?nextEndlessRegionKind(a,startY):a.encounterCount?(a.lastEncounterKind==='town'?'trees':'town'):'town');
     const visit=a.themeVisits[kind]=(a.themeVisits[kind]||0)+1,difficulty=clamp((visit-1)/(Cf.difficultyVisits-1),0,1);
-    const scale=endlessScaleAt((startY-a.startY)/PX_PER_M),length=range(...((R.enabled||forcedKind)&&(R.lengthMetres[kind]||(kind==='crowd'?R.lengthMetres.beginner:null))||Cf.lengthMetres))*PX_PER_M*scale;
+    const scale=endlessScaleAt((startY-a.startY)/PX_PER_M),length=range(...((R.enabled||forcedKind)&&(R.lengthMetres[kind]||(kind==='crowd'?R.lengthMetres.beginner:null))||Cf.lengthMetres))*PX_PER_M*scale*(kind==='christmas'?R.festivals.christmasParade.lengthMultiplier:1);
     const townKind=kind==='town'||FESTIVAL_KINDS.has(kind),widths=townKind?Cf.townStreetWidthMetres:Cf.corridorWidthMetres;
     const streetWidths=kind==='christmas'?R.festivals.christmasParade.streetWidthMetres:widths;
     const half=mix(streetWidths[1],streetWidths[0],difficulty)*PX_PER_M*(townKind?1:scale)/2;

@@ -279,8 +279,8 @@
       "festivals": {
         "peopleMultiplier": 1.6,
         "treeCrowd": [
-          20,
-          32
+          10,
+          16
         ],
         "santaFraction": 0.24,
         "sleighEveryMetres": 280,
@@ -307,10 +307,12 @@
             40
           ],
           "people": [
-            150,
-            240
+            75,
+            120
           ],
-          "houseSpacingMetres": 20
+          "houseSpacingMetres": 20,
+          "lengthMultiplier": 5,
+          "rainbowSpacingMetres": 140
         }
       }
     },

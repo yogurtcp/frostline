@@ -42,7 +42,9 @@ function makeChristmasParade(e,root,name){
   town.approachRoad={surface:'snow',width:town.mainRoadWidth,points:[town.route.at(-1),{x:base,y:e.endY}],town};
   town.festivalPlaza={x:base,y:mix(e.startY,e.endY,.53)};
   state.villages.push(town);
-  state.roads.push({surface:'snow',width:town.mainRoadWidth,points:town.route,town},town.approachRoad);
+  // Small render sections keep a five-kilometre street from building/scanning one huge tile cache.
+  for(let y=town.route[0].y;y<town.roadEndY;y+=100*PX_PER_M)state.roads.push({surface:'snow',width:town.mainRoadWidth,points:[{x:base,y},{x:base,y:Math.min(y+100*PX_PER_M,town.roadEndY)}],town});
+  state.roads.push(town.approachRoad);
   entity('villageTitle',base,e.startY+10,{r:0,width:300,town});
   // The two facades stay exactly aligned; variety belongs to the buildings, not the street plan.
   const width=160,houseX=half+width*V.houseFootWidthRatio+35,step=P.houseSpacingMetres*PX_PER_M,houses=[],rowYs=[],centers=[];
@@ -57,7 +59,11 @@ function makeChristmasParade(e,root,name){
   };
   const shuffle=items=>{const out=[...items];for(let i=out.length-1;i>0;i--){const j=Math.floor(random()*(i+1));[out[i],out[j]]=[out[j],out[i]];}return out;};
   populateVillageLife(town,houses,rowYs,centers,decorate,shuffle);
-  const n=Math.round(mix(...P.people,e.difficulty)),first=e.startY+260,last=e.endY-220;
+  // Thin facade-side residents too, while keeping the cocoa host available.
+  let resident=0;
+  state.objects=state.objects.filter(o=>o.town!==town||!o.type.startsWith('person')||resident++%2===0||o.job==='cocoa');
+  // Population is per base-length parade, so extending the street preserves its intended density.
+  const n=Math.round(mix(...P.people,e.difficulty)*P.lengthMultiplier),first=e.startY+260,last=e.endY-220;
   for(let i=0;i<n;i++){
     const side=i%2?1:-1,y=mix(first,last,(i+.25+random()*.5)/n),crossing=i%4===0&&Math.abs(y-town.festivalPlaza.y)>190;
     const edge=half-range(28,52),x=base+(crossing?range(-edge,edge):side*edge),p={x,y};
@@ -106,6 +112,12 @@ function decorateFestival(e,section){
     const kiss={x:plaza.x+Math.min(e.half*.7,210),y:plaza.y+190};
     town.mistletoe=entity('mistletoe',kiss.x,kiss.y,{...own,width:82,r:0});
     town.mistletoe.partner=festivalGuest(town,{x:kiss.x+15,y:kiss.y+2},3,{...own,costume:'evening',job:'mistletoe'});
+    const spacing=F.christmasParade.rainbowSpacingMetres*PX_PER_M*e.scale;
+    for(let y=e.startY+160*PX_PER_M*e.scale,i=0;y<e.endY-160*PX_PER_M*e.scale;y+=spacing,i++){
+      // Alternate the invitation to jump, leaving a clear approach to the tree and mistletoe.
+      if(Math.abs(y-plaza.y)<65*PX_PER_M*e.scale)continue;
+      const jump=createArcadeItem('rainbow',town.x+[-.45,0,.45][i%3]*e.half,y,section);jump.town=town;jump.encounter=e;
+    }
     e.nextSleighY=e.startY+80*PX_PER_M*e.scale;
   }else{
     const points=e.paths[0],lengths=[0];for(let i=1;i<points.length;i++)lengths.push(lengths.at(-1)+Math.hypot(points[i].x-points[i-1].x,points[i].y-points[i-1].y));e.cemeteryRoute={points,lengths,length:lengths.at(-1)};

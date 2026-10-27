@@ -9739,6 +9739,16 @@
                       "type": "number",
                       "minimum": 16,
                       "maximum": 27
+                    },
+                    "lengthMultiplier": {
+                      "type": "number",
+                      "minimum": 1,
+                      "maximum": 10
+                    },
+                    "rainbowSpacingMetres": {
+                      "type": "number",
+                      "minimum": 70,
+                      "maximum": 500
                     }
                   }
                 }
