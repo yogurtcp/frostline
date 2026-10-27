@@ -2715,6 +2715,7 @@
     "lampRadiusMetres": 24,
     "lampSpacingMetres": 20,
     "ambientOpacity": 0.97,
-    "transitionSeconds": 1.8
+    "transitionSeconds": 1.8,
+    "lampSetbackMetres": 7
   }
 }

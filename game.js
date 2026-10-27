@@ -1400,7 +1400,6 @@ window.FROSTLINE_READY = (async () => {
       return entity(type,x,y,{...extra,town});
     };
     for(const row of plazaRows){const x=centers[row],y=rowYs[row]+V.corridorExitOffset,half=halfWidths[row],side=varied?choose([-1,1]):1;
-      for(const sign of [-1,1])decorate('lamp',x+sign*(half-22),y,{width:20,r:6});
       if(!courseRun)entity('bunting',x,y-95,{width:half*2,r:0,town});
       decorate('bench',x+side*(half-26),y+55,{width:46,r:9});
       decorate('snowman',x-side*(half-24),y+58,{width:28,r:9});

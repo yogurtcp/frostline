@@ -16,12 +16,21 @@ function updateDayNight(dt){
 }
 function addRouteLamps(path,town,from,to,encounter=null){
   if(!path?.length)return;
-  const spacing=S.night.lampSpacingMetres*PX_PER_M,roadWidth=town?.mainRoadWidth??S.village.mainRoadWidth;
-  const first=Math.max(path[0].y,from),last=Math.min(path.at(-1).y,to);
-  for(let y=Math.ceil(first/spacing)*spacing;y<last;y+=spacing)for(const side of [-1,1]){
-    const x=encounterPathX(path,y)+side*(roadWidth/2+24);
-    if(state.objects.some(o=>(HOUSE_TYPES.has(o.type)&&houseClearance(o,x,y)<16)||(o.type==='lamp'&&Math.hypot(o.x-x,o.y-y)<45)))continue;
-    entity('lamp',x,y,{width:20,r:5,town,encounter:encounter??town?.encounter,arcadeRun:town?.endlessRun,roadLamp:true});
+  const spacing=S.night.lampSpacingMetres*PX_PER_M,roadWidth=town?.mainRoadWidth??S.village.mainRoadWidth,setback=S.night.lampSetbackMetres*PX_PER_M;
+  const first=Math.max(path[0].y,from),last=Math.min(path.at(-1).y,to),route={points:path,width:roadWidth};
+  const roads=town?state.roads.filter(r=>r.town===town&&r.points!==path):[];
+  for(let nominal=Math.ceil(first/spacing)*spacing;nominal<last;nominal+=spacing)for(const side of [-1,1]){
+    // Shift along the shoulder to find a gap between houses instead of pushing a pole into the street.
+    for(const shift of [0,spacing*.25,-spacing*.25,spacing*.45,-spacing*.45]){
+      const y=clamp(nominal+shift,path[0].y,path.at(-1).y-.01),i=path.findIndex((p,index)=>index>0&&p.y>=y);if(i<1)continue;
+      const a=path[i-1],b=path[i],dx=b.x-a.x,dy=b.y-a.y,length=Math.hypot(dx,dy);if(!length||!dy)continue;
+      const x=mix(a.x,b.x,clamp((y-a.y)/dy,0,1)),offset=roadWidth/2+setback;
+      const px=x+side*dy/length*offset,py=y-side*dx/length*offset;
+      if(roadDistance(route,px,py)<offset-.01||roads.some(r=>roadDistance(r,px,py)<r.width/2+24))continue;
+      if(state.objects.some(o=>(HOUSE_TYPES.has(o.type)&&houseClearance(o,px,py)<16)||(TREE_TYPES.has(o.type)&&obstacleClearance(o,px,py)<16)||(o.type==='lamp'&&Math.hypot(o.x-px,o.y-py)<45)))continue;
+      const plaza=town?.festivalPlaza;if(plaza&&Math.hypot(px-plaza.x,py-plaza.y)<(town.festival==='halloween'?165:75))continue;
+      entity('lamp',px,py,{width:20,r:5,town,encounter:encounter??town?.encounter,arcadeRun:town?.endlessRun,roadLamp:true});break;
+    }
   }
 }
 function festivalPoint(e,t,side=0,pathIndex=0){

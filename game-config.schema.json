@@ -9802,6 +9802,12 @@
           "type": "number",
           "minimum": 0.1,
           "maximum": 10
+        },
+        "lampSetbackMetres": {
+          "type": "number",
+          "minimum": 3,
+          "maximum": 16,
+          "description": "Minimum street-edge clearance for road lamp posts, in metres (default 7)."
         }
       }
     }
