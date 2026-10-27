@@ -20,7 +20,7 @@ validate(config, schema)
 # Escape HTML script terminators in editable dialogue and labels.
 encode = lambda data: json.dumps(data).replace('<', '\\u003c')
 page = page.replace('__CONFIG__', encode(config)).replace('__SCHEMA__', encode(schema)).replace('__CONFIG_CODE__', (root / 'config.js').read_text())
-game_code = (root / 'game.js').read_text().replace('// __SPECIAL_AREAS_CODE__', (root / 'special-areas.js').read_text())
+game_code = (root / 'game.js').read_text().replace('// __SPECIAL_AREAS_CODE__', (root / 'special-areas.js').read_text()).replace('// __SEASONAL_AREAS_CODE__', (root / 'seasonal-areas.js').read_text())
 page = page.replace('__ASSET_DATA__', json.dumps(assets)).replace('__GAME_CODE__', game_code)
 page = page.replace('__APP_CODE__', (root / 'app.js').read_text())
 worker = (root / 'sw.template.js').read_text()

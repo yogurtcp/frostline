@@ -18,17 +18,17 @@ window.loadFrostlineConfig = async function () {
   config.endless.encounters.townStreetWidthMetres ??= [14.4,23];
   config.endless.encounters.townPeople ??= [36,120];
   config.endless.yetis.wakeMetres ??= 140;
-  const regionDefaults = {"enabled":true,"minimumWidthMetres":600,"order":["town","quiet","trees","lake","quiet","rivalRace","forest","marsh","quiet","cemetery","denseForest","bowls","scramble","quiet"],"firstMetres":450,"gapMetres":[0,0],"lengthMetres":{"beginner":[320,400],"quiet":[180,250],"lake":[240,330],"denseForest":[110,160],"forest":[300,450],"cemetery":[650,850],"crowd":[320,400],"scramble":[70,110]},"beginnerPeople":[65,140],"quietTreesPer100Metres":8,"forestTreesPer100Metres":[12,26],"cemeteryOpeningMetres":[12,18],"zombies":{"count":[8,14],"speedKmh":[7,11],"noticeMetres":22},"crowd":{"firstMetres":1200,"chance":0.55,"minimumGapMetres":1600,"maximumGapMetres":4200,"widthMetres":240,"people":[180,280]},"denseForestDensity":[1,2],"scrambleDensity":[1,1.35]};
+  const regionDefaults = {"enabled":true,"minimumWidthMetres":600,"order":["town","quiet","trees","lake","quiet","rivalRace","forest","christmas","quiet","cemetery","denseForest","halloween","scramble","quiet"],"firstMetres":450,"gapMetres":[0,0],"lengthMetres":{"beginner":[320,400],"quiet":[180,250],"lake":[240,330],"denseForest":[110,160],"forest":[300,450],"cemetery":[650,850],"crowd":[320,400],"scramble":[70,110]},"beginnerPeople":[65,140],"quietTreesPer100Metres":8,"forestTreesPer100Metres":[12,26],"cemeteryOpeningMetres":[12,18],"zombies":{"count":[8,14],"speedKmh":[7,11],"noticeMetres":22},"crowd":{"firstMetres":1200,"chance":0.55,"minimumGapMetres":1600,"maximumGapMetres":4200,"widthMetres":240,"people":[180,280]},"denseForestDensity":[1,2],"scrambleDensity":[1,1.35]};
   config.endless.regions ??= regionDefaults;
   for(const [key,value] of Object.entries(regionDefaults))config.endless.regions[key] ??= value;
   for(const [key,value] of Object.entries(regionDefaults.lengthMetres))config.endless.regions.lengthMetres[key] ??= value;
-  const specialDefaults = {"widthScreens":3.5,"rivalRace":{"count":[3,5],"speedRatio":[1,1.08],"draftMinMetres":4,"draftRangeMetres":28,"draftWidthMetres":4,"draftChargeSeconds":0.8,"draftBoost":0.24,"gateQuota":0.75,"predators":true},"marsh":{"islandRadiusMetres":[12,8],"boardwalkWidthMetres":[5,3.2],"sinkSeconds":[2.4,1.5],"minimumSpeedRatio":[0.55,0.35]},"bowls":{"radiusMetres":[60,50],"spacingMetres":95,"bankBoost":[0.28,0.42],"powderSpeedRatio":[0.7,0.5]}};
+  const specialDefaults = {"widthScreens":3.5,"rivalRace":{"count":[3,5],"speedRatio":[1,1.08],"draftMinMetres":4,"draftRangeMetres":28,"draftWidthMetres":4,"draftChargeSeconds":0.8,"draftBoost":0.24,"gateQuota":0.75,"predators":true}};
   config.endless.regions.specialAreas ??= {};
   for(const [key,value] of Object.entries(specialDefaults)){
     config.endless.regions.specialAreas[key] ??= value;
     if(value&&typeof value==='object'&&!Array.isArray(value))for(const [field,fallback] of Object.entries(value))config.endless.regions.specialAreas[key][field] ??= fallback;
   }
-  for(const [key,value] of Object.entries({rivalRace:[800,1000],marsh:[650,850],bowls:[900,1200]}))config.endless.regions.lengthMetres[key] ??= value;
+  for(const [key,value] of Object.entries({rivalRace:[800,1000],christmas:[900,1200],halloween:[900,1200]}))config.endless.regions.lengthMetres[key] ??= value;
   config.endless.regions.crowd ??= regionDefaults.crowd;
   for(const [key,value] of Object.entries(regionDefaults.crowd))config.endless.regions.crowd[key] ??= value;
   config.endless.regions.cemetery ??= {};
@@ -67,6 +67,12 @@ window.loadFrostlineConfig = async function () {
   config.predators.divertPathAngleDegrees ??= 45;
   config.predators.divertReleaseAngleDegrees ??= 60;
   config.predators.mealPauseSeconds ??= .8;
+  config.night ??= {};
+  for(const [key,value] of Object.entries({"enabled":true,"dayNightRounds":true,"playerRadiusMetres":14,"skierRadiusMetres":5,"lampRadiusMetres":24,"lampSpacingMetres":20,"ambientOpacity":0.97,"transitionSeconds":1.8}))config.night[key] ??= value;
+  config.endless.regions.festivals ??= {};
+  for(const [key,value] of Object.entries({"peopleMultiplier":1.6,"treeCrowd":[20,32],"santaFraction":0.24,"sleighEveryMetres":280,"reindeerPairs":3,"yetis":[2,4],"wolves":[4,8],"zombies":[20,40],"skeletons":[8,14]}))config.endless.regions.festivals[key] ??= value;
+  config.endless.regions.order=config.endless.regions.order.map(kind=>({marsh:"christmas",bowls:"halloween"}[kind]||kind));
+  for(const kind of ['marsh','bowls']){delete config.endless.regions.specialAreas[kind];delete config.endless.regions.lengthMetres[kind];}
   config.controls.tapBottomFraction ??= .24;
   config.controls.swipeShortPixels ??= 22;
   config.controls.swipeLongPixels ??= 88;
@@ -76,6 +82,7 @@ window.loadFrostlineConfig = async function () {
   config.physics.releaseTurnFollow ??= 3;
   config.village.populationMultiplier ??= 2;
   const regionRanges = ['gapMetres','beginnerPeople','forestTreesPer100Metres','cemeteryOpeningMetres','denseForestDensity','scrambleDensity'].map(key=>config.endless.regions[key]).concat(Object.values(config.endless.regions.lengthMetres),[config.endless.regions.specialAreas.rivalRace.count,config.endless.regions.specialAreas.rivalRace.speedRatio,config.endless.regions.cemetery.clusterSpacingMetres,config.endless.regions.cemetery.mausoleum.count,config.endless.regions.zombies.wandererCount,config.endless.regions.zombies.graveWake.count,config.endless.regions.zombies.roamerCount,config.endless.regions.zombies.wandererSpeedKmh,config.endless.regions.zombies.count,config.endless.regions.zombies.speedKmh,config.endless.regions.crowd.people],['crossingMetres','rows','chokeWidthMetres'].map(key=>config.endless.regions.cemetery[key]).filter(Array.isArray));
+  regionRanges.push(...Object.values(config.endless.regions.festivals).filter(Array.isArray));
   if(config.endless.regions.specialAreas.rivalRace.draftRangeMetres<=config.endless.regions.specialAreas.rivalRace.draftMinMetres)throw new Error('draftRangeMetres must exceed draftMinMetres');
   if(config.endless.regions.crowd.maximumGapMetres<config.endless.regions.crowd.minimumGapMetres)throw new Error('crowd maximumGapMetres must be at least minimumGapMetres');
   if(regionRanges.some(pair=>pair[0]>pair[1]))throw new Error('endless.regions ranges must be ordered');

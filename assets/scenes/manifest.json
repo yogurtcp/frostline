@@ -89,6 +89,110 @@
       "width": 320,
       "height": 200,
       "colors": 64
+    },
+    {
+      "key": "death-wolf-night",
+      "file": "death-wolf-night.png",
+      "source": "exec-54bf0380-db07-4171-9ab8-f60bae7cc0d1.png",
+      "width": 320,
+      "height": 200,
+      "colors": 64
+    },
+    {
+      "key": "death-bear-night",
+      "file": "death-bear-night.png",
+      "source": "exec-181c201c-55d0-4fb2-b372-3072fda2238a.png",
+      "width": 320,
+      "height": 200,
+      "colors": 64
+    },
+    {
+      "key": "death-zombie-night",
+      "file": "death-zombie-night.png",
+      "source": "exec-2c3ea4ad-71c6-49fd-b782-0bf8e3eb4094.png",
+      "width": 320,
+      "height": 200,
+      "colors": 64
+    },
+    {
+      "key": "death-yeti-white-night",
+      "file": "death-yeti-white-night.png",
+      "source": "exec-1367d264-021c-4aa7-aa97-16f468c8242a.png",
+      "width": 320,
+      "height": 200,
+      "colors": 64
+    },
+    {
+      "key": "death-yeti-avalanche-night",
+      "file": "death-yeti-avalanche-night.png",
+      "source": "exec-c8374d2f-c77f-4526-90fb-fcb114a9d6d8.png",
+      "width": 320,
+      "height": 200,
+      "colors": 64
+    },
+    {
+      "key": "death-yeti-violet-night",
+      "file": "death-yeti-violet-night.png",
+      "source": "exec-8d7c2dfd-10c9-4f6b-9cb2-6f0b363271cb.png",
+      "width": 320,
+      "height": 200,
+      "colors": 64
+    },
+    {
+      "key": "death-yeti-burgundy-night",
+      "file": "death-yeti-burgundy-night.png",
+      "source": "exec-a7d163e6-2ca1-4f60-a54e-2674b5d5f461.png",
+      "width": 320,
+      "height": 200,
+      "colors": 64
+    },
+    {
+      "key": "finish-night",
+      "file": "finish-night.png",
+      "source": "exec-4c543279-a790-4dfa-b88c-1ddef6f6cab4.png",
+      "width": 320,
+      "height": 200,
+      "colors": 64
+    },
+    {
+      "key": "perfect-night",
+      "file": "perfect-night.png",
+      "source": "exec-77876ac1-2cc8-4719-a134-2f0c104c7c26.png",
+      "width": 320,
+      "height": 200,
+      "colors": 64
+    },
+    {
+      "key": "victory-night",
+      "file": "victory-night.png",
+      "source": "exec-3f6fc0a9-4dc6-4a1b-ab79-68201d66b2a9.png",
+      "width": 320,
+      "height": 200,
+      "colors": 64
+    },
+    {
+      "key": "cocoa-night",
+      "file": "cocoa-night.png",
+      "source": "exec-428d8cdb-ef6d-432a-880d-d7a9c62072b1.png",
+      "width": 320,
+      "height": 200,
+      "colors": 64
+    },
+    {
+      "key": "mistletoe",
+      "file": "mistletoe.png",
+      "source": "exec-8a0ea492-ca06-4b4c-90a7-d837d81851e5.png",
+      "width": 320,
+      "height": 200,
+      "colors": 64
+    },
+    {
+      "key": "mistletoe-night",
+      "file": "mistletoe-night.png",
+      "source": "exec-8b96dbac-80ad-41aa-82eb-2d508248cbe3.png",
+      "width": 320,
+      "height": 200,
+      "colors": 64
     }
   ]
 }

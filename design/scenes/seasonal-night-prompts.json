@@ -1,0 +1,63 @@
+{
+  "tool": "Built-in image_gen",
+  "nativeExport": "320x200 nearest-neighbor, 64 colors",
+  "prompts": {
+    "night": "Use case: lighting-weather. Edit this game transition card into a distinctly NIGHTTIME version. Preserve its entire composition, all characters, their exact fur/clothing colors and species, funny story, props and cozy native pixel-art style. Keep the image landscape 8:5, intended native 320x200 pixels. Change the time of day: deep indigo starry night sky, small moon, cool blue snow, dark forest and mountains, warm amber lantern/window light illuminating the main characters and foreground. Festive lights where already present should glow beautifully. Keep foreground readable and cute; no new characters, gore, text, border, logo, watermark, smoothing, photographic rendering or arbitrary costume changes. In particular do not turn dark burgundy/violet Yetis white.",
+    "kiss": "Use case: illustration-story. Create a cozy funny game transition card in the same crisp tiny pixel-art style and 8:5 landscape composition as the reference. Intended final native size 320x200. A clearly adult male skier with orange beanie, teal ski jacket, dark blue ski trousers and skis, and a clearly adult woman in a beautiful burgundy winter coat and cream scarf share a sweet consensual kiss on the cheek beneath mistletoe hanging from a Christmas village wooden arch. She hands him a small decorative silver sword with golden hilt as a playful good-luck gift. Snowy alpine village at DAYTIME, one huge decorated Christmas tree in the distance, elegant party guests, warm wooden chalets, garlands, snowy mountains. Cute, humorous, wholesome; no text, logos, UI, watermark, blood, realism or gradients. Deliberately readable pixels and limited palette, matching the reference image. Both adults look happy.",
+    "kissNight": "Use case: lighting-weather. Create a NIGHTTIME version of this exact pixel-art game scene. Preserve the happy adult couple, their kiss, orange hat and teal ski outfit, burgundy coat and cream scarf, mistletoe arch and small silver gift sword with golden hilt. Keep the same 8:5 composition, all characters and the beautiful Christmas tree. Replace daylight with deep starry indigo sky and moonlit blue snow. Make garlands, Christmas tree fairy lights, windows and lanterns glow warmly, bathing the foreground couple in golden light. Cute cozy pixel art, intended final native 320x200, no text, UI, watermark, realism or smoothing."
+  },
+  "outputs": [
+    {
+      "key": "death-wolf-night",
+      "path": "/home/yevgeny/.codex/generated_images/01a11f23-43ba-7833-8aa6-c8d1c1fc528d/exec-54bf0380-db07-4171-9ab8-f60bae7cc0d1.png"
+    },
+    {
+      "key": "death-bear-night",
+      "path": "/home/yevgeny/.codex/generated_images/01a11f23-43ba-7833-8aa6-c8d1c1fc528d/exec-181c201c-55d0-4fb2-b372-3072fda2238a.png"
+    },
+    {
+      "key": "death-zombie-night",
+      "path": "/home/yevgeny/.codex/generated_images/01a11f23-43ba-7833-8aa6-c8d1c1fc528d/exec-2c3ea4ad-71c6-49fd-b782-0bf8e3eb4094.png"
+    },
+    {
+      "key": "death-yeti-white-night",
+      "path": "/home/yevgeny/.codex/generated_images/01a11f23-43ba-7833-8aa6-c8d1c1fc528d/exec-1367d264-021c-4aa7-aa97-16f468c8242a.png"
+    },
+    {
+      "key": "death-yeti-avalanche-night",
+      "path": "/home/yevgeny/.codex/generated_images/01a11f23-43ba-7833-8aa6-c8d1c1fc528d/exec-c8374d2f-c77f-4526-90fb-fcb114a9d6d8.png"
+    },
+    {
+      "key": "death-yeti-violet-night",
+      "path": "/home/yevgeny/.codex/generated_images/01a11f23-43ba-7833-8aa6-c8d1c1fc528d/exec-8d7c2dfd-10c9-4f6b-9cb2-6f0b363271cb.png"
+    },
+    {
+      "key": "death-yeti-burgundy-night",
+      "path": "/home/yevgeny/.codex/generated_images/01a11f23-43ba-7833-8aa6-c8d1c1fc528d/exec-a7d163e6-2ca1-4f60-a54e-2674b5d5f461.png"
+    },
+    {
+      "key": "finish-night",
+      "path": "/home/yevgeny/.codex/generated_images/01a11f23-43ba-7833-8aa6-c8d1c1fc528d/exec-4c543279-a790-4dfa-b88c-1ddef6f6cab4.png"
+    },
+    {
+      "key": "perfect-night",
+      "path": "/home/yevgeny/.codex/generated_images/01a11f23-43ba-7833-8aa6-c8d1c1fc528d/exec-77876ac1-2cc8-4719-a134-2f0c104c7c26.png"
+    },
+    {
+      "key": "victory-night",
+      "path": "/home/yevgeny/.codex/generated_images/01a11f23-43ba-7833-8aa6-c8d1c1fc528d/exec-3f6fc0a9-4dc6-4a1b-ab79-68201d66b2a9.png"
+    },
+    {
+      "key": "cocoa-night",
+      "path": "/home/yevgeny/.codex/generated_images/01a11f23-43ba-7833-8aa6-c8d1c1fc528d/exec-428d8cdb-ef6d-432a-880d-d7a9c62072b1.png"
+    },
+    {
+      "key": "mistletoe",
+      "path": "/home/yevgeny/.codex/generated_images/01a11f23-43ba-7833-8aa6-c8d1c1fc528d/exec-8a0ea492-ca06-4b4c-90a7-d837d81851e5.png"
+    },
+    {
+      "key": "mistletoe-night",
+      "path": "/home/yevgeny/.codex/generated_images/01a11f23-43ba-7833-8aa6-c8d1c1fc528d/exec-8b96dbac-80ad-41aa-82eb-2d508248cbe3.png"
+    }
+  ]
+}

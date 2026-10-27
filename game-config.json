@@ -105,11 +105,11 @@
         "quiet",
         "rivalRace",
         "forest",
-        "marsh",
+        "christmas",
         "quiet",
         "cemetery",
         "denseForest",
-        "bowls",
+        "halloween",
         "scramble",
         "quiet"
       ],
@@ -155,11 +155,11 @@
           800,
           1000
         ],
-        "marsh": [
-          650,
-          850
+        "christmas": [
+          900,
+          1200
         ],
-        "bowls": [
+        "halloween": [
           900,
           1200
         ]
@@ -184,12 +184,21 @@
         ],
         "downedSpeedMultiplier": 2,
         "graveWake": {
-          "count": [8, 14],
+          "count": [
+            8,
+            14
+          ],
           "radiusMetres": 140,
           "intervalSeconds": 0.25
         },
-        "wandererCount": [72, 144],
-        "wandererSpeedKmh": [10, 18],
+        "wandererCount": [
+          72,
+          144
+        ],
+        "wandererSpeedKmh": [
+          10,
+          18
+        ],
         "count": [
           8,
           14
@@ -230,13 +239,19 @@
       "cemetery": {
         "widthScreens": 3.5,
         "mausoleum": {
-          "count": [6, 10],
+          "count": [
+            6,
+            10
+          ],
           "noticeMetres": 75,
           "windupSeconds": 0.4,
           "releaseSeconds": 0.45,
           "speedMultiplier": 8
         },
-        "clusterSpacingMetres": [34, 42],
+        "clusterSpacingMetres": [
+          34,
+          42
+        ],
         "ySpeedScale": 0.7,
         "blendMetres": 25
       },
@@ -258,40 +273,33 @@
           "draftBoost": 0.24,
           "gateQuota": 0.75,
           "predators": true
-        },
-        "marsh": {
-          "islandRadiusMetres": [
-            12,
-            8
-          ],
-          "boardwalkWidthMetres": [
-            5,
-            3.2
-          ],
-          "sinkSeconds": [
-            2.4,
-            1.5
-          ],
-          "minimumSpeedRatio": [
-            0.55,
-            0.35
-          ]
-        },
-        "bowls": {
-          "radiusMetres": [
-            60,
-            50
-          ],
-          "spacingMetres": 95,
-          "bankBoost": [
-            0.28,
-            0.42
-          ],
-          "powderSpeedRatio": [
-            0.7,
-            0.5
-          ]
         }
+      },
+      "festivals": {
+        "peopleMultiplier": 1.6,
+        "treeCrowd": [
+          20,
+          32
+        ],
+        "santaFraction": 0.24,
+        "sleighEveryMetres": 280,
+        "reindeerPairs": 3,
+        "yetis": [
+          2,
+          4
+        ],
+        "wolves": [
+          4,
+          8
+        ],
+        "zombies": [
+          20,
+          40
+        ],
+        "skeletons": [
+          8,
+          14
+        ]
       }
     },
     "wildlife": {
@@ -1186,15 +1194,69 @@
       218,
       226
     ],
-    "yetiWhiteIdle": ["yetis", 0, 0, 30, 34],
-    "yetiWhiteRunL": ["yetis", 30, 0, 30, 34],
-    "yetiWhiteRunR": ["yetis", 60, 0, 30, 34],
-    "yetiAvalancheIdle": ["yetis", 90, 0, 30, 34],
-    "yetiAvalancheRunL": ["yetis", 120, 0, 30, 34],
-    "yetiAvalancheRunR": ["yetis", 150, 0, 30, 34],
-    "yetiStalkerIdle": ["yetis", 180, 0, 30, 34],
-    "yetiStalkerRunL": ["yetis", 210, 0, 30, 34],
-    "yetiStalkerRunR": ["yetis", 240, 0, 30, 34],
+    "yetiWhiteIdle": [
+      "yetis",
+      0,
+      0,
+      30,
+      34
+    ],
+    "yetiWhiteRunL": [
+      "yetis",
+      30,
+      0,
+      30,
+      34
+    ],
+    "yetiWhiteRunR": [
+      "yetis",
+      60,
+      0,
+      30,
+      34
+    ],
+    "yetiAvalancheIdle": [
+      "yetis",
+      90,
+      0,
+      30,
+      34
+    ],
+    "yetiAvalancheRunL": [
+      "yetis",
+      120,
+      0,
+      30,
+      34
+    ],
+    "yetiAvalancheRunR": [
+      "yetis",
+      150,
+      0,
+      30,
+      34
+    ],
+    "yetiStalkerIdle": [
+      "yetis",
+      180,
+      0,
+      30,
+      34
+    ],
+    "yetiStalkerRunL": [
+      "yetis",
+      210,
+      0,
+      30,
+      34
+    ],
+    "yetiStalkerRunR": [
+      "yetis",
+      240,
+      0,
+      30,
+      34
+    ],
     "pine": [
       "ski",
       710,
@@ -2207,7 +2269,10 @@
     "offDownhillSpeedRatio": 0.5
   },
   "skiers": {
-    "crashSeconds": [4, 5],
+    "crashSeconds": [
+      4,
+      5
+    ],
     "getUpSeconds": 0.6,
     "slowTurnSeconds": [
       2.5,
@@ -2641,5 +2706,15 @@
       "swayPeriodSeconds": 5,
       "trailSeconds": 8
     }
+  },
+  "night": {
+    "enabled": true,
+    "dayNightRounds": true,
+    "playerRadiusMetres": 14,
+    "skierRadiusMetres": 5,
+    "lampRadiusMetres": 24,
+    "lampSpacingMetres": 20,
+    "ambientOpacity": 0.97,
+    "transitionSeconds": 1.8
   }
 }

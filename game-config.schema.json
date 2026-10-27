@@ -4158,7 +4158,12 @@
           "minimum": 0,
           "exclusiveMinimum": 0
         },
-        "tapBottomFraction": { "type": "number", "minimum": 0.1, "maximum": 0.4, "description": "Bottom fraction of the canvas where a tap points downhill (default 0.24)." },
+        "tapBottomFraction": {
+          "type": "number",
+          "minimum": 0.1,
+          "maximum": 0.4,
+          "description": "Bottom fraction of the canvas where a tap points downhill (default 0.24)."
+        },
         "swipeShortPixels": {
           "type": "number",
           "exclusiveMinimum": 0,
@@ -5576,16 +5581,33 @@
         },
         "slowTurnSeconds": {
           "type": "array",
-          "items": { "type": "number", "minimum": 0, "exclusiveMinimum": 0 },
+          "items": {
+            "type": "number",
+            "minimum": 0,
+            "exclusiveMinimum": 0
+          },
           "minItems": 2,
           "maxItems": 2,
           "description": "Minimum/maximum seconds between casual skier turn decisions."
         },
-        "slowTurnChance": { "type": "number", "minimum": 0, "maximum": 1 },
-        "slowTurnLateralRatio": { "type": "number", "minimum": 0, "maximum": 1 },
-        "slowSteeringFollow": { "type": "number", "minimum": 0, "exclusiveMinimum": 0 },
+        "slowTurnChance": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "slowTurnLateralRatio": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "slowSteeringFollow": {
+          "type": "number",
+          "minimum": 0,
+          "exclusiveMinimum": 0
+        },
         "slowTurnMaxOffsetMetres": {
-          "type": "number", "minimum": 1,
+          "type": "number",
+          "minimum": 1,
           "description": "Casual skiers turn back toward their own lane beyond this lateral offset; easing permits a small overshoot."
         },
         "fastSpeed": {
@@ -8534,7 +8556,7 @@
             "pathPlacementChance",
             "pathOffsetMetres"
           ],
-          "description": "Tall pine that warns, rotates rigidly sideways toward the skier’s side, and remains a jumpable fallen obstacle.",
+          "description": "Tall pine that warns, rotates rigidly sideways toward the skier\u2019s side, and remains a jumpable fallen obstacle.",
           "properties": {
             "pathPlacementChance": {
               "type": "number",
@@ -9136,93 +9158,6 @@
                       "description": "Allow ordinary Arcade hunter/wildlife schedules inside the race; incoming hunters always remain active."
                     }
                   }
-                },
-                "marsh": {
-                  "type": "object",
-                  "additionalProperties": false,
-                  "properties": {
-                    "islandRadiusMetres": {
-                      "type": "array",
-                      "minItems": 2,
-                      "maxItems": 2,
-                      "items": {
-                        "type": "number",
-                        "minimum": 5,
-                        "maximum": 20
-                      }
-                    },
-                    "boardwalkWidthMetres": {
-                      "type": "array",
-                      "minItems": 2,
-                      "maxItems": 2,
-                      "items": {
-                        "type": "number",
-                        "minimum": 2,
-                        "maximum": 8
-                      }
-                    },
-                    "sinkSeconds": {
-                      "type": "array",
-                      "minItems": 2,
-                      "maxItems": 2,
-                      "items": {
-                        "type": "number",
-                        "minimum": 0.5,
-                        "maximum": 6
-                      }
-                    },
-                    "minimumSpeedRatio": {
-                      "type": "array",
-                      "minItems": 2,
-                      "maxItems": 2,
-                      "items": {
-                        "type": "number",
-                        "minimum": 0.2,
-                        "maximum": 0.9
-                      }
-                    }
-                  }
-                },
-                "bowls": {
-                  "type": "object",
-                  "additionalProperties": false,
-                  "properties": {
-                    "radiusMetres": {
-                      "type": "array",
-                      "minItems": 2,
-                      "maxItems": 2,
-                      "items": {
-                        "type": "number",
-                        "minimum": 35,
-                        "maximum": 80
-                      }
-                    },
-                    "spacingMetres": {
-                      "type": "number",
-                      "minimum": 80,
-                      "maximum": 120
-                    },
-                    "bankBoost": {
-                      "type": "array",
-                      "minItems": 2,
-                      "maxItems": 2,
-                      "items": {
-                        "type": "number",
-                        "minimum": 0.1,
-                        "maximum": 0.7
-                      }
-                    },
-                    "powderSpeedRatio": {
-                      "type": "array",
-                      "minItems": 2,
-                      "maxItems": 2,
-                      "items": {
-                        "type": "number",
-                        "minimum": 0.3,
-                        "maximum": 0.95
-                      }
-                    }
-                  }
                 }
               }
             },
@@ -9247,8 +9182,8 @@
                   "crowd",
                   "scramble",
                   "rivalRace",
-                  "marsh",
-                  "bowls"
+                  "christmas",
+                  "halloween"
                 ]
               }
             },
@@ -9352,7 +9287,7 @@
                     "maximum": 1600
                   }
                 },
-                "marsh": {
+                "christmas": {
                   "type": "array",
                   "minItems": 2,
                   "maxItems": 2,
@@ -9362,7 +9297,7 @@
                     "maximum": 1600
                   }
                 },
-                "bowls": {
+                "halloween": {
                   "type": "array",
                   "minItems": 2,
                   "maxItems": 2,
@@ -9476,16 +9411,37 @@
                   "type": "array",
                   "minItems": 2,
                   "maxItems": 2,
-                  "items": { "type": "integer", "minimum": 0, "maximum": 120 },
+                  "items": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 120
+                  },
                   "description": "Additional first/final-visit zombies already patrolling the open gaps."
                 },
                 "graveWake": {
                   "type": "object",
                   "additionalProperties": false,
                   "properties": {
-                    "count": { "type": "array", "minItems": 2, "maxItems": 2, "items": { "type": "integer", "minimum": 1, "maximum": 32 } },
-                    "radiusMetres": { "type": "number", "minimum": 20, "maximum": 250 },
-                    "intervalSeconds": { "type": "number", "minimum": 0.1, "maximum": 2 }
+                    "count": {
+                      "type": "array",
+                      "minItems": 2,
+                      "maxItems": 2,
+                      "items": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 32
+                      }
+                    },
+                    "radiusMetres": {
+                      "type": "number",
+                      "minimum": 20,
+                      "maximum": 250
+                    },
+                    "intervalSeconds": {
+                      "type": "number",
+                      "minimum": 0.1,
+                      "maximum": 2
+                    }
                   },
                   "description": "A nearby grave wakes a finite group in sequence; later local groups append to the same cemetery queue."
                 },
@@ -9563,11 +9519,36 @@
                   "type": "object",
                   "additionalProperties": false,
                   "properties": {
-                    "count": { "type": "array", "minItems": 2, "maxItems": 2, "items": { "type": "integer", "minimum": 1, "maximum": 24 } },
-                    "noticeMetres": { "type": "number", "minimum": 10, "maximum": 100 },
-                    "windupSeconds": { "type": "number", "minimum": 0.3, "maximum": 3 },
-                    "releaseSeconds": { "type": "number", "minimum": 0.2, "maximum": 2 },
-                    "speedMultiplier": { "type": "number", "minimum": 1, "maximum": 8 }
+                    "count": {
+                      "type": "array",
+                      "minItems": 2,
+                      "maxItems": 2,
+                      "items": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 24
+                      }
+                    },
+                    "noticeMetres": {
+                      "type": "number",
+                      "minimum": 10,
+                      "maximum": 100
+                    },
+                    "windupSeconds": {
+                      "type": "number",
+                      "minimum": 0.3,
+                      "maximum": 3
+                    },
+                    "releaseSeconds": {
+                      "type": "number",
+                      "minimum": 0.2,
+                      "maximum": 2
+                    },
+                    "speedMultiplier": {
+                      "type": "number",
+                      "minimum": 1,
+                      "maximum": 8
+                    }
                   }
                 },
                 "widthScreens": {
@@ -9580,7 +9561,11 @@
                   "type": "array",
                   "minItems": 2,
                   "maxItems": 2,
-                  "items": { "type": "number", "minimum": 24, "maximum": 70 },
+                  "items": {
+                    "type": "number",
+                    "minimum": 24,
+                    "maximum": 70
+                  },
                   "description": "Late/first spacing of irregular burial clusters in the open cemetery, before pace scaling."
                 },
                 "ySpeedScale": {
@@ -9651,6 +9636,82 @@
                 "maximum": 3
               },
               "description": "First/final visit obstacle density multiplier; fixed within each appearance."
+            },
+            "festivals": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "peopleMultiplier": {
+                  "type": "number",
+                  "minimum": 1,
+                  "maximum": 3
+                },
+                "treeCrowd": {
+                  "type": "array",
+                  "minItems": 2,
+                  "maxItems": 2,
+                  "items": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 200
+                  }
+                },
+                "santaFraction": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                "sleighEveryMetres": {
+                  "type": "number",
+                  "minimum": 100,
+                  "maximum": 1000
+                },
+                "reindeerPairs": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 5
+                },
+                "yetis": {
+                  "type": "array",
+                  "minItems": 2,
+                  "maxItems": 2,
+                  "items": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 200
+                  }
+                },
+                "wolves": {
+                  "type": "array",
+                  "minItems": 2,
+                  "maxItems": 2,
+                  "items": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 200
+                  }
+                },
+                "zombies": {
+                  "type": "array",
+                  "minItems": 2,
+                  "maxItems": 2,
+                  "items": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 200
+                  }
+                },
+                "skeletons": {
+                  "type": "array",
+                  "minItems": 2,
+                  "maxItems": 2,
+                  "items": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 200
+                  }
+                }
+              }
             }
           }
         },
@@ -9699,6 +9760,48 @@
               "maximum": 150
             }
           }
+        }
+      }
+    },
+    "night": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "dayNightRounds": {
+          "type": "boolean"
+        },
+        "playerRadiusMetres": {
+          "type": "number",
+          "minimum": 4,
+          "maximum": 40
+        },
+        "skierRadiusMetres": {
+          "type": "number",
+          "minimum": 1,
+          "maximum": 20
+        },
+        "lampRadiusMetres": {
+          "type": "number",
+          "minimum": 8,
+          "maximum": 60
+        },
+        "lampSpacingMetres": {
+          "type": "number",
+          "minimum": 8,
+          "maximum": 60
+        },
+        "ambientOpacity": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 1
+        },
+        "transitionSeconds": {
+          "type": "number",
+          "minimum": 0.1,
+          "maximum": 10
         }
       }
     }
