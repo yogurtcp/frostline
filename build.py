@@ -9,6 +9,7 @@ assets = {name: 'data:image/png;base64,' + base64.b64encode((root / 'assets' / f
           for name, file in [('ski', 'ski-sprites.png'), ('village', 'village-sprites.png'), ('wildlife', 'wildlife-sprites.png'), ('trees', 'tree-sprites.png')]}
 for name, file in [('hillSmall', 'hill-small.png'), ('hillLarge', 'hill-large.png'), ('fallingTree', 'falling-tree.png'), ('wideLog', 'wide-log-v2.png'), ('rollingSnowball', 'rolling-snowball.png'), ('bears', 'bear-sprites.png'), ('people', 'people-animations.png'), ('cozyBuildings', 'cozy-buildings.png'), ('yetis', 'yeti-sprites.png')]:
     assets[name] = 'data:image/png;base64,' + base64.b64encode((root / 'assets' / file).read_bytes()).decode()
+assets['gritty'] = 'data:image/png;base64,' + base64.b64encode((root / 'assets/gritty-sprites.png').read_bytes()).decode()
 scenes = json.loads((root / 'assets/scenes/manifest.json').read_text())
 for scene in scenes['images']:
     assets['scene:' + scene['key']] = 'data:image/png;base64,' + base64.b64encode((root / 'assets/scenes' / scene['file']).read_bytes()).decode()
@@ -20,7 +21,7 @@ validate(config, schema)
 # Escape HTML script terminators in editable dialogue and labels.
 encode = lambda data: json.dumps(data).replace('<', '\\u003c')
 page = page.replace('__CONFIG__', encode(config)).replace('__SCHEMA__', encode(schema)).replace('__CONFIG_CODE__', (root / 'config.js').read_text())
-game_code = (root / 'game.js').read_text().replace('// __SPECIAL_AREAS_CODE__', (root / 'special-areas.js').read_text()).replace('// __SEASONAL_AREAS_CODE__', (root / 'seasonal-areas.js').read_text())
+game_code = (root / 'game.js').read_text().replace('// __SPECIAL_AREAS_CODE__', (root / 'special-areas.js').read_text()).replace('// __SEASONAL_AREAS_CODE__', (root / 'seasonal-areas.js').read_text()).replace('// __ART_DIRECTION_CODE__', (root / 'art-direction.js').read_text())
 page = page.replace('__ASSET_DATA__', json.dumps(assets)).replace('__GAME_CODE__', game_code)
 page = page.replace('__APP_CODE__', (root / 'app.js').read_text())
 worker = (root / 'sw.template.js').read_text()

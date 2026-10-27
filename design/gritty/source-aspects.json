@@ -1,0 +1,358 @@
+{
+  "spruceTree": [
+    483,
+    659
+  ],
+  "crookedTree": [
+    491,
+    630
+  ],
+  "cedarTree": [
+    560,
+    564
+  ],
+  "alpineTree": [
+    383,
+    651
+  ],
+  "skier": [
+    244,
+    265
+  ],
+  "left": [
+    294,
+    282
+  ],
+  "right": [
+    286,
+    276
+  ],
+  "fall": [
+    307,
+    282
+  ],
+  "yeti": [
+    225,
+    230
+  ],
+  "yetiWalk": [
+    216,
+    230
+  ],
+  "yetiHappy": [
+    218,
+    226
+  ],
+  "yetiWhiteIdle": [
+    30,
+    34
+  ],
+  "yetiWhiteRunL": [
+    30,
+    34
+  ],
+  "yetiWhiteRunR": [
+    30,
+    34
+  ],
+  "yetiAvalancheIdle": [
+    30,
+    34
+  ],
+  "yetiAvalancheRunL": [
+    30,
+    34
+  ],
+  "yetiAvalancheRunR": [
+    30,
+    34
+  ],
+  "yetiStalkerIdle": [
+    30,
+    34
+  ],
+  "yetiStalkerRunL": [
+    30,
+    34
+  ],
+  "yetiStalkerRunR": [
+    30,
+    34
+  ],
+  "pine": [
+    222,
+    309
+  ],
+  "fir": [
+    160,
+    228
+  ],
+  "smallPine": [
+    147,
+    147
+  ],
+  "rock": [
+    234,
+    185
+  ],
+  "pebble": [
+    162,
+    139
+  ],
+  "ramp": [
+    342,
+    192
+  ],
+  "snowball": [
+    195,
+    194
+  ],
+  "star": [
+    136,
+    135
+  ],
+  "flag": [
+    99,
+    113
+  ],
+  "lodge": [
+    332,
+    357
+  ],
+  "rental": [
+    302,
+    323
+  ],
+  "lift": [
+    347,
+    350
+  ],
+  "sign": [
+    230,
+    357
+  ],
+  "dog": [
+    232,
+    293
+  ],
+  "dogLeft": [
+    263,
+    272
+  ],
+  "dogRight": [
+    258,
+    280
+  ],
+  "boarder": [
+    245,
+    280
+  ],
+  "personRed": [
+    194,
+    272
+  ],
+  "personYellow": [
+    220,
+    272
+  ],
+  "personGreen": [
+    187,
+    272
+  ],
+  "mushroom": [
+    267,
+    272
+  ],
+  "stump": [
+    315,
+    257
+  ],
+  "mogul": [
+    315,
+    235
+  ],
+  "sled": [
+    326,
+    229
+  ],
+  "bush": [
+    265,
+    254
+  ],
+  "bear": [
+    500,
+    280
+  ],
+  "bearRun": [
+    500,
+    280
+  ],
+  "rabbit": [
+    140,
+    219
+  ],
+  "rabbitRun": [
+    220,
+    201
+  ],
+  "wolf": [
+    304,
+    229
+  ],
+  "wolfRun": [
+    310,
+    227
+  ],
+  "fox": [
+    266,
+    229
+  ],
+  "foxRun": [
+    318,
+    215
+  ],
+  "cat": [
+    192,
+    202
+  ],
+  "catClimb": [
+    179,
+    316
+  ],
+  "still": [
+    255,
+    314
+  ],
+  "uphill": [
+    280,
+    319
+  ],
+  "fallingTree": [
+    618,
+    1399
+  ],
+  "wideLog": [
+    2096,
+    371
+  ],
+  "rollingSnowball": [
+    1049,
+    1014
+  ],
+  "bearWalkAlt": [
+    500,
+    280
+  ],
+  "bearRunAlt": [
+    500,
+    280
+  ],
+  "personRedIdle0": [
+    192,
+    250
+  ],
+  "personRedIdle1": [
+    192,
+    250
+  ],
+  "personRedChat0": [
+    192,
+    250
+  ],
+  "personRedChat1": [
+    192,
+    250
+  ],
+  "personRedWave0": [
+    192,
+    250
+  ],
+  "personRedWave1": [
+    192,
+    250
+  ],
+  "personRedServe0": [
+    192,
+    250
+  ],
+  "personRedServe1": [
+    192,
+    250
+  ],
+  "personYellowIdle0": [
+    192,
+    255
+  ],
+  "personYellowIdle1": [
+    192,
+    255
+  ],
+  "personYellowChat0": [
+    192,
+    255
+  ],
+  "personYellowChat1": [
+    192,
+    255
+  ],
+  "personYellowWave0": [
+    192,
+    255
+  ],
+  "personYellowWave1": [
+    192,
+    255
+  ],
+  "personYellowServe0": [
+    192,
+    255
+  ],
+  "personYellowServe1": [
+    192,
+    255
+  ],
+  "personGreenIdle0": [
+    192,
+    257
+  ],
+  "personGreenIdle1": [
+    192,
+    257
+  ],
+  "personGreenChat0": [
+    192,
+    257
+  ],
+  "personGreenChat1": [
+    192,
+    257
+  ],
+  "personGreenWave0": [
+    192,
+    257
+  ],
+  "personGreenWave1": [
+    192,
+    257
+  ],
+  "personGreenServe0": [
+    192,
+    257
+  ],
+  "personGreenServe1": [
+    192,
+    257
+  ],
+  "bakeryFacade": [
+    724,
+    642
+  ],
+  "cocoaFacade": [
+    724,
+    642
+  ],
+  "toyFacade": [
+    724,
+    642
+  ]
+}

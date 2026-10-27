@@ -1,0 +1,88 @@
+{
+  "tool": "Built-in image_gen",
+  "reference": "art-options/4-gritty-90s-pc.png",
+  "sheets": [
+    {
+      "key": "people",
+      "cols": 4,
+      "rows": 4,
+      "names": [
+        "skier",
+        "left",
+        "right",
+        "fall",
+        "still",
+        "uphill",
+        "boarder",
+        "personIdle0",
+        "personIdle1",
+        "personChat0",
+        "personChat1",
+        "personWave0",
+        "personWave1",
+        "personServe0",
+        "personServe1",
+        "dog"
+      ],
+      "prompt": "Use case: stylized-concept. Asset type: PRODUCTION TRANSPARENT PNG sprite atlas for Frostline. The reference image supplies ONLY the chosen art direction: rugged early-1990s PC game pixel art, icy white snow with blue-violet pixel shadows, deep dark evergreen branches, russet timber, amber light, dark navy contours, hard clustered pixel highlights and restrained checkerboard dithering. Redraw assets in that style. This is an asset sheet, not a scene. Camera slightly elevated front/top-down, same as the reference. Every sprite completely isolated on genuine transparent alpha, NO terrain, ground, shadows, labels, text, grid lines, frame borders or backdrop. Use an EXACT regular grid as requested, all cells equal, with at least15% EMPTY TRANSPARENT GUTTER on every cell edge. One complete sprite per cell. Keep everything within its own cell. Crisp low-resolution hand-placed square pixel clusters enlarged by an integer factor; no smooth painting, blur, fine vector edges, isometric cubes or 3D render. Small, readable game sprites with controlled detail, not HD character illustrations. Consistent upper-left light and dark outlines, complete heads/feet/equipment.\n\nExactly16 isolated sprites in a FOUR-COLUMN FOUR-ROW grid, square canvas. All people have realistic tiny sprite proportions, native approximately20x28 pixels including skis, with an upright torso in every skiing direction. Same main skier throughout the first six cells: red parka, yellow scarf, navy trousers, black goggles, blue hat, pale skis with red tips and two poles. The same bundled red-coated pedestrian throughout cells8\u201315, native16x24 pixels, a separate clothing silhouette from skier. Exact cells, left to right then top to bottom:\nROW1: skier skiing straight down toward viewer; same skier carving left with skis angled but torso upright; same skier carving right; same skier crashed and lying sideways in snow with loose skis (no ground).\nROW2: same skier standing upright stationary with skis sideways; same skier climbing uphill viewed upright from behind (never upside down); purple-coated snowboarder on a board; red-coated pedestrian idle pose A.\nROW3: same red-coated pedestrian idle pose B with small breathing/arm change; same pedestrian chatting pose A; chatting pose B with hand gesture; waving pose A one arm raised.\nROW4: waving pose B arm shifted; offering a cocoa cup pose A; offering cup pose B arm extended; a small rugged brown/white mountain dog facing down-right on four feet.\nThese are true animation poses, SAME person/equipment proportions in adjacent frames, no scenery.",
+      "file": "design/gritty/people.png"
+    },
+    {
+      "key": "terrain",
+      "cols": 4,
+      "rows": 2,
+      "names": [
+        "spruceTree",
+        "crookedTree",
+        "cedarTree",
+        "alpineTree",
+        "rock",
+        "pebble",
+        "stump",
+        "bush"
+      ],
+      "prompt": "Use case: stylized-concept. Asset type: PRODUCTION TRANSPARENT PNG sprite atlas for Frostline. The reference image supplies ONLY the chosen art direction: rugged early-1990s PC game pixel art, icy white snow with blue-violet pixel shadows, deep dark evergreen branches, russet timber, amber light, dark navy contours, hard clustered pixel highlights and restrained checkerboard dithering. Redraw assets in that style. This is an asset sheet, not a scene. Camera slightly elevated front/top-down, same as the reference. Every sprite completely isolated on genuine transparent alpha, NO terrain, ground, shadows, labels, text, grid lines, frame borders or backdrop. Use an EXACT regular grid as requested, all cells equal, with at least15% EMPTY TRANSPARENT GUTTER on every cell edge. One complete sprite per cell. Keep everything within its own cell. Crisp low-resolution hand-placed square pixel clusters enlarged by an integer factor; no smooth painting, blur, fine vector edges, isometric cubes or 3D render. Small, readable game sprites with controlled detail, not HD character illustrations. Consistent upper-left light and dark outlines, complete heads/feet/equipment.\n\nExactly8 isolated terrain sprites in a FOUR-COLUMN TWO-ROW grid, landscape2:1 canvas. Trees designed native40x58 pixels, natural asymmetrical needles and staggered branches rather than repeated geometric triangles. Dark forest needles dominate, heavy irregular white snow caps have distinct blue-violet undersides and a few dithered pixels.\nROW1: dense tall mountain spruce; crooked old pine with exposed bark and irregular sparse branches; broad ancient snowy cedar; narrow sharp alpine fir.\nROW2: large craggy gray-blue boulder with a snow cap; cluster of three small slate pebbles with snow; rough broken russet pine stump with rings and a small snowy root; tangled low winter shrub with sparse red berries and small snow clumps.\nOne object per cell, common bottom baseline, no ground patches, do not attach terrain/shadows.",
+      "file": "design/gritty/terrain.png"
+    },
+    {
+      "key": "buildings",
+      "cols": 3,
+      "rows": 2,
+      "names": [
+        "lodge",
+        "rental",
+        "lift",
+        "bakeryFacade",
+        "cocoaFacade",
+        "toyFacade"
+      ],
+      "prompt": "Use case: stylized-concept. Asset type: PRODUCTION TRANSPARENT PNG sprite atlas for Frostline. The reference image supplies ONLY the chosen art direction: rugged early-1990s PC game pixel art, icy white snow with blue-violet pixel shadows, deep dark evergreen branches, russet timber, amber light, dark navy contours, hard clustered pixel highlights and restrained checkerboard dithering. Redraw assets in that style. This is an asset sheet, not a scene. Camera slightly elevated front/top-down, same as the reference. Every sprite completely isolated on genuine transparent alpha, NO terrain, ground, shadows, labels, text, grid lines, frame borders or backdrop. Use an EXACT regular grid as requested, all cells equal, with at least15% EMPTY TRANSPARENT GUTTER on every cell edge. One complete sprite per cell. Keep everything within its own cell. Crisp low-resolution hand-placed square pixel clusters enlarged by an integer factor; no smooth painting, blur, fine vector edges, isometric cubes or 3D render. Small, readable game sprites with controlled detail, not HD character illustrations. Consistent upper-left light and dark outlines, complete heads/feet/equipment.\n\nExactly6 isolated alpine buildings in a THREE-COLUMN TWO-ROW grid, landscape3:2 canvas. These should fit native64x66 pixel sprites. Match the reference's rugged warm timber chalet, chunky blue-violet roof shadows, angular stone foundations, tiny amber divided windows and textured log courses. Different shapes and rooflines, charming but weathered. Front/elevated view, no exaggerated isometric perspective. No surrounding trees, people, terrain or signs with words; shop plaques may be blank.\nROW1: broad timber alpine lodge with snowy pitched roof and small front porch; compact burgundy wooden ski-rental cabin with a simple snowy gable and two skis leaning against the wall; small timber chairlift terminal with snow roof and one empty hanging chair.\nROW2: warm russet bakery chalet with a modest striped awning and bread display; small cocoa cafe with a dark red awning, amber windows and a blank wooden shop plaque; timber toy shop with muted green trim and a few tiny colorful toys in its window.\nFull buildings, no clipping, one building per cell, generous transparent margins.",
+      "file": "design/gritty/buildings.png"
+    },
+    {
+      "key": "monsters",
+      "cols": 4,
+      "rows": 4,
+      "names": [
+        "yetiWhiteIdle",
+        "yetiWhiteRunL",
+        "yetiWhiteRunR",
+        "yetiAvalancheIdle",
+        "yetiAvalancheRunL",
+        "yetiAvalancheRunR",
+        "yetiStalkerIdle",
+        "yetiStalkerRunL",
+        "yetiStalkerRunR",
+        "wolf",
+        "wolfRun",
+        "bear",
+        "bearWalkAlt",
+        "bearRun",
+        "bearRunAlt",
+        "sleepWolf"
+      ],
+      "prompt": "Use case: stylized-concept. Asset type: PRODUCTION TRANSPARENT PNG sprite atlas for Frostline. The reference image supplies ONLY the chosen art direction: rugged early-1990s PC game pixel art, icy white snow with blue-violet pixel shadows, deep dark evergreen branches, russet timber, amber light, dark navy contours, hard clustered pixel highlights and restrained checkerboard dithering. Redraw assets in that style. This is an asset sheet, not a scene. Camera slightly elevated front/top-down, same as the reference. Every sprite completely isolated on genuine transparent alpha, NO terrain, ground, shadows, labels, text, grid lines, frame borders or backdrop. Use an EXACT regular grid as requested, all cells equal, with at least15% EMPTY TRANSPARENT GUTTER on every cell edge. One complete sprite per cell. Keep everything within its own cell. Crisp low-resolution hand-placed square pixel clusters enlarged by an integer factor; no smooth painting, blur, fine vector edges, isometric cubes or 3D render. Small, readable game sprites with controlled detail, not HD character illustrations. Consistent upper-left light and dark outlines, complete heads/feet/equipment.\n\nExactly16 isolated predator animation sprites in a FOUR-COLUMN FOUR-ROW grid, square canvas. Pixel creatures match the reference's menacing hunched white Yeti and lean gray wolf, tiny native approx28x34 for Yetis and34x21 for quadrupeds. No cute teddy bears or fluffy plush smiling monsters. Yeti: long heavy arms, forward shoulders, dark face, pale small fangs, coarse pixel fur. First family off-white with slate/blue shadows; second family bigger shoulders with gray-blue fur; third family leaner long-limbed in muted dark purple. SAME scale for each family's three frames. ALL bear frames are natural brown quadrupeds on FOUR FEET, long heavy horizontal body, shoulder hump, small round ears, extended muzzle. All wolf/bear movement faces RIGHT.\nExact cells left to right/top to bottom:\nROW1: white Yeti idle; same white Yeti run left-foot-forward; same white Yeti run right-foot-forward; gray-blue broad-shouldered Yeti idle.\nROW2: same gray-blue Yeti run left-foot; gray-blue run right-foot; lean purple stalker Yeti idle; same purple stalker run left-foot.\nROW3: same purple stalker run right-foot; lean gray wolf walking right; same gray wolf running right with stretched stride; wild brown bear walking right frame A.\nROW4: same brown bear walk frame B alternating paws; same brown bear galloping frame A gathered legs; same bear galloping frame B extended legs; same gray wolf curled up sleeping.\nRecognizable distinct paired limb animation, threatening but no gore, isolated transparent sprites, no cast shadows.",
+      "file": "design/gritty/monsters.png"
+    }
+  ]
+}

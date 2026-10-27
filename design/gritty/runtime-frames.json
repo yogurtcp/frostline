@@ -1,0 +1,506 @@
+{
+  "spruceTree": [
+    "gritty",
+    0,
+    0,
+    42,
+    57
+  ],
+  "crookedTree": [
+    "gritty",
+    128,
+    0,
+    42,
+    54
+  ],
+  "cedarTree": [
+    "gritty",
+    256,
+    0,
+    42,
+    42
+  ],
+  "alpineTree": [
+    "gritty",
+    384,
+    0,
+    42,
+    71
+  ],
+  "skier": [
+    "gritty",
+    512,
+    0,
+    22,
+    24
+  ],
+  "left": [
+    "gritty",
+    640,
+    0,
+    22,
+    21
+  ],
+  "right": [
+    "gritty",
+    768,
+    0,
+    22,
+    21
+  ],
+  "fall": [
+    "gritty",
+    896,
+    0,
+    28,
+    26
+  ],
+  "yeti": [
+    "gritty",
+    0,
+    128,
+    30,
+    31
+  ],
+  "yetiWalk": [
+    "gritty",
+    128,
+    128,
+    30,
+    32
+  ],
+  "yetiHappy": [
+    "gritty",
+    256,
+    128,
+    30,
+    31
+  ],
+  "yetiWhiteIdle": [
+    "gritty",
+    384,
+    128,
+    30,
+    34
+  ],
+  "yetiWhiteRunL": [
+    "gritty",
+    512,
+    128,
+    30,
+    34
+  ],
+  "yetiWhiteRunR": [
+    "gritty",
+    640,
+    128,
+    30,
+    34
+  ],
+  "yetiAvalancheIdle": [
+    "gritty",
+    768,
+    128,
+    30,
+    34
+  ],
+  "yetiAvalancheRunL": [
+    "gritty",
+    896,
+    128,
+    30,
+    34
+  ],
+  "yetiAvalancheRunR": [
+    "gritty",
+    0,
+    256,
+    30,
+    34
+  ],
+  "yetiStalkerIdle": [
+    "gritty",
+    128,
+    256,
+    30,
+    34
+  ],
+  "yetiStalkerRunL": [
+    "gritty",
+    256,
+    256,
+    30,
+    34
+  ],
+  "yetiStalkerRunR": [
+    "gritty",
+    384,
+    256,
+    30,
+    34
+  ],
+  "pine": [
+    "gritty",
+    512,
+    256,
+    42,
+    58
+  ],
+  "fir": [
+    "gritty",
+    640,
+    256,
+    42,
+    60
+  ],
+  "smallPine": [
+    "gritty",
+    768,
+    256,
+    42,
+    42
+  ],
+  "rock": [
+    "gritty",
+    896,
+    256,
+    42,
+    33
+  ],
+  "pebble": [
+    "gritty",
+    0,
+    384,
+    42,
+    36
+  ],
+  "lodge": [
+    "gritty",
+    128,
+    384,
+    80,
+    65
+  ],
+  "rental": [
+    "gritty",
+    256,
+    384,
+    80,
+    86
+  ],
+  "lift": [
+    "gritty",
+    384,
+    384,
+    80,
+    64
+  ],
+  "dog": [
+    "gritty",
+    512,
+    384,
+    24,
+    30
+  ],
+  "dogLeft": [
+    "gritty",
+    640,
+    384,
+    24,
+    25
+  ],
+  "dogRight": [
+    "gritty",
+    768,
+    384,
+    24,
+    26
+  ],
+  "boarder": [
+    "gritty",
+    896,
+    384,
+    22,
+    25
+  ],
+  "personRed": [
+    "gritty",
+    0,
+    512,
+    18,
+    25
+  ],
+  "personYellow": [
+    "gritty",
+    128,
+    512,
+    18,
+    22
+  ],
+  "personGreen": [
+    "gritty",
+    256,
+    512,
+    18,
+    26
+  ],
+  "stump": [
+    "gritty",
+    384,
+    512,
+    42,
+    34
+  ],
+  "bush": [
+    "gritty",
+    512,
+    512,
+    42,
+    40
+  ],
+  "bear": [
+    "gritty",
+    640,
+    512,
+    36,
+    20
+  ],
+  "bearRun": [
+    "gritty",
+    768,
+    512,
+    36,
+    20
+  ],
+  "wolf": [
+    "gritty",
+    896,
+    512,
+    28,
+    21
+  ],
+  "wolfRun": [
+    "gritty",
+    0,
+    640,
+    28,
+    20
+  ],
+  "still": [
+    "gritty",
+    128,
+    640,
+    22,
+    27
+  ],
+  "uphill": [
+    "gritty",
+    256,
+    640,
+    22,
+    25
+  ],
+  "bearWalkAlt": [
+    "gritty",
+    384,
+    640,
+    36,
+    20
+  ],
+  "bearRunAlt": [
+    "gritty",
+    512,
+    640,
+    36,
+    20
+  ],
+  "personRedIdle0": [
+    "gritty",
+    640,
+    640,
+    18,
+    23
+  ],
+  "personRedIdle1": [
+    "gritty",
+    768,
+    640,
+    18,
+    23
+  ],
+  "personRedChat0": [
+    "gritty",
+    896,
+    640,
+    18,
+    23
+  ],
+  "personRedChat1": [
+    "gritty",
+    0,
+    768,
+    18,
+    23
+  ],
+  "personRedWave0": [
+    "gritty",
+    128,
+    768,
+    18,
+    23
+  ],
+  "personRedWave1": [
+    "gritty",
+    256,
+    768,
+    18,
+    23
+  ],
+  "personRedServe0": [
+    "gritty",
+    384,
+    768,
+    18,
+    23
+  ],
+  "personRedServe1": [
+    "gritty",
+    512,
+    768,
+    18,
+    23
+  ],
+  "personYellowIdle0": [
+    "gritty",
+    640,
+    768,
+    18,
+    24
+  ],
+  "personYellowIdle1": [
+    "gritty",
+    768,
+    768,
+    18,
+    24
+  ],
+  "personYellowChat0": [
+    "gritty",
+    896,
+    768,
+    18,
+    24
+  ],
+  "personYellowChat1": [
+    "gritty",
+    0,
+    896,
+    18,
+    24
+  ],
+  "personYellowWave0": [
+    "gritty",
+    128,
+    896,
+    18,
+    24
+  ],
+  "personYellowWave1": [
+    "gritty",
+    256,
+    896,
+    18,
+    24
+  ],
+  "personYellowServe0": [
+    "gritty",
+    384,
+    896,
+    18,
+    24
+  ],
+  "personYellowServe1": [
+    "gritty",
+    512,
+    896,
+    18,
+    24
+  ],
+  "personGreenIdle0": [
+    "gritty",
+    640,
+    896,
+    18,
+    24
+  ],
+  "personGreenIdle1": [
+    "gritty",
+    768,
+    896,
+    18,
+    24
+  ],
+  "personGreenChat0": [
+    "gritty",
+    896,
+    896,
+    18,
+    24
+  ],
+  "personGreenChat1": [
+    "gritty",
+    0,
+    1024,
+    18,
+    24
+  ],
+  "personGreenWave0": [
+    "gritty",
+    128,
+    1024,
+    18,
+    24
+  ],
+  "personGreenWave1": [
+    "gritty",
+    256,
+    1024,
+    18,
+    24
+  ],
+  "personGreenServe0": [
+    "gritty",
+    384,
+    1024,
+    18,
+    24
+  ],
+  "personGreenServe1": [
+    "gritty",
+    512,
+    1024,
+    18,
+    24
+  ],
+  "bakeryFacade": [
+    "gritty",
+    640,
+    1024,
+    80,
+    71
+  ],
+  "cocoaFacade": [
+    "gritty",
+    768,
+    1024,
+    80,
+    71
+  ],
+  "toyFacade": [
+    "gritty",
+    896,
+    1024,
+    80,
+    71
+  ]
+}

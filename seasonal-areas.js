@@ -192,7 +192,7 @@ function festivalGuestFrame(kind,skinIndex,step){
   if(!tile){
     if(festivalGuestTiles.size>=192){festivalGuestTiles.clear();festivalGuestCtx.clearRect(0,0,512,528);}
     const slot=festivalGuestTiles.size;tile={x:slot%16*32,y:Math.floor(slot/16)*44};const t=festivalGuestCtx;t.save();t.translate(tile.x,tile.y);
-    const px=(x,y,w,h,color)=>{t.fillStyle=color;t.fillRect(Math.round(x),Math.round(y),Math.round(w),Math.round(h));};
+    const px=(x,y,w,h,color)=>{t.fillStyle=gritMaterial(color);t.fillRect(Math.round(x),Math.round(y),Math.round(w),Math.round(h));};
     const skin=['#e2b68b','#b98465','#f0cbaa'][skinIndex];
     const coat={velvet:'#386b58',evening:'#813e65',tuxedo:'#314556',furCoat:'#b5a28a',witch:'#57456c',vampire:'#643641',pumpkin:'#d27938',ghost:'#e5e5d9',skeletonSuit:'#35404a',santa:'#b4444a'}[kind];
     const x=16,y=40,half=santa?9:5,bob=step>0?-1:0;
@@ -213,7 +213,7 @@ function festivalGuestFrame(kind,skinIndex,step){
     else if(kind==='ghost'){px(x-5,y-27+bob,10,8,'#e7e9de');px(x-3,y-24+bob,6,5,skin);px(x-6,y-6,12,3,'#e7e9de');}
     else if(kind==='skeletonSuit'){px(x-1,y-17+bob,2,11,'#d6d9cc');for(let i=0;i<3;i++)px(x-4,y-16+bob+i*3,8,1,'#d6d9cc');px(x-3,y-27+bob,6,2,'#bbc6c1');}
     else{px(x-5,y-20+bob,10,3,'#d6b263');px(x+3,y-18+bob,2,5,'#d6b263');}
-    t.restore();festivalGuestTiles.set(key,tile);
+    t.restore();gritTextureNative(t,tile.x,tile.y,32,44);festivalGuestTiles.set(key,tile);
   }
   return tile;
 }

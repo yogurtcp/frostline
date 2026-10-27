@@ -7,7 +7,8 @@ const source=fs.readFileSync(path.join(root,'game.js'),'utf8');
 const spriteCode=source.slice(source.indexOf('  function sprite('),source.indexOf('  function shadow('));
 const palette=config.palette.map(color=>[1,3,5].map(at=>parseInt(color.slice(at,at+2),16)));
 const images={},atlas={},cache=new Map(),document={createElement:()=>createCanvas(1,1)};
-const sprite=new Function('S','images','atlas','spriteCache','paletteRGB','document','ctx','ZOOM',spriteCode+';return sprite;')(config,images,atlas,cache,palette,document,createCanvas(1,1).getContext('2d'),config.render.zoom);
+const bakeHelpers='const exactPalette=new Map(paletteRGB.map(rgb=>[(rgb[0]<<16)|(rgb[1]<<8)|rgb[2],rgb]));const gritClothing=(rgb,target)=>target;const drawGritCastShadow=()=>{};';
+const sprite=new Function('S','images','atlas','spriteCache','paletteRGB','document','ctx','ZOOM',bakeHelpers+spriteCode+';return sprite;')(config,images,atlas,cache,palette,document,createCanvas(1,1).getContext('2d'),config.render.zoom);
 const designs=[
  {id:'white',source:'white-fang',rects:[[24,47,603,697],[651,57,588,719],[1265,57,590,722]]},
  {id:'avalanche',source:'avalanche',rects:[[8,16,674,679],[702,22,643,716],[1365,26,673,712]]},

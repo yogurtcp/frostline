@@ -660,7 +660,7 @@
         0,
         0.5,
         1.5,
-        3.0
+        3
       ],
       "chaseCount": [
         0,
@@ -713,7 +713,7 @@
       },
       "itemRates": {},
       "itemSpreadMetres": 55,
-      "endTrafficMultiplier": 2.0
+      "endTrafficMultiplier": 2
     },
     "stageOverrides": {
       "Warmup": {
@@ -762,7 +762,7 @@
           "slightlyRare": 0.1
         },
         "itemRates": {
-          "skier": 2.0,
+          "skier": 2,
           "boarder": 0.4,
           "fastSkier": 0.2,
           "overtakingSkier": 0.1,
@@ -816,7 +816,7 @@
           "slightlyRare": 0.15
         },
         "itemRates": {
-          "skier": 2.0,
+          "skier": 2,
           "boarder": 0.4,
           "fastSkier": 0.3,
           "personRed": 0.2,
@@ -838,7 +838,7 @@
         },
         "itemRates": {
           "skier": 3.5,
-          "fastSkier": 2.0,
+          "fastSkier": 2,
           "boarder": 1.2,
           "overtakingSkier": 0.2,
           "wolfPack": 0.2,
@@ -989,7 +989,7 @@
         "specialLayout": "momentum",
         "itemRates": {
           "pine": 1.4,
-          "fir": 1.0,
+          "fir": 1,
           "spruceTree": 0.7,
           "smallPine": 0.7,
           "skier": 4,
@@ -1008,15 +1008,15 @@
     }
   },
   "colors": {
-    "ink": "#244451",
-    "muted": "#739391",
-    "snow": "#f3f7f0",
-    "ice": "#dfece8",
-    "blue": "#348ea0",
-    "teal": "#24716d",
-    "red": "#ce6855",
-    "gold": "#dba45a",
-    "wood": "#976e4d"
+    "ink": "#202b43",
+    "muted": "#7283a2",
+    "snow": "#f1f6ff",
+    "ice": "#dce7fa",
+    "blue": "#426f9c",
+    "teal": "#345f70",
+    "red": "#b94d51",
+    "gold": "#d2a152",
+    "wood": "#8e583d"
   },
   "courses": {
     "endless": {
@@ -1132,179 +1132,179 @@
   },
   "atlas": {
     "spruceTree": [
-      "trees",
-      20,
-      72,
-      483,
-      659
+      "gritty",
+      0,
+      0,
+      42,
+      57
     ],
     "crookedTree": [
-      "trees",
-      529,
-      86,
-      491,
-      630
+      "gritty",
+      128,
+      0,
+      42,
+      54
     ],
     "cedarTree": [
-      "trees",
-      1055,
-      159,
-      560,
-      564
+      "gritty",
+      256,
+      0,
+      42,
+      42
     ],
     "alpineTree": [
-      "trees",
-      1645,
-      75,
-      383,
-      651
+      "gritty",
+      384,
+      0,
+      42,
+      71
     ],
     "skier": [
-      "ski",
-      46,
-      101,
-      244,
-      265
+      "gritty",
+      512,
+      0,
+      22,
+      24
     ],
     "left": [
-      "ski",
-      316,
-      105,
-      294,
-      282
+      "gritty",
+      640,
+      0,
+      22,
+      21
     ],
     "right": [
-      "ski",
-      646,
-      102,
-      286,
-      276
+      "gritty",
+      768,
+      0,
+      22,
+      21
     ],
     "fall": [
-      "ski",
-      945,
-      102,
-      307,
-      282
+      "gritty",
+      896,
+      0,
+      28,
+      26
     ],
     "yeti": [
-      "ski",
-      38,
-      453,
-      225,
-      230
+      "gritty",
+      0,
+      128,
+      30,
+      31
     ],
     "yetiWalk": [
-      "ski",
-      276,
-      459,
-      216,
-      230
+      "gritty",
+      128,
+      128,
+      30,
+      32
     ],
     "yetiHappy": [
-      "ski",
-      496,
-      455,
-      218,
-      226
+      "gritty",
+      256,
+      128,
+      30,
+      31
     ],
     "yetiWhiteIdle": [
-      "yetis",
-      0,
-      0,
+      "gritty",
+      384,
+      128,
       30,
       34
     ],
     "yetiWhiteRunL": [
-      "yetis",
-      30,
-      0,
+      "gritty",
+      512,
+      128,
       30,
       34
     ],
     "yetiWhiteRunR": [
-      "yetis",
-      60,
-      0,
+      "gritty",
+      640,
+      128,
       30,
       34
     ],
     "yetiAvalancheIdle": [
-      "yetis",
-      90,
-      0,
+      "gritty",
+      768,
+      128,
       30,
       34
     ],
     "yetiAvalancheRunL": [
-      "yetis",
-      120,
-      0,
+      "gritty",
+      896,
+      128,
       30,
       34
     ],
     "yetiAvalancheRunR": [
-      "yetis",
-      150,
+      "gritty",
       0,
+      256,
       30,
       34
     ],
     "yetiStalkerIdle": [
-      "yetis",
-      180,
-      0,
+      "gritty",
+      128,
+      256,
       30,
       34
     ],
     "yetiStalkerRunL": [
-      "yetis",
-      210,
-      0,
+      "gritty",
+      256,
+      256,
       30,
       34
     ],
     "yetiStalkerRunR": [
-      "yetis",
-      240,
-      0,
+      "gritty",
+      384,
+      256,
       30,
       34
     ],
     "pine": [
-      "ski",
-      710,
-      377,
-      222,
-      309
+      "gritty",
+      512,
+      256,
+      42,
+      58
     ],
     "fir": [
-      "ski",
-      939,
-      455,
-      160,
-      228
+      "gritty",
+      640,
+      256,
+      42,
+      60
     ],
     "smallPine": [
-      "ski",
-      1106,
-      532,
-      147,
-      147
+      "gritty",
+      768,
+      256,
+      42,
+      42
     ],
     "rock": [
-      "ski",
-      37,
-      718,
-      234,
-      185
+      "gritty",
+      896,
+      256,
+      42,
+      33
     ],
     "pebble": [
-      "ski",
-      267,
-      769,
-      162,
-      139
+      "gritty",
+      0,
+      384,
+      42,
+      36
     ],
     "ramp": [
       "ski",
@@ -1335,25 +1335,25 @@
       113
     ],
     "lodge": [
-      "village",
-      0,
-      50,
-      332,
-      357
+      "gritty",
+      128,
+      384,
+      80,
+      65
     ],
     "rental": [
-      "village",
-      334,
-      81,
-      302,
-      323
+      "gritty",
+      256,
+      384,
+      80,
+      86
     ],
     "lift": [
-      "village",
-      643,
-      52,
-      347,
-      350
+      "gritty",
+      384,
+      384,
+      80,
+      64
     ],
     "sign": [
       "village",
@@ -1363,53 +1363,53 @@
       357
     ],
     "dog": [
-      "village",
-      49,
-      408,
-      232,
-      293
+      "gritty",
+      512,
+      384,
+      24,
+      30
     ],
     "dogLeft": [
-      "village",
-      351,
-      426,
-      263,
-      272
+      "gritty",
+      640,
+      384,
+      24,
+      25
     ],
     "dogRight": [
-      "village",
-      676,
-      425,
-      258,
-      280
+      "gritty",
+      768,
+      384,
+      24,
+      26
     ],
     "boarder": [
-      "village",
-      990,
-      425,
-      245,
-      280
+      "gritty",
+      896,
+      384,
+      22,
+      25
     ],
     "personRed": [
-      "village",
-      69,
-      704,
-      194,
-      272
+      "gritty",
+      0,
+      512,
+      18,
+      25
     ],
     "personYellow": [
-      "village",
-      364,
-      704,
-      220,
-      272
+      "gritty",
+      128,
+      512,
+      18,
+      22
     ],
     "personGreen": [
-      "village",
-      689,
-      704,
-      187,
-      272
+      "gritty",
+      256,
+      512,
+      18,
+      26
     ],
     "mushroom": [
       "village",
@@ -1419,11 +1419,11 @@
       272
     ],
     "stump": [
-      "village",
-      10,
-      981,
-      315,
-      257
+      "gritty",
+      384,
+      512,
+      42,
+      34
     ],
     "mogul": [
       "village",
@@ -1440,25 +1440,25 @@
       229
     ],
     "bush": [
-      "village",
-      983,
-      986,
-      265,
-      254
+      "gritty",
+      512,
+      512,
+      42,
+      40
     ],
     "bear": [
-      "bears",
-      30,
-      235,
-      500,
-      280
+      "gritty",
+      640,
+      512,
+      36,
+      20
     ],
     "bearRun": [
-      "bears",
-      1116,
-      235,
-      500,
-      280
+      "gritty",
+      768,
+      512,
+      36,
+      20
     ],
     "rabbit": [
       "wildlife",
@@ -1475,18 +1475,18 @@
       201
     ],
     "wolf": [
-      "wildlife",
-      35,
-      432,
-      304,
-      229
+      "gritty",
+      896,
+      512,
+      28,
+      21
     ],
     "wolfRun": [
-      "wildlife",
-      401,
-      435,
-      310,
-      227
+      "gritty",
+      0,
+      640,
+      28,
+      20
     ],
     "fox": [
       "wildlife",
@@ -1517,18 +1517,18 @@
       316
     ],
     "still": [
-      "wildlife",
-      770,
-      717,
-      255,
-      314
+      "gritty",
+      128,
+      640,
+      22,
+      27
     ],
     "uphill": [
-      "wildlife",
-      1124,
-      715,
-      280,
-      319
+      "gritty",
+      256,
+      640,
+      22,
+      25
     ],
     "fallingTree": [
       "fallingTree",
@@ -1552,240 +1552,246 @@
       1014
     ],
     "bearWalkAlt": [
-      "bears",
-      573,
-      235,
-      500,
-      280
+      "gritty",
+      384,
+      640,
+      36,
+      20
     ],
     "bearRunAlt": [
-      "bears",
-      1659,
-      235,
-      500,
-      280
+      "gritty",
+      512,
+      640,
+      36,
+      20
     ],
     "personRedIdle0": [
-      "people",
-      0,
-      90,
-      192,
-      250
+      "gritty",
+      640,
+      640,
+      18,
+      23
     ],
     "personRedIdle1": [
-      "people",
-      192,
-      90,
-      192,
-      250
+      "gritty",
+      768,
+      640,
+      18,
+      23
     ],
     "personRedChat0": [
-      "people",
-      384,
-      90,
-      192,
-      250
+      "gritty",
+      896,
+      640,
+      18,
+      23
     ],
     "personRedChat1": [
-      "people",
-      576,
-      90,
-      192,
-      250
+      "gritty",
+      0,
+      768,
+      18,
+      23
     ],
     "personRedWave0": [
-      "people",
+      "gritty",
+      128,
       768,
-      90,
-      192,
-      250
+      18,
+      23
     ],
     "personRedWave1": [
-      "people",
-      960,
-      90,
-      192,
-      250
+      "gritty",
+      256,
+      768,
+      18,
+      23
     ],
     "personRedServe0": [
-      "people",
-      1152,
-      90,
-      192,
-      250
+      "gritty",
+      384,
+      768,
+      18,
+      23
     ],
     "personRedServe1": [
-      "people",
-      1344,
-      90,
-      192,
-      250
+      "gritty",
+      512,
+      768,
+      18,
+      23
     ],
     "personYellowIdle0": [
-      "people",
-      0,
-      398,
-      192,
-      255
+      "gritty",
+      640,
+      768,
+      18,
+      24
     ],
     "personYellowIdle1": [
-      "people",
-      192,
-      398,
-      192,
-      255
+      "gritty",
+      768,
+      768,
+      18,
+      24
     ],
     "personYellowChat0": [
-      "people",
-      384,
-      398,
-      192,
-      255
+      "gritty",
+      896,
+      768,
+      18,
+      24
     ],
     "personYellowChat1": [
-      "people",
-      576,
-      398,
-      192,
-      255
+      "gritty",
+      0,
+      896,
+      18,
+      24
     ],
     "personYellowWave0": [
-      "people",
-      768,
-      398,
-      192,
-      255
+      "gritty",
+      128,
+      896,
+      18,
+      24
     ],
     "personYellowWave1": [
-      "people",
-      960,
-      398,
-      192,
-      255
+      "gritty",
+      256,
+      896,
+      18,
+      24
     ],
     "personYellowServe0": [
-      "people",
-      1152,
-      398,
-      192,
-      255
+      "gritty",
+      384,
+      896,
+      18,
+      24
     ],
     "personYellowServe1": [
-      "people",
-      1344,
-      398,
-      192,
-      255
+      "gritty",
+      512,
+      896,
+      18,
+      24
     ],
     "personGreenIdle0": [
-      "people",
-      0,
-      713,
-      192,
-      257
+      "gritty",
+      640,
+      896,
+      18,
+      24
     ],
     "personGreenIdle1": [
-      "people",
-      192,
-      713,
-      192,
-      257
+      "gritty",
+      768,
+      896,
+      18,
+      24
     ],
     "personGreenChat0": [
-      "people",
-      384,
-      713,
-      192,
-      257
+      "gritty",
+      896,
+      896,
+      18,
+      24
     ],
     "personGreenChat1": [
-      "people",
-      576,
-      713,
-      192,
-      257
+      "gritty",
+      0,
+      1024,
+      18,
+      24
     ],
     "personGreenWave0": [
-      "people",
-      768,
-      713,
-      192,
-      257
+      "gritty",
+      128,
+      1024,
+      18,
+      24
     ],
     "personGreenWave1": [
-      "people",
-      960,
-      713,
-      192,
-      257
+      "gritty",
+      256,
+      1024,
+      18,
+      24
     ],
     "personGreenServe0": [
-      "people",
-      1152,
-      713,
-      192,
-      257
+      "gritty",
+      384,
+      1024,
+      18,
+      24
     ],
     "personGreenServe1": [
-      "people",
-      1344,
-      713,
-      192,
-      257
+      "gritty",
+      512,
+      1024,
+      18,
+      24
     ],
     "bakeryFacade": [
-      "cozyBuildings",
-      0,
-      40,
-      724,
-      642
+      "gritty",
+      640,
+      1024,
+      80,
+      71
     ],
     "cocoaFacade": [
-      "cozyBuildings",
-      724,
-      40,
-      724,
-      642
+      "gritty",
+      768,
+      1024,
+      80,
+      71
     ],
     "toyFacade": [
-      "cozyBuildings",
-      1448,
-      40,
-      724,
-      642
+      "gritty",
+      896,
+      1024,
+      80,
+      71
     ]
   },
   "palette": [
-    "#142c40",
-    "#244451",
-    "#375769",
-    "#548091",
-    "#79a5b4",
-    "#9ec9d3",
-    "#c7e0e4",
-    "#e5f0ee",
-    "#f8faf0",
-    "#0c5058",
-    "#1b7379",
-    "#399799",
-    "#65b3b0",
-    "#b0794c",
-    "#714a37",
-    "#463735",
-    "#d39b61",
-    "#f2c98f",
-    "#ffe4ae",
-    "#e58039",
-    "#f6a252",
-    "#9b403e",
-    "#cc5655",
-    "#ee8275",
-    "#403959",
-    "#70557d",
-    "#987bb1",
-    "#d3becd",
-    "#618272",
-    "#9fb4a1"
+    "#111c2c",
+    "#202b43",
+    "#344663",
+    "#60739b",
+    "#8ea3ce",
+    "#bbcbeb",
+    "#dce7fa",
+    "#f7faff",
+    "#0d292d",
+    "#193e3d",
+    "#2e564b",
+    "#51765c",
+    "#4b322e",
+    "#714534",
+    "#9d6140",
+    "#bf8954",
+    "#e1ae6e",
+    "#f5d29c",
+    "#e4b39a",
+    "#f3d0b0",
+    "#74303d",
+    "#b8444b",
+    "#e46b57",
+    "#dc963e",
+    "#2c4770",
+    "#416f9d",
+    "#6b9cbc",
+    "#302d49",
+    "#58456c",
+    "#8a78a1",
+    "#b5a4c6",
+    "#9097a6",
+    "#c59a46",
+    "#efd17c",
+    "#6a7e72",
+    "#a4b4a4"
   ],
   "render": {
     "width": 480,
@@ -1808,14 +1814,14 @@
     "trailLimit": 1800,
     "trailSpacing": 6,
     "fastSkierRGB": [
-      204,
-      86,
-      85
+      156,
+      102,
+      154
     ],
     "guestRGB": [
-      112,
-      85,
-      125
+      52,
+      110,
+      132
     ]
   },
   "world": {
@@ -2059,10 +2065,10 @@
     ],
     "mainRoadSurface": "snow",
     "snowRoadColors": [
-      "#d7e4df",
-      "#eaf2ec",
-      "#f7faf3",
-      "#d1e0db"
+      "#d5e0f1",
+      "#e8f0fc",
+      "#f8fbff",
+      "#c2d1e9"
     ],
     "randomization": {
       "enabled": true,

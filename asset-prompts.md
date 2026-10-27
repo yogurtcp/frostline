@@ -87,3 +87,21 @@ Built-in image_gen tool, transparent background, reference: assets/village-sprit
 Prompt:
 
 Use case: stylized-concept. Asset type: three new snowy village building sprites for the existing Frostline pixel-art skiing game. The attached atlas is style reference only. Create a NEW transparent sprite sheet of three cute, cozy alpine storefronts, exactly one building in each of 3 equal-width columns. Prefer 1536 x 512 canvas: cells 512 x 512. Left: a small warm bakery in honey-colored timber, a rounded glowing oven window, red/cream striped little awning, a simple bread-roll emblem above the door. Center: a cozy cocoa hut with rounded snow-laden gabled roof, teal painted wood, a mug emblem, glowing amber windows, knitted-looking decorative trim. Right: a charming tiny toyshop with muted rose and cream painted timber, little wooden teddy-bear emblem, toy figures visible behind a glowing shop window, simple evergreen winter garland. Match the reference's cheerful, chunky, crisp pixel art and front-facing slightly top-down perspective, miniature chibi building proportions, thick roof snow and clear brown door near lower center. Same overall building scale, width about 420 pixels, height about 390 pixels, aligned foot/bottom baseline, every building fully inside its cell with generous transparent margin. One storey each. No people, animals, scenery, ground plane or cast shadow. Do not draw chimneys; the game adds animated chimneys later. No text, lettering, labels, watermark, borders or painted checkerboard. Actual transparent background between and around the buildings. No glow halos outside outlines, no blur, no smooth vector illustration. Preserve the existing houses in their original file; this is a separate additional atlas.
+
+## Selected option4 production art (2026-10-27)
+
+Current primary game art uses the rugged90s PC direction selected from `art-options/4-gritty-90s-pc.png`. Tool: **built-in image_gen**, four independent transparent production sheets. Exact complete prompts and sheet layout/name lists are saved in [`design/gritty/prompts.json`](design/gritty/prompts.json). Original generated outputs are copied into `design/gritty/people.png`, `terrain.png`, `buildings.png` and `monsters.png`. These preserve native animation roles and the three Yeti families, plus four-footed walking/galloping bears. Existing source files remain available for history.
+
+The generated images are source artwork. `tools/map-gritty-atlas.py` analyzes alpha projections to find safe row/column gutters and source rectangles; it never edits the PNGs. Original aspect targets are recorded in `design/gritty/source-aspects.json`. `tools/bake-gritty-sprites.cjs` samples these rectangles with nearest-neighbor rendering and the game palette into the committed `assets/gritty-sprites.png` (72runtime frames, about125KiB). Frame metadata lives in `frames.json` and `runtime-frames.json`. The bake also rasterizes the editable installation icon SVG at192/512/180px. Normal runtime/build does not require these optional authoring dependencies.
+
+To rebake artwork, use Python/Pillow for the rectangle analysis, then Node20+ with Playwright and Chrome for the native atlas:
+
+```sh
+python3 tools/map-gritty-atlas.py
+# NODE_PATH may be used to locate an existing Playwright installation.
+# CHROME_PATH may select a system Chrome; otherwise Playwright's Chromium is used.
+node tools/bake-gritty-sprites.cjs
+python3 build.py
+```
+
+World snow, cast shadows, snowdrifts and shared native materials are authored in `art-direction.js`. Geometry/AI/contact mechanics are independent of this artwork. All generated source assets and the runtime atlas are local project files; no generation or external asset download happens while playing.

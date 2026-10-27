@@ -105,7 +105,7 @@ function specialGateX(e,y,number,path){return encounterPathX(path,y);}
 function specialTile(key,width,height,paint){
   let tile=specialArt.get(key);if(tile)return tile;
   tile=document.createElement('canvas');tile.width=Math.ceil(width);tile.height=Math.ceil(height);const t=tile.getContext('2d');t.imageSmoothingEnabled=false;
-  const px=(x,y,w,h,c)=>{t.fillStyle=c;t.fillRect(Math.round(x),Math.round(y),Math.round(w),Math.round(h));};
+  const px=(x,y,w,h,c)=>{t.fillStyle=gritMaterial(c);t.fillRect(Math.round(x),Math.round(y),Math.round(w),Math.round(h));};
   const polygon=(points,c)=>{t.fillStyle=c;t.beginPath();points.forEach(([x,y],i)=>i?t.lineTo(Math.round(x/2)*2,Math.round(y/2)*2):t.moveTo(Math.round(x/2)*2,Math.round(y/2)*2));t.closePath();t.fill();};
   paint(t,px,polygon);specialArt.set(key,tile);if(specialArt.size>24)specialArt.delete(specialArt.keys().next().value);return tile;
 }
@@ -116,8 +116,8 @@ function drawSpecialAreas(){
     if(!e.specialArea||e.endY<view.top||e.startY>view.bottom)continue;
     const a=screen(e.centerX-e.band,e.startY),b=screen(e.centerX+e.band,e.endY),left=Math.max(0,a.x),right=Math.min(W,b.x),top=Math.max(0,a.y),bottom=Math.min(H,b.y);
     ctx.save();ctx.beginPath();ctx.rect(left,top,Math.max(0,right-left),bottom-top);ctx.clip();
-    box(left,top,right-left,bottom-top,'#e8efec');
-    const path=e.paths[0];for(let y=Math.max(e.startY,Math.floor(view.top/100)*100);y<Math.min(e.endY,view.bottom+100);y+=100){const at=screen(encounterPathX(path,y),y);box(at.x-e.half*ZOOM,at.y,e.half*2*ZOOM,50,'#f5f8ee');for(const side of [-1,1])box(at.x+side*(e.half-12)*ZOOM,at.y,2,22,'#b4cdd7');}
+    box(left,top,right-left,bottom-top,'#e7effc');
+    const path=e.paths[0];for(let y=Math.max(e.startY,Math.floor(view.top/100)*100);y<Math.min(e.endY,view.bottom+100);y+=100){const at=screen(encounterPathX(path,y),y);box(at.x-e.half*ZOOM,at.y,e.half*2*ZOOM,50,'#f1f6ff');for(const side of [-1,1])box(at.x+side*(e.half-12)*ZOOM,at.y,2,22,'#b4cdd7');}
     ctx.restore();
     // Continue the entry/exit barrier across off-centre approaches, just as in the cemetery.
     for(const y of [e.startY+100*e.scale,e.endY-100*e.scale])if(y>view.top-50&&y<view.bottom+50)for(const side of [-1,1]){

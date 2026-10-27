@@ -708,7 +708,8 @@
                 "ski",
                 "village",
                 "wildlife",
-                "trees"
+                "trees",
+                "gritty"
               ]
             },
             {
@@ -740,7 +741,8 @@
                 "ski",
                 "village",
                 "wildlife",
-                "trees"
+                "trees",
+                "gritty"
               ]
             },
             {
@@ -772,7 +774,8 @@
                 "ski",
                 "village",
                 "wildlife",
-                "trees"
+                "trees",
+                "gritty"
               ]
             },
             {
@@ -804,7 +807,8 @@
                 "ski",
                 "village",
                 "wildlife",
-                "trees"
+                "trees",
+                "gritty"
               ]
             },
             {
@@ -836,7 +840,8 @@
                 "ski",
                 "village",
                 "wildlife",
-                "trees"
+                "trees",
+                "gritty"
               ]
             },
             {
@@ -868,7 +873,8 @@
                 "ski",
                 "village",
                 "wildlife",
-                "trees"
+                "trees",
+                "gritty"
               ]
             },
             {
@@ -900,7 +906,8 @@
                 "ski",
                 "village",
                 "wildlife",
-                "trees"
+                "trees",
+                "gritty"
               ]
             },
             {
@@ -932,7 +939,8 @@
                 "ski",
                 "village",
                 "wildlife",
-                "trees"
+                "trees",
+                "gritty"
               ]
             },
             {
@@ -964,7 +972,8 @@
                 "ski",
                 "village",
                 "wildlife",
-                "trees"
+                "trees",
+                "gritty"
               ]
             },
             {
@@ -996,7 +1005,8 @@
                 "ski",
                 "village",
                 "wildlife",
-                "trees"
+                "trees",
+                "gritty"
               ]
             },
             {
@@ -1028,7 +1038,8 @@
                 "ski",
                 "village",
                 "wildlife",
-                "trees"
+                "trees",
+                "gritty"
               ]
             },
             {
@@ -1057,7 +1068,8 @@
             {
               "type": "string",
               "enum": [
-                "yetis"
+                "yetis",
+                "gritty"
               ]
             },
             {
@@ -1086,7 +1098,8 @@
             {
               "type": "string",
               "enum": [
-                "yetis"
+                "yetis",
+                "gritty"
               ]
             },
             {
@@ -1115,7 +1128,8 @@
             {
               "type": "string",
               "enum": [
-                "yetis"
+                "yetis",
+                "gritty"
               ]
             },
             {
@@ -1144,7 +1158,8 @@
             {
               "type": "string",
               "enum": [
-                "yetis"
+                "yetis",
+                "gritty"
               ]
             },
             {
@@ -1173,7 +1188,8 @@
             {
               "type": "string",
               "enum": [
-                "yetis"
+                "yetis",
+                "gritty"
               ]
             },
             {
@@ -1202,7 +1218,8 @@
             {
               "type": "string",
               "enum": [
-                "yetis"
+                "yetis",
+                "gritty"
               ]
             },
             {
@@ -1231,7 +1248,8 @@
             {
               "type": "string",
               "enum": [
-                "yetis"
+                "yetis",
+                "gritty"
               ]
             },
             {
@@ -1260,7 +1278,8 @@
             {
               "type": "string",
               "enum": [
-                "yetis"
+                "yetis",
+                "gritty"
               ]
             },
             {
@@ -1289,7 +1308,8 @@
             {
               "type": "string",
               "enum": [
-                "yetis"
+                "yetis",
+                "gritty"
               ]
             },
             {
@@ -1321,7 +1341,8 @@
                 "ski",
                 "village",
                 "wildlife",
-                "trees"
+                "trees",
+                "gritty"
               ]
             },
             {
@@ -1353,7 +1374,8 @@
                 "ski",
                 "village",
                 "wildlife",
-                "trees"
+                "trees",
+                "gritty"
               ]
             },
             {
@@ -1385,7 +1407,8 @@
                 "ski",
                 "village",
                 "wildlife",
-                "trees"
+                "trees",
+                "gritty"
               ]
             },
             {
@@ -1417,7 +1440,8 @@
                 "ski",
                 "village",
                 "wildlife",
-                "trees"
+                "trees",
+                "gritty"
               ]
             },
             {
@@ -1449,7 +1473,8 @@
                 "ski",
                 "village",
                 "wildlife",
-                "trees"
+                "trees",
+                "gritty"
               ]
             },
             {
@@ -1481,7 +1506,8 @@
                 "ski",
                 "village",
                 "wildlife",
-                "trees"
+                "trees",
+                "gritty"
               ]
             },
             {
@@ -1513,7 +1539,8 @@
                 "ski",
                 "village",
                 "wildlife",
-                "trees"
+                "trees",
+                "gritty"
               ]
             },
             {
@@ -1545,7 +1572,8 @@
                 "ski",
                 "village",
                 "wildlife",
-                "trees"
+                "trees",
+                "gritty"
               ]
             },
             {
@@ -1577,7 +1605,8 @@
                 "ski",
                 "village",
                 "wildlife",
-                "trees"
+                "trees",
+                "gritty"
               ]
             },
             {
@@ -1609,7 +1638,8 @@
                 "ski",
                 "village",
                 "wildlife",
-                "trees"
+                "trees",
+                "gritty"
               ]
             },
             {
@@ -1641,7 +1671,8 @@
                 "ski",
                 "village",
                 "wildlife",
-                "trees"
+                "trees",
+                "gritty"
               ]
             },
             {
@@ -1673,7 +1704,8 @@
                 "ski",
                 "village",
                 "wildlife",
-                "trees"
+                "trees",
+                "gritty"
               ]
             },
             {
@@ -1705,7 +1737,8 @@
                 "ski",
                 "village",
                 "wildlife",
-                "trees"
+                "trees",
+                "gritty"
               ]
             },
             {
@@ -1737,7 +1770,8 @@
                 "ski",
                 "village",
                 "wildlife",
-                "trees"
+                "trees",
+                "gritty"
               ]
             },
             {
@@ -1769,7 +1803,8 @@
                 "ski",
                 "village",
                 "wildlife",
-                "trees"
+                "trees",
+                "gritty"
               ]
             },
             {
@@ -1801,7 +1836,8 @@
                 "ski",
                 "village",
                 "wildlife",
-                "trees"
+                "trees",
+                "gritty"
               ]
             },
             {
@@ -1833,7 +1869,8 @@
                 "ski",
                 "village",
                 "wildlife",
-                "trees"
+                "trees",
+                "gritty"
               ]
             },
             {
@@ -1865,7 +1902,8 @@
                 "ski",
                 "village",
                 "wildlife",
-                "trees"
+                "trees",
+                "gritty"
               ]
             },
             {
@@ -1897,7 +1935,8 @@
                 "ski",
                 "village",
                 "wildlife",
-                "trees"
+                "trees",
+                "gritty"
               ]
             },
             {
@@ -1929,7 +1968,8 @@
                 "ski",
                 "village",
                 "wildlife",
-                "trees"
+                "trees",
+                "gritty"
               ]
             },
             {
@@ -1961,7 +2001,8 @@
                 "ski",
                 "village",
                 "wildlife",
-                "trees"
+                "trees",
+                "gritty"
               ]
             },
             {
@@ -1993,7 +2034,8 @@
                 "ski",
                 "village",
                 "wildlife",
-                "trees"
+                "trees",
+                "gritty"
               ]
             },
             {
@@ -2025,7 +2067,8 @@
                 "ski",
                 "village",
                 "wildlife",
-                "trees"
+                "trees",
+                "gritty"
               ]
             },
             {
@@ -2057,7 +2100,8 @@
                 "ski",
                 "village",
                 "wildlife",
-                "trees"
+                "trees",
+                "gritty"
               ]
             },
             {
@@ -2089,7 +2133,8 @@
                 "ski",
                 "village",
                 "wildlife",
-                "trees"
+                "trees",
+                "gritty"
               ]
             },
             {
@@ -2122,7 +2167,8 @@
                 "village",
                 "wildlife",
                 "trees",
-                "bears"
+                "bears",
+                "gritty"
               ]
             },
             {
@@ -2155,7 +2201,8 @@
                 "village",
                 "wildlife",
                 "trees",
-                "bears"
+                "bears",
+                "gritty"
               ]
             },
             {
@@ -2187,7 +2234,8 @@
                 "ski",
                 "village",
                 "wildlife",
-                "trees"
+                "trees",
+                "gritty"
               ]
             },
             {
@@ -2219,7 +2267,8 @@
                 "ski",
                 "village",
                 "wildlife",
-                "trees"
+                "trees",
+                "gritty"
               ]
             },
             {
@@ -2251,7 +2300,8 @@
                 "ski",
                 "village",
                 "wildlife",
-                "trees"
+                "trees",
+                "gritty"
               ]
             },
             {
@@ -2283,7 +2333,8 @@
                 "ski",
                 "village",
                 "wildlife",
-                "trees"
+                "trees",
+                "gritty"
               ]
             },
             {
@@ -2315,7 +2366,8 @@
                 "ski",
                 "village",
                 "wildlife",
-                "trees"
+                "trees",
+                "gritty"
               ]
             },
             {
@@ -2347,7 +2399,8 @@
                 "ski",
                 "village",
                 "wildlife",
-                "trees"
+                "trees",
+                "gritty"
               ]
             },
             {
@@ -2379,7 +2432,8 @@
                 "ski",
                 "village",
                 "wildlife",
-                "trees"
+                "trees",
+                "gritty"
               ]
             },
             {
@@ -2411,7 +2465,8 @@
                 "ski",
                 "village",
                 "wildlife",
-                "trees"
+                "trees",
+                "gritty"
               ]
             },
             {
@@ -2443,7 +2498,8 @@
                 "ski",
                 "village",
                 "wildlife",
-                "trees"
+                "trees",
+                "gritty"
               ]
             },
             {
@@ -2475,7 +2531,8 @@
                 "ski",
                 "village",
                 "wildlife",
-                "trees"
+                "trees",
+                "gritty"
               ]
             },
             {
@@ -2504,7 +2561,8 @@
             {
               "type": "string",
               "enum": [
-                "fallingTree"
+                "fallingTree",
+                "gritty"
               ]
             },
             {
@@ -2533,7 +2591,8 @@
             {
               "type": "string",
               "enum": [
-                "wideLog"
+                "wideLog",
+                "gritty"
               ]
             },
             {
@@ -2562,7 +2621,8 @@
             {
               "type": "string",
               "enum": [
-                "rollingSnowball"
+                "rollingSnowball",
+                "gritty"
               ]
             },
             {
@@ -2595,7 +2655,8 @@
                 "village",
                 "wildlife",
                 "trees",
-                "bears"
+                "bears",
+                "gritty"
               ]
             },
             {
@@ -2628,7 +2689,8 @@
                 "village",
                 "wildlife",
                 "trees",
-                "bears"
+                "bears",
+                "gritty"
               ]
             },
             {
@@ -2661,7 +2723,8 @@
                 "village",
                 "wildlife",
                 "trees",
-                "people"
+                "people",
+                "gritty"
               ]
             },
             {
@@ -2694,7 +2757,8 @@
                 "village",
                 "wildlife",
                 "trees",
-                "people"
+                "people",
+                "gritty"
               ]
             },
             {
@@ -2727,7 +2791,8 @@
                 "village",
                 "wildlife",
                 "trees",
-                "people"
+                "people",
+                "gritty"
               ]
             },
             {
@@ -2760,7 +2825,8 @@
                 "village",
                 "wildlife",
                 "trees",
-                "people"
+                "people",
+                "gritty"
               ]
             },
             {
@@ -2793,7 +2859,8 @@
                 "village",
                 "wildlife",
                 "trees",
-                "people"
+                "people",
+                "gritty"
               ]
             },
             {
@@ -2826,7 +2893,8 @@
                 "village",
                 "wildlife",
                 "trees",
-                "people"
+                "people",
+                "gritty"
               ]
             },
             {
@@ -2859,7 +2927,8 @@
                 "village",
                 "wildlife",
                 "trees",
-                "people"
+                "people",
+                "gritty"
               ]
             },
             {
@@ -2892,7 +2961,8 @@
                 "village",
                 "wildlife",
                 "trees",
-                "people"
+                "people",
+                "gritty"
               ]
             },
             {
@@ -2925,7 +2995,8 @@
                 "village",
                 "wildlife",
                 "trees",
-                "people"
+                "people",
+                "gritty"
               ]
             },
             {
@@ -2958,7 +3029,8 @@
                 "village",
                 "wildlife",
                 "trees",
-                "people"
+                "people",
+                "gritty"
               ]
             },
             {
@@ -2991,7 +3063,8 @@
                 "village",
                 "wildlife",
                 "trees",
-                "people"
+                "people",
+                "gritty"
               ]
             },
             {
@@ -3024,7 +3097,8 @@
                 "village",
                 "wildlife",
                 "trees",
-                "people"
+                "people",
+                "gritty"
               ]
             },
             {
@@ -3057,7 +3131,8 @@
                 "village",
                 "wildlife",
                 "trees",
-                "people"
+                "people",
+                "gritty"
               ]
             },
             {
@@ -3090,7 +3165,8 @@
                 "village",
                 "wildlife",
                 "trees",
-                "people"
+                "people",
+                "gritty"
               ]
             },
             {
@@ -3123,7 +3199,8 @@
                 "village",
                 "wildlife",
                 "trees",
-                "people"
+                "people",
+                "gritty"
               ]
             },
             {
@@ -3156,7 +3233,8 @@
                 "village",
                 "wildlife",
                 "trees",
-                "people"
+                "people",
+                "gritty"
               ]
             },
             {
@@ -3189,7 +3267,8 @@
                 "village",
                 "wildlife",
                 "trees",
-                "people"
+                "people",
+                "gritty"
               ]
             },
             {
@@ -3222,7 +3301,8 @@
                 "village",
                 "wildlife",
                 "trees",
-                "people"
+                "people",
+                "gritty"
               ]
             },
             {
@@ -3255,7 +3335,8 @@
                 "village",
                 "wildlife",
                 "trees",
-                "people"
+                "people",
+                "gritty"
               ]
             },
             {
@@ -3288,7 +3369,8 @@
                 "village",
                 "wildlife",
                 "trees",
-                "people"
+                "people",
+                "gritty"
               ]
             },
             {
@@ -3321,7 +3403,8 @@
                 "village",
                 "wildlife",
                 "trees",
-                "people"
+                "people",
+                "gritty"
               ]
             },
             {
@@ -3354,7 +3437,8 @@
                 "village",
                 "wildlife",
                 "trees",
-                "people"
+                "people",
+                "gritty"
               ]
             },
             {
@@ -3387,7 +3471,8 @@
                 "village",
                 "wildlife",
                 "trees",
-                "people"
+                "people",
+                "gritty"
               ]
             },
             {
@@ -3420,7 +3505,8 @@
                 "village",
                 "wildlife",
                 "trees",
-                "people"
+                "people",
+                "gritty"
               ]
             },
             {
@@ -3453,7 +3539,8 @@
                 "village",
                 "wildlife",
                 "trees",
-                "cozyBuildings"
+                "cozyBuildings",
+                "gritty"
               ]
             },
             {
@@ -3486,7 +3573,8 @@
                 "village",
                 "wildlife",
                 "trees",
-                "cozyBuildings"
+                "cozyBuildings",
+                "gritty"
               ]
             },
             {
@@ -3519,7 +3607,8 @@
                 "village",
                 "wildlife",
                 "trees",
-                "cozyBuildings"
+                "cozyBuildings",
+                "gritty"
               ]
             },
             {
