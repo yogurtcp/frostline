@@ -9940,10 +9940,10 @@
           "description": "Minimum street-edge clearance for road lamp posts, in metres (default 7)."
         },
         "lightReachMultiplier": {
-          "description": "Multiplier on light radii for the long, smooth visibility falloff.",
+          "description": "Outer reach of the dim Gaussian light spill; default 3.2 keeps a bright local pool with a long soft tail.",
           "type": "number",
           "minimum": 1,
-          "maximum": 2.5
+          "maximum": 5
         }
       }
     }

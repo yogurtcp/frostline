@@ -2737,6 +2737,6 @@
     "ambientOpacity": 0.97,
     "transitionSeconds": 1.8,
     "lampSetbackMetres": 7,
-    "lightReachMultiplier": 1.6
+    "lightReachMultiplier": 3.2
   }
 }

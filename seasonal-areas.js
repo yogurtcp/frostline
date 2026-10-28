@@ -295,8 +295,9 @@ function glowTile(color='white'){
   if(lightTiles.has(color))return lightTiles.get(color);
   const tile=document.createElement('canvas');tile.width=tile.height=128;const t=tile.getContext('2d'),g=t.createRadialGradient(64,64,0,64,64,64);
   const rgb=color==='white'?[255,255,255]:[1,3,5].map(i=>parseInt(color.slice(i,i+2),16));
-  // A bright centre and a long smoothstep shoulder, with zero slope at the outer edge.
-  for(let i=0;i<=64;i++){const r=i/64,u=clamp((r-.12)/.88,0,1),alpha=1-u*u*(3-2*u);g.addColorStop(r,'rgba('+rgb.join(',')+','+alpha+')');}
+  // Gaussian spill keeps a similar bright area, then a much longer dim penumbra.
+  // Taper only the nearly invisible final quarter to remove the texture boundary.
+  for(let i=0;i<=64;i++){const r=i/64,u=clamp((r-.75)/.25,0,1),alpha=Math.exp(-7*r*r)*(1-u*u*(3-2*u));g.addColorStop(r,'rgba('+rgb.join(',')+','+alpha+')');}
   t.fillStyle=g;t.fillRect(0,0,128,128);lightTiles.set(color,tile);return tile;
 }
 function appendNightLights(o,lights){
