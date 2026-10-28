@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#f1f6ff">
-<meta name="frostline-build" content="d101dcfcf1ef11c3">
+<meta name="frostline-build" content="ff3d95afa8d6c8af">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="manifest" href="manifest.webmanifest">
@@ -22,7 +22,7 @@ body{padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bot
 <dialog id="install-help" aria-labelledby="install-title"><h2 id="install-title">Install Frostline</h2><p id="install-instructions"></p><p>Once saved, Frostline plays offline. Online startups check for updates. Installing this same site keeps your scores and settings. A downloaded file or a different browser uses a separate save.</p><p><a href="https://yogurtcp.github.io/frostline/">Open published game</a></p><button id="close-install-help">Done</button></dialog>
 <script>/* Install/offline support. Updates are checked once, before the game starts. */
 (() => {
-  const BUILD = 'd101dcfcf1ef11c3';
+  const BUILD = 'ff3d95afa8d6c8af';
   window.FROSTLINE_DEV = new URL(location.href).searchParams.has('dev');
   let prompt = null, playing = false;
   const standalone = () => window.matchMedia('(display-mode: standalone)').matches || navigator.standalone;
@@ -452,11 +452,27 @@ function updateDayNight(dt){
   const area=state.endless&&endlessEncounterAt(state.p.y);if(area)state.endless.nightPhase=area.night;
   state.nightBlend=ease(state.nightBlend||0,isNight()?1:0,4/S.night.transitionSeconds,dt);
 }
+function routeLampBlockers(){
+  const grid=new Map(),cell=256;
+  const add=o=>{
+    let b;
+    if(HOUSE_TYPES.has(o.type)){
+      const hw=o.width*S.village.houseFootWidthRatio,hh=o.width*S.village.houseFootHeightRatio;
+      b=[o.x-hw-16,o.y-hh*2-16,o.x+hw+16,o.y+16];
+    }else if(TREE_TYPES.has(o.type)){
+      const pad=16*Math.max(1,1/S.physics.collisionYScale),bounds=solidBounds(o);b=[bounds[0]-pad,bounds[1]-pad,bounds[2]+pad,bounds[3]+pad];
+    }else if(o.type==='lamp')b=[o.x-45,o.y-45,o.x+45,o.y+45];
+    else return;
+    for(let x=Math.floor(b[0]/cell);x<=Math.floor(b[2]/cell);x++){let col=grid.get(x);if(!col)grid.set(x,col=new Map());for(let y=Math.floor(b[1]/cell);y<=Math.floor(b[3]/cell);y++){let items=col.get(y);if(!items)col.set(y,items=[]);items.push(o);}}
+  };
+  for(const o of state.objects)add(o);
+  return {add,near:(x,y)=>grid.get(Math.floor(x/cell))?.get(Math.floor(y/cell))||[]};
+}
 function addRouteLamps(path,town,from,to,encounter=null){
   if(!path?.length)return;
   const spacing=S.night.lampSpacingMetres*PX_PER_M,roadWidth=town?.mainRoadWidth??S.village.mainRoadWidth,setback=S.night.lampSetbackMetres*PX_PER_M;
   const first=Math.max(path[0].y,from),last=Math.min(path.at(-1).y,to),route={points:path,width:roadWidth};
-  const roads=town?state.roads.filter(r=>r.town===town&&r.points!==path):[];
+  const roads=town?state.roads.filter(r=>r.town===town&&r.points!==path):[],blockers=routeLampBlockers();
   for(let nominal=Math.ceil(first/spacing)*spacing;nominal<last;nominal+=spacing)for(const side of [-1,1]){
     // Shift along the shoulder to find a gap between houses instead of pushing a pole into the street.
     for(const shift of [0,spacing*.25,-spacing*.25,spacing*.45,-spacing*.45]){
@@ -465,11 +481,11 @@ function addRouteLamps(path,town,from,to,encounter=null){
       const x=mix(a.x,b.x,clamp((y-a.y)/dy,0,1)),offset=roadWidth/2+setback;
       const px=x+side*dy/length*offset,py=y-side*dx/length*offset;
       if(roadDistance(route,px,py)<offset-.01||roads.some(r=>roadDistance(r,px,py)<r.width/2+24))continue;
-      if(state.objects.some(o=>(HOUSE_TYPES.has(o.type)&&houseClearance(o,px,py)<16)||(TREE_TYPES.has(o.type)&&obstacleClearance(o,px,py)<16)||(o.type==='lamp'&&Math.hypot(o.x-px,o.y-py)<45)))continue;
+      if(blockers.near(px,py).some(o=>(HOUSE_TYPES.has(o.type)&&houseClearance(o,px,py)<16)||(TREE_TYPES.has(o.type)&&obstacleClearance(o,px,py)<16)||(o.type==='lamp'&&Math.hypot(o.x-px,o.y-py)<45)))continue;
       const plaza=town?.festivalPlaza;if(plaza&&Math.hypot(px-plaza.x,py-plaza.y)<(town.festival==='halloween'?165:75))continue;
       // A broad parade needs light to reach across the avenue while its posts stay on the shoulders.
       const lightRadiusWorld=town?.parade?Math.max(S.night.lampRadiusMetres*PX_PER_M,Math.hypot(offset,spacing/2)+40):undefined;
-      entity('lamp',px,py,{width:20,r:5,town,encounter:encounter??town?.encounter,arcadeRun:town?.endlessRun,roadLamp:true,lightRadiusWorld});break;
+      const lamp=entity('lamp',px,py,{width:20,r:5,town,encounter:encounter??town?.encounter,arcadeRun:town?.endlessRun,roadLamp:true,lightRadiusWorld});blockers.add(lamp);break;
     }
   }
 }
@@ -604,7 +620,7 @@ function updateFestivalTraffic(dt){
   }
 }
 function updateSleighTeams(dt){
-  for(const root of state.objects){
+  for(const root of objectGroups().sleighs){
     if(!root.santaSleigh)continue;
     for(const o of root.team){
       if(o.eaten||o.dead)continue;
@@ -849,7 +865,7 @@ function drawNightLighting(layers){
 }
 
   /* Option 4: world-anchored snow, native pixel shadows and shared alpine materials. */
-const gritSnowTiles=new Map(),gritShadowTiles=new Map(),gritHillTiles=new Map();
+const gritSnowTiles=new Map(),gritShadowTiles=new Map(),gritHillTiles=new Map(),gritTreeTiles=new Map();
 const GRIT_MATERIALS={'#142c40':'#111c2c','#244451':'#202b43','#375769':'#344663','#548091':'#60739b','#79a5b4':'#8ea3ce','#9ec9d3':'#bbcbeb','#c7e0e4':'#dce7fa','#e5f0ee':'#e8efff','#f8faf0':'#f7faff','#0c5058':'#0d292d','#1b7379':'#193e3d','#399799':'#2e564b','#65b3b0':'#51765c','#b0794c':'#bf8954','#714a37':'#714534','#463735':'#4b322e','#d39b61':'#d4a267','#f2c98f':'#f5d29c','#9b403e':'#74303d','#cc5655':'#b8444b','#ee8275':'#e46b57','#403959':'#302d49','#70557d':'#58456c','#987bb1':'#8a78a1','#d3becd':'#b5a4c6','#dfe8e5':'#dce7fa','#a9bcbe':'#adbfdd','#b9c9c8':'#bbcae4','#78858a':'#7888a4','#526672':'#51617f','#44545f':'#344159','#b9c7c5':'#becbe1','#a9b7bb':'#acbbd2','#6c7e89':'#526582','#bbc9bf':'#bdcce1','#d2ddd2':'#d9e3f3','#edf3ed':'#f1f6ff','#e4ebe4':'#e4edfc','#dbe6df':'#dce7fa','#dce6df':'#dce7fa'};
 Object.assign(GRIT_MATERIALS,{'#a4b4b4':'#aab9d4','#5c6c79':'#455371','#829592':'#6e80a1','#8fa19e':'#8598b9','#637983':'#526886','#c1ccc5':'#c5d2e8','#dfe7dc':'#e2ebfb','#687b85':'#5d7194','#60747b':'#516582','#233c45':'#1c293f','#647a80':'#586b8b'});
 function gritMaterial(color){return GRIT_MATERIALS[color]||color;}
@@ -903,7 +919,7 @@ function drawGritSnow(){
   }
   ctx.restore();
 }
-function drawGritCastShadow(name,x,y,width,height){
+function gritCastShadowTile(name,width,height){
   const tree=GRIT_TREES.has(name),house=GRIT_BUILDINGS.has(name),rock=name==='rock'||name==='pebble'||name==='stump';
   if(!tree&&!house&&!rock)return;
   const w=Math.round(width),h=Math.max(4,Math.round(height*(tree?.42:house?.24:.22))),key=(tree?'tree':house?'house':'rock')+w+':'+h;
@@ -920,7 +936,20 @@ function drawGritCastShadow(name,x,y,width,height){
     }
     t.restore();if(gritShadowTiles.size>=128)gritShadowTiles.delete(gritShadowTiles.keys().next().value);gritShadowTiles.set(key,tile);
   }
-  const alpha=ctx.globalAlpha;ctx.globalAlpha=alpha*.72;ctx.drawImage(tile,Math.round(x-w*.48),Math.round(y-2));ctx.globalAlpha=alpha;
+  return tile;
+}
+function drawGritCastShadow(name,x,y,width,height){
+  const tile=gritCastShadowTile(name,width,height);if(!tile)return;
+  const w=Math.round(width),alpha=ctx.globalAlpha;ctx.globalAlpha=alpha*.72;ctx.drawImage(tile,Math.round(x-w*.48),Math.round(y-2));ctx.globalAlpha=alpha;
+}
+function drawCachedGritTree(key,name,source,x,y,w,h){
+  let cached=gritTreeTiles.get(key);
+  if(!cached){
+    const shade=gritCastShadowTile(name,w,h),sx=Math.round(-w*.48),sy=-2,bx=Math.round(-w/2),by=-h,left=Math.min(sx,bx),top=Math.min(sy,by),right=Math.max(sx+shade.width,bx+w),bottom=Math.max(sy+shade.height,0);
+    const tile=document.createElement('canvas');tile.width=right-left;tile.height=bottom-top;const t=tile.getContext('2d');t.imageSmoothingEnabled=false;t.globalAlpha=.72;t.drawImage(shade,sx-left,sy-top);t.globalAlpha=1;t.drawImage(source,bx-left,by-top);
+    cached={tile,left,top};if(gritTreeTiles.size>=192)gritTreeTiles.delete(gritTreeTiles.keys().next().value);gritTreeTiles.set(key,cached);
+  }
+  ctx.drawImage(cached.tile,x+cached.left,y+cached.top);
 }
 function gritClothing(rgb,target){
   const shade=clamp((rgb[0]+rgb[1]+rgb[2])/310,.55,1.3);return target.map(v=>Math.min(255,Math.round(v*shade)));
@@ -1766,13 +1795,13 @@ function drawYetiStride(o,s,family,tier,width,gait){
     state.villages=state.villages.filter(t=>!t.endlessRun||t.end>state.p.y-S.world.sceneryRetentionBehind);
     const view=viewBounds();
     for(const o of state.objects){
-      if(activeCourseOwner(o)&&o.endlessBaseVy!==undefined&&!(o.npcFallUntil>clock))o.vy=o.endlessBaseVy*a.speedScale;
+      if(o.endlessBaseVy!==undefined&&activeCourseOwner(o)&&!(o.npcFallUntil>clock))o.vy=o.endlessBaseVy*a.speedScale;
       if(o.type==='ice'&&o.iceTile&&o.y+o.lake.radius<view.top-200)o.iceTile=null;
     }
     const far=o=>o.y<state.p.y-S.endless.yetis.nearbyMetres*PX_PER_M*a.speedScale;
     const dormant=o=>!o.dead&&!o.eaten&&(o.type==='lurker'||['wolf','bear'].includes(o.type)&&!o.linkedChase&&!o.wolfAwake&&!(o.alertUntil>clock)&&!o.divert&&!(o.feedingUntil>clock));
     // Discard missed, unengaged threats once offscreen. Awake hunters keep physically pursuing.
-    state.objects=state.objects.filter(o=>!activeCourseOwner(o)||!((dormant(o)&&(far(o)||o.y<view.top-100))||(['skier','boarder'].includes(o.type)&&o.y>a.plannedY+800*a.speedScale)));
+    state.objects=state.objects.filter(o=>!((dormant(o)&&(far(o)||o.y<view.top-100))||(['skier','boarder'].includes(o.type)&&o.y>a.plannedY+800*a.speedScale))||!activeCourseOwner(o));
   }
   function retireArcadeBlock(run){
     const owned=o=>{const owner=o.arcadeRun||o.chaseRun;return owner&&(owner===run||run?.block&&owner.block===run.block);};
@@ -2688,6 +2717,28 @@ function drawYetiStride(o,s,family,tier,width,gait){
     const chasingNpc=o.kind==='dog'||o.kind==='patrol',type=o.type||(chasingNpc?(o.kind==='dog'?'dog':'skier'):null);
     return CREATURE_TYPES.has(type)&&!o.eaten&&!o.dead&&!o.leaving&&(!o.patrolPass||o.remaining>0)&&(!chasingNpc||!(state.p.y>o.expires))&&((o.r??(chasingNpc?12:0))>0||type.startsWith('person'));
   }
+  const objectGroupCache={};
+  function objectGroups(){
+    const c=objectGroupCache;
+    if(c.time===clock&&c.source===state.objects&&c.length===state.objects.length)return c.groups;
+    const groups={wildlife:[],animals:[],skiers:[],zombies:[],mausoleums:[],groundHunters:[],terrainFeatures:[],ground:[],plots:[],sleighs:[]};
+    for(const o of state.objects){
+      const type=o.type;
+      if(o.animal||o.retiring||type==='wolf')groups.animals.push(o);
+      if(o.grandMausoleum)groups.mausoleums.push(o);if(o.santaSleigh)groups.sleighs.push(o);
+      switch(type){
+        case 'rabbit':case 'cat':case 'fox':groups.wildlife.push(o);break;
+        case 'wolf':groups.wildlife.push(o);groups.groundHunters.push(o);break;
+        case 'skier':case 'boarder':groups.wildlife.push(o);groups.skiers.push(o);break;
+        case 'zombie':groups.zombies.push(o);groups.groundHunters.push(o);break;
+        case 'fallingTree':groups.terrainFeatures.push(o);break;
+        case 'rollingSnowball':groups.terrainFeatures.push(o);break;
+        case 'cemeteryPlot':groups.plots.push(o);break;
+        case 'ice':case 'rugged':case 'ramp':case 'mogul':case 'smallHill':case 'largeHill':case 'logBump':groups.ground.push(o);break;
+      }
+    }
+    Object.assign(c,{time:clock,source:state.objects,length:state.objects.length,groups});return groups;
+  }
   const preyCache={};
   function preyActors(){
     if(preyCache.time!==clock||preyCache.objects!==state.objects||preyCache.length!==state.objects.length||preyCache.chasers!==state.chasers||preyCache.chaserLength!==state.chasers.length){
@@ -2767,9 +2818,29 @@ function drawYetiStride(o,s,family,tier,width,gait){
       hunter.divertOrigin={x:hunter.x,y:hunter.y};
     }
   }
-  function contactPrey(hunter,previous,radius=S.chasers.captureDistance){
+  // Build per predator-only phase: NPC movement between phases gets a fresh swept index.
+  // Index both ends of prey motion so fast crossing skiers remain candidates.
+  function preyContactIndex(){
+    const actors=preyActors(),grid=new Map(),large=[],cell=160;
+    for(let i=0;i<actors.length;i++){
+      const o=actors[i],moving=o.motionFromStamp===clock,px=moving?o.motionFromX:o.x,py=moving?o.motionFromY:o.y;
+      const x0=Math.floor(Math.min(px,o.x)/cell),x1=Math.floor(Math.max(px,o.x)/cell),y0=Math.floor(Math.min(py,o.y)/cell),y1=Math.floor(Math.max(py,o.y)/cell);
+      if((x1-x0+1)*(y1-y0+1)>64){large.push(i);continue;}
+      for(let x=x0;x<=x1;x++){let col=grid.get(x);if(!col)grid.set(x,col=new Map());for(let y=y0;y<=y1;y++){let list=col.get(y);if(!list)col.set(y,list=[]);list.push(i);}}
+    }
+    return {actors,grid,large,cell,marks:new Uint32Array(actors.length),epoch:0};
+  }
+  function nearbyContactPrey(index,hunter,previous,radius){
+    const {actors,grid,cell,marks}=index,x0=Math.floor((Math.min(previous.x,hunter.x)-radius)/cell),x1=Math.floor((Math.max(previous.x,hunter.x)+radius)/cell),y0=Math.floor((Math.min(previous.y,hunter.y)-radius)/cell),y1=Math.floor((Math.max(previous.y,hunter.y)+radius)/cell);
+    if((x1-x0+1)*(y1-y0+1)>256)return actors;
+    if(index.epoch>=0xffffffff){marks.fill(0);index.epoch=0;}const epoch=++index.epoch,found=[...index.large];for(const i of found)marks[i]=epoch;
+    for(let x=x0;x<=x1;x++){const col=grid.get(x);if(!col)continue;for(let y=y0;y<=y1;y++)for(const i of col.get(y)||[]){if(marks[i]===epoch)continue;marks[i]=epoch;found.push(i);}}
+    // Retain the linear scan's tie order when two prey have the same contact time.
+    found.sort((a,b)=>a-b);return found.map(i=>actors[i]);
+  }
+  function contactPrey(hunter,previous,radius=S.chasers.captureDistance,index=null){
     let meal=null,best=Infinity;
-    for(const o of preyActors()){
+    for(const o of index?nearbyContactPrey(index,hunter,previous,radius):preyActors()){
       const moving=o.motionFromStamp===clock,px=moving?o.motionFromX:o.x,py=moving?o.motionFromY:o.y;
       const sx=previous.x-px,sy=previous.y-py,dx=hunter.x-o.x,dy=hunter.y-o.y;
       if(sx>radius&&dx>radius||sx< -radius&&dx< -radius||sy>radius&&dy>radius||sy< -radius&&dy< -radius)continue;
@@ -2791,18 +2862,19 @@ function drawYetiStride(o,s,family,tier,width,gait){
     hunter.feedingUntil=clock+pause;hunter.nextDivertCheck=hunter.feedingUntil;
     say('CHOMP!',hunter,1.2);burst(meal.x,meal.y,C.ice,9);
   }
-  function consumeNearbyPrey(hunter,previous,pause=S.predators.mealPauseSeconds,radius=S.chasers.captureDistance){
+  function consumeNearbyPrey(hunter,previous,pause=S.predators.mealPauseSeconds,radius=S.chasers.captureDistance,contacts=null){
     if(hunter.dead||hunter.eaten||hunter.retiring||hunter.leaving||hunter.stunnedUntil>clock||hunter.feedingUntil>clock)return false;
     if(resolveEnemyContact(hunter,{ramOnly:true}))return false;
-    const meal=contactPrey(hunter,previous,radius);if(!meal)return false;
+    const index=contacts&&(contacts.index??=preyContactIndex()),meal=contactPrey(hunter,previous,radius,index);if(!meal)return false;
     eatChaserPrey(hunter,meal,previous,pause);return true;
   }
   function resolveGroundPredatorPrey(){
-    for(const o of state.objects){
+    const contacts={};
+    for(const o of objectGroups().groundHunters){
       const wolf=o.type==='wolf'&&o.animal&&(!o.penaltyGate||o.wolfAwake),walker=o.type==='zombie'&&o.zombieRole==='wanderer'&&o.zombieState==='wandering'&&(o.awake||o.zombieRoamer);
       if(!wolf&&!walker)continue;
       const previous=o.motionFromStamp===clock?{x:o.motionFromX,y:o.motionFromY}:o;
-      consumeNearbyPrey(o,previous,wolf?S.wildlife.feedingSeconds:S.predators.mealPauseSeconds,wolf?S.wildlife.captureDistance:S.chasers.captureDistance);
+      consumeNearbyPrey(o,previous,wolf?S.wildlife.feedingSeconds:S.predators.mealPauseSeconds,wolf?S.wildlife.captureDistance:S.chasers.captureDistance,contacts);
     }
   }
   function patchAt(x,y){return freshIceCache().find(o=>lakeContains(o,x,y));}
@@ -3297,7 +3369,7 @@ function drawYetiStride(o,s,family,tier,width,gait){
   }
   function updateTerrainFeatures(dt,previous=state.p){
     const p=state.p;
-    for(const o of state.objects){
+    for(const o of objectGroups().terrainFeatures){
       if(o.eaten)continue;
       if(o.type==='fallingTree'){
         const f=S.terrainFeatures.fallingTree;
@@ -3717,7 +3789,7 @@ function drawYetiStride(o,s,family,tier,width,gait){
     const p=state.p,A=S.wildlife,K=S.skiers;
     let collisionGrid,threats;
     // Bears/yetis live in the chaser list after waking; wolves and roaming bears are scenery.
-    for(const o of state.objects){
+    for(const o of objectGroups().skiers){
       if((o.type!=='skier'&&o.type!=='boarder')||o.eaten||o.dead||o.sleighRoot||!o.rival&&Math.hypot(o.x-p.x,o.y-p.y)>A.activeRadius*endlessSpeedScale(o))continue;
       if(o.npcFallUntil>clock){specialActorFactor(o,dt);o.motionVx=o.motionVy=o.travelSpeed=0;o.travelStamp=clock;continue;}
       if(o.npcFallUntil){
@@ -3769,7 +3841,7 @@ function drawYetiStride(o,s,family,tier,width,gait){
   }
   function updateMausoleums(){
     const p=state.p,M=S.endless.regions.cemetery.mausoleum;
-    for(const m of state.objects){
+    for(const m of objectGroups().mausoleums){
       if(!m.grandMausoleum||!activeCourseOwner(m))continue;
       const scale=m.encounter.scale;
       if(m.triggerAt===undefined){
@@ -3795,8 +3867,8 @@ function drawYetiStride(o,s,family,tier,width,gait){
   function updateZombies(dt){
     if(!state.started)return;
     updateMausoleums();
-    const p=state.p,Z=S.endless.regions.zombies,A=Z.ambush;
-    for(const o of state.objects){
+    const p=state.p,Z=S.endless.regions.zombies,A=Z.ambush,contacts={};
+    for(const o of objectGroups().zombies){
       if(o.type!=='zombie'||o.dead||o.eaten)continue;
       o.zombieState??='hidden';const scale=endlessSpeedScale(o);
       if(o.zombieRole==='wanderer'){
@@ -3839,7 +3911,7 @@ function drawYetiStride(o,s,family,tier,width,gait){
         if(Math.hypot(target.x-o.x,target.y-o.y)>4)travel(o,Math.atan2(target.y-o.y,target.x-o.x),speed,elapsed,false,false,true,true,target,true);
         else {o.motionVx=o.motionVy=o.travelSpeed=0;o.travelStamp=clock;}
         if(resolveEnemyContact(o,{ramOnly:true}))continue;
-        if(consumeNearbyPrey(o,previous))continue;
+        if(consumeNearbyPrey(o,previous,S.predators.mealPauseSeconds,S.chasers.captureDistance,contacts))continue;
         resolveEnemyContact(o);if(state.deathTimer)return;continue;
       }
       if(o.zombieState==='hidden'||o.zombieState==='resting'){
@@ -3864,8 +3936,8 @@ function drawYetiStride(o,s,family,tier,width,gait){
   }
   function updateWildlife(dt){
     const p=state.p,A=S.wildlife,rabbits=[],cats=[],skis=[],hunters=[];
-    for(const o of state.objects){const t=o.type;if(t==='rabbit'){if(!o.eaten)rabbits.push(o);}else if(t==='cat')cats.push(o);else if(t==='skier'||t==='boarder')skis.push(o);else if(t==='fox'||t==='wolf')hunters.push(o);}
-    for(const o of state.objects){
+    for(const o of objectGroups().wildlife){const t=o.type;if(t==='rabbit'){if(!o.eaten)rabbits.push(o);}else if(t==='cat')cats.push(o);else if(t==='skier'||t==='boarder')skis.push(o);else if(t==='fox'||t==='wolf')hunters.push(o);}
+    for(const o of objectGroups().animals){
       if(o.type==='wolf'&&activeCourseOwner(o)&&!state.started)continue;
       if(o.retiring){o.y-=A.roamSpeed*dt;o.running=true;if(o.y<viewBounds().top-100)o.eaten=true;continue;}
       if(state.endless&&o.type==='wolf'&&(o.wolfAwake||o.alertUntil>clock)&&!activeCourseOwner(o)){o.arcadeRun=state.course;o.linkedChase=true;delete o.worldChunk;}
@@ -4083,6 +4155,9 @@ function drawYetiStride(o,s,family,tier,width,gait){
       }
       t.putImageData(pixels,0,0);spriteCache.set(key,tile);
     }
+    if(GRIT_TREES.has(name)&&!opts.ui&&!opts.rotate&&!opts.flip&&!opts.center&&!opts.bodyOnly&&!(opts.floors>1)&&(opts.alpha===undefined||opts.alpha===1)&&ctx.globalAlpha===1&&Number.isInteger(x)&&Number.isInteger(y)){
+      drawCachedGritTree(key,name,spriteCache.get(key),x,y,width,h);return;
+    }
     if(!opts.ui&&!opts.rotate)drawGritCastShadow(name,x,y,width,h);
     if(!opts.rotate&&!opts.flip&&(opts.alpha===undefined||opts.alpha===ctx.globalAlpha)&&!opts.bodyOnly&&!(opts.floors>1)){
       ctx.drawImage(spriteCache.get(key),Math.round(x)+Math.round(-width/2),Math.round(y)+(opts.center?-Math.round(h/2):-h));return;
@@ -4111,11 +4186,11 @@ function drawYetiStride(o,s,family,tier,width,gait){
         paintCemeteryFence({solidWall:true},a,b,box,line);
       }
     }
-    for(const o of state.objects)if(o.type==='cemeteryPlot'&&Math.abs(o.x-state.cam.x)<W/(2*ZOOM)+o.width/2+30&&o.y+o.depth/2>state.cam.y&&o.y-o.depth/2<state.cam.y+H/ZOOM)drawCemeteryPlot(o);
+    for(const o of objectGroups().plots)if(o.type==='cemeteryPlot'&&Math.abs(o.x-state.cam.x)<W/(2*ZOOM)+o.width/2+30&&o.y+o.depth/2>state.cam.y&&o.y-o.depth/2<state.cam.y+H/ZOOM)drawCemeteryPlot(o);
     drawRoads();
-    for(const o of state.objects)if(o.type==='ice')drawIce(o);else if(o.type==='rugged')drawRugged(o);
-    for(const o of state.objects)if(o.type==='ramp'||o.type==='mogul'||o.type==='smallHill'||o.type==='largeHill'||o.type==='logBump')drawObject(o);
-    for(const o of state.objects)if(o.type==='fallingTree'&&o.fallState!=='standing'&&o.fallState!=='fallen'){
+    for(const o of objectGroups().ground)if(o.type==='ice')drawIce(o);else if(o.type==='rugged')drawRugged(o);
+    for(const o of objectGroups().ground)if(o.type==='ramp'||o.type==='mogul'||o.type==='smallHill'||o.type==='largeHill'||o.type==='logBump')drawObject(o);
+    for(const o of objectGroups().terrainFeatures)if(o.type==='fallingTree'&&o.fallState!=='standing'&&o.fallState!=='fallen'){
       const a=screen(o.x,o.y),b=screen(o.x+Math.cos(o.fallAngle)*o.treeLength,o.y+Math.sin(o.fallAngle)*o.treeLength);
       line(a.x,a.y,b.x,b.y,'#9bb0ac',Math.max(2,o.r*ZOOM));
       for(let t=.15;t<1;t+=.2)box(mix(a.x,b.x,t)-1,mix(a.y,b.y,t)-1,3,3,C.snow);

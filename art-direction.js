@@ -1,5 +1,5 @@
 /* Option 4: world-anchored snow, native pixel shadows and shared alpine materials. */
-const gritSnowTiles=new Map(),gritShadowTiles=new Map(),gritHillTiles=new Map();
+const gritSnowTiles=new Map(),gritShadowTiles=new Map(),gritHillTiles=new Map(),gritTreeTiles=new Map();
 const GRIT_MATERIALS={'#142c40':'#111c2c','#244451':'#202b43','#375769':'#344663','#548091':'#60739b','#79a5b4':'#8ea3ce','#9ec9d3':'#bbcbeb','#c7e0e4':'#dce7fa','#e5f0ee':'#e8efff','#f8faf0':'#f7faff','#0c5058':'#0d292d','#1b7379':'#193e3d','#399799':'#2e564b','#65b3b0':'#51765c','#b0794c':'#bf8954','#714a37':'#714534','#463735':'#4b322e','#d39b61':'#d4a267','#f2c98f':'#f5d29c','#9b403e':'#74303d','#cc5655':'#b8444b','#ee8275':'#e46b57','#403959':'#302d49','#70557d':'#58456c','#987bb1':'#8a78a1','#d3becd':'#b5a4c6','#dfe8e5':'#dce7fa','#a9bcbe':'#adbfdd','#b9c9c8':'#bbcae4','#78858a':'#7888a4','#526672':'#51617f','#44545f':'#344159','#b9c7c5':'#becbe1','#a9b7bb':'#acbbd2','#6c7e89':'#526582','#bbc9bf':'#bdcce1','#d2ddd2':'#d9e3f3','#edf3ed':'#f1f6ff','#e4ebe4':'#e4edfc','#dbe6df':'#dce7fa','#dce6df':'#dce7fa'};
 Object.assign(GRIT_MATERIALS,{'#a4b4b4':'#aab9d4','#5c6c79':'#455371','#829592':'#6e80a1','#8fa19e':'#8598b9','#637983':'#526886','#c1ccc5':'#c5d2e8','#dfe7dc':'#e2ebfb','#687b85':'#5d7194','#60747b':'#516582','#233c45':'#1c293f','#647a80':'#586b8b'});
 function gritMaterial(color){return GRIT_MATERIALS[color]||color;}
@@ -53,7 +53,7 @@ function drawGritSnow(){
   }
   ctx.restore();
 }
-function drawGritCastShadow(name,x,y,width,height){
+function gritCastShadowTile(name,width,height){
   const tree=GRIT_TREES.has(name),house=GRIT_BUILDINGS.has(name),rock=name==='rock'||name==='pebble'||name==='stump';
   if(!tree&&!house&&!rock)return;
   const w=Math.round(width),h=Math.max(4,Math.round(height*(tree?.42:house?.24:.22))),key=(tree?'tree':house?'house':'rock')+w+':'+h;
@@ -70,7 +70,20 @@ function drawGritCastShadow(name,x,y,width,height){
     }
     t.restore();if(gritShadowTiles.size>=128)gritShadowTiles.delete(gritShadowTiles.keys().next().value);gritShadowTiles.set(key,tile);
   }
-  const alpha=ctx.globalAlpha;ctx.globalAlpha=alpha*.72;ctx.drawImage(tile,Math.round(x-w*.48),Math.round(y-2));ctx.globalAlpha=alpha;
+  return tile;
+}
+function drawGritCastShadow(name,x,y,width,height){
+  const tile=gritCastShadowTile(name,width,height);if(!tile)return;
+  const w=Math.round(width),alpha=ctx.globalAlpha;ctx.globalAlpha=alpha*.72;ctx.drawImage(tile,Math.round(x-w*.48),Math.round(y-2));ctx.globalAlpha=alpha;
+}
+function drawCachedGritTree(key,name,source,x,y,w,h){
+  let cached=gritTreeTiles.get(key);
+  if(!cached){
+    const shade=gritCastShadowTile(name,w,h),sx=Math.round(-w*.48),sy=-2,bx=Math.round(-w/2),by=-h,left=Math.min(sx,bx),top=Math.min(sy,by),right=Math.max(sx+shade.width,bx+w),bottom=Math.max(sy+shade.height,0);
+    const tile=document.createElement('canvas');tile.width=right-left;tile.height=bottom-top;const t=tile.getContext('2d');t.imageSmoothingEnabled=false;t.globalAlpha=.72;t.drawImage(shade,sx-left,sy-top);t.globalAlpha=1;t.drawImage(source,bx-left,by-top);
+    cached={tile,left,top};if(gritTreeTiles.size>=192)gritTreeTiles.delete(gritTreeTiles.keys().next().value);gritTreeTiles.set(key,cached);
+  }
+  ctx.drawImage(cached.tile,x+cached.left,y+cached.top);
 }
 function gritClothing(rgb,target){
   const shade=clamp((rgb[0]+rgb[1]+rgb[2])/310,.55,1.3);return target.map(v=>Math.min(255,Math.round(v*shade)));

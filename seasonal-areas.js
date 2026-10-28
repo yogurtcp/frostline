@@ -14,11 +14,27 @@ function updateDayNight(dt){
   const area=state.endless&&endlessEncounterAt(state.p.y);if(area)state.endless.nightPhase=area.night;
   state.nightBlend=ease(state.nightBlend||0,isNight()?1:0,4/S.night.transitionSeconds,dt);
 }
+function routeLampBlockers(){
+  const grid=new Map(),cell=256;
+  const add=o=>{
+    let b;
+    if(HOUSE_TYPES.has(o.type)){
+      const hw=o.width*S.village.houseFootWidthRatio,hh=o.width*S.village.houseFootHeightRatio;
+      b=[o.x-hw-16,o.y-hh*2-16,o.x+hw+16,o.y+16];
+    }else if(TREE_TYPES.has(o.type)){
+      const pad=16*Math.max(1,1/S.physics.collisionYScale),bounds=solidBounds(o);b=[bounds[0]-pad,bounds[1]-pad,bounds[2]+pad,bounds[3]+pad];
+    }else if(o.type==='lamp')b=[o.x-45,o.y-45,o.x+45,o.y+45];
+    else return;
+    for(let x=Math.floor(b[0]/cell);x<=Math.floor(b[2]/cell);x++){let col=grid.get(x);if(!col)grid.set(x,col=new Map());for(let y=Math.floor(b[1]/cell);y<=Math.floor(b[3]/cell);y++){let items=col.get(y);if(!items)col.set(y,items=[]);items.push(o);}}
+  };
+  for(const o of state.objects)add(o);
+  return {add,near:(x,y)=>grid.get(Math.floor(x/cell))?.get(Math.floor(y/cell))||[]};
+}
 function addRouteLamps(path,town,from,to,encounter=null){
   if(!path?.length)return;
   const spacing=S.night.lampSpacingMetres*PX_PER_M,roadWidth=town?.mainRoadWidth??S.village.mainRoadWidth,setback=S.night.lampSetbackMetres*PX_PER_M;
   const first=Math.max(path[0].y,from),last=Math.min(path.at(-1).y,to),route={points:path,width:roadWidth};
-  const roads=town?state.roads.filter(r=>r.town===town&&r.points!==path):[];
+  const roads=town?state.roads.filter(r=>r.town===town&&r.points!==path):[],blockers=routeLampBlockers();
   for(let nominal=Math.ceil(first/spacing)*spacing;nominal<last;nominal+=spacing)for(const side of [-1,1]){
     // Shift along the shoulder to find a gap between houses instead of pushing a pole into the street.
     for(const shift of [0,spacing*.25,-spacing*.25,spacing*.45,-spacing*.45]){
@@ -27,11 +43,11 @@ function addRouteLamps(path,town,from,to,encounter=null){
       const x=mix(a.x,b.x,clamp((y-a.y)/dy,0,1)),offset=roadWidth/2+setback;
       const px=x+side*dy/length*offset,py=y-side*dx/length*offset;
       if(roadDistance(route,px,py)<offset-.01||roads.some(r=>roadDistance(r,px,py)<r.width/2+24))continue;
-      if(state.objects.some(o=>(HOUSE_TYPES.has(o.type)&&houseClearance(o,px,py)<16)||(TREE_TYPES.has(o.type)&&obstacleClearance(o,px,py)<16)||(o.type==='lamp'&&Math.hypot(o.x-px,o.y-py)<45)))continue;
+      if(blockers.near(px,py).some(o=>(HOUSE_TYPES.has(o.type)&&houseClearance(o,px,py)<16)||(TREE_TYPES.has(o.type)&&obstacleClearance(o,px,py)<16)||(o.type==='lamp'&&Math.hypot(o.x-px,o.y-py)<45)))continue;
       const plaza=town?.festivalPlaza;if(plaza&&Math.hypot(px-plaza.x,py-plaza.y)<(town.festival==='halloween'?165:75))continue;
       // A broad parade needs light to reach across the avenue while its posts stay on the shoulders.
       const lightRadiusWorld=town?.parade?Math.max(S.night.lampRadiusMetres*PX_PER_M,Math.hypot(offset,spacing/2)+40):undefined;
-      entity('lamp',px,py,{width:20,r:5,town,encounter:encounter??town?.encounter,arcadeRun:town?.endlessRun,roadLamp:true,lightRadiusWorld});break;
+      const lamp=entity('lamp',px,py,{width:20,r:5,town,encounter:encounter??town?.encounter,arcadeRun:town?.endlessRun,roadLamp:true,lightRadiusWorld});blockers.add(lamp);break;
     }
   }
 }
@@ -166,7 +182,7 @@ function updateFestivalTraffic(dt){
   }
 }
 function updateSleighTeams(dt){
-  for(const root of state.objects){
+  for(const root of objectGroups().sleighs){
     if(!root.santaSleigh)continue;
     for(const o of root.team){
       if(o.eaten||o.dead)continue;

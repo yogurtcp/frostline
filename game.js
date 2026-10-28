@@ -802,13 +802,13 @@ window.FROSTLINE_READY = (async () => {
     state.villages=state.villages.filter(t=>!t.endlessRun||t.end>state.p.y-S.world.sceneryRetentionBehind);
     const view=viewBounds();
     for(const o of state.objects){
-      if(activeCourseOwner(o)&&o.endlessBaseVy!==undefined&&!(o.npcFallUntil>clock))o.vy=o.endlessBaseVy*a.speedScale;
+      if(o.endlessBaseVy!==undefined&&activeCourseOwner(o)&&!(o.npcFallUntil>clock))o.vy=o.endlessBaseVy*a.speedScale;
       if(o.type==='ice'&&o.iceTile&&o.y+o.lake.radius<view.top-200)o.iceTile=null;
     }
     const far=o=>o.y<state.p.y-S.endless.yetis.nearbyMetres*PX_PER_M*a.speedScale;
     const dormant=o=>!o.dead&&!o.eaten&&(o.type==='lurker'||['wolf','bear'].includes(o.type)&&!o.linkedChase&&!o.wolfAwake&&!(o.alertUntil>clock)&&!o.divert&&!(o.feedingUntil>clock));
     // Discard missed, unengaged threats once offscreen. Awake hunters keep physically pursuing.
-    state.objects=state.objects.filter(o=>!activeCourseOwner(o)||!((dormant(o)&&(far(o)||o.y<view.top-100))||(['skier','boarder'].includes(o.type)&&o.y>a.plannedY+800*a.speedScale)));
+    state.objects=state.objects.filter(o=>!((dormant(o)&&(far(o)||o.y<view.top-100))||(['skier','boarder'].includes(o.type)&&o.y>a.plannedY+800*a.speedScale))||!activeCourseOwner(o));
   }
   function retireArcadeBlock(run){
     const owned=o=>{const owner=o.arcadeRun||o.chaseRun;return owner&&(owner===run||run?.block&&owner.block===run.block);};
@@ -1724,6 +1724,28 @@ window.FROSTLINE_READY = (async () => {
     const chasingNpc=o.kind==='dog'||o.kind==='patrol',type=o.type||(chasingNpc?(o.kind==='dog'?'dog':'skier'):null);
     return CREATURE_TYPES.has(type)&&!o.eaten&&!o.dead&&!o.leaving&&(!o.patrolPass||o.remaining>0)&&(!chasingNpc||!(state.p.y>o.expires))&&((o.r??(chasingNpc?12:0))>0||type.startsWith('person'));
   }
+  const objectGroupCache={};
+  function objectGroups(){
+    const c=objectGroupCache;
+    if(c.time===clock&&c.source===state.objects&&c.length===state.objects.length)return c.groups;
+    const groups={wildlife:[],animals:[],skiers:[],zombies:[],mausoleums:[],groundHunters:[],terrainFeatures:[],ground:[],plots:[],sleighs:[]};
+    for(const o of state.objects){
+      const type=o.type;
+      if(o.animal||o.retiring||type==='wolf')groups.animals.push(o);
+      if(o.grandMausoleum)groups.mausoleums.push(o);if(o.santaSleigh)groups.sleighs.push(o);
+      switch(type){
+        case 'rabbit':case 'cat':case 'fox':groups.wildlife.push(o);break;
+        case 'wolf':groups.wildlife.push(o);groups.groundHunters.push(o);break;
+        case 'skier':case 'boarder':groups.wildlife.push(o);groups.skiers.push(o);break;
+        case 'zombie':groups.zombies.push(o);groups.groundHunters.push(o);break;
+        case 'fallingTree':groups.terrainFeatures.push(o);break;
+        case 'rollingSnowball':groups.terrainFeatures.push(o);break;
+        case 'cemeteryPlot':groups.plots.push(o);break;
+        case 'ice':case 'rugged':case 'ramp':case 'mogul':case 'smallHill':case 'largeHill':case 'logBump':groups.ground.push(o);break;
+      }
+    }
+    Object.assign(c,{time:clock,source:state.objects,length:state.objects.length,groups});return groups;
+  }
   const preyCache={};
   function preyActors(){
     if(preyCache.time!==clock||preyCache.objects!==state.objects||preyCache.length!==state.objects.length||preyCache.chasers!==state.chasers||preyCache.chaserLength!==state.chasers.length){
@@ -1803,9 +1825,29 @@ window.FROSTLINE_READY = (async () => {
       hunter.divertOrigin={x:hunter.x,y:hunter.y};
     }
   }
-  function contactPrey(hunter,previous,radius=S.chasers.captureDistance){
+  // Build per predator-only phase: NPC movement between phases gets a fresh swept index.
+  // Index both ends of prey motion so fast crossing skiers remain candidates.
+  function preyContactIndex(){
+    const actors=preyActors(),grid=new Map(),large=[],cell=160;
+    for(let i=0;i<actors.length;i++){
+      const o=actors[i],moving=o.motionFromStamp===clock,px=moving?o.motionFromX:o.x,py=moving?o.motionFromY:o.y;
+      const x0=Math.floor(Math.min(px,o.x)/cell),x1=Math.floor(Math.max(px,o.x)/cell),y0=Math.floor(Math.min(py,o.y)/cell),y1=Math.floor(Math.max(py,o.y)/cell);
+      if((x1-x0+1)*(y1-y0+1)>64){large.push(i);continue;}
+      for(let x=x0;x<=x1;x++){let col=grid.get(x);if(!col)grid.set(x,col=new Map());for(let y=y0;y<=y1;y++){let list=col.get(y);if(!list)col.set(y,list=[]);list.push(i);}}
+    }
+    return {actors,grid,large,cell,marks:new Uint32Array(actors.length),epoch:0};
+  }
+  function nearbyContactPrey(index,hunter,previous,radius){
+    const {actors,grid,cell,marks}=index,x0=Math.floor((Math.min(previous.x,hunter.x)-radius)/cell),x1=Math.floor((Math.max(previous.x,hunter.x)+radius)/cell),y0=Math.floor((Math.min(previous.y,hunter.y)-radius)/cell),y1=Math.floor((Math.max(previous.y,hunter.y)+radius)/cell);
+    if((x1-x0+1)*(y1-y0+1)>256)return actors;
+    if(index.epoch>=0xffffffff){marks.fill(0);index.epoch=0;}const epoch=++index.epoch,found=[...index.large];for(const i of found)marks[i]=epoch;
+    for(let x=x0;x<=x1;x++){const col=grid.get(x);if(!col)continue;for(let y=y0;y<=y1;y++)for(const i of col.get(y)||[]){if(marks[i]===epoch)continue;marks[i]=epoch;found.push(i);}}
+    // Retain the linear scan's tie order when two prey have the same contact time.
+    found.sort((a,b)=>a-b);return found.map(i=>actors[i]);
+  }
+  function contactPrey(hunter,previous,radius=S.chasers.captureDistance,index=null){
     let meal=null,best=Infinity;
-    for(const o of preyActors()){
+    for(const o of index?nearbyContactPrey(index,hunter,previous,radius):preyActors()){
       const moving=o.motionFromStamp===clock,px=moving?o.motionFromX:o.x,py=moving?o.motionFromY:o.y;
       const sx=previous.x-px,sy=previous.y-py,dx=hunter.x-o.x,dy=hunter.y-o.y;
       if(sx>radius&&dx>radius||sx< -radius&&dx< -radius||sy>radius&&dy>radius||sy< -radius&&dy< -radius)continue;
@@ -1827,18 +1869,19 @@ window.FROSTLINE_READY = (async () => {
     hunter.feedingUntil=clock+pause;hunter.nextDivertCheck=hunter.feedingUntil;
     say('CHOMP!',hunter,1.2);burst(meal.x,meal.y,C.ice,9);
   }
-  function consumeNearbyPrey(hunter,previous,pause=S.predators.mealPauseSeconds,radius=S.chasers.captureDistance){
+  function consumeNearbyPrey(hunter,previous,pause=S.predators.mealPauseSeconds,radius=S.chasers.captureDistance,contacts=null){
     if(hunter.dead||hunter.eaten||hunter.retiring||hunter.leaving||hunter.stunnedUntil>clock||hunter.feedingUntil>clock)return false;
     if(resolveEnemyContact(hunter,{ramOnly:true}))return false;
-    const meal=contactPrey(hunter,previous,radius);if(!meal)return false;
+    const index=contacts&&(contacts.index??=preyContactIndex()),meal=contactPrey(hunter,previous,radius,index);if(!meal)return false;
     eatChaserPrey(hunter,meal,previous,pause);return true;
   }
   function resolveGroundPredatorPrey(){
-    for(const o of state.objects){
+    const contacts={};
+    for(const o of objectGroups().groundHunters){
       const wolf=o.type==='wolf'&&o.animal&&(!o.penaltyGate||o.wolfAwake),walker=o.type==='zombie'&&o.zombieRole==='wanderer'&&o.zombieState==='wandering'&&(o.awake||o.zombieRoamer);
       if(!wolf&&!walker)continue;
       const previous=o.motionFromStamp===clock?{x:o.motionFromX,y:o.motionFromY}:o;
-      consumeNearbyPrey(o,previous,wolf?S.wildlife.feedingSeconds:S.predators.mealPauseSeconds,wolf?S.wildlife.captureDistance:S.chasers.captureDistance);
+      consumeNearbyPrey(o,previous,wolf?S.wildlife.feedingSeconds:S.predators.mealPauseSeconds,wolf?S.wildlife.captureDistance:S.chasers.captureDistance,contacts);
     }
   }
   function patchAt(x,y){return freshIceCache().find(o=>lakeContains(o,x,y));}
@@ -2333,7 +2376,7 @@ window.FROSTLINE_READY = (async () => {
   }
   function updateTerrainFeatures(dt,previous=state.p){
     const p=state.p;
-    for(const o of state.objects){
+    for(const o of objectGroups().terrainFeatures){
       if(o.eaten)continue;
       if(o.type==='fallingTree'){
         const f=S.terrainFeatures.fallingTree;
@@ -2753,7 +2796,7 @@ window.FROSTLINE_READY = (async () => {
     const p=state.p,A=S.wildlife,K=S.skiers;
     let collisionGrid,threats;
     // Bears/yetis live in the chaser list after waking; wolves and roaming bears are scenery.
-    for(const o of state.objects){
+    for(const o of objectGroups().skiers){
       if((o.type!=='skier'&&o.type!=='boarder')||o.eaten||o.dead||o.sleighRoot||!o.rival&&Math.hypot(o.x-p.x,o.y-p.y)>A.activeRadius*endlessSpeedScale(o))continue;
       if(o.npcFallUntil>clock){specialActorFactor(o,dt);o.motionVx=o.motionVy=o.travelSpeed=0;o.travelStamp=clock;continue;}
       if(o.npcFallUntil){
@@ -2805,7 +2848,7 @@ window.FROSTLINE_READY = (async () => {
   }
   function updateMausoleums(){
     const p=state.p,M=S.endless.regions.cemetery.mausoleum;
-    for(const m of state.objects){
+    for(const m of objectGroups().mausoleums){
       if(!m.grandMausoleum||!activeCourseOwner(m))continue;
       const scale=m.encounter.scale;
       if(m.triggerAt===undefined){
@@ -2831,8 +2874,8 @@ window.FROSTLINE_READY = (async () => {
   function updateZombies(dt){
     if(!state.started)return;
     updateMausoleums();
-    const p=state.p,Z=S.endless.regions.zombies,A=Z.ambush;
-    for(const o of state.objects){
+    const p=state.p,Z=S.endless.regions.zombies,A=Z.ambush,contacts={};
+    for(const o of objectGroups().zombies){
       if(o.type!=='zombie'||o.dead||o.eaten)continue;
       o.zombieState??='hidden';const scale=endlessSpeedScale(o);
       if(o.zombieRole==='wanderer'){
@@ -2875,7 +2918,7 @@ window.FROSTLINE_READY = (async () => {
         if(Math.hypot(target.x-o.x,target.y-o.y)>4)travel(o,Math.atan2(target.y-o.y,target.x-o.x),speed,elapsed,false,false,true,true,target,true);
         else {o.motionVx=o.motionVy=o.travelSpeed=0;o.travelStamp=clock;}
         if(resolveEnemyContact(o,{ramOnly:true}))continue;
-        if(consumeNearbyPrey(o,previous))continue;
+        if(consumeNearbyPrey(o,previous,S.predators.mealPauseSeconds,S.chasers.captureDistance,contacts))continue;
         resolveEnemyContact(o);if(state.deathTimer)return;continue;
       }
       if(o.zombieState==='hidden'||o.zombieState==='resting'){
@@ -2900,8 +2943,8 @@ window.FROSTLINE_READY = (async () => {
   }
   function updateWildlife(dt){
     const p=state.p,A=S.wildlife,rabbits=[],cats=[],skis=[],hunters=[];
-    for(const o of state.objects){const t=o.type;if(t==='rabbit'){if(!o.eaten)rabbits.push(o);}else if(t==='cat')cats.push(o);else if(t==='skier'||t==='boarder')skis.push(o);else if(t==='fox'||t==='wolf')hunters.push(o);}
-    for(const o of state.objects){
+    for(const o of objectGroups().wildlife){const t=o.type;if(t==='rabbit'){if(!o.eaten)rabbits.push(o);}else if(t==='cat')cats.push(o);else if(t==='skier'||t==='boarder')skis.push(o);else if(t==='fox'||t==='wolf')hunters.push(o);}
+    for(const o of objectGroups().animals){
       if(o.type==='wolf'&&activeCourseOwner(o)&&!state.started)continue;
       if(o.retiring){o.y-=A.roamSpeed*dt;o.running=true;if(o.y<viewBounds().top-100)o.eaten=true;continue;}
       if(state.endless&&o.type==='wolf'&&(o.wolfAwake||o.alertUntil>clock)&&!activeCourseOwner(o)){o.arcadeRun=state.course;o.linkedChase=true;delete o.worldChunk;}
@@ -3119,6 +3162,9 @@ window.FROSTLINE_READY = (async () => {
       }
       t.putImageData(pixels,0,0);spriteCache.set(key,tile);
     }
+    if(GRIT_TREES.has(name)&&!opts.ui&&!opts.rotate&&!opts.flip&&!opts.center&&!opts.bodyOnly&&!(opts.floors>1)&&(opts.alpha===undefined||opts.alpha===1)&&ctx.globalAlpha===1&&Number.isInteger(x)&&Number.isInteger(y)){
+      drawCachedGritTree(key,name,spriteCache.get(key),x,y,width,h);return;
+    }
     if(!opts.ui&&!opts.rotate)drawGritCastShadow(name,x,y,width,h);
     if(!opts.rotate&&!opts.flip&&(opts.alpha===undefined||opts.alpha===ctx.globalAlpha)&&!opts.bodyOnly&&!(opts.floors>1)){
       ctx.drawImage(spriteCache.get(key),Math.round(x)+Math.round(-width/2),Math.round(y)+(opts.center?-Math.round(h/2):-h));return;
@@ -3147,11 +3193,11 @@ window.FROSTLINE_READY = (async () => {
         paintCemeteryFence({solidWall:true},a,b,box,line);
       }
     }
-    for(const o of state.objects)if(o.type==='cemeteryPlot'&&Math.abs(o.x-state.cam.x)<W/(2*ZOOM)+o.width/2+30&&o.y+o.depth/2>state.cam.y&&o.y-o.depth/2<state.cam.y+H/ZOOM)drawCemeteryPlot(o);
+    for(const o of objectGroups().plots)if(o.type==='cemeteryPlot'&&Math.abs(o.x-state.cam.x)<W/(2*ZOOM)+o.width/2+30&&o.y+o.depth/2>state.cam.y&&o.y-o.depth/2<state.cam.y+H/ZOOM)drawCemeteryPlot(o);
     drawRoads();
-    for(const o of state.objects)if(o.type==='ice')drawIce(o);else if(o.type==='rugged')drawRugged(o);
-    for(const o of state.objects)if(o.type==='ramp'||o.type==='mogul'||o.type==='smallHill'||o.type==='largeHill'||o.type==='logBump')drawObject(o);
-    for(const o of state.objects)if(o.type==='fallingTree'&&o.fallState!=='standing'&&o.fallState!=='fallen'){
+    for(const o of objectGroups().ground)if(o.type==='ice')drawIce(o);else if(o.type==='rugged')drawRugged(o);
+    for(const o of objectGroups().ground)if(o.type==='ramp'||o.type==='mogul'||o.type==='smallHill'||o.type==='largeHill'||o.type==='logBump')drawObject(o);
+    for(const o of objectGroups().terrainFeatures)if(o.type==='fallingTree'&&o.fallState!=='standing'&&o.fallState!=='fallen'){
       const a=screen(o.x,o.y),b=screen(o.x+Math.cos(o.fallAngle)*o.treeLength,o.y+Math.sin(o.fallAngle)*o.treeLength);
       line(a.x,a.y,b.x,b.y,'#9bb0ac',Math.max(2,o.r*ZOOM));
       for(let t=.15;t<1;t+=.2)box(mix(a.x,b.x,t)-1,mix(a.y,b.y,t)-1,3,3,C.snow);
