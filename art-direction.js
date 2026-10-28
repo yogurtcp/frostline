@@ -56,10 +56,15 @@ function drawGritSnow(){
 function gritCastShadowTile(name,width,height){
   const tree=GRIT_TREES.has(name),house=GRIT_BUILDINGS.has(name),rock=name==='rock'||name==='pebble'||name==='stump';
   if(!tree&&!house&&!rock)return;
-  const w=Math.round(width),h=Math.max(4,Math.round(height*(tree?.42:house?.24:.22))),key=(tree?'tree':house?'house':'rock')+w+':'+h;
+  const w=Math.round(width),h=Math.max(4,Math.round(height*(tree?.42:house?.12:.22))),key=(tree?'tree':house?'house':'rock')+w+':'+h;
   let tile=gritShadowTiles.get(key);
   if(!tile){
     tile=document.createElement('canvas');tile.width=Math.ceil(w*1.55+8);tile.height=h+6;const t=tile.getContext('2d');
+    if(house){
+      t.fillStyle='rgba(91,112,151,.24)';t.beginPath();t.moveTo(w*.08,1);t.lineTo(w*.87,1);t.lineTo(w*1.08,h*.62);t.lineTo(w*.28,h*.85);t.closePath();t.fill();
+      t.fillStyle='rgba(69,91,128,.12)';t.fillRect(Math.round(w*.14),1,Math.round(w*.68),2);
+      if(gritShadowTiles.size>=128)gritShadowTiles.delete(gritShadowTiles.keys().next().value);gritShadowTiles.set(key,tile);return tile;
+    }
     t.save();t.beginPath();
     if(tree){t.moveTo(w*.24,2);t.lineTo(w*.65,0);t.lineTo(w*1.45,h*.72);t.lineTo(w*.9,h);}
     else{t.moveTo(2,2);t.lineTo(w,0);t.lineTo(w*1.45,h*.72);t.lineTo(w*.42,h);}
@@ -147,4 +152,25 @@ function drawYetiStride(o,s,family,tier,width,gait){
   const tile=yetiStrideTile(family,tier,Math.floor(gait.phase*8)%8),scale=width*ZOOM/30,w=Math.round(34*scale),h=Math.round(36*scale),top=-Math.round(34*scale);
   if(gait.flip){ctx.save();ctx.translate(Math.round(s.x),Math.round(s.y));ctx.scale(-1,1);ctx.drawImage(tile,-Math.round(w/2),top,w,h);ctx.restore();}
   else ctx.drawImage(tile,Math.round(s.x)-Math.round(w/2),Math.round(s.y)+top,w,h);
+}
+
+const dogWalkTiles=new Map();
+function dogWalkTile(frame){
+  if(dogWalkTiles.has(frame))return dogWalkTiles.get(frame);
+  const key='dogRight:24';if(!spriteCache.has(key))sprite('dogRight',-10000,-10000,24,{ui:true});
+  const source=spriteCache.get(key),tile=document.createElement('canvas');tile.width=26;tile.height=28;const t=tile.getContext('2d');t.imageSmoothingEnabled=false;t.drawImage(source,1,1);
+  if(frame<8){
+    const phase=frame/8*TAU;
+    for(const [i,[x,y,w,h]] of [[2,15,6,7],[12,20,7,6]].entries()){
+      t.clearRect(x+1,y+1,w,h);const swing=Math.sin(phase+i*Math.PI),lift=Math.round(Math.max(0,Math.cos(phase+i*Math.PI)));
+      for(let row=0;row<h;row++)t.drawImage(source,x,y+row,w,1,x+1+Math.round(swing*row*.2),y+row+1-lift,w,1);
+    }
+  }
+  dogWalkTiles.set(frame,tile);return tile;
+}
+function drawDog(o,s,width=o.width||39){
+  const gait=o.dogGait??={x:o.x,y:o.y,time:clock,phase:0,active:false,flip:false},dt=clock-gait.time,dx=o.x-gait.x,dy=o.y-gait.y;
+  if(dt>0){const distance=Math.hypot(dx,dy);gait.active=distance>.01;if(gait.active){gait.phase=(gait.phase+distance/Math.max(28,width*1.3))%1;if(dx/dt<-3)gait.flip=true;else if(dx/dt>3)gait.flip=false;}gait.x=o.x;gait.y=o.y;gait.time=clock;}
+  const tile=dogWalkTile(gait.active?Math.floor(gait.phase*8):8),w=Math.round(width*ZOOM*26/24),h=Math.round(w*28/26),hop=o.hopUntil>clock?Math.sin((1-(o.hopUntil-clock)/1.2)*Math.PI)*7:0;
+  shadow(s.x,s.y,11,3,.1);ctx.save();ctx.translate(Math.round(s.x),Math.round(s.y-hop));if(gait.flip)ctx.scale(-1,1);ctx.drawImage(tile,-Math.round(w/2),-h+1,w,h);ctx.restore();
 }

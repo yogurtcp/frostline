@@ -453,13 +453,14 @@ window.FROSTLINE_READY = (async () => {
       const previous=state.endless.encounters.at(-2)?.town,side=pick([-1,1]);
       // Continue Arcade's actual village-exit road, including an off-centre approach.
       const entry=previous&&state.p.y>previous.origin?clamp(state.p.x,previous.x-previous.halfWidth*.8,previous.x+previous.halfWidth*.8):root.x;
-      e.centerX=entry;e.paths=[[{x:entry,y:e.startY},point(.3,(entry-root.x)*.75+side*55*e.scale),point(.65,(entry-root.x)*.35-side*35*e.scale),point(1)]];
+      e.centerX=entry;e.paths=[[{x:entry,y:e.startY},point(.3,(entry-root.x)*.75+side*55*e.scale),point(.65,(entry-root.x)*.35-side*35*e.scale),point(1)]];e.paths[0].linear=true;
       const road=previous?.approachRoad??{surface:'snow',width:S.village.mainRoadWidth};
       road.surface='snow';road.width=S.village.mainRoadWidth;
       road.points=[...(previous?[{x:previous.x,y:previous.roadEndY}]:[]),...e.paths[0]];road.endlessEncounter=e;road.endlessEndY=e.endY;
       delete road.tiles;delete road.bounds;delete road.tileRows;delete road.tileRowsFor;
       if(previous){previous.approachEndY=e.endY;for(const path of previous.encounter.paths)if(path.at(-1).y===previous.end)path.at(-1).x=entry;}
       else state.roads.push(road);
+      e.snowRoad=road;clearSnowRoadTrees(road);
     }else if(e.kind==='scramble'){
       e.band=900*e.scale;e.half=600*e.scale;
     }else if(e.kind==='denseForest'){
@@ -598,7 +599,7 @@ window.FROSTLINE_READY = (async () => {
     if(to===e.endY)mouth(true);
   }
   function populateEndlessEncounter(e,section,toY){
-    const scale=e.scale,from=e.generatedY,to=Math.min(e.endY,toY);if(to<=from)return;if(e.kind!=='trees'){populateEndlessRegion(e,section,from,to);if(e.kind==='quiet')addRouteLamps(e.paths[0],null,from,to,e);e.generatedY=to;return;}
+    const scale=e.scale,from=e.generatedY,to=Math.min(e.endY,toY);if(to<=from)return;if(e.kind!=='trees'){populateEndlessRegion(e,section,from,to);if(e.kind==='quiet'){clearSnowRoadTrees(e.snowRoad);addRouteLamps(e.paths[0],null,from,to,e);}e.generatedY=to;return;}
     const own={arcadeRun:section,encounter:e},root=section.endlessRoot;
     if(from===e.startY)entity('encounterTitle',root.x,e.startY-60*scale,{...own,r:0,width:300});
     populateForestBoundary(e,section,from,to);
@@ -1435,7 +1436,7 @@ window.FROSTLINE_READY = (async () => {
       }
     }
     if(courseRun){for(const road of [...roads,town.approachRoad])road.town=town;town.approachEndY=town.end;town.approachRoad.points=[{x:base,y:town.roadEndY},{x:base,y:town.end}];}
-    addRouteLamps(town.route,town,town.origin,town.end);
+    clearSnowRoadTrees(town.approachRoad);addRouteLamps(town.route,town,town.origin,town.end);
     return town;
   }
 
@@ -1891,6 +1892,14 @@ window.FROSTLINE_READY = (async () => {
   }
   function patchAt(x,y){return freshIceCache().find(o=>lakeContains(o,x,y));}
   function ruggedAt(x,y){return state.objects.find(o=>o.type==='rugged'&&lakeContains(o,x,y));}
+  function clearSnowRoadTrees(road){
+    if(!road?.points?.length||road.surface!=='snow')return;
+    state.objects=state.objects.filter(o=>{
+      if(!GRIT_TREES.has(o.type))return true;
+      const margin=road.width/2+Math.max(o.r||0,(o.width||40)*.32)+18;
+      return roadDistance(road,o.x,o.y)>=margin&&roadDistance(road,o.x,o.y-(o.width||40)*.4)>=margin;
+    });
+  }
   function roadBBox(r){let x0=Infinity,y0=Infinity,x1=-Infinity,y1=-Infinity;for(const p of r.points){if(p.x<x0)x0=p.x;if(p.x>x1)x1=p.x;if(p.y<y0)y0=p.y;if(p.y>y1)y1=p.y;}return r.bounds={left:x0-r.width,right:x1+r.width,top:y0-r.width,bottom:y1+r.width};}
   function onRoad(x,y){
     // Only exposed paving slows skis. A snow-covered main road wins at intersections.
@@ -1943,7 +1952,7 @@ window.FROSTLINE_READY = (async () => {
         const forestOutside=encounter?.kind==='quiet'?Math.abs(x-encounterPathX(encounter.paths[0],y))>410:forest&&!forestBank||encounter&&encounter.kind!=='trees'&&!encounter.town&&Math.abs(x-(encounter.centerX??state.course.x))>encounter.band+60;
         if(encounter&&!forestOutside)continue;
         if(state.safeTrails.some(r=>!(forestOutside&&r===state.course)&&r.arcade&&y>r.startY-120&&y<r.endY+60&&Math.abs(x-centerAt(y,r))<S.world.safeCourseHalfWidth+100))continue;
-        if(nearArcadeFeature(x,y)||nearMushroom(x,y)||patchAt(x,y)||insideTown(x,y)||state.villages.some(t=>roadDistance(t.approachRoad,x,y)<t.approachRoad.width/2+30)||(!state.course&&state.zone.kind==='start'&&Math.abs(x)<S.world.meadowHalfWidth&&y>S.world.meadowTop&&y<S.world.meadowBottom))continue;
+        if(nearArcadeFeature(x,y)||nearMushroom(x,y)||patchAt(x,y)||insideTown(x,y)||state.villages.some(t=>roadDistance(t.approachRoad,x,y)<t.approachRoad.width/2+60)||(!state.course&&state.zone.kind==='start'&&Math.abs(x)<S.world.meadowHalfWidth&&y>S.world.meadowTop&&y<S.world.meadowBottom))continue;
         if(state.objects.some(o=>(o.type==='gate'||o.type==='entrance')&&Math.abs(o.x-x)<o.half+60&&Math.abs(o.y-y)<140))continue;
         const type=forestOutside?pick(['pine','pine','pine','fir','fir','bush','rock','rabbit']):ambientType(x,y);
         if(MONSTER_KINDS.has(type)&&(state.endless||humanArea(x,y)))continue;
@@ -1975,6 +1984,7 @@ window.FROSTLINE_READY = (async () => {
         if(nearArcadeFeature(x,y)||patchAt(x,y)||nearMushroom(x,y,S.mushroomHunt.obstacleClearance+35))continue;
         const kinds=s.kind==='slalom'?S.spawnTables.classic:s.kind==='mushroom'?S.spawnTables.mushroom:s.kind==='forest'?S.spawnTables.forest:S.spawnTables.mixed;
         const type=pick(kinds),fast=type==='skier'&&random()<S.skiers.courseFastChance,sizes={personGreen:30,personYellow:30,pine:range(63,93),fir:range(49,70),rock:47,dog:34,skier:42,boarder:43,mushroom:37,ramp:61,mogul:40,sled:45,cat:25,rainbow:130,bush:35};
+        if(GRIT_TREES.has(type)&&state.roads.some(r=>r.surface==='snow'&&roadDistance(r,x,y)<r.width/2+Math.max(20,(sizes[type]||70)*.32)+48))continue;
         entity(type,x,y+range(-30,30),{fast,width:sizes[type],r:type==='pine'?18:type==='ramp'||type==='rainbow'?25:13,animal:type==='cat',ai:'idle',climb:0,nextAI:clock+3,vx:type==='dog'?range(-15,15):0,vy:type==='skier'?(fast?range(...S.skiers.fastSpeed):range(...S.skiers.slowSpeed)):type==='boarder'?range(...S.skiers.boarderSpeed):0});
       }
       if(s.kind==='freestyle'&&Math.floor(y/180)%2===0)entity('ramp',center+range(-105,105),y+55,{width:100,r:24});
@@ -3601,7 +3611,7 @@ window.FROSTLINE_READY = (async () => {
   }
   function drawKnockedOut(o,s,kind){
     if(kind==='zombie'){drawZombie(o,s);return;}
-    if(['bear','dog','wolf'].includes(kind))sprite(kind==='bear'?'bearRun':kind,s.x,s.y,kind==='bear'?60:52,{rotate:Math.PI/2});
+    if(['bear','dog','wolf'].includes(kind))sprite(kind==='bear'?'bearRun':kind==='dog'?'dogRight':kind,s.x,s.y,kind==='bear'?60:52,{rotate:Math.PI/2});
     else drawYeti(o,s,'down',52);
     for(let i=0;i<3;i++){const a=clock*4+i*TAU/3;box(s.x+Math.cos(a)*12,s.y-17+Math.sin(a)*4,2,2,C.gold);}
   }
@@ -3871,7 +3881,7 @@ window.FROSTLINE_READY = (async () => {
       return;
     }
     if(o.type==='skier'){sprite((o.motionVx??o.vx)<-5?'left':(o.motionVx??o.vx)>5?'right':'skier',s.x,s.y,o.width,{guest:true,fast:o.fast});if(o.rival)drawRival(o,s);if(o.fast){line(s.x-5,s.y+3,s.x-5,s.y+12,C.muted);line(s.x+5,s.y+3,s.x+5,s.y+15,C.muted);}return;}
-    if(o.type==='dog'){const hop=o.hopUntil>clock?Math.sin((1-(o.hopUntil-clock)/1.2)*Math.PI)*7:0;sprite((Math.sin(clock*3+o.phase)>.4?'dogLeft':'dog'),s.x,s.y+wiggle-hop,o.width);return;}
+    if(o.type==='dog'){drawDog(o,s);return;}
     if(o.type==='boarder'){sprite('boarder',s.x,s.y,o.width,{rotate:Math.sin(clock+o.phase)*.08});return;}
     sprite(o.type,s.x,s.y+wiggle,o.width,{alpha:o.flatten?.55:1});
 
@@ -4000,7 +4010,7 @@ window.FROSTLINE_READY = (async () => {
     }
     if(c.feedingUntil>clock&&(c.kind==='fast'||c.kind==='slow')){drawYeti(c,s,'feed',56);return;}
     if(c.kind==='bear'){drawBear(c,s,true);return;}
-    if(c.kind==='dog')sprite(Math.sin(clock*8+c.phase)>.3?'dog':'dogLeft',s.x,s.y+bob,39);
+    if(c.kind==='dog')drawDog(c,s,39);
     else if(c.kind==='patrol'){sprite(c.motionVx<-5?'left':c.motionVx>5?'right':'skier',s.x,s.y+bob,42,{guest:true,fast:true});line(s.x-5,s.y+3,s.x-5,s.y+12,C.muted);}
     else drawYeti(c,s,'run',c.kind==='slow'?52:59);
   }

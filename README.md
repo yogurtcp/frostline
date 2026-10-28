@@ -224,3 +224,5 @@ Christmas side arrivals start after five seconds of active play inside the parad
 
 
 The speed increase now runs at half its previous rate (speedRampMetres9600). Distant zombies/skier steering update less often with accumulated elapsed time; nearby movement and physical contact retain the normal simulation. Static collision bounds and group membership are reused while geometry stays unchanged. Christmas building rows now extend horizontally outward from each street-side house row, with a continuous clear avenue. Swept building collision prevents jumps or shields carrying the skier through those rows.
+
+Dogs now share a stable native body and eight movement-driven leg poses, with a separate idle pose and direction held between turns; village and chasing dogs use the same renderer. House cast shadows are compact, translucent contact shadows. Village-exit/quiet snow roads clear trees against their actual painted segments, and future terrain spawns reserve that space.
