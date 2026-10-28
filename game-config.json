@@ -66,7 +66,7 @@
       "wakeMetres": 140
     },
     "maxPlayerSpeedKmh": 130,
-    "speedRampMetres": 4800,
+    "speedRampMetres": 9600,
     "encounters": {
       "firstMetres": 450,
       "gapMetres": [

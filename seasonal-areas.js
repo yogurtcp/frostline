@@ -19,7 +19,7 @@ function routeLampBlockers(){
   const add=o=>{
     let b;
     if(HOUSE_TYPES.has(o.type)){
-      const hw=o.width*S.village.houseFootWidthRatio,hh=houseFootDepth(o)/2;
+      const hw=houseFootHalfWidth(o),hh=houseFootDepth(o)/2;
       b=[o.x-hw-16,o.y-hh*2-16,o.x+hw+16,o.y+16];
     }else if(TREE_TYPES.has(o.type)){
       const pad=16*Math.max(1,1/S.physics.collisionYScale),bounds=solidBounds(o);b=[bounds[0]-pad,bounds[1]-pad,bounds[2]+pad,bounds[3]+pad];
@@ -52,15 +52,16 @@ function addRouteLamps(path,town,from,to,encounter=null){
   }
 }
 function encloseChristmasParade(e,town,houses,rowYs){
-  const width=160,foot=width*S.village.houseFootWidthRatio,depth=width*S.village.houseFootHeightRatio*2,step=depth-8,span=4,blockDepth=depth+(span-1)*step;
-  const inner=Math.abs(houses[0].x-town.x),outer=inner+foot*2+36,band=Math.max(e.band,S.endless.regions.minimumWidthMetres*PX_PER_M*e.scale/2),own={town,paradeBoundary:true,r:foot,width};
+  const width=160,foot=width*S.village.houseFootWidthRatio;
+  const inner=Math.abs(houses[0].x-town.x),band=Math.max(e.band,S.endless.regions.minimumWidthMetres*PX_PER_M*e.scale/2),own={town,paradeBoundary:true,r:foot,width};
   const place=(x,y,style,extra={})=>entity(style%3?'rental':'lodge',x,y,{...own,houseStyle:style%S.houseAnimation.trimRGB.length,...extra});
-  // Continuous rear terraces; short cross-buildings close each back-yard pocket.
-  for(const side of [-1,1]){
-    for(let y=e.startY+60+blockDepth,i=0;y<e.endY+blockDepth-40;y+=span*step,i++)place(town.x+side*outer,y,i,{paradeSpan:span,paradeStep:step,depth:blockDepth+width});
-    for(let i=0;i<rowYs.length;i++)place(town.x+side*(inner+outer)/2,rowYs[i],i+1);
-    // Wide, visible building wings funnel the approach and prevent skirting the first house.
-    for(const y of [e.startY+140,e.endY-40])for(let x=inner,i=0;x<band+width;x+=foot*2-4,i++)place(town.x+side*x,y,i+2);
+  // Horizontal rows extend outward from each street facade, leaving the avenue open.
+  const pitch=foot*2-4,run=12;
+  for(const side of [-1,1])for(const y of [e.startY+140,...rowYs,e.endY-40]){
+    for(let first=inner+pitch;first<band+width;first+=run*pitch){
+      const x=town.x+side*(first+(run-1)*pitch/2);
+      place(x,y,Math.round((y-e.startY)/200)+Math.round(first/pitch),{paradeSpanX:run,paradeStepX:pitch,r:foot+(run-1)*pitch/2});
+    }
   }
   // Keep existing shopkeepers, stalls and animals clear of the new rear buildings.
   const buildings=state.objects.filter(o=>o.town===town&&HOUSE_TYPES.has(o.type)).map(h=>({h,b:solidBounds(h)}));
@@ -68,7 +69,7 @@ function encloseChristmasParade(e,town,houses,rowYs){
   for(const o of state.objects){
     if(o.town!==town||HOUSE_TYPES.has(o.type)||!(o.r>0||o.type.startsWith('person')||o.animal))continue;
     const r=Math.max(8,o.r||0)+4,side=Math.sign(o.x-town.x)||1;
-    if(Math.abs(o.x-town.x)<outer-foot-r&&!blocked(o.x,o.y,r,true))continue;
+    if(!blocked(o.x,o.y,r,true))continue;
     for(const offset of [inner+foot*.7,inner,e.half-r-15]){
       const x=town.x+side*offset;if(blocked(x,o.y,r))continue;
       const dx=x-o.x;o.x=o.homeX=x;if(o.path)o.path=o.path.map(p=>({...p,x:p.x+dx}));break;
