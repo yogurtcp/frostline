@@ -9938,6 +9938,12 @@
           "minimum": 3,
           "maximum": 16,
           "description": "Minimum street-edge clearance for road lamp posts, in metres (default 7)."
+        },
+        "lightReachMultiplier": {
+          "description": "Multiplier on light radii for the long, smooth visibility falloff.",
+          "type": "number",
+          "minimum": 1,
+          "maximum": 2.5
         }
       }
     }

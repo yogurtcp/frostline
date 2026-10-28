@@ -226,7 +226,8 @@ function drawFestivalGuest(o,s){
   const tile=festivalGuestFrame(o.costume,Math.floor(o.phase*3)%3,step),x=Math.round(s.x),y=Math.round(s.y);
   shadow(x,y,o.costume==='santa'?11:7,2);ctx.drawImage(festivalGuestAtlas,tile.x,tile.y,32,44,x-16,y-40,32,44);
 }
-function drawFestivalHouse(o,s){
+function drawFestivalHouse(o,s,paint={box,line}){
+  const {box,line}=paint;
   if(!o.festival)return;
   const w=o.width*ZOOM,y=s.y-w*.48,christmas=o.festival==='christmas';
   line(s.x-w*.38,y,s.x,y+5,christmas?'#416654':'#51445d',2);line(s.x,y+5,s.x+w*.38,y,christmas?'#416654':'#51445d',2);
@@ -293,13 +294,15 @@ function resetNightLighting(){
 function glowTile(color='white'){
   if(lightTiles.has(color))return lightTiles.get(color);
   const tile=document.createElement('canvas');tile.width=tile.height=128;const t=tile.getContext('2d'),g=t.createRadialGradient(64,64,0,64,64,64);
-  g.addColorStop(0,color);g.addColorStop(.32,color);g.addColorStop(.65,color==='white'?'rgba(255,255,255,.48)':color+'88');g.addColorStop(1,color==='white'?'rgba(255,255,255,0)':color+'00');
+  const rgb=color==='white'?[255,255,255]:[1,3,5].map(i=>parseInt(color.slice(i,i+2),16));
+  // A bright centre and a long smoothstep shoulder, with zero slope at the outer edge.
+  for(let i=0;i<=64;i++){const r=i/64,u=clamp((r-.12)/.88,0,1),alpha=1-u*u*(3-2*u);g.addColorStop(r,'rgba('+rgb.join(',')+','+alpha+')');}
   t.fillStyle=g;t.fillRect(0,0,128,128);lightTiles.set(color,tile);return tile;
 }
 function appendNightLights(o,lights){
   if(o.dead||o.eaten||o.collected)return;
   const x=o.x*ZOOM,y=o.y*ZOOM,w=(o.width||40)*ZOOM;
-  const add=(px,py,r,color='#ffc277',strength=1,core=false)=>{const light={x:px,y:py,r,color,strength,core};lights.push(light);return light;};
+  const add=(px,py,r,color='#ffc277',strength=1,core=false)=>{const light={x:px,y:py,r:r*S.night.lightReachMultiplier,color,strength,core};lights.push(light);return light;};
   if(o===state.p){const lift=o.air>0&&o.airTotal?Math.sin(o.air/o.airTotal*Math.PI)*o.jumpHeight*ZOOM:0;add(x,y-8-lift,S.night.playerRadiusMetres*PX_PER_M*ZOOM,'#efc48b');}
   else if(o.type==='lamp')add(x,y-22,(o.lightRadiusWorld??S.night.lampRadiusMetres*PX_PER_M)*ZOOM,'#ffbd70',1,true);
   else if(o.grandMausoleum){add(x-w*.35,y-w*.35,58,'#dcb0a1',1,true);add(x+w*.35,y-w*.35,58,'#dcb0a1',1,true);}
@@ -337,7 +340,7 @@ function syncNightStaticLights(){
   for(const o of state.objects){
     if(!NIGHT_STATIC_TYPES.has(o.type)||o.dead||o.eaten||o.collected)continue;
     const old=nightLightObjects.get(o);
-    if(old&&old.x===o.x&&old.y===o.y&&old.width===o.width&&old.half===o.half&&old.type===o.type&&old.festival===o.festival&&old.grand===o.grandMausoleum&&old.lampRadius===S.night.lampRadiusMetres&&old.lightRadiusWorld===o.lightRadiusWorld){old.seen=epoch;continue;}
+    if(old&&old.x===o.x&&old.y===o.y&&old.width===o.width&&old.half===o.half&&old.type===o.type&&old.festival===o.festival&&old.grand===o.grandMausoleum&&old.lampRadius===S.night.lampRadiusMetres&&old.lightRadiusWorld===o.lightRadiusWorld&&old.lightReachMultiplier===S.night.lightReachMultiplier){old.seen=epoch;continue;}
     if(old)removeNightLightEntry(old);
     const sources=[];appendNightLights(o,sources);
     for(const source of sources){
@@ -347,7 +350,7 @@ function syncNightStaticLights(){
         bucket.sources.set(source.id,source);bucket.version++;source.cells.push(key);
       }
     }
-    nightLightObjects.set(o,{x:o.x,y:o.y,width:o.width,half:o.half,type:o.type,festival:o.festival,grand:o.grandMausoleum,lampRadius:S.night.lampRadiusMetres,lightRadiusWorld:o.lightRadiusWorld,sources,seen:epoch});
+    nightLightObjects.set(o,{x:o.x,y:o.y,width:o.width,half:o.half,type:o.type,festival:o.festival,grand:o.grandMausoleum,lampRadius:S.night.lampRadiusMetres,lightRadiusWorld:o.lightRadiusWorld,lightReachMultiplier:S.night.lightReachMultiplier,sources,seen:epoch});
   }
   let count=0;for(const [o,entry] of nightLightObjects)if(entry.seen!==epoch){removeNightLightEntry(entry);nightLightObjects.delete(o);}else count+=entry.sources.length;
   nightLightingStats.staticSources=count;

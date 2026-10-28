@@ -1186,7 +1186,7 @@ window.FROSTLINE_READY = (async () => {
 
   function die(cause='YETI',attacker=null) {
     if(state.deathTimer)return;
-    const animated=['YETI','WOLF','BEAR'].includes(cause),scene=['YETI','WOLF','BEAR','ZOMBIE'].includes(cause)?deathScene(cause,attacker):null;
+    const animated=['YETI','WOLF','BEAR','ZOMBIE'].includes(cause),scene=animated?deathScene(cause,attacker):null;
     state.deathYeti=null;state.deathTimer=animated?3:S.physics.deathSeconds;state.deaths++;
     state.p.fall=2;state.p.speed=0;state.p.vx=state.p.vy=0;state.p.draft=0;state.p.draftTarget=null;state.input={left:false,right:false,up:false,down:false,pointer:null,jump:false};
     if(state.arcade)state.arcade.endReason='CAUGHT BY '+cause;
@@ -1194,7 +1194,7 @@ window.FROSTLINE_READY = (async () => {
     announce(cause==='BEAR'?'THE BEAR CAUGHT YOU.':cause==='WOLF'?'THE PACK CAUGHT YOU.':cause==='ZOMBIE'?'THE DEAD CAUGHT YOU.':'THE YETI GOT YOU.',scene?.detail||`Your ${state.bank} coins are safe.`,C.red,3);
     beep(110,.3,'triangle');save();
     if(animated){
-      const actor=attacker||(cause==='YETI'?state.chasers.find(c=>!c.dead&&['fast','slow'].includes(c.kind)):null)||{kind:cause==='YETI'?'fast':cause.toLowerCase(),phase:0};
+      const actor=attacker||(cause==='YETI'?state.chasers.find(c=>!c.dead&&['fast','slow'].includes(c.kind)):null)||{kind:cause==='YETI'?'fast':cause.toLowerCase(),type:cause.toLowerCase(),zombieRole:'wanderer',zombieStyle:0,width:34,phase:0};
       state.deathAnimation={cause,actor,x:state.p.x,y:state.p.y,remaining:3,shown:false,scene};
     }else if(scene)showSceneCard(scene.key,scene.title,scene.detail,'summit');
   }
@@ -1766,8 +1766,8 @@ window.FROSTLINE_READY = (async () => {
   function nearestPrey(x,y,radius,hunter){
     let best=null,bestD=radius;
     for(const o of preyActors()){
-      if(!ediblePrey(o))continue;
       const dx=o.x-x,dy=o.y-y;if(Math.abs(dx)>=bestD||Math.abs(dy)>=bestD)continue;
+      if(!ediblePrey(o))continue;
       const d=Math.hypot(dx,dy);
       if(d>=bestD||humanArea(o.x,o.y)&&!courseCreature(hunter,o.x,o.y))continue;
       if(!preyOnPlayerPath(hunter,o))continue;
@@ -1806,10 +1806,10 @@ window.FROSTLINE_READY = (async () => {
   function contactPrey(hunter,previous,radius=S.chasers.captureDistance){
     let meal=null,best=Infinity;
     for(const o of preyActors()){
-      if(!ediblePrey(o))continue;
       const moving=o.motionFromStamp===clock,px=moving?o.motionFromX:o.x,py=moving?o.motionFromY:o.y;
       const sx=previous.x-px,sy=previous.y-py,dx=hunter.x-o.x,dy=hunter.y-o.y;
       if(sx>radius&&dx>radius||sx< -radius&&dx< -radius||sy>radius&&dy>radius||sy< -radius&&dy< -radius)continue;
+      if(!ediblePrey(o))continue;
       const vx=dx-sx,vy=dy-sy,t=clamp(-(sx*vx+sy*vy)/(vx*vx+vy*vy||1),0,1);
       if(Math.hypot(sx+vx*t,sy+vy*t)>=radius)continue;
       if(humanArea(o.x,o.y)&&!courseCreature(hunter,o.x,o.y))continue;
@@ -2418,7 +2418,7 @@ window.FROSTLINE_READY = (async () => {
     if(state.course){const run=state.course;if(!run.timingStarted&&p.y>=run.startY){run.timingStarted=true;run.time+=dt*clamp((p.y-run.startY)/(p.y-previous.y||1),0,1);}else if(run.timingStarted)run.time+=dt;spawnTerrain();}
     updateTerrainFeatures(dt,previous);updateVillageLife(dt);updateWildlife(dt);if(state.sceneCard||state.deathTimer)return;updateZombies(dt);if(state.sceneCard||state.deathTimer)return;updateFestivalTraffic(dt);updateSkiers(dt);updateSleighTeams(dt);resolveGroundPredatorPrey();updatePedestrians(dt);updateSpecialEvents();
     for(const o of state.objects){
-      if(tryMistletoe(o)||tryCocoaShop(o))return;
+      if(o.type==='mistletoe'&&tryMistletoe(o)||o.cocoaShop&&tryCocoaShop(o))return;
       if(o.type!=='skier'&&o.type!=='boarder'&&o.type!=='rollingSnowball'&&!o.animal&&(o.vx||o.vy)){o.motionFromX=o.x;o.motionFromY=o.y;o.motionFromStamp=clock;o.motionVx=o.vx||0;o.motionVy=(o.vy||0)*cemeteryYScale(o.x,o.y);o.x+=o.motionVx*dt;o.y+=o.motionVy*dt;o.travelSpeed=Math.hypot(o.motionVx,o.motionVy);o.travelStamp=clock;}
       if(o.cheerUntil>clock&&clock>=(o.nextCheer||0)&&Math.hypot(o.x-p.x,o.y-p.y)<650){say(pick(o.cheerRun?.objective==='mushrooms'?S.dialogue.mushroomCheers:S.dialogue.cheers),o,2.2);o.nextCheer=clock+3.4+o.phase*.2;}
       if(o.roam&&!(o.socialUntil>clock))o.x+=Math.cos(clock*.8+o.phase)*o.roam*dt*.3;
@@ -2553,15 +2553,25 @@ window.FROSTLINE_READY = (async () => {
     if(o.type==='iceBlock'||o.type==='ruinWall')return [o.x-o.width/2,o.y-o.depth/2,o.x+o.width/2,o.y+o.depth/2];
     const radius=o.r||0;return [o.x-radius,o.y-radius/S.physics.collisionYScale,o.x+radius,o.y+radius/S.physics.collisionYScale];
   }
+  const solidSnapshot={time:-1,source:null,length:-1,groups:null};
+  function snapshotSolids(){
+    if(solidSnapshot.time===clock&&solidSnapshot.source===state.objects&&solidSnapshot.length===state.objects.length)return solidSnapshot;
+    const groups=new Map([[HOUSE_TYPES,[]],[TREE_TYPES,[]],[NPC_STATIC_SOLIDS,[]]]);
+    for(const o of state.objects){
+      if(o.eaten||o.dead||o.r<=0)continue;
+      const house=HOUSE_TYPES.has(o.type),tree=TREE_TYPES.has(o.type),npc=NPC_STATIC_SOLIDS.has(o.type);
+      if(!house&&!tree&&!npc)continue;o.solidBounds=solidBounds(o);
+      if(house)groups.get(HOUSE_TYPES).push(o);if(tree)groups.get(TREE_TYPES).push(o);if(npc)groups.get(NPC_STATIC_SOLIDS).push(o);
+    }
+    Object.assign(solidSnapshot,{time:clock,source:state.objects,length:state.objects.length,groups});return solidSnapshot;
+  }
   function cachedSolidGrid(cache,types,cell,padding=0){
     if(cache.time===clock&&cache.source===state.objects&&cache.length===state.objects.length)return cache;
     cache.time=clock;cache.source=state.objects;cache.length=state.objects.length;
-    const items=[];let changed=!cache.records;
-    for(const o of state.objects){
-      if(!types.has(o.type)||o.eaten||o.dead||o.r<=0)continue;
-      items.push(o);const b=solidBounds(o),old=cache.records?.get(o);
-      if(!old||old.some((v,i)=>v!==b[i]))changed=true;
-      o.solidBounds=b;
+    const snapshot=snapshotSolids(),shared=snapshot.groups.get(types),items=shared||state.objects.filter(o=>types.has(o.type)&&!o.eaten&&!o.dead&&o.r>0);let changed=!cache.records;
+    for(const o of items){
+      const b=shared?o.solidBounds:(o.solidBounds=solidBounds(o)),old=cache.records?.get(o);
+      if(!old||old[0]!==b[0]||old[1]!==b[1]||old[2]!==b[2]||old[3]!==b[3])changed=true;
     }
     if(!changed&&items.length===cache.records.size)return cache;
     cache.records=new Map();cache.grid=new Map();cache.objects=new Set(items);cache.builds=(cache.builds||0)+1;
@@ -3110,6 +3120,9 @@ window.FROSTLINE_READY = (async () => {
       t.putImageData(pixels,0,0);spriteCache.set(key,tile);
     }
     if(!opts.ui&&!opts.rotate)drawGritCastShadow(name,x,y,width,h);
+    if(!opts.rotate&&!opts.flip&&(opts.alpha===undefined||opts.alpha===ctx.globalAlpha)&&!opts.bodyOnly&&!(opts.floors>1)){
+      ctx.drawImage(spriteCache.get(key),Math.round(x)+Math.round(-width/2),Math.round(y)+(opts.center?-Math.round(h/2):-h));return;
+    }
     ctx.save();ctx.translate(Math.round(x),Math.round(y));
     if(opts.rotate)ctx.rotate(opts.rotate);if(opts.flip)ctx.scale(-1,1);if(opts.alpha!==undefined)ctx.globalAlpha=opts.alpha;
     if(opts.bodyOnly){const crop=Math.ceil(h*.62);ctx.drawImage(spriteCache.get(key),0,0,width,crop,Math.round(-width/2),-h,width,crop);}
@@ -3121,7 +3134,7 @@ window.FROSTLINE_READY = (async () => {
     }else ctx.drawImage(spriteCache.get(key),Math.round(-width/2),opts.center?-Math.round(h/2):-h);
     ctx.restore();
   }
-  function shadow(x,y,rx=15,ry=4,alpha=.11) {ctx.save();ctx.globalAlpha*=Math.min(.5,alpha*2);const w=Math.max(3,Math.round(rx*ZOOM)),h=Math.max(2,Math.round(ry*ZOOM));for(let row=-h;row<=h;row++){const half=Math.max(1,w-Math.round(Math.abs(row)*w/(h+2)));box(x-half+row,y+row,half*2,1,'#758bb4');}ctx.restore();}
+  function shadow(x,y,rx=15,ry=4,alpha=.11) {const before=ctx.globalAlpha,color=ctx.fillStyle;ctx.globalAlpha=before*Math.min(.5,alpha*2);ctx.fillStyle='#758bb4';const w=Math.max(3,Math.round(rx*ZOOM)),h=Math.max(2,Math.round(ry*ZOOM));for(let row=-h;row<=h;row++){const half=Math.max(1,w-Math.round(Math.abs(row)*w/(h+2)));ctx.fillRect(Math.round(x-half+row),Math.round(y+row),half*2,1);}ctx.globalAlpha=before;ctx.fillStyle=color;}
   function snow() {
     box(0,0,W,H,nightSnowColor());drawSpecialAreas();
     for(const e of state.endless?.encounters||[])if(e.kind==='cemetery'){const a=screen(state.course.x-e.band,e.startY),b=screen(state.course.x+e.band,e.endY);if(b.y>0&&a.y<H){ctx.fillStyle='#e7ecf8';ctx.fillRect(a.x,a.y,b.x-a.x,b.y-a.y);}}
@@ -3247,6 +3260,30 @@ window.FROSTLINE_READY = (async () => {
     const key=role+':'+style+':'+frame+':'+fast;if(zombieTiles.has(key))return zombieTiles.get(key);
     const tile=document.createElement('canvas'),crawl=style===4;tile.width=crawl?24:18;tile.height=crawl?13:24;
     const t=tile.getContext('2d'),px=(x,y,w,h,c)=>{t.fillStyle=gritMaterial(c);t.fillRect(x,y,w,h);},ink='#334a4d',skin=['#91a77b','#8b9e88','#8c9b77','#a1aea0','#91a797'][style],coat=['#786273','#5c7466','#788a85','#9baba3','#776e58'][style];
+    if(frame===4||frame===5){
+      const chew=frame-4;
+      if(crawl){
+        px(2,6,14,5,ink);px(3,6,11,3,coat);px(1,10,8,3,ink);
+        px(14,3+chew,8,7,ink);px(15,3+chew,6,5,skin);px(17,4+chew,2,1,ink);
+        px(18,7+chew,4,1+chew,ink);px(19,7+chew,1,1,'#e1d8ba');
+        px(10,9,8,2,skin);px(17,10,5,2,skin);
+      }else{
+        // Bent knees, a forward head and hands lifted to the jaw: a small, readable chomp.
+        px(3,19,6,4,ink);px(10,19,5,3,ink);px(2,22,7,2,ink);px(11,22,5,2,ink);
+        px(4,11,10,9,ink);px(5,11,8,8,coat);px(5,17,4,2,skin);
+        px(7+chew,6+chew,9,9,ink);px(8+chew,7+chew,7,6,skin);
+        px(9+chew,8+chew,2,1,ink);px(13+chew,8+chew,2,1,ink);
+        px(11+chew,12+chew,5,1+chew,ink);px(12+chew,12+chew,1,1,'#e1d8ba');
+        px(2,14+chew,5,3,coat);px(5,14+chew,5,2,skin);
+        px(12,16,5,3,coat);px(13,14+chew,4,2,skin);
+        if(style===0){px(7+chew,5+chew,8,3,'#526477');px(6+chew,7+chew,11,1,'#526477');}
+        if(style===1){px(6+chew,5+chew,11,3,'#645f50');px(9+chew,4+chew,6,2,'#645f50');}
+        if(style===2){px(7+chew,6+chew,9,2,'#8c9b77');px(7,12,2,5,'#77725c');}
+        if(style===3){px(6+chew,5+chew,11,3,'#bdc7ba');px(6+chew,8+chew,2,7,'#bdc7ba');px(4,17,10,3,'#a8b7aa');}
+      }
+      if(fast)px(crawl?18:10+chew,crawl?4+chew:8+chew,1,1,'#d8e8a1');
+      gritTextureNative(t,0,0,tile.width,tile.height);zombieTiles.set(key,tile);return tile;
+    }
     if(role==='ambusher'){
       tile.width=22;tile.height=24;const bone='#d7d0b2',shade='#a9ae9c',dark='#3b4b50';
       if(frame===2){
@@ -3290,6 +3327,7 @@ window.FROSTLINE_READY = (async () => {
     gritTextureNative(t,0,0,tile.width,tile.height);zombieTiles.set(key,tile);return tile;
   }
   function drawZombie(o,s){
+    if(!o.dead&&o.feedingUntil>clock){drawZombieFeeding(o,s);return;}
     const resting=['hidden','resting'].includes(o.zombieState)&&!o.dead,stirring=['rising','stirring'].includes(o.zombieState)&&!o.dead,leaping=o.zombieState==='leaping'&&!o.dead;
     const walkRate=Math.min(10,2*(o.zombieBaseKmh??S.endless.regions.zombies.wandererSpeedKmh[0])/5*(o.zombieRushing?2:1)*(o.mausoleumSpawn?2:1));
     const role=o.zombieRole??'ambusher',frame=resting||role==='ambusher'&&o.zombieState==='spent'?2:stirring?(clock-o.riseAt<S.endless.regions.zombies.ambush.windupSeconds*.5?2:3):leaping?1:role==='wanderer'&&o.travelSpeed>1?Math.floor(clock*walkRate+o.phase)%2:0;
@@ -3297,6 +3335,13 @@ window.FROSTLINE_READY = (async () => {
     shadow(s.x,s.y,resting?14:10,3);ctx.save();ctx.translate(s.x,s.y-lift);if(!o.dead&&(o.zombieRushing||o.mausoleumSpawn)&&o.travelSpeed>1)ctx.translate(0,Math.floor(clock*8)%2?-1:0);if((o.motionVx||o.leapVx||0)<-2)ctx.scale(-1,1);
     if(o.zombieState==='emerging')ctx.globalAlpha=.35+.65*clamp((clock-o.emergeAt)/.5,0,1);
     if(o.dead||o.stunnedUntil>clock)ctx.rotate(Math.PI/2);ctx.drawImage(tile,-Math.round(width/2),-height,width,height);ctx.restore();
+  }
+  function drawZombieFeeding(o,s,worldWidth=o.width||34){
+    const chew=Math.floor(clock*7+(o.phase||0))%2,tile=zombieTile(o.zombieStyle??0,4+chew,'wanderer',!!o.mausoleumSpawn);
+    const width=Math.round(worldWidth*ZOOM),height=Math.round(width*tile.height/tile.width);
+    shadow(s.x,s.y,12,3);ctx.save();ctx.translate(Math.round(s.x),Math.round(s.y));
+    if((o.motionVx||0)<-2)ctx.scale(-1,1);
+    ctx.drawImage(tile,-Math.round(width/2),-height,width,height);ctx.restore();
   }
   function drawTransitionLake(o){
     const g=lakeGeometry(o),s=screen(o.x,o.y);
@@ -3451,14 +3496,15 @@ window.FROSTLINE_READY = (async () => {
     return {rank,tier:tiers[rank],family:['White','Avalanche','Stalker','Stalker'][rank]};
   }
   function drawYeti(o,s,pose='run',width=58){
-    const {rank,tier,family}=yetiAppearance(o),phase=clock*(5+rank*1.3)+(o.phase||0);
-    const frame=pose==='run'?(Math.floor(phase)%2?'RunR':'RunL'):'Idle';
+    const {tier,family}=yetiAppearance(o);
+    const frame='Idle',gait=yetiLocomotion(o,pose);
     const feeding=pose==='feed',down=pose==='down';
-    const bob=pose==='run'?-(Math.floor(phase)%2):feeding?(Math.sin(clock*15)>0?1:0):pose==='idle'?(Math.sin(clock*1.7+(o.phase||0))>.65?1:0):0;
+    const bob=feeding?(Math.sin(clock*15)>0?1:0):pose==='idle'?(Math.sin(clock*1.7+(o.phase||0))>.65?1:0):0;
     const lean=down?0:clamp(Math.round((o.motionVx||0)/180),-1,1),x=s.x+lean,y=s.y+bob;
     if(!down)shadow(s.x,s.y,19,5);
     // Every family uses the approved tiny atlas: <=30x34 pixels at normal game zoom.
-    sprite('yeti'+family+frame,x,y,width,{yetiTier:tier,rotate:down?Math.PI/2:0});
+    if(pose==='run'&&gait.active)drawYetiStride(o,{x,y},family,tier,width,gait);
+    else sprite('yeti'+family+frame,x,y,width,{yetiTier:tier,rotate:down?Math.PI/2:0});
     if(feeding){
       const w=Math.max(2,Math.round(width*ZOOM)),h=Math.round(w*34/30);
       const mouthY=Math.round(y-h+h*(family==='Stalker'?.42:.41));
@@ -3481,12 +3527,13 @@ window.FROSTLINE_READY = (async () => {
   }
   function drawDeathAnimation(){
     const a=state.deathAnimation;if(!a)return;a.shown=true;
-    const s=screen(a.x,a.y),t=3-a.remaining,yeti=a.cause==='YETI',width=yeti?62:a.cause==='BEAR'?72:54;
-    const mouthX=s.x+(yeti?0:a.cause==='BEAR'?14:11),mouthY=s.y-(yeti?21:9),lift=clamp(t/.8,0,1);
+    const s=screen(a.x,a.y),t=3-a.remaining,yeti=a.cause==='YETI',zombie=a.cause==='ZOMBIE',width=yeti?62:zombie?40:a.cause==='BEAR'?72:54;
+    const crawl=zombie&&a.actor.zombieStyle===4,biteScale=zombie?width*ZOOM/(crawl?24:18):1,biteSide=(a.actor.motionVx||0)<-2?-1:1;
+    const mouthX=s.x+(yeti?0:zombie?(crawl?7:4)*biteScale*biteSide:a.cause==='BEAR'?14:11),mouthY=s.y-(yeti?21:zombie?(crawl?5:10)*biteScale:9),lift=clamp(t/.8,0,1);
     // A wobbling skier, discarded skis, kicking boots and a flying hat: no gore.
     for(const side of [-1,1])line(s.x+side*10,s.y+5,s.x+side*18,s.y+9,'#b48b54',2);
     if(t<.85){sprite('fall',mix(s.x,mouthX,lift),mix(s.y,mouthY+5,lift),42*(1-lift*.35),{rotate:Math.sin(t*12)*.12});}
-    if(yeti)drawYeti(a.actor,s,'feed',width);else drawAnimalFeeding(a.cause,a.actor,s,width);
+    if(yeti)drawYeti(a.actor,s,'feed',width);else if(zombie)drawZombieFeeding(a.actor,s,width);else drawAnimalFeeding(a.cause,a.actor,s,width);
     if(t>=.65&&t<2.4){
       const length=8*(1-clamp((t-1.1)/1.3,0,1)),kick=Math.sin(t*21)*2;
       for(const side of [-1,1]){box(mouthX+side*2,mouthY+2,2,length+kick*side,'#405664');box(mouthX+side*2-1,mouthY+2+length+kick*side,4,2,'#283e4a');}
@@ -3529,19 +3576,25 @@ window.FROSTLINE_READY = (async () => {
     }
     ctx.restore();
   }
-  function drawHouse(o,s){
-    const A=S.houseAnimation,w=o.width*ZOOM,a=atlas[o.houseSprite||o.type],h=w*a[4]/a[3],style=o.houseStyle??0;
-    const floors=o.floors||1,pixelH=Math.round(Math.round(w)*a[4]/a[3]),storey=Math.floor(pixelH*.87)-Math.floor(pixelH*.55),extra=(floors-1)*storey;
-    sprite(o.houseSprite||o.type,s.x,s.y,o.width,{houseStyle:style,floors});
-    // Native-pixel accents: warm windows, smoking chimneys, shop awnings and occupied doors.
-    const phase=clock+o.phase*A.doorCycleSeconds,door=phase%A.doorCycleSeconds;
-    const chimneyX=s.x+w*(o.houseSprite?.24:o.type==='lodge'?.26:-.2),chimneyY=s.y-h*.94-extra;
-    for(let i=0;i<A.smokePuffs;i++){
-      const t=((clock/A.smokeSeconds+i/A.smokePuffs+o.phase)%1),size=2+Math.floor(t*3);
-      ctx.globalAlpha=(1-t)*.32;box(chimneyX+Math.sin(t*5+o.phase)*4,chimneyY-7-t*22,size,size,'#91a5ab');
-    }ctx.globalAlpha=1;
-    drawFestivalHouse(o,s);
-    const warm=(state.nightBlend||0)>.003?'#f2bc78':Math.sin(clock*A.lampFlickerSpeed+o.phase)>.15?'#f2c98f':'#d39b61';
+  const houseFacadeTiles=new Map();
+  function houseLabelTile(label,color){
+    const str=String(label).toUpperCase().replaceAll('…','...').replaceAll('’',"'"),key=str+'|1|'+color+'|0';
+    if(!textTiles.has(key))text(str,-10000,-10000,7,color);return textTiles.get(key);
+  }
+  function houseFacadeTile(o,warm,flap){
+    const name=o.houseSprite||o.type,w=Math.round(o.width*ZOOM),a=atlas[name],h=w*a[4]/a[3],style=o.houseStyle??0,floors=o.floors||1,pixelH=Math.round(h),storey=Math.floor(pixelH*.87)-Math.floor(pixelH*.55),extra=(floors-1)*storey;
+    const key=[name,w,style,floors,o.cozyStyle,o.buildingKind,o.shopName,o.festival,warm,flap].join(':');
+    let entry=houseFacadeTiles.get(key);if(entry){houseFacadeTiles.delete(key);houseFacadeTiles.set(key,entry);return entry;}
+    const sourceKey=name+':'+w+':house'+style;
+    if(!spriteCache.has(sourceKey))sprite(name,-10000,-10000,w,{ui:true,houseStyle:style});
+    const base=spriteCache.get(sourceKey),tile=document.createElement('canvas');tile.width=w+24;tile.height=Math.ceil(h+extra)+30;const t=tile.getContext('2d');t.imageSmoothingEnabled=false;
+    const s={x:Math.ceil(w/2)+12,y:tile.height-6},left=s.x+Math.round(-w/2);
+    if(floors>1){const roof=Math.floor(pixelH*.55),bottom=Math.floor(pixelH*.87);t.drawImage(base,0,0,w,roof,left,s.y-pixelH-extra,w,roof);for(let floor=0;floor<floors;floor++)t.drawImage(base,0,roof,w,storey,left,s.y-pixelH-extra+roof+floor*storey,w,storey);t.drawImage(base,0,bottom,w,pixelH-bottom,left,s.y+bottom-pixelH,w,pixelH-bottom);}
+    else t.drawImage(base,left,s.y-pixelH);
+    const box=(x,y,w,h,c)=>{t.fillStyle=gritMaterial(c);t.fillRect(Math.round(x),Math.round(y),Math.round(w),Math.round(h));};
+    const line=(x,y,xx,yy,c,width=1)=>{t.strokeStyle=gritMaterial(c);t.lineWidth=width;t.beginPath();t.moveTo(x,y);t.lineTo(xx,yy);t.stroke();};
+    const text=(str,x,y,size,c)=>{const glyph=houseLabelTile(str,c);t.drawImage(glyph,Math.round(x-glyph.width/2),Math.round(y-3.5));};
+    drawFestivalHouse(o,s,{box,line});
     for(const side of [-1,1]){box(s.x+side*w*.19-2,s.y-h*.25,4,5,warm);box(s.x+side*w*.19,s.y-h*.25,1,5,'#714a37');}
     if(o.cozyStyle===0)for(const side of [-1,1]){
       const x=s.x+side*w*.19;box(x-4,s.y-h*.25+5,9,3,'#916951');
@@ -3550,7 +3603,7 @@ window.FROSTLINE_READY = (async () => {
     if(o.cozyStyle===1){line(s.x-w*.32,s.y-h*.45-extra,s.x+w*.32,s.y-h*.45-extra,'#796c59');for(let i=0;i<7;i++)box(s.x-w*.3+i*w*.1,s.y-h*.45-extra+1,2,3,i%2?'#e8b788':'#e7d4a1');}
     if(o.cozyStyle===2){const x=s.x+(o.houseSprite?w*.24:0),y=s.y-h*(o.houseSprite?.31:.14);box(x-3,y-3,6,1,'#668f70');box(x-4,y-2,1,5,'#668f70');box(x+3,y-2,1,5,'#668f70');box(x-3,y+3,6,1,'#668f70');box(x-1,y+3,3,2,'#b97877');}
     if(!o.houseSprite&&(o.buildingKind==='cafe'||o.buildingKind==='rental')){
-      const y=s.y-h*.22,flap=Math.round(Math.sin(clock*A.awningSpeed+o.phase)),width=Math.round(w*.38);
+      const y=s.y-h*.22,width=Math.round(w*.38);
       for(let x=0;x<width;x+=4){box(s.x-width/2+x,y,4,3,(x/4)%2?'#e5f0ee':style===1?'#548091':'#9b403e');box(s.x-width/2+x,y+3,4,2+flap,(x/4)%2?'#c7e0e4':'#714a37');}
     }
     if(o.buildingKind==='hotel'||o.buildingKind==='chalet'){
@@ -3562,13 +3615,28 @@ window.FROSTLINE_READY = (async () => {
         if(floor>0)for(const side of [-1,1]){box(s.x+side*w*.19-2,by-14,5,6,warm);box(s.x+side*w*.19,by-14,1,6,'#735e58');}
       }
     }
-    if(o.cocoaShop){if(!o.town.cocoaClaimed)drawCocoaPickup(o);else{const at=screen(o.x,o.y+52);text('THANK YOU!',at.x,at.y+10,8,C.muted);}}
     const label=o.shopName||{hotel:'HOTEL',inn:'INN',cafe:'CAFE',rental:'SKIS'}[o.buildingKind];
     if(label){
       const ly=s.y-h*.41-extra*.2,sw=label.length*5+6;
       box(s.x-sw/2-1,ly-7,sw+2,11,'#725f50');box(s.x-sw/2,ly-6,sw,8,'#ebe0c4');
       text(label,s.x,ly,7,'#53675f');box(s.x-sw/2-1,ly-8,sw+2,2,'#f3f7ee');
     }
+    entry={tile,x:s.x,y:s.y};if(houseFacadeTiles.size>=192)houseFacadeTiles.delete(houseFacadeTiles.keys().next().value);houseFacadeTiles.set(key,entry);return entry;
+  }
+  function drawHouse(o,s){
+    const A=S.houseAnimation,w=o.width*ZOOM,a=atlas[o.houseSprite||o.type],h=w*a[4]/a[3],style=o.houseStyle??0;
+    const floors=o.floors||1,pixelH=Math.round(Math.round(w)*a[4]/a[3]),storey=Math.floor(pixelH*.87)-Math.floor(pixelH*.55),extra=(floors-1)*storey;
+    const warm=(state.nightBlend||0)>.003?'#f2bc78':Math.sin(clock*A.lampFlickerSpeed+o.phase)>.15?'#f2c98f':'#d39b61';
+    const flap=!o.houseSprite&&['cafe','rental'].includes(o.buildingKind)?Math.round(Math.sin(clock*A.awningSpeed+o.phase)):0,facade=houseFacadeTile(o,warm,flap);
+    drawGritCastShadow(o.houseSprite||o.type,s.x,s.y,Math.round(w),pixelH);ctx.drawImage(facade.tile,Math.round(s.x)-facade.x,Math.round(s.y)-facade.y);
+    // Native-pixel accents: warm windows, smoking chimneys, shop awnings and occupied doors.
+    const phase=clock+o.phase*A.doorCycleSeconds,door=phase%A.doorCycleSeconds;
+    const chimneyX=s.x+w*(o.houseSprite?.24:o.type==='lodge'?.26:-.2),chimneyY=s.y-h*.94-extra;
+    for(let i=0;i<A.smokePuffs;i++){
+      const t=((clock/A.smokeSeconds+i/A.smokePuffs+o.phase)%1),size=2+Math.floor(t*3);
+      ctx.globalAlpha=(1-t)*.32;box(chimneyX+Math.sin(t*5+o.phase)*4,chimneyY-7-t*22,size,size,'#91a5ab');
+    }ctx.globalAlpha=1;
+    if(o.cocoaShop){if(!o.town.cocoaClaimed)drawCocoaPickup(o);else{const at=screen(o.x,o.y+52);text('THANK YOU!',at.x,at.y+10,8,C.muted);}}
     if(door<A.doorOpenSeconds){
       const x=s.x+(o.houseSprite?w*.24:-w*.045),y=s.y-h*(o.houseSprite?.4:.17);
       box(x-2,y,8,Math.max(8,h*.16),'#463735');box(x-1,y+1,5,Math.max(6,h*.14),'#d39b61');
@@ -3756,23 +3824,30 @@ window.FROSTLINE_READY = (async () => {
     }
   }
   function comboText(label,x,y,level){text(label,x,y,10,S.arcade.gear.comboColors[Math.max(0,(level||1)-1)],'center',Math.max(0,(level||1)-1));}
+  const gearHudTiles=new Map();
+  function gearHudTile(kind,fill,ready){
+    const filled=Math.round(fill*18),G=S.arcade.gear,color=kind==='shield'?G.shieldColor:G.swordColor,key=kind+':'+filled+':'+ready+':'+color;
+    let tile=gearHudTiles.get(key);if(tile)return tile;
+    tile=document.createElement('canvas');tile.width=tile.height=18;const t=tile.getContext('2d'),pixels=gearPixels[kind],amount=filled/18;
+    const paint=(x,y,w,h,c)=>{t.fillStyle=gritMaterial(c);t.fillRect(Math.round(x),Math.round(y),Math.round(w),Math.round(h));};
+    for(let row=0;row<9;row++)for(let col=0;col<9;col++){
+      const pixel=pixels[row][col];if(pixel==='0')continue;const x=col*2,y=row*2;
+      t.globalAlpha=1;paint(x,y,2,2,pixel==='1'?'#acbfbb':'#dce6df');
+      const height=clamp(amount*9-(8-row),0,1)*2;
+      if(height>0){t.globalAlpha=ready?1:.55;paint(x,y+2-height,2,height,pixel==='1'?C.ink:pixel==='3'?C.gold:color);}
+      if(ready&&pixel==='2'&&row<2){t.globalAlpha=1;paint(x,y,2,1,'#fff9d9');}
+    }
+    if(gearHudTiles.size>=96)gearHudTiles.delete(gearHudTiles.keys().next().value);gearHudTiles.set(key,tile);return tile;
+  }
   function drawGearHUD(){
-    const a=state.arcade||state.endless,G=S.arcade.gear,scale=2,y=24;
+    const a=state.arcade||state.endless,G=S.arcade.gear,y=24;
     let x=(W-((G.maxShields+G.maxSwords-1)*25+14))/2;
     for(const kind of ['shield','sword']){
       const stock=a[kind+'s'],cap=kind==='shield'?G.maxShields:G.maxSwords;
       const progress=clamp(kind==='shield'?a.shieldCharge:a.swordCharge/G.swordGatesPerSword,0,1);
-      const color=kind==='shield'?G.shieldColor:G.swordColor,pixels=gearPixels[kind];
       for(let slot=0;slot<cap;slot++){
         const ready=slot<stock,fill=ready?1:slot===stock?progress:0;
-        for(let row=0;row<pixels.length;row++)for(let col=0;col<pixels[row].length;col++){
-          const pixel=pixels[row][col];if(pixel==='0')continue;
-          const px=x+(col-4)*scale,py=y+(row-4)*scale;
-          box(px,py,scale,scale,pixel==='1'?'#acbfbb':'#dce6df');
-          const height=clamp(fill*pixels.length-(pixels.length-1-row),0,1)*scale;
-          if(height>0){ctx.save();ctx.globalAlpha=ready?1:.55;box(px,py+scale-height,scale,height,pixel==='1'?C.ink:pixel==='3'?C.gold:color);ctx.restore();}
-          if(ready&&pixel==='2'&&row<2)box(px,py,scale,1,'#fff9d9');
-        }
+        ctx.drawImage(gearHudTile(kind,fill,ready),Math.round(x)-8,y-8);
         x+=25;
       }
       if(kind==='sword'&&stock>cap)text('+'+(stock-cap),x-10,y+21,8,C.gold);
@@ -3974,7 +4049,9 @@ window.FROSTLINE_READY = (async () => {
   document.addEventListener('visibilitychange',()=>{lastTime=0;accumulator=0;});
   function frame(t) {const elapsed=lastTime?Math.min(S.simulation.maxFrameSeconds,(t-lastTime)/1000):0;lastTime=t;if(!document.hidden){accumulator+=elapsed;while(accumulator>=S.simulation.stepSeconds){step(S.simulation.stepSeconds);accumulator-=S.simulation.stepSeconds;}render();}requestAnimationFrame(frame);}
   startMeadow();resize();state.liftRoutes.push({x0:S.lift.x,x1:S.lift.x,y0:S.lift.startY,y1:Infinity});ensureWorld(true);
-  const loaded=Promise.all(Object.entries(window.FROSTLINE_ASSETS).map(([key,src])=>new Promise((resolve,reject)=>{const im=new Image();im.onload=()=>{images[key]=im;resolve();};im.onerror=()=>reject(new Error('Cannot load sprite atlas: '+key));im.src=src;})));
+  // Keep embedded fallbacks for editable atlases, but decode only textures this config uses.
+  const requiredTextures=new Set([...Object.values(atlas).map(frame=>frame[0]),'hillSmall','hillLarge']);
+  const loaded=Promise.all(Object.entries(window.FROSTLINE_ASSETS).filter(([key])=>requiredTextures.has(key)||key.startsWith('scene:')).map(([key,src])=>new Promise((resolve,reject)=>{const im=new Image();im.onload=()=>{images[key]=im;resolve();};im.onerror=()=>reject(new Error('Cannot load sprite atlas: '+key));im.src=src;})));
   loaded.then(()=>{ready=true;window.FrostlineApp?.ready();if(S.endless.autoStart)autoStartEndless();else if(S.arcade.autoStart)autoStartArcade();render();requestAnimationFrame(frame);}).catch(window.showFrostlineError);
   // Kept out of the UI: deterministic hooks for simulation and renderer checks.
   window.Frostline={debugEndlessDifficulty,debugEndlessArea,debugAreas:ENDLESS_DEBUG_AREAS,config:S,state,stages,atlas,loaded,step,render,startCourse,creditRun,makeVillage,hit,triggerAmbush,addChasers,startMoving,resize,launch,playerPose,keyboardDirection,releasePointer,ensureWorld,updateWildlife,updateSkiers,crashSkier,endlessPressure,endlessScaleAt,obstacleClearance,encounterPathX,encounterClearance,endlessTownAt,extendEndless,die,resetSummit,patchAt,onRoad,entity,topSpeed,viewBounds,humanArea,lakeContains,pickWarningChaser,isNight,toggleDayNight,get ready(){return ready;},get height(){return H;}};

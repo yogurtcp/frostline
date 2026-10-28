@@ -70,7 +70,7 @@ function drawGritCastShadow(name,x,y,width,height){
     }
     t.restore();if(gritShadowTiles.size>=128)gritShadowTiles.delete(gritShadowTiles.keys().next().value);gritShadowTiles.set(key,tile);
   }
-  ctx.save();ctx.globalAlpha*=.72;ctx.drawImage(tile,Math.round(x-w*.48),Math.round(y-2));ctx.restore();
+  const alpha=ctx.globalAlpha;ctx.globalAlpha=alpha*.72;ctx.drawImage(tile,Math.round(x-w*.48),Math.round(y-2));ctx.globalAlpha=alpha;
 }
 function gritClothing(rgb,target){
   const shade=clamp((rgb[0]+rgb[1]+rgb[2])/310,.55,1.3);return target.map(v=>Math.min(255,Math.round(v*shade)));
@@ -86,4 +86,52 @@ function grittyHillTile(big,ratio){
     if((n&15)===0&&y>ridge+2)t.fillStyle='#b4c6e8';t.fillRect(x,y,1,1);
   }
   t.restore();gritHillTiles.set(key,tile);return tile;
+}
+const yetiRigs=new Map(),yetiStrideTiles=new Map();
+function yetiRig(family,tier){
+  const key=family+':'+tier;let rig=yetiRigs.get(key);if(rig)return rig;
+  const name='yeti'+family+'Idle',cacheKey=name+':30:yeti'+tier;
+  if(!spriteCache.has(cacheKey)){ctx.save();ctx.translate(-10000,-10000);sprite(name,0,0,30,{ui:true,yetiTier:tier});ctx.restore();}
+  const source=spriteCache.get(cacheKey),body=document.createElement('canvas');body.width=30;body.height=34;
+  const t=body.getContext('2d');t.drawImage(source,0,0,30,34);
+  t.clearRect(0,26,30,8);t.clearRect(0,14,10,20);t.clearRect(23,15,7,19);
+  const legRects=family==='White'?[[6,24,10,10],[16,24,11,10]]:family==='Avalanche'?[[0,25,10,9],[10,25,13,9]]:[[0,25,10,9],[11,25,12,9]];
+  const part=(rect,leg=false)=>{
+    const [x,y,w,h]=rect,tile=document.createElement('canvas');tile.width=w;tile.height=h;const p=tile.getContext('2d');p.drawImage(source,x,y,w,h,0,0,w,h);
+    let used=h;if(leg){const a=p.getImageData(0,0,w,h).data;while(used>1&&!a.slice((used-1)*w*4,used*w*4).some((v,i)=>i%4===3&&v))used--;}
+    return {tile,x,y,w,h,used};
+  };
+  rig={body,legs:legRects.map(r=>part(r,true)),arms:[part([0,12,11,16]),part([23,14,7,14])]};yetiRigs.set(key,rig);return rig;
+}
+function yetiStrideTile(family,tier,frame){
+  const key=family+':'+tier+':'+frame;let tile=yetiStrideTiles.get(key);if(tile)return tile;
+  const rig=yetiRig(family,tier),phase=frame/8*TAU;tile=document.createElement('canvas');tile.width=34;tile.height=36;const t=tile.getContext('2d');t.imageSmoothingEnabled=false;
+  const limb=(part,a,leg=false)=>{
+    const swing=Math.sin(a),lift=leg?Math.round(Math.max(0,Math.cos(a))*2):0;
+    for(let row=0;row<part.h;row++){
+      const sourceRow=leg?Math.min(part.used-1,Math.floor(row*part.used/part.h)):row;
+      const dx=Math.round(swing*row*(leg?.2:.18));
+      t.drawImage(part.tile,0,sourceRow,part.w,1,part.x+2+dx,part.y+row-lift,part.w,1);
+    }
+  };
+  limb(rig.arms[1],phase);limb(rig.legs[1],phase+Math.PI,true);limb(rig.legs[0],phase,true);
+  t.drawImage(rig.body,2,0);limb(rig.arms[0],phase+Math.PI);
+  if(yetiStrideTiles.size>=64)yetiStrideTiles.delete(yetiStrideTiles.keys().next().value);yetiStrideTiles.set(key,tile);return tile;
+}
+function yetiLocomotion(o,pose){
+  const gait=o.yetiGait??={x:o.x,y:o.y,time:clock,phase:((o.phase||0)/TAU)%1,active:false,flip:false};
+  const dt=clock-gait.time,distance=Math.hypot(o.x-gait.x,o.y-gait.y),vx=o.motionVx||0;
+  if(dt>0){
+    gait.active=pose==='run'&&distance>.01;
+    if(gait.active){const scale=endlessSpeedScale(o),speed=distance/dt,stride=mix(75,150,clamp(speed/(420*scale),0,1))*scale;gait.phase=(gait.phase+distance/stride)%1;}
+    gait.x=o.x;gait.y=o.y;gait.time=clock;
+  }
+  if(pose!=='run')gait.active=false;
+  if(vx<-25)gait.flip=true;else if(vx>25)gait.flip=false;
+  return gait;
+}
+function drawYetiStride(o,s,family,tier,width,gait){
+  const tile=yetiStrideTile(family,tier,Math.floor(gait.phase*8)%8),scale=width*ZOOM/30,w=Math.round(34*scale),h=Math.round(36*scale),top=-Math.round(34*scale);
+  if(gait.flip){ctx.save();ctx.translate(Math.round(s.x),Math.round(s.y));ctx.scale(-1,1);ctx.drawImage(tile,-Math.round(w/2),top,w,h);ctx.restore();}
+  else ctx.drawImage(tile,Math.round(s.x)-Math.round(w/2),Math.round(s.y)+top,w,h);
 }
