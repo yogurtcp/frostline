@@ -215,3 +215,5 @@ Night lighting caches stationary emitters in world coordinates, using256-screen-
 Q/W/E use debug indices10/11/12. []/+- still changes the selected area visit, without distance records. Source modules `special-areas.js` and `seasonal-areas.js` are embedded by build.py; no runtime module fetch. Holiday preview layouts use the session seed so revisiting a difficulty reproduces the arrangement. Startup-only updates, save key and app installation lifecycle are unchanged.
 
 Road lamp posts sit at least `night.lampSetbackMetres` (7m by default) beyond the painted road edge. Placement follows the normal of the actual straight road segments, checks adjacent bends/roads and fixed scenery, and shifts along the shoulder to find gaps between houses. Redundant plaza poles are omitted; reserved tree/mausoleum footprints stay clear. The unchanged24m light reach still covers the road.
+
+Bush and fast sled impacts retain30% of the skier's current speed (`physics.bushSpeedRetention` and `sledSpeedRetention`:0.3), a70% speed reduction. The existing one-contact rule prevents repeated slowdown while overlapping the same object.
