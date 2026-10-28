@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#f1f6ff">
-<meta name="frostline-build" content="f71e5dbf074397af">
+<meta name="frostline-build" content="ce42a4c942658b96">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="manifest" href="manifest.webmanifest">
@@ -22,7 +22,7 @@ body{padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bot
 <dialog id="install-help" aria-labelledby="install-title"><h2 id="install-title">Install Frostline</h2><p id="install-instructions"></p><p>Once saved, Frostline plays offline. Online startups check for updates. Installing this same site keeps your scores and settings. A downloaded file or a different browser uses a separate save.</p><p><a href="https://yogurtcp.github.io/frostline/">Open published game</a></p><button id="close-install-help">Done</button></dialog>
 <script>/* Install/offline support. Updates are checked once, before the game starts. */
 (() => {
-  const BUILD = 'f71e5dbf074397af';
+  const BUILD = 'ce42a4c942658b96';
   window.FROSTLINE_DEV = new URL(location.href).searchParams.has('dev');
   let prompt = null, playing = false;
   const standalone = () => window.matchMedia('(display-mode: standalone)').matches || navigator.standalone;
@@ -459,7 +459,7 @@ function routeLampBlockers(){
   const add=o=>{
     let b;
     if(HOUSE_TYPES.has(o.type)){
-      const hw=o.width*S.village.houseFootWidthRatio,hh=o.width*S.village.houseFootHeightRatio;
+      const hw=o.width*S.village.houseFootWidthRatio,hh=houseFootDepth(o)/2;
       b=[o.x-hw-16,o.y-hh*2-16,o.x+hw+16,o.y+16];
     }else if(TREE_TYPES.has(o.type)){
       const pad=16*Math.max(1,1/S.physics.collisionYScale),bounds=solidBounds(o);b=[bounds[0]-pad,bounds[1]-pad,bounds[2]+pad,bounds[3]+pad];
@@ -488,6 +488,30 @@ function addRouteLamps(path,town,from,to,encounter=null){
       // A broad parade needs light to reach across the avenue while its posts stay on the shoulders.
       const lightRadiusWorld=town?.parade?Math.max(S.night.lampRadiusMetres*PX_PER_M,Math.hypot(offset,spacing/2)+40):undefined;
       const lamp=entity('lamp',px,py,{width:20,r:5,town,encounter:encounter??town?.encounter,arcadeRun:town?.endlessRun,roadLamp:true,lightRadiusWorld});blockers.add(lamp);break;
+    }
+  }
+}
+function encloseChristmasParade(e,town,houses,rowYs){
+  const width=160,foot=width*S.village.houseFootWidthRatio,depth=width*S.village.houseFootHeightRatio*2,step=depth-8,span=4,blockDepth=depth+(span-1)*step;
+  const inner=Math.abs(houses[0].x-town.x),outer=inner+foot*2+36,band=Math.max(e.band,S.endless.regions.minimumWidthMetres*PX_PER_M*e.scale/2),own={town,paradeBoundary:true,r:foot,width};
+  const place=(x,y,style,extra={})=>entity(style%3?'rental':'lodge',x,y,{...own,houseStyle:style%S.houseAnimation.trimRGB.length,...extra});
+  // Continuous rear terraces; short cross-buildings close each back-yard pocket.
+  for(const side of [-1,1]){
+    for(let y=e.startY+60+blockDepth,i=0;y<e.endY+blockDepth-40;y+=span*step,i++)place(town.x+side*outer,y,i,{paradeSpan:span,paradeStep:step,depth:blockDepth+width});
+    for(let i=0;i<rowYs.length;i++)place(town.x+side*(inner+outer)/2,rowYs[i],i+1);
+    // Wide, visible building wings funnel the approach and prevent skirting the first house.
+    for(const y of [e.startY+140,e.endY-40])for(let x=inner,i=0;x<band+width;x+=foot*2-4,i++)place(town.x+side*x,y,i+2);
+  }
+  // Keep existing shopkeepers, stalls and animals clear of the new rear buildings.
+  const buildings=state.objects.filter(o=>o.town===town&&HOUSE_TYPES.has(o.type)).map(h=>({h,b:solidBounds(h)}));
+  const blocked=(x,y,r,boundaryOnly=false)=>buildings.some(({h,b})=>(!boundaryOnly||h.paradeBoundary)&&x>b[0]-r&&x<b[2]+r&&y>b[1]-r&&y<b[3]+r&&houseClearance(h,x,y)<r);
+  for(const o of state.objects){
+    if(o.town!==town||HOUSE_TYPES.has(o.type)||!(o.r>0||o.type.startsWith('person')||o.animal))continue;
+    const r=Math.max(8,o.r||0)+4,side=Math.sign(o.x-town.x)||1;
+    if(Math.abs(o.x-town.x)<outer-foot-r&&!blocked(o.x,o.y,r,true))continue;
+    for(const offset of [inner+foot*.7,inner,e.half-r-15]){
+      const x=town.x+side*offset;if(blocked(x,o.y,r))continue;
+      const dx=x-o.x;o.x=o.homeX=x;if(o.path)o.path=o.path.map(p=>({...p,x:p.x+dx}));break;
     }
   }
 }
@@ -527,6 +551,7 @@ function makeChristmasParade(e,root,name){
     const path=crossing?[{x:base-edge,y:y-45},{x:base+edge,y:y+45}]:[p,{x:base+side*(edge-range(0,24)),y:Math.min(last,y+range(45,100))}];
     entity(['personRed','personGreen','personYellow'][i%3],x,y,{town,width:32,r:10,paradeGuest:true,paradeCrossing:crossing,walker:true,path,pathIndex:crossing?(i%8?0:1):1,pathDir:i%8?-1:1,walkSpeed:range(...V.walkerSpeed)});
   }
+  encloseChristmasParade(e,town,houses,rowYs);
   // Enter from behind a roof, then cross the real opening between its row and the one above.
   e.sideYetiEntries=houses.filter(h=>h.band>0).map(h=>{
     const side=Math.sign(h.x-base),back=h.y-h.width*V.houseFootHeightRatio*2;
@@ -556,7 +581,7 @@ function decorateFestival(e,section){
     // Guests mingle on the existing footpath network and retain ordinary fear/feeding behavior.
     if(o.walker)o.walkSpeed*=1.15;
   }
-  const houses=state.objects.filter(o=>o.town===town&&HOUSE_TYPES.has(o.type));
+  const houses=state.objects.filter(o=>o.town===town&&HOUSE_TYPES.has(o.type)&&!o.paradeBoundary);
   for(const [i,h] of houses.entries()){
     h.festival=e.kind;
     if(i%2===0)entity(e.kind==='christmas'?'holidayGift':'jackLantern',h.x+(i%4?1:-1)*h.width*.39,h.y+23,{...own,width:24,r:0,style:i%3});
@@ -794,6 +819,7 @@ function appendNightLights(o,lights){
   if(o===state.p){const lift=o.air>0&&o.airTotal?Math.sin(o.air/o.airTotal*Math.PI)*o.jumpHeight*ZOOM:0;add(x,y-8-lift,S.night.playerRadiusMetres*PX_PER_M*ZOOM,'#efc48b');}
   else if(o.type==='lamp')add(x,y-22,(o.lightRadiusWorld??S.night.lampRadiusMetres*PX_PER_M)*ZOOM,'#ffbd70',1,true);
   else if(o.grandMausoleum){add(x-w*.35,y-w*.35,58,'#dcb0a1',1,true);add(x+w*.35,y-w*.35,58,'#dcb0a1',1,true);}
+  else if(o.paradeBoundary)add(x,y-houseFootDepth(o)*ZOOM/2,Math.max(w*.8+12,houseFootDepth(o)*ZOOM*.6),'#ffc277');
   else if(HOUSE_TYPES.has(o.type)){
     add(x,y-w*.34,w*.8+12,'#ffc277');for(const side of [-1,1])add(x+side*w*.19,y-w*.25,20,'#ffd28d',.9,true);
     if(o.festival)for(const side of [-1,0,1])add(x+side*w*.3,y-w*.49,30,o.festival==='christmas'?(side?'#ffb784':'#bfce9c'):'#d7acc5',.8,true);
@@ -1453,7 +1479,7 @@ function drawYetiStride(o,s,family,tier,width,gait){
     }
     e.coreBand=e.band;
     if(kind!=='cemetery'&&!SPECIAL_KINDS.has(kind)&&(WIDE_REGIONS.has(kind)||kind==='lake'))e.band=Math.max(e.band,R.minimumWidthMetres*PX_PER_M*scale/2);
-    if(e.town){e.town.halfWidth=e.band;populateForestBoundary(e,section,e.startY,e.endY,{banks:false});}
+    if(e.town){e.town.halfWidth=e.band;if(kind!=='christmas')populateForestBoundary(e,section,e.startY,e.endY,{banks:false});}
     if(WIDE_REGIONS.has(kind)||kind==='lake')state.objects=state.objects.filter(o=>!o.worldChunk||o.arcadeRun||o.y<e.startY||o.y>e.endY||Math.abs(o.x-(e.centerX??root.x))>e.band);
     return e;
   }
@@ -2251,8 +2277,9 @@ function drawYetiStride(o,s,family,tier,width,gait){
 
   function segmentDistance(x,y,a,b){const dx=b.x-a.x,dy=b.y-a.y,t=clamp(((x-a.x)*dx+(y-a.y)*dy)/(dx*dx+dy*dy||1),0,1);return Math.hypot(x-a.x-dx*t,y-a.y-dy*t);}
   function roadDistance(road,x,y){let d=Infinity;for(let i=1;i<road.points.length;i++)d=Math.min(d,segmentDistance(x,y,road.points[i-1],road.points[i]));return d;}
+  function houseFootDepth(o){return o.width*S.village.houseFootHeightRatio*2+(o.paradeSpan>1?(o.paradeSpan-1)*o.paradeStep:0);}
   function houseClearance(o,x,y){
-    const hw=o.width*S.village.houseFootWidthRatio,hh=o.width*S.village.houseFootHeightRatio;
+    const hw=o.width*S.village.houseFootWidthRatio,hh=houseFootDepth(o)/2;
     const dx=Math.abs(x-o.x)-hw,dy=Math.abs(y-(o.y-hh))-hh;
     return Math.hypot(Math.max(dx,0),Math.max(dy,0))+Math.min(Math.max(dx,dy),0);
   }
@@ -2293,7 +2320,7 @@ function drawYetiStride(o,s,family,tier,width,gait){
     const blocked=n=>{
       const k=key(n.x,n.y);if(cells.has(k))return cells.get(k);
       const p=world(n),value=Math.abs(p.x-town.x)>V.halfWidth||p.y<town.origin+V.roadStartY-g||p.y>town.roadEndY+g||houses.some(h=>{
-        const hw=h.width*V.houseFootWidthRatio,hh=h.width*V.houseFootHeightRatio;
+        const hw=h.width*V.houseFootWidthRatio,hh=houseFootDepth(h)/2;
         return Math.abs(p.x-h.x)<=hw+margin&&Math.abs(p.y-(h.y-hh))<=hh+margin&&houseClearance(h,p.x,p.y)<margin;
       });
       cells.set(k,value);return value;
@@ -3618,7 +3645,7 @@ function drawYetiStride(o,s,family,tier,width,gait){
   const houseSolids={},treeSolids={},skierSolids={};
   function solidBounds(o){
     if(['wideLog','fallingTree','cemeteryFence','areaBarrier'].includes(o.type)){const [ax,ay,bx,by]=obstacleSegment(o);return [Math.min(ax,bx)-o.r,Math.min(ay,by)-o.r,Math.max(ax,bx)+o.r,Math.max(ay,by)+o.r];}
-    if(['lodge','rental','mausoleum'].includes(o.type)){const hw=o.width*S.village.houseFootWidthRatio;return [o.x-hw,o.y-o.width*S.village.houseFootHeightRatio*2,o.x+hw,o.y];}
+    if(['lodge','rental','mausoleum'].includes(o.type)){const hw=o.width*S.village.houseFootWidthRatio;return [o.x-hw,o.y-houseFootDepth(o),o.x+hw,o.y];}
     if(o.type==='iceBlock'||o.type==='ruinWall')return [o.x-o.width/2,o.y-o.depth/2,o.x+o.width/2,o.y+o.depth/2];
     const radius=o.r||0;return [o.x-radius,o.y-radius/S.physics.collisionYScale,o.x+radius,o.y+radius/S.physics.collisionYScale];
   }
@@ -3657,11 +3684,11 @@ function drawYetiStride(o,s,family,tier,width,gait){
     const houseGrid=cachedSolidGrid(houseSolids,HOUSE_TYPES,HOUSE_CELL,HOUSE_REACH).grid;
     const trees=cachedSolidGrid(treeSolids,TREE_TYPES,TREE_CELL),treeGrid=trees.grid,treeObjects=trees.objects;
     const ice=freshIceCache();
-    const A=S.wildlife,Vh=S.village,hwr=Vh.houseFootWidthRatio,hhr=Vh.houseFootHeightRatio,rm=(o.r||10)+5;
+    const A=S.wildlife,Vh=S.village,hwr=Vh.houseFootWidthRatio,rm=(o.r||10)+5;
     const nearHouse=(x,y)=>{
       const col=houseGrid.get(Math.floor(x/HOUSE_CELL));if(!col)return false;
       const a=col.get(Math.floor(y/HOUSE_CELL));if(!a)return false;
-      for(const h of a){const block=h.type==='iceBlock'||h.type==='ruinWall',hw=block?h.width/2:h.width*hwr;if(Math.abs(x-h.x)>hw+rm)continue;if(block){if(obstacleClearance(h,x,y)<rm)return true;}else{const dy=h.y-y;if(dy>-rm&&dy<h.width*hhr*2+rm&&houseClearance(h,x,y)<rm)return true;}}
+      for(const h of a){const block=h.type==='iceBlock'||h.type==='ruinWall',hw=block?h.width/2:h.width*hwr;if(Math.abs(x-h.x)>hw+rm)continue;if(block){if(obstacleClearance(h,x,y)<rm)return true;}else{const dy=h.y-y;if(dy>-rm&&dy<houseFootDepth(h)+rm&&houseClearance(h,x,y)<rm)return true;}}
       return false;
     };
     const nearTree=(x,y,solidOnly=false)=>{
@@ -4695,7 +4722,21 @@ function drawYetiStride(o,s,family,tier,width,gait){
     }
     entry={tile,x:s.x,y:s.y};if(houseFacadeTiles.size>=192)houseFacadeTiles.delete(houseFacadeTiles.keys().next().value);houseFacadeTiles.set(key,entry);return entry;
   }
+  const paradeBlockTiles=new Map();
+  function drawParadeBlock(o,s){
+    const w=Math.round(o.width*ZOOM),span=o.paradeSpan||1,step=Math.round((o.paradeStep||0)*ZOOM),warm=(state.nightBlend||0)>.003?'#f2bc78':'#f2c98f';
+    const key=[o.type,w,o.houseStyle,span,step,warm].join(':');let cached=paradeBlockTiles.get(key);
+    if(!cached){
+      const facade=houseFacadeTile(o,warm,0),a=atlas[o.type],h=Math.round(w*a[4]/a[3]),shade=gritCastShadowTile(o.type,w,h),tile=document.createElement('canvas');
+      tile.width=Math.ceil(w*2+48);tile.height=facade.tile.height+(span-1)*step+shade.height+8;
+      const t=tile.getContext('2d'),x=Math.ceil(w/2)+16,y=tile.height-shade.height-4;t.imageSmoothingEnabled=false;
+      for(let i=span-1;i>=0;i--){const at=y-i*step;t.globalAlpha=.72;t.drawImage(shade,Math.round(x-w*.48),at-2);t.globalAlpha=1;t.drawImage(facade.tile,x-facade.x,at-facade.y);}
+      cached={tile,x,y};if(paradeBlockTiles.size>=96)paradeBlockTiles.delete(paradeBlockTiles.keys().next().value);paradeBlockTiles.set(key,cached);
+    }
+    ctx.drawImage(cached.tile,Math.round(s.x)-cached.x,Math.round(s.y)-cached.y);
+  }
   function drawHouse(o,s){
+    if(o.paradeBoundary){drawParadeBlock(o,s);return;}
     const A=S.houseAnimation,w=o.width*ZOOM,a=atlas[o.houseSprite||o.type],h=w*a[4]/a[3],style=o.houseStyle??0;
     const floors=o.floors||1,pixelH=Math.round(Math.round(w)*a[4]/a[3]),storey=Math.floor(pixelH*.87)-Math.floor(pixelH*.55),extra=(floors-1)*storey;
     const warm=(state.nightBlend||0)>.003?'#f2bc78':Math.sin(clock*A.lampFlickerSpeed+o.phase)>.15?'#f2c98f':'#d39b61';
@@ -4757,7 +4798,7 @@ function drawYetiStride(o,s,family,tier,width,gait){
   function drawObject(o) {
     if(state.deathAnimation?.actor===o)return;
     const s=screen(o.x,o.y);
-    const margin=['wideLog','logBump','cemeteryFence','areaBarrier'].includes(o.type)?Math.max(230,o.width*ZOOM/2):230,vertical=['cemeteryFence','areaBarrier'].includes(o.type)?o.depth*ZOOM/2:0;
+    const margin=['wideLog','logBump','cemeteryFence','areaBarrier'].includes(o.type)?Math.max(230,o.width*ZOOM/2):230,vertical=o.paradeSpan?Math.max(0,o.depth*ZOOM-230):['cemeteryFence','areaBarrier'].includes(o.type)?o.depth*ZOOM/2:0;
     if(s.x<-margin||s.x>W+margin||s.y<-80-vertical||s.y>H+230+vertical)return;
     // Ordinary bodies do not need the long-obstacle drawing margin. Keep harnesses and moving trunks broad.
     if(TIGHT_DRAW_TYPES.has(o.type)&&!o.santaSleigh){const half=(o.width||40)*ZOOM*.75+24+(GRIT_BUILDINGS.has(o.houseSprite||o.type)?12:0);if(s.x+half<0||s.x-half>W)return;}
@@ -5086,7 +5127,7 @@ function drawYetiStride(o,s,family,tier,width,gait){
     const layers=[],groundLights=[],top=state.cam.y-200,bottom=state.cam.y+H/ZOOM+200;
     for(const o of state.objects){
       if(['ramp','mogul','smallHill','largeHill','logBump','rugged','cemeteryPlot'].includes(o.type)){if(o.type==='ramp')groundLights.push(o);continue;}
-      const extent=o.type==='christmasTree'?o.width*1.5:o.grandMausoleum?o.width*1.1:['cemeteryFence','areaBarrier'].includes(o.type)?(o.depth||0)/2:0;
+      const extent=o.paradeSpan?o.depth:o.type==='christmasTree'?o.width*1.5:o.grandMausoleum?o.width*1.1:['cemeteryFence','areaBarrier'].includes(o.type)?(o.depth||0)/2:0;
       if(o.y+extent<=top||o.y-extent>=bottom||Math.abs(o.x-state.cam.x)>=W/(2*ZOOM)+Math.max(460,(o.width||0)/2+60,o.treeLength||0))continue;layers.push(o);
     }
     for(const c of state.chasers)if(c.y>top&&c.y<bottom&&Math.abs(c.x-state.cam.x)<W/(2*ZOOM)+230)layers.push(c);

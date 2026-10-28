@@ -427,7 +427,7 @@ window.FROSTLINE_READY = (async () => {
     }
     e.coreBand=e.band;
     if(kind!=='cemetery'&&!SPECIAL_KINDS.has(kind)&&(WIDE_REGIONS.has(kind)||kind==='lake'))e.band=Math.max(e.band,R.minimumWidthMetres*PX_PER_M*scale/2);
-    if(e.town){e.town.halfWidth=e.band;populateForestBoundary(e,section,e.startY,e.endY,{banks:false});}
+    if(e.town){e.town.halfWidth=e.band;if(kind!=='christmas')populateForestBoundary(e,section,e.startY,e.endY,{banks:false});}
     if(WIDE_REGIONS.has(kind)||kind==='lake')state.objects=state.objects.filter(o=>!o.worldChunk||o.arcadeRun||o.y<e.startY||o.y>e.endY||Math.abs(o.x-(e.centerX??root.x))>e.band);
     return e;
   }
@@ -1225,8 +1225,9 @@ window.FROSTLINE_READY = (async () => {
 
   function segmentDistance(x,y,a,b){const dx=b.x-a.x,dy=b.y-a.y,t=clamp(((x-a.x)*dx+(y-a.y)*dy)/(dx*dx+dy*dy||1),0,1);return Math.hypot(x-a.x-dx*t,y-a.y-dy*t);}
   function roadDistance(road,x,y){let d=Infinity;for(let i=1;i<road.points.length;i++)d=Math.min(d,segmentDistance(x,y,road.points[i-1],road.points[i]));return d;}
+  function houseFootDepth(o){return o.width*S.village.houseFootHeightRatio*2+(o.paradeSpan>1?(o.paradeSpan-1)*o.paradeStep:0);}
   function houseClearance(o,x,y){
-    const hw=o.width*S.village.houseFootWidthRatio,hh=o.width*S.village.houseFootHeightRatio;
+    const hw=o.width*S.village.houseFootWidthRatio,hh=houseFootDepth(o)/2;
     const dx=Math.abs(x-o.x)-hw,dy=Math.abs(y-(o.y-hh))-hh;
     return Math.hypot(Math.max(dx,0),Math.max(dy,0))+Math.min(Math.max(dx,dy),0);
   }
@@ -1267,7 +1268,7 @@ window.FROSTLINE_READY = (async () => {
     const blocked=n=>{
       const k=key(n.x,n.y);if(cells.has(k))return cells.get(k);
       const p=world(n),value=Math.abs(p.x-town.x)>V.halfWidth||p.y<town.origin+V.roadStartY-g||p.y>town.roadEndY+g||houses.some(h=>{
-        const hw=h.width*V.houseFootWidthRatio,hh=h.width*V.houseFootHeightRatio;
+        const hw=h.width*V.houseFootWidthRatio,hh=houseFootDepth(h)/2;
         return Math.abs(p.x-h.x)<=hw+margin&&Math.abs(p.y-(h.y-hh))<=hh+margin&&houseClearance(h,p.x,p.y)<margin;
       });
       cells.set(k,value);return value;
@@ -2592,7 +2593,7 @@ window.FROSTLINE_READY = (async () => {
   const houseSolids={},treeSolids={},skierSolids={};
   function solidBounds(o){
     if(['wideLog','fallingTree','cemeteryFence','areaBarrier'].includes(o.type)){const [ax,ay,bx,by]=obstacleSegment(o);return [Math.min(ax,bx)-o.r,Math.min(ay,by)-o.r,Math.max(ax,bx)+o.r,Math.max(ay,by)+o.r];}
-    if(['lodge','rental','mausoleum'].includes(o.type)){const hw=o.width*S.village.houseFootWidthRatio;return [o.x-hw,o.y-o.width*S.village.houseFootHeightRatio*2,o.x+hw,o.y];}
+    if(['lodge','rental','mausoleum'].includes(o.type)){const hw=o.width*S.village.houseFootWidthRatio;return [o.x-hw,o.y-houseFootDepth(o),o.x+hw,o.y];}
     if(o.type==='iceBlock'||o.type==='ruinWall')return [o.x-o.width/2,o.y-o.depth/2,o.x+o.width/2,o.y+o.depth/2];
     const radius=o.r||0;return [o.x-radius,o.y-radius/S.physics.collisionYScale,o.x+radius,o.y+radius/S.physics.collisionYScale];
   }
@@ -2631,11 +2632,11 @@ window.FROSTLINE_READY = (async () => {
     const houseGrid=cachedSolidGrid(houseSolids,HOUSE_TYPES,HOUSE_CELL,HOUSE_REACH).grid;
     const trees=cachedSolidGrid(treeSolids,TREE_TYPES,TREE_CELL),treeGrid=trees.grid,treeObjects=trees.objects;
     const ice=freshIceCache();
-    const A=S.wildlife,Vh=S.village,hwr=Vh.houseFootWidthRatio,hhr=Vh.houseFootHeightRatio,rm=(o.r||10)+5;
+    const A=S.wildlife,Vh=S.village,hwr=Vh.houseFootWidthRatio,rm=(o.r||10)+5;
     const nearHouse=(x,y)=>{
       const col=houseGrid.get(Math.floor(x/HOUSE_CELL));if(!col)return false;
       const a=col.get(Math.floor(y/HOUSE_CELL));if(!a)return false;
-      for(const h of a){const block=h.type==='iceBlock'||h.type==='ruinWall',hw=block?h.width/2:h.width*hwr;if(Math.abs(x-h.x)>hw+rm)continue;if(block){if(obstacleClearance(h,x,y)<rm)return true;}else{const dy=h.y-y;if(dy>-rm&&dy<h.width*hhr*2+rm&&houseClearance(h,x,y)<rm)return true;}}
+      for(const h of a){const block=h.type==='iceBlock'||h.type==='ruinWall',hw=block?h.width/2:h.width*hwr;if(Math.abs(x-h.x)>hw+rm)continue;if(block){if(obstacleClearance(h,x,y)<rm)return true;}else{const dy=h.y-y;if(dy>-rm&&dy<houseFootDepth(h)+rm&&houseClearance(h,x,y)<rm)return true;}}
       return false;
     };
     const nearTree=(x,y,solidOnly=false)=>{
@@ -3669,7 +3670,21 @@ window.FROSTLINE_READY = (async () => {
     }
     entry={tile,x:s.x,y:s.y};if(houseFacadeTiles.size>=192)houseFacadeTiles.delete(houseFacadeTiles.keys().next().value);houseFacadeTiles.set(key,entry);return entry;
   }
+  const paradeBlockTiles=new Map();
+  function drawParadeBlock(o,s){
+    const w=Math.round(o.width*ZOOM),span=o.paradeSpan||1,step=Math.round((o.paradeStep||0)*ZOOM),warm=(state.nightBlend||0)>.003?'#f2bc78':'#f2c98f';
+    const key=[o.type,w,o.houseStyle,span,step,warm].join(':');let cached=paradeBlockTiles.get(key);
+    if(!cached){
+      const facade=houseFacadeTile(o,warm,0),a=atlas[o.type],h=Math.round(w*a[4]/a[3]),shade=gritCastShadowTile(o.type,w,h),tile=document.createElement('canvas');
+      tile.width=Math.ceil(w*2+48);tile.height=facade.tile.height+(span-1)*step+shade.height+8;
+      const t=tile.getContext('2d'),x=Math.ceil(w/2)+16,y=tile.height-shade.height-4;t.imageSmoothingEnabled=false;
+      for(let i=span-1;i>=0;i--){const at=y-i*step;t.globalAlpha=.72;t.drawImage(shade,Math.round(x-w*.48),at-2);t.globalAlpha=1;t.drawImage(facade.tile,x-facade.x,at-facade.y);}
+      cached={tile,x,y};if(paradeBlockTiles.size>=96)paradeBlockTiles.delete(paradeBlockTiles.keys().next().value);paradeBlockTiles.set(key,cached);
+    }
+    ctx.drawImage(cached.tile,Math.round(s.x)-cached.x,Math.round(s.y)-cached.y);
+  }
   function drawHouse(o,s){
+    if(o.paradeBoundary){drawParadeBlock(o,s);return;}
     const A=S.houseAnimation,w=o.width*ZOOM,a=atlas[o.houseSprite||o.type],h=w*a[4]/a[3],style=o.houseStyle??0;
     const floors=o.floors||1,pixelH=Math.round(Math.round(w)*a[4]/a[3]),storey=Math.floor(pixelH*.87)-Math.floor(pixelH*.55),extra=(floors-1)*storey;
     const warm=(state.nightBlend||0)>.003?'#f2bc78':Math.sin(clock*A.lampFlickerSpeed+o.phase)>.15?'#f2c98f':'#d39b61';
@@ -3731,7 +3746,7 @@ window.FROSTLINE_READY = (async () => {
   function drawObject(o) {
     if(state.deathAnimation?.actor===o)return;
     const s=screen(o.x,o.y);
-    const margin=['wideLog','logBump','cemeteryFence','areaBarrier'].includes(o.type)?Math.max(230,o.width*ZOOM/2):230,vertical=['cemeteryFence','areaBarrier'].includes(o.type)?o.depth*ZOOM/2:0;
+    const margin=['wideLog','logBump','cemeteryFence','areaBarrier'].includes(o.type)?Math.max(230,o.width*ZOOM/2):230,vertical=o.paradeSpan?Math.max(0,o.depth*ZOOM-230):['cemeteryFence','areaBarrier'].includes(o.type)?o.depth*ZOOM/2:0;
     if(s.x<-margin||s.x>W+margin||s.y<-80-vertical||s.y>H+230+vertical)return;
     // Ordinary bodies do not need the long-obstacle drawing margin. Keep harnesses and moving trunks broad.
     if(TIGHT_DRAW_TYPES.has(o.type)&&!o.santaSleigh){const half=(o.width||40)*ZOOM*.75+24+(GRIT_BUILDINGS.has(o.houseSprite||o.type)?12:0);if(s.x+half<0||s.x-half>W)return;}
@@ -4060,7 +4075,7 @@ window.FROSTLINE_READY = (async () => {
     const layers=[],groundLights=[],top=state.cam.y-200,bottom=state.cam.y+H/ZOOM+200;
     for(const o of state.objects){
       if(['ramp','mogul','smallHill','largeHill','logBump','rugged','cemeteryPlot'].includes(o.type)){if(o.type==='ramp')groundLights.push(o);continue;}
-      const extent=o.type==='christmasTree'?o.width*1.5:o.grandMausoleum?o.width*1.1:['cemeteryFence','areaBarrier'].includes(o.type)?(o.depth||0)/2:0;
+      const extent=o.paradeSpan?o.depth:o.type==='christmasTree'?o.width*1.5:o.grandMausoleum?o.width*1.1:['cemeteryFence','areaBarrier'].includes(o.type)?(o.depth||0)/2:0;
       if(o.y+extent<=top||o.y-extent>=bottom||Math.abs(o.x-state.cam.x)>=W/(2*ZOOM)+Math.max(460,(o.width||0)/2+60,o.treeLength||0))continue;layers.push(o);
     }
     for(const c of state.chasers)if(c.y>top&&c.y<bottom&&Math.abs(c.x-state.cam.x)<W/(2*ZOOM)+230)layers.push(c);

@@ -19,7 +19,7 @@ function routeLampBlockers(){
   const add=o=>{
     let b;
     if(HOUSE_TYPES.has(o.type)){
-      const hw=o.width*S.village.houseFootWidthRatio,hh=o.width*S.village.houseFootHeightRatio;
+      const hw=o.width*S.village.houseFootWidthRatio,hh=houseFootDepth(o)/2;
       b=[o.x-hw-16,o.y-hh*2-16,o.x+hw+16,o.y+16];
     }else if(TREE_TYPES.has(o.type)){
       const pad=16*Math.max(1,1/S.physics.collisionYScale),bounds=solidBounds(o);b=[bounds[0]-pad,bounds[1]-pad,bounds[2]+pad,bounds[3]+pad];
@@ -48,6 +48,30 @@ function addRouteLamps(path,town,from,to,encounter=null){
       // A broad parade needs light to reach across the avenue while its posts stay on the shoulders.
       const lightRadiusWorld=town?.parade?Math.max(S.night.lampRadiusMetres*PX_PER_M,Math.hypot(offset,spacing/2)+40):undefined;
       const lamp=entity('lamp',px,py,{width:20,r:5,town,encounter:encounter??town?.encounter,arcadeRun:town?.endlessRun,roadLamp:true,lightRadiusWorld});blockers.add(lamp);break;
+    }
+  }
+}
+function encloseChristmasParade(e,town,houses,rowYs){
+  const width=160,foot=width*S.village.houseFootWidthRatio,depth=width*S.village.houseFootHeightRatio*2,step=depth-8,span=4,blockDepth=depth+(span-1)*step;
+  const inner=Math.abs(houses[0].x-town.x),outer=inner+foot*2+36,band=Math.max(e.band,S.endless.regions.minimumWidthMetres*PX_PER_M*e.scale/2),own={town,paradeBoundary:true,r:foot,width};
+  const place=(x,y,style,extra={})=>entity(style%3?'rental':'lodge',x,y,{...own,houseStyle:style%S.houseAnimation.trimRGB.length,...extra});
+  // Continuous rear terraces; short cross-buildings close each back-yard pocket.
+  for(const side of [-1,1]){
+    for(let y=e.startY+60+blockDepth,i=0;y<e.endY+blockDepth-40;y+=span*step,i++)place(town.x+side*outer,y,i,{paradeSpan:span,paradeStep:step,depth:blockDepth+width});
+    for(let i=0;i<rowYs.length;i++)place(town.x+side*(inner+outer)/2,rowYs[i],i+1);
+    // Wide, visible building wings funnel the approach and prevent skirting the first house.
+    for(const y of [e.startY+140,e.endY-40])for(let x=inner,i=0;x<band+width;x+=foot*2-4,i++)place(town.x+side*x,y,i+2);
+  }
+  // Keep existing shopkeepers, stalls and animals clear of the new rear buildings.
+  const buildings=state.objects.filter(o=>o.town===town&&HOUSE_TYPES.has(o.type)).map(h=>({h,b:solidBounds(h)}));
+  const blocked=(x,y,r,boundaryOnly=false)=>buildings.some(({h,b})=>(!boundaryOnly||h.paradeBoundary)&&x>b[0]-r&&x<b[2]+r&&y>b[1]-r&&y<b[3]+r&&houseClearance(h,x,y)<r);
+  for(const o of state.objects){
+    if(o.town!==town||HOUSE_TYPES.has(o.type)||!(o.r>0||o.type.startsWith('person')||o.animal))continue;
+    const r=Math.max(8,o.r||0)+4,side=Math.sign(o.x-town.x)||1;
+    if(Math.abs(o.x-town.x)<outer-foot-r&&!blocked(o.x,o.y,r,true))continue;
+    for(const offset of [inner+foot*.7,inner,e.half-r-15]){
+      const x=town.x+side*offset;if(blocked(x,o.y,r))continue;
+      const dx=x-o.x;o.x=o.homeX=x;if(o.path)o.path=o.path.map(p=>({...p,x:p.x+dx}));break;
     }
   }
 }
@@ -87,6 +111,7 @@ function makeChristmasParade(e,root,name){
     const path=crossing?[{x:base-edge,y:y-45},{x:base+edge,y:y+45}]:[p,{x:base+side*(edge-range(0,24)),y:Math.min(last,y+range(45,100))}];
     entity(['personRed','personGreen','personYellow'][i%3],x,y,{town,width:32,r:10,paradeGuest:true,paradeCrossing:crossing,walker:true,path,pathIndex:crossing?(i%8?0:1):1,pathDir:i%8?-1:1,walkSpeed:range(...V.walkerSpeed)});
   }
+  encloseChristmasParade(e,town,houses,rowYs);
   // Enter from behind a roof, then cross the real opening between its row and the one above.
   e.sideYetiEntries=houses.filter(h=>h.band>0).map(h=>{
     const side=Math.sign(h.x-base),back=h.y-h.width*V.houseFootHeightRatio*2;
@@ -116,7 +141,7 @@ function decorateFestival(e,section){
     // Guests mingle on the existing footpath network and retain ordinary fear/feeding behavior.
     if(o.walker)o.walkSpeed*=1.15;
   }
-  const houses=state.objects.filter(o=>o.town===town&&HOUSE_TYPES.has(o.type));
+  const houses=state.objects.filter(o=>o.town===town&&HOUSE_TYPES.has(o.type)&&!o.paradeBoundary);
   for(const [i,h] of houses.entries()){
     h.festival=e.kind;
     if(i%2===0)entity(e.kind==='christmas'?'holidayGift':'jackLantern',h.x+(i%4?1:-1)*h.width*.39,h.y+23,{...own,width:24,r:0,style:i%3});
@@ -354,6 +379,7 @@ function appendNightLights(o,lights){
   if(o===state.p){const lift=o.air>0&&o.airTotal?Math.sin(o.air/o.airTotal*Math.PI)*o.jumpHeight*ZOOM:0;add(x,y-8-lift,S.night.playerRadiusMetres*PX_PER_M*ZOOM,'#efc48b');}
   else if(o.type==='lamp')add(x,y-22,(o.lightRadiusWorld??S.night.lampRadiusMetres*PX_PER_M)*ZOOM,'#ffbd70',1,true);
   else if(o.grandMausoleum){add(x-w*.35,y-w*.35,58,'#dcb0a1',1,true);add(x+w*.35,y-w*.35,58,'#dcb0a1',1,true);}
+  else if(o.paradeBoundary)add(x,y-houseFootDepth(o)*ZOOM/2,Math.max(w*.8+12,houseFootDepth(o)*ZOOM*.6),'#ffc277');
   else if(HOUSE_TYPES.has(o.type)){
     add(x,y-w*.34,w*.8+12,'#ffc277');for(const side of [-1,1])add(x+side*w*.19,y-w*.25,20,'#ffd28d',.9,true);
     if(o.festival)for(const side of [-1,0,1])add(x+side*w*.3,y-w*.49,30,o.festival==='christmas'?(side?'#ffb784':'#bfce9c'):'#d7acc5',.8,true);
