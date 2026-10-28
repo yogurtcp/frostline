@@ -87,6 +87,11 @@ function makeChristmasParade(e,root,name){
     const path=crossing?[{x:base-edge,y:y-45},{x:base+edge,y:y+45}]:[p,{x:base+side*(edge-range(0,24)),y:Math.min(last,y+range(45,100))}];
     entity(['personRed','personGreen','personYellow'][i%3],x,y,{town,width:32,r:10,paradeGuest:true,paradeCrossing:crossing,walker:true,path,pathIndex:crossing?(i%8?0:1):1,pathDir:i%8?-1:1,walkSpeed:range(...V.walkerSpeed)});
   }
+  // Enter from behind a roof, then cross the real opening between its row and the one above.
+  e.sideYetiEntries=houses.filter(h=>h.band>0).map(h=>{
+    const side=Math.sign(h.x-base),back=h.y-h.width*V.houseFootHeightRatio*2;
+    return {side,x:h.x,y:back-30,gapY:(rowYs[h.band-1]+back)/2,insideX:base+side*(half-40)};
+  }).filter(p=>p.gapY>=e.startY+180&&p.gapY<e.endY-220);
   addRouteLamps(town.route,town,town.origin,town.end);
   return town;
 }
@@ -168,10 +173,36 @@ function sleighMotion(o,dt){
   o.sleighSpeed=Math.min(target,(o.sleighSpeed||topSpeed()*.7)+220*e.scale*dt);
   const vx=clamp((x-o.x)*1.1,-target*.36,target*.36);return {vx,vy:Math.sqrt(Math.max(0,o.sleighSpeed**2-vx**2))};
 }
+function updateChristmasYetis(e,dt){
+  const p=state.p,Y=S.endless.regions.festivals.christmasParade.sideYetis;
+  if(p.y<e.startY||p.y>=e.endY||Math.abs(p.x-e.town.x)>e.band)return;
+  e.sideYetiElapsed=(e.sideYetiElapsed||0)+dt;
+  e.nextSideYetiAt??=Y.delaySeconds;e.sideYetiCount??=0;
+  if(e.sideYetiElapsed+1e-8<e.nextSideYetiAt||e.sideYetiCount>=Math.round(mix(...Y.count,e.difficulty)))return;
+  const nearby=state.chasers.filter(c=>c.christmasArrival&&!c.dead&&!c.leaving&&Math.hypot(c.x-p.x,c.y-p.y)<S.endless.yetis.nearbyMetres*PX_PER_M*state.endless.speedScale).length;
+  if(nearby>=Y.maxNearby){e.nextSideYetiAt=e.sideYetiElapsed+1;return;}
+  const number=e.sideYetiCount,side=number%2?1:-1,fast=number%4===1||number%4===2,base=fast?Y.fastSpeedKmh:Y.slowSpeedKmh;
+  const speed=base*state.endless.speedScale/S.physics.hudKmhPerSpeed,crossing=(e.half+120)/(speed*S.predators.offDownhillSpeedRatio)+.35;
+  const lead=clamp(Math.max(p.vy,topSpeed()*.7)*crossing,220,900),goal=p.y+lead;
+  let entry=null,best=Infinity;
+  for(const point of e.sideYetiEntries){
+    if(point.side!==side||point.gapY<p.y+140||point.gapY>e.endY-220)continue;
+    const distance=Math.abs(point.gapY-goal);if(distance<best){entry=point;best=distance;}
+  }
+  if(!entry){e.nextSideYetiAt=e.sideYetiElapsed+1;return;}
+  state.chasers.push({kind:fast?'fast':'slow',arcadeTier:fast?'fast':'slow',endlessBaseKmh:base,speed,x:entry.x,y:entry.y,chaseRun:state.course,christmasArrival:e.id,christmasEntry:{encounter:e,x:entry.insideX,y:entry.gapY},phase:range(0,TAU),id:random(),expires:Infinity,talkAt:clock+6});
+  e.sideYetiCount++;e.nextSideYetiAt=e.sideYetiElapsed+(e.sideYetiCount%2?Y.staggerSeconds:Y.intervalSeconds);
+}
+function christmasYetiEntryTarget(c){
+  const entry=c.christmasEntry;if(!entry)return null;
+  if(Math.abs(c.x-entry.encounter.town.x)<=entry.encounter.half-24){c.christmasEntry=null;return null;}
+  return entry;
+}
 function updateFestivalTraffic(dt){
   if(!state.endless||!state.started)return;
   const p=state.p,F=S.endless.regions.festivals;
   for(const e of state.endless.encounters){
+    if(e.kind==='christmas')updateChristmasYetis(e,dt);
     if(e.kind!=='christmas'||p.y<e.nextSleighY||p.y>e.endY-320)continue;
     e.nextSleighY=p.y+F.sleighEveryMetres*PX_PER_M*e.scale;
     const y=p.y-320*e.scale,x=encounterPathX(e.paths[0],clamp(y,e.startY,e.endY));

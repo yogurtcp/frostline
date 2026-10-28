@@ -73,6 +73,8 @@ window.loadFrostlineConfig = async function () {
   for(const [key,value] of Object.entries({"peopleMultiplier":1.6,"treeCrowd":[10,16],"santaFraction":0.24,"sleighEveryMetres":280,"reindeerPairs":3,"yetis":[2,4],"wolves":[4,8],"zombies":[20,40],"skeletons":[8,14]}))config.endless.regions.festivals[key] ??= value;
   config.endless.regions.festivals.christmasParade ??= {};
   for(const [key,value] of Object.entries({streetWidthMetres:[28,40],people:[75,120],houseSpacingMetres:20,lengthMultiplier:5,rainbowSpacingMetres:140}))config.endless.regions.festivals.christmasParade[key] ??= value;
+  config.endless.regions.festivals.christmasParade.sideYetis ??= {};
+  for(const [key,value] of Object.entries({delaySeconds:5,intervalSeconds:14,staggerSeconds:1.2,count:[16,24],maxNearby:4,slowSpeedKmh:68,fastSpeedKmh:94}))config.endless.regions.festivals.christmasParade.sideYetis[key] ??= value;
   config.endless.regions.order=config.endless.regions.order.map(kind=>({marsh:"christmas",bowls:"halloween"}[kind]||kind));
   for(const kind of ['marsh','bowls']){delete config.endless.regions.specialAreas[kind];delete config.endless.regions.lengthMetres[kind];}
   config.controls.tapBottomFraction ??= .24;
@@ -85,7 +87,7 @@ window.loadFrostlineConfig = async function () {
   config.village.populationMultiplier ??= 2;
   const regionRanges = ['gapMetres','beginnerPeople','forestTreesPer100Metres','cemeteryOpeningMetres','denseForestDensity','scrambleDensity'].map(key=>config.endless.regions[key]).concat(Object.values(config.endless.regions.lengthMetres),[config.endless.regions.specialAreas.rivalRace.count,config.endless.regions.specialAreas.rivalRace.speedRatio,config.endless.regions.cemetery.clusterSpacingMetres,config.endless.regions.cemetery.mausoleum.count,config.endless.regions.zombies.wandererCount,config.endless.regions.zombies.graveWake.count,config.endless.regions.zombies.roamerCount,config.endless.regions.zombies.wandererSpeedKmh,config.endless.regions.zombies.count,config.endless.regions.zombies.speedKmh,config.endless.regions.crowd.people],['crossingMetres','rows','chokeWidthMetres'].map(key=>config.endless.regions.cemetery[key]).filter(Array.isArray));
   regionRanges.push(...Object.values(config.endless.regions.festivals).filter(Array.isArray));
-  regionRanges.push(config.endless.regions.festivals.christmasParade.streetWidthMetres,config.endless.regions.festivals.christmasParade.people);
+  regionRanges.push(config.endless.regions.festivals.christmasParade.streetWidthMetres,config.endless.regions.festivals.christmasParade.people,config.endless.regions.festivals.christmasParade.sideYetis.count);
   if(config.endless.regions.specialAreas.rivalRace.draftRangeMetres<=config.endless.regions.specialAreas.rivalRace.draftMinMetres)throw new Error('draftRangeMetres must exceed draftMinMetres');
   if(config.endless.regions.crowd.maximumGapMetres<config.endless.regions.crowd.minimumGapMetres)throw new Error('crowd maximumGapMetres must be at least minimumGapMetres');
   if(regionRanges.some(pair=>pair[0]>pair[1]))throw new Error('endless.regions ranges must be ordered');

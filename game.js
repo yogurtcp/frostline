@@ -3074,12 +3074,12 @@ window.FROSTLINE_READY = (async () => {
       if(c.wakeUntil>clock)continue;
       if(c.stunnedUntil>clock)continue;
       if(p.y>c.expires){c.leaving=true;c.speed*=.97;continue;}
-      const feeding=c.feedingUntil>clock,previous={x:c.x,y:c.y};
-      if(!feeding&&(c.kind==='fast'||c.kind==='slow'||c.kind==='bear')){
+      const feeding=c.feedingUntil>clock,previous={x:c.x,y:c.y},entryTarget=christmasYetiEntryTarget(c);
+      if(!feeding&&!entryTarget&&(c.kind==='fast'||c.kind==='slow'||c.kind==='bear')){
         updatePreyTarget(c);
       }
       const hunt=c.divert||p;
-      const routeTarget=endlessPursuitTarget(c,hunt),dx=routeTarget.x-c.x,dy=routeTarget.y-c.y,len=Math.hypot(dx,dy)||1;
+      const routeTarget=entryTarget||endlessPursuitTarget(c,hunt),dx=routeTarget.x-c.x,dy=routeTarget.y-c.y,len=Math.hypot(dx,dy)||1;
       const [vx,vy]=chaseVelocity(dx/len*c.speed,dy/len*c.speed);
       const lethal=['fast','slow','bear'].includes(c.kind),nx=c.x+vx*dt,ny=c.y+vy*cemeteryYScale(c.x,c.y)*dt;
       if(feeding||c.shoreLake&&patchAt(hunt.x,hunt.y)===c.shoreLake){

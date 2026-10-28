@@ -9838,6 +9838,52 @@
                       "type": "number",
                       "minimum": 70,
                       "maximum": 500
+                    },
+                    "sideYetis": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "delaySeconds": {
+                          "type": "number",
+                          "minimum": 0,
+                          "maximum": 30
+                        },
+                        "intervalSeconds": {
+                          "type": "number",
+                          "minimum": 3,
+                          "maximum": 60
+                        },
+                        "staggerSeconds": {
+                          "type": "number",
+                          "minimum": 0.3,
+                          "maximum": 5
+                        },
+                        "count": {
+                          "type": "array",
+                          "minItems": 2,
+                          "maxItems": 2,
+                          "items": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "maximum": 40
+                          }
+                        },
+                        "maxNearby": {
+                          "type": "integer",
+                          "minimum": 1,
+                          "maximum": 8
+                        },
+                        "slowSpeedKmh": {
+                          "type": "number",
+                          "minimum": 30,
+                          "maximum": 100
+                        },
+                        "fastSpeedKmh": {
+                          "type": "number",
+                          "minimum": 60,
+                          "maximum": 110
+                        }
+                      }
                     }
                   }
                 }

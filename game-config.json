@@ -312,7 +312,19 @@
           ],
           "houseSpacingMetres": 20,
           "lengthMultiplier": 5,
-          "rainbowSpacingMetres": 140
+          "rainbowSpacingMetres": 140,
+          "sideYetis": {
+            "delaySeconds": 5,
+            "intervalSeconds": 14,
+            "staggerSeconds": 1.2,
+            "count": [
+              16,
+              24
+            ],
+            "maxNearby": 4,
+            "slowSpeedKmh": 68,
+            "fastSpeedKmh": 94
+          }
         }
       }
     },
