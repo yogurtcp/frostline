@@ -1943,10 +1943,10 @@ window.FROSTLINE_READY = (async () => {
     if(o.type!=='dog'||o.dogFed||o.eaten||o.dead||p.air>0||p.fall||p.awaitingInput||p.speed<S.physics.walkingBumpLimit)return false;
     const distance=segmentDistance(o.x,o.y,previous,p);
     if(distance<=(o.r||10)+S.physics.playerRadius+3||distance>D.feedMetres*PX_PER_M)return false;
-    Object.assign(o,{dogFed:true,dogCompanion:true,dogRetreat:false,roam:0,vx:0,vy:0,socialUntil:0,visitUntil:0,hopUntil:clock+1.2,arcadeRun:state.course,dogTreatAt:clock,dogTreatFrom:{x:p.x,y:p.y-16}});
+    Object.assign(o,{dogFed:true,dogCompanion:true,dogRetreat:false,roam:0,vx:0,vy:0,socialUntil:0,visitUntil:0,hopUntil:clock+1.2,arcadeRun:state.course,dogTreatAt:clock,dogTreatFrom:{x:p.x,y:p.y-16},dogReplyAt:clock+1.9});
     delete o.worldChunk;o.socialPartner=null;
     for(const n of state.objects)if(n.socialAnimal===o){n.socialAnimal=null;n.socialUntil=0;}
-    say('WOOF! ♥',o,1.5);burst(o.x,o.y,C.gold,5);return true;
+    say("Here's a snack. Come along!",p,1.8);burst(o.x,o.y,C.gold,5);return true;
   }
   function updateDogCompanions(dt,previous){
     const p=state.p,D=S.chasers.dogCompanion;
@@ -1956,9 +1956,10 @@ window.FROSTLINE_READY = (async () => {
       if(o.eaten||o.dead)continue;
       if(!o.dogCompanion&&!o.dogRetreat&&following<D.maxFollowing&&feedDog(o,previous))following++;
       if(!o.dogCompanion&&!o.dogRetreat)continue;
-      const speed=Math.max(topSpeed(),Math.hypot(p.vx,p.vy))*D.speedMultiplier;
+      if(o.dogReplyAt!==undefined&&clock>=o.dogReplyAt){say('WOOF!',o,2.2);delete o.dogReplyAt;}
+      const speed=Math.hypot(p.vx,p.vy)*D.speedMultiplier;
       if(o.dogRetreat){
-        travel(o,o.retreatAngle,speed,dt,false,false,true,false,null,true);
+        travel(o,o.retreatAngle,Math.max(speed,S.chasers.dogContactSpeed),dt,false,false,true,false,null,true);
         if(clock>=o.retreatUntil){o.eaten=true;o.r=0;}continue;
       }
       let threat=null,gap=D.scareMetres*PX_PER_M*endlessSpeedScale(o);
@@ -1974,10 +1975,11 @@ window.FROSTLINE_READY = (async () => {
         threat.scaredUntil=clock+D.scareSeconds;threat.divert=threat.divertOrigin=null;threat.obstacleDetour=null;threat.avoidUntil=0;threat.nextDivertCheck=threat.scaredUntil;
         threat.motionVx=threat.motionVy=threat.travelSpeed=0;threat.travelStamp=clock;
         Object.assign(o,{dogCompanion:false,dogRetreat:true,leaving:true,barkAt:clock,retreatUntil:clock+D.retreatSeconds,retreatAngle:Math.atan2(-.35,o.x>=p.x?1:-1)});
+        delete o.dogReplyAt;
         say('WOOF! WOOF!',o,1.25);burst(o.x,o.y,C.gold,8);beep(210,.08,'square');continue;
       }
       const side=(o.id||0)>.5?1:-1,target={x:p.x+side*40,y:p.y-65},dx=target.x-o.x,dy=target.y-o.y,d=Math.hypot(dx,dy);
-      if(d>6)travel(o,Math.atan2(dy,dx),Math.min(speed,d/dt),dt,false,false,true,false,target,true);
+      if(d>6&&speed>0)travel(o,Math.atan2(dy/cemeteryYScale(o.x,o.y),dx),Math.min(speed,d/dt),dt,false,false,true,false,target,true,false,true);
       else{o.motionVx=o.motionVy=o.travelSpeed=0;o.travelStamp=clock;}
     }
   }
@@ -2786,7 +2788,7 @@ window.FROSTLINE_READY = (async () => {
   }
   function freshIceCache(){if(iceCacheTime!==clock||iceCacheObjects!==state.objects||iceCacheLength!==state.objects.length){iceCache=state.objects.filter(h=>h.type==='ice');iceCacheTime=clock;iceCacheObjects=state.objects;iceCacheLength=state.objects.length;}return iceCache;}
   function chaseVelocity(vx,vy){const ratio=S.predators.offDownhillSpeedRatio;return [vx*ratio,vy*(vy>0?1:ratio)];}
-  function travel(o,angle,speed,dt,animal=false,avoidTowns=false,avoidTrees=false,chasing=false,target=null,allowIce=false,groundApplied=false){
+  function travel(o,angle,speed,dt,animal=false,avoidTowns=false,avoidTrees=false,chasing=false,target=null,allowIce=false,groundApplied=false,worldPace=false){
     if(!groundApplied)speed*=specialActorFactor(o,dt);
     o.motionFromX=o.x;o.motionFromY=o.y;o.motionFromStamp=clock;
     const houseGrid=cachedSolidGrid(houseSolids,HOUSE_TYPES,HOUSE_CELL,HOUSE_REACH).grid;
@@ -2815,6 +2817,8 @@ window.FROSTLINE_READY = (async () => {
     const motion=a=>{
       const [vx,rawVy]=chasing?chaseVelocity(Math.cos(a)*speed,Math.sin(a)*speed):[Math.cos(a)*speed,Math.sin(a)*speed];
       const vy=rawVy*cemeteryYScale(o.x,o.y),actualSpeed=Math.hypot(vx,vy);
+      // Companions use the player's already-scaled world motion, including flat graveyards.
+      if(worldPace&&actualSpeed){const ratio=speed/actualSpeed;return {vx:vx*ratio,vy:vy*ratio,speed,ux:vx/actualSpeed,uy:vy/actualSpeed,probe:Math.max(A.avoidProbeDistance,speed*A.avoidLookaheadSeconds)};}
       return {vx,vy,speed:actualSpeed,ux:vx/(actualSpeed||1),uy:vy/(actualSpeed||1),probe:Math.max(A.avoidProbeDistance,actualSpeed*A.avoidLookaheadSeconds)};
     };
     // Long trunks need two committed corners; local turns alone steer back into their middle.

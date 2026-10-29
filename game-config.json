@@ -2296,7 +2296,7 @@
     "dogCompanion": {
       "feedMetres": 8,
       "maxFollowing": 2,
-      "speedMultiplier": 1.18,
+      "speedMultiplier": 1.01,
       "scareMetres": 18,
       "barkMetres": 14,
       "scareSeconds": 2.5,

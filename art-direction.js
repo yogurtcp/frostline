@@ -176,7 +176,7 @@ function drawDog(o,s,width=o.width||39){
   if(dt>0){const distance=Math.hypot(dx,dy);gait.active=distance>.01;if(gait.active){gait.phase=(gait.phase+distance/Math.max(28,width*1.3))%1;if(dx/dt<-12)gait.flip=true;else if(dx/dt>12)gait.flip=false;}gait.x=o.x;gait.y=o.y;gait.time=clock;}
   const tile=dogWalkTile(gait.active?Math.floor(gait.phase*8):8),w=Math.round(width*ZOOM*26/24),h=Math.round(w*28/26),hop=o.hopUntil>clock?Math.sin((1-(o.hopUntil-clock)/1.2)*Math.PI)*7:0;
   shadow(s.x,s.y,11,3,.1);ctx.save();ctx.translate(Math.round(s.x),Math.round(s.y-hop));if(gait.flip)ctx.scale(-1,1);ctx.drawImage(tile,-Math.round(w/2),-h+1,w,h);ctx.restore();
-  if(o.dogTreatAt!==undefined&&clock-o.dogTreatAt<.7){
+  if(o.dogTreatAt!==undefined&&clock-o.dogTreatAt<2.4){
     const t=clamp((clock-o.dogTreatAt)/.45,0,1),from=screen(o.dogTreatFrom.x,o.dogTreatFrom.y),x=mix(from.x,s.x,t),y=mix(from.y,s.y-10,t)-Math.sin(t*Math.PI)*15;
     if(t<1){box(x-2,y-2,4,3,'#9b403e');box(x+1,y-3,2,2,'#f2c98f');}
     else{box(s.x-2,s.y-29,2,3,'#cc5655');box(s.x+1,s.y-29,2,3,'#cc5655');box(s.x-1,s.y-27,3,2,'#cc5655');}
