@@ -1,0 +1,50 @@
+{
+  "pipeline": "Production sprite() palette and alpha baking",
+  "assets": [
+    {
+      "id": "1-stiltwalker",
+      "width": 24,
+      "height": 38,
+      "source": [
+        996,
+        1578
+      ],
+      "crop": [
+        144,
+        44,
+        771,
+        1499
+      ]
+    },
+    {
+      "id": "2-tuskbreaker",
+      "width": 38,
+      "height": 26,
+      "source": [
+        1536,
+        1024
+      ],
+      "crop": [
+        46,
+        129,
+        1447,
+        790
+      ]
+    },
+    {
+      "id": "3-ragjaw",
+      "width": 34,
+      "height": 34,
+      "source": [
+        1254,
+        1254
+      ],
+      "crop": [
+        262,
+        84,
+        932,
+        1090
+      ]
+    }
+  ]
+}

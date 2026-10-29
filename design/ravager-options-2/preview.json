@@ -1,0 +1,23 @@
+{
+  "title": "THREE NEW RAVAGER SILHOUETTES",
+  "options": [
+    {
+      "id": "1-stiltwalker",
+      "label": "Stiltwalker",
+      "width": 24,
+      "height": 38
+    },
+    {
+      "id": "2-tuskbreaker",
+      "label": "Tuskbreaker",
+      "width": 38,
+      "height": 26
+    },
+    {
+      "id": "3-ragjaw",
+      "label": "Ragjaw",
+      "width": 34,
+      "height": 34
+    }
+  ]
+}
