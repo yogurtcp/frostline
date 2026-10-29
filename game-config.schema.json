@@ -9205,7 +9205,6 @@
               "additionalProperties": false,
               "required": [
                 "firstMetres",
-                "every",
                 "speedMultiplier",
                 "noticeMetres"
               ],
@@ -9217,7 +9216,8 @@
                 "every": {
                   "type": "integer",
                   "minimum": 1,
-                  "maximum": 20
+                  "maximum": 20,
+                  "description": "Legacy replacement cadence, accepted but ignored. Stiltwalkers now spawn independently."
                 },
                 "speedMultiplier": {
                   "type": "number",
@@ -9228,6 +9228,26 @@
                   "type": "number",
                   "minimum": 10,
                   "maximum": 150
+                },
+                "chancePerSection": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                "maxNearby": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 4
+                },
+                "divertSeconds": {
+                  "type": "number",
+                  "minimum": 0.25,
+                  "maximum": 6
+                },
+                "pursueSeconds": {
+                  "type": "number",
+                  "minimum": 0.5,
+                  "maximum": 12
                 }
               }
             }

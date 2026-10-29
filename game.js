@@ -490,8 +490,8 @@ window.FROSTLINE_READY = (async () => {
         const x=center-spread+(lane+jitter)*spread*2/13;
         entity(type,x,y,{...own,width:type.startsWith('person')?30:42,r:10,vy:type.startsWith('person')?0:base*scale,vx:0,endlessBaseVy:type.startsWith('person')?undefined:base});},200*scale);
       const y=e.startY+Math.min(length*.55,180*PX_PER_M*scale);
-      if(!e.introYeti&&to>y){e.introYeti=true;const live=state.chasers.filter(c=>activeCourseOwner(c)&&!c.dead&&!c.leaving&&Math.abs(c.y-state.p.y)<S.endless.yetis.nearbyMetres*PX_PER_M*scale).length;
-        if(live<S.endless.yetis.maxNearbyHunters){const speed=crowd?mix(...S.endless.yetis.speedKmh,endlessPressure((e.startY-state.endless.startY)/PX_PER_M).t):S.endless.yetis.speedKmh[0];entity('lurker',center+pick([-1,1])*170*scale,y,{...own,width:55,r:18,...endlessYetiVariant(y,speed,scale),wakeSeconds:S.endless.yetis.wakeSeconds});}}
+      if(!e.introYeti&&to>y){e.introYeti=true;const live=state.chasers.filter(c=>activeCourseOwner(c)&&!c.ravager&&!c.dead&&!c.leaving&&Math.abs(c.y-state.p.y)<S.endless.yetis.nearbyMetres*PX_PER_M*scale).length;
+        if(live<S.endless.yetis.maxNearbyHunters){const speed=crowd?mix(...S.endless.yetis.speedKmh,endlessPressure((e.startY-state.endless.startY)/PX_PER_M).t):S.endless.yetis.speedKmh[0];entity('lurker',center+pick([-1,1])*170*scale,y,{...own,width:55,r:18,arcadeTier:speed>90?'special':speed>78?'fast':'slow',yetiSpeedKmh:speed*scale,endlessBaseKmh:speed,wakeSeconds:S.endless.yetis.wakeSeconds});}}
     }else if(e.kind==='quiet'){
       const path=e.paths[0];
       if(R.quietTreesPer100Metres>0)rows(100*PX_PER_M*scale/Math.max(.01,R.quietTreesPer100Metres),(y,row)=>entity(row%3?'pine':'fir',encounterPathX(path,y)+(row%2?-1:1)*range(110,310),y,{...own,width:range(58,78),r:17}));
@@ -688,16 +688,23 @@ window.FROSTLINE_READY = (async () => {
     if(next===current){announce('VISIT '+current+'/'+limit,current===1?'ALREADY AT THE EASIEST VISIT':'ALREADY AT THE HARDEST VISIT',C.teal,2);return true;}
     return debugEndlessArea(number,next);
   }
-  function endlessYetiVariant(y,baseSpeed,scale){
-    const a=state.endless,R=S.endless.yetis.ravager;
-    let ravager=false;
-    if(a&&(y-a.startY)/PX_PER_M>=R.firstMetres){
-      // Count successful placements from every spawn path, starting with a visible introduction.
-      const number=a.eligibleYetiSpawns=(a.eligibleYetiSpawns||0)+1;
-      ravager=(number-1)%R.every===0;
+  function spawnEndlessRavager(section,endY){
+    const a=state.endless,R=S.endless.yetis.ravager,scale=section.endlessScale;
+    const from=Math.max(section.startY,a.startY+R.firstMetres*PX_PER_M);
+    if(endY-from<180*scale||random()>=R.chancePerSection)return;
+    for(let attempt=0;attempt<10;attempt++){
+      const y=range(from+80*scale,endY-100*scale),e=endlessEncounterAt(y);
+      if(e?.town||e?.noNewPredators||['quiet','lake','beginner'].includes(e?.kind))continue;
+      const path=e?pick(e.paths):null;
+      const x=path?encounterPathX(path,y)+pick([-1,1])*e.half*range(.15,.45):section.x+range(-200,200)*scale;
+      if(patchAt(x,y)||state.objects.some(o=>o.r>0&&!o.dead&&!o.eaten&&obstacleClearance(o,x,y)<40))continue;
+      const radius=S.endless.yetis.nearbyMetres*PX_PER_M*scale;
+      const near=o=>o.ravager&&!o.dead&&!o.eaten&&!o.leaving&&activeCourseOwner(o)&&Math.hypot(o.x-x,o.y-y)<radius;
+      if(state.chasers.filter(near).length+state.objects.filter(near).length>=R.maxNearby)return;
+      const speed=S.endless.yetis.speedKmh[1]*R.speedMultiplier;
+      entity('lurker',x,y,{arcadeRun:section,encounter:e,width:55,r:18,ravager:true,arcadeTier:'fast',endlessBaseKmh:speed,yetiSpeedKmh:speed*scale,wakeSeconds:S.endless.yetis.wakeSeconds});
+      return;
     }
-    const speed=ravager?S.endless.yetis.speedKmh[1]*R.speedMultiplier:baseSpeed;
-    return {ravager,arcadeTier:ravager?'fast':speed>90?'special':speed>78?'fast':'slow',endlessBaseKmh:speed,yetiSpeedKmh:speed*scale};
   }
   function yetiWakeDistance(o){
     if(!state.endless||!activeCourseOwner(o))return S.wildlife.yetiWakeDistance*endlessSpeedScale(o);
@@ -786,7 +793,7 @@ window.FROSTLINE_READY = (async () => {
         a.nextLakeY+=Math.max(110,100/density*range(.8,1.2))*PX_PER_M*lakeScale;
       }
       prepareArcadeTerrain(section);
-      const live=state.chasers.filter(c=>activeCourseOwner(c)&&!c.dead&&!c.leaving&&c.y>state.p.y-E.yetis.nearbyMetres*PX_PER_M*scale).length+state.objects.filter(o=>o.type==='lurker'&&activeCourseOwner(o)&&!o.dead&&!o.eaten).length;
+      const live=state.chasers.filter(c=>activeCourseOwner(c)&&!c.ravager&&!c.dead&&!c.leaving&&c.y>state.p.y-E.yetis.nearbyMetres*PX_PER_M*scale).length+state.objects.filter(o=>o.type==='lurker'&&!o.ravager&&activeCourseOwner(o)&&!o.dead&&!o.eaten).length;
       const desired=Math.min(E.yetis.maxNearbyHunters,1+Math.floor(Math.max(0,distance-E.yetis.firstMetres)/E.yetis.additionalEveryMetres));
       if(a.nextYetiY<endY){
         const scheduledRegion=endlessEncounterAt(a.nextYetiY);
@@ -799,11 +806,11 @@ window.FROSTLINE_READY = (async () => {
             at+=25*scale;x=path?encounterPathX(path,at)+side*corridor.half*(i%2?.68:-.68):x+side*35*scale;
           }
           const speed=mix(...E.yetis.speedKmh,P.t);
-          if(!endlessTownAt(x,at)&&!patchAt(x,at)&&!state.objects.some(o=>o.r>0&&obstacleClearance(o,x,at)<40))entity('lurker',x,at,{width:55,r:18,arcadeRun:section,...endlessYetiVariant(at,speed,scale),shoreLake:near,wakeSeconds:E.yetis.wakeSeconds});
+          if(!endlessTownAt(x,at)&&!patchAt(x,at)&&!state.objects.some(o=>o.r>0&&obstacleClearance(o,x,at)<40))entity('lurker',x,at,{width:55,r:18,arcadeRun:section,arcadeTier:speed>90?'special':speed>78?'fast':'slow',yetiSpeedKmh:speed*scale,endlessBaseKmh:speed,shoreLake:near,wakeSeconds:E.yetis.wakeSeconds});
         }
         a.nextYetiY=Math.max(a.nextYetiY,endY)+mix(...E.yetis.intervalMetres,P.t)*PX_PER_M*scale;
       }
-      spawnEndlessWildlife(section,endY,P);
+      spawnEndlessWildlife(section,endY,P);spawnEndlessRavager(section,endY);
       a.sections.push(section);a.plannedY=endY;
     }
     extendEndlessTownLanes();
@@ -1954,12 +1961,14 @@ window.FROSTLINE_READY = (async () => {
   }
   function updateRavagerTarget(hunter){
     const old=hunter.divert,R=S.endless.yetis.ravager;
-    if(old&&ravagerPrey(old,hunter)&&(!humanArea(old.x,old.y)||courseCreature(hunter,old.x,old.y))){
-      const d=Math.hypot(old.x-hunter.x,old.y-hunter.y);
-      if(hunter.divertBestDistance===undefined||d<hunter.divertBestDistance-1){hunter.divertBestDistance=d;hunter.divertUntil=clock+S.predators.divertTimeoutSeconds;}
-      if(clock<(hunter.divertUntil||0))return;
+    if(clock<(hunter.ravagerPursueUntil||0)){hunter.divert=null;return;}
+    if(old){
+      const distance=Math.hypot(old.x-hunter.x,old.y-hunter.y);
+      if(clock<(hunter.ravagerDivertUntil||0)&&distance<=R.noticeMetres*1.5*PX_PER_M*endlessSpeedScale(hunter)&&ravagerPrey(old,hunter)&&(!humanArea(old.x,old.y)||courseCreature(hunter,old.x,old.y)))return;
+      // A hard detour limit, rather than extending the hunt every time it makes progress.
+      hunter.divert=hunter.divertOrigin=hunter.obstacleDetour=null;hunter.avoidUntil=0;
+      hunter.ravagerPursueUntil=clock+R.pursueSeconds;return;
     }
-    hunter.divert=null;
     if(clock<(hunter.nextDivertCheck||0))return;
     hunter.nextDivertCheck=clock+.5;
     let best=null,distance=R.noticeMetres*PX_PER_M*endlessSpeedScale(hunter);
@@ -1968,7 +1977,7 @@ window.FROSTLINE_READY = (async () => {
       const d=Math.hypot(o.x-hunter.x,o.y-hunter.y);
       if(d<distance&&(!humanArea(o.x,o.y)||courseCreature(hunter,o.x,o.y))){best=o;distance=d;}
     }
-    if(best){hunter.divert=best;hunter.divertBestDistance=distance;hunter.divertUntil=clock+S.predators.divertTimeoutSeconds;hunter.avoidUntil=0;hunter.obstacleDetour=null;}
+    if(best){hunter.divert=best;hunter.ravagerDivertUntil=clock+R.divertSeconds;hunter.avoidUntil=0;hunter.obstacleDetour=null;}
   }
   function ravagerContact(hunter,previous){
     return contactPrey(hunter,previous,S.chasers.captureDistance,null,ravagerActors(),o=>ravagerPrey(o,hunter));
@@ -1976,6 +1985,7 @@ window.FROSTLINE_READY = (async () => {
   function eatRavagerPrey(hunter,meal,previous){
     const hostile=MONSTER_KINDS.has(enemyKind(meal));
     eatChaserPrey(hunter,meal,previous,hostile?1.2:S.predators.mealPauseSeconds);
+    hunter.ravagerPursueUntil=(hunter.feedingUntil||clock)+S.endless.yetis.ravager.pursueSeconds;
     if(hostile){meal.eaten=false;meal.dead=true;meal.animal=false;meal.vx=meal.vy=meal.roam=0;meal.motionVx=meal.motionVy=meal.travelSpeed=0;meal.travelStamp=clock;meal.fadeUntil=clock+.6;burst(meal.x,meal.y,'#93a6c7',10);}
   }
   function feedDog(o,previous){

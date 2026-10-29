@@ -66,9 +66,12 @@
       "wakeMetres": 140,
       "ravager": {
         "firstMetres": 1200,
-        "every": 2,
         "speedMultiplier": 1.15,
-        "noticeMetres": 55
+        "noticeMetres": 30,
+        "chancePerSection": 0.5,
+        "maxNearby": 1,
+        "divertSeconds": 2,
+        "pursueSeconds": 3
       }
     },
     "maxPlayerSpeedKmh": 130,
