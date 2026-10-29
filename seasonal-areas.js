@@ -57,10 +57,12 @@ function encloseChristmasParade(e,town,houses,rowYs){
   const place=(x,y,style,extra={})=>entity(style%3?'rental':'lodge',x,y,{...own,houseStyle:style%S.houseAnimation.trimRGB.length,...extra});
   // Horizontal rows extend outward from each street facade, leaving the avenue open.
   const pitch=foot*2-4,run=12;
+  // Consecutive strips use the same facade (12 repeats both type and trim); merge their solids.
+  const across=run%S.houseAnimation.trimRGB.length===0?Math.max(1,Math.ceil((band+width-inner-pitch)/(run*pitch)))*run:run;
   for(const side of [-1,1])for(const y of [e.startY+140,...rowYs,e.endY-40]){
-    for(let first=inner+pitch;first<band+width;first+=run*pitch){
-      const x=town.x+side*(first+(run-1)*pitch/2);
-      place(x,y,Math.round((y-e.startY)/200)+Math.round(first/pitch),{paradeSpanX:run,paradeStepX:pitch,r:foot+(run-1)*pitch/2});
+    for(let first=inner+pitch;first<band+width;first+=across*pitch){
+      const x=town.x+side*(first+(across-1)*pitch/2);
+      place(x,y,Math.round((y-e.startY)/200)+Math.round(first/pitch),{paradeSpanX:across,paradeStepX:pitch,r:foot+(across-1)*pitch/2});
     }
   }
   // Keep existing shopkeepers, stalls and animals clear of the new rear buildings.
@@ -131,6 +133,21 @@ function festivalGuest(town,p,index,extra={}){
   const christmas=town.festival==='christmas',santa=christmas&&((index*37)%100)/100<S.endless.regions.festivals.santaFraction;
   return entity(['personRed','personGreen','personYellow'][index%3],p.x,p.y,{town,width:santa?44:32,r:santa?18:10,costume:santa?'santa':christmas?['velvet','evening','tuxedo','furCoat'][index%4]:['witch','vampire','pumpkin','ghost','skeletonSuit'][index%5],...extra});
 }
+function reserveHalloweenMausoleum(town,roads,side){
+  const plaza=town.festivalPlaza,width=town.mausoleumWidth=280;
+  const clearance=Math.max(...roads.map(r=>r.width))/2+S.village.roadClearance+S.physics.playerRadius+12;
+  const top=plaza.y-width*S.village.houseFootHeightRatio*2-clearance,bottom=plaza.y+clearance;
+  let edge=plaza.x;
+  // Include every bend across the building's feet, not just the road at its door.
+  for(const road of roads)for(let i=1;i<road.points.length;i++){
+    const a=road.points[i-1],b=road.points[i];
+    if(Math.max(a.y,b.y)<top||Math.min(a.y,b.y)>bottom)continue;
+    const dy=b.y-a.y;
+    const xs=dy?[top,bottom].map(y=>mix(a.x,b.x,clamp((y-a.y)/dy,0,1))):[a.x,b.x];
+    for(const x of xs)edge=side>0?Math.max(edge,x):Math.min(edge,x);
+  }
+  plaza.x=edge+side*(width/2+clearance);
+}
 function decorateFestival(e,section){
   warmFestivalGuestAtlas(e.kind);
   const town=e.town,F=S.endless.regions.festivals,own={town,encounter:e,arcadeRun:section};
@@ -168,7 +185,8 @@ function decorateFestival(e,section){
     e.nextSleighY=e.startY+80*PX_PER_M*e.scale;
   }else{
     const points=e.paths[0],lengths=[0];for(let i=1;i<points.length;i++)lengths.push(lengths.at(-1)+Math.hypot(points[i].x-points[i-1].x,points[i].y-points[i-1].y));e.cemeteryRoute={points,lengths,length:lengths.at(-1)};
-    e.mausoleum=entity('mausoleum',plaza.x,plaza.y,{...own,width:280,r:126,grandMausoleum:true,waveSize:Math.round(mix(...S.endless.regions.cemetery.mausoleum.count,e.difficulty)),released:0});
+    const width=town.mausoleumWidth;
+    e.mausoleum=entity('mausoleum',plaza.x,plaza.y,{...own,width,r:width*S.village.houseFootWidthRatio,grandMausoleum:true,waveSize:Math.round(mix(...S.endless.regions.cemetery.mausoleum.count,e.difficulty)),released:0});
     for(let i=0,n=Math.round(mix(12,20,e.difficulty));i<n;i++){
       const angle=i*2.399963,p={x:plaza.x+Math.cos(angle)*(180+i%3*30),y:plaza.y+180+Math.sin(angle)*65};
       if(!clearFestivalSpot(e,p,14))continue;
@@ -312,14 +330,15 @@ function drawSeasonalProp(o,s){
   if(o.eaten||o.dead)return false;
   if(o.costume){drawFestivalGuest(o,s);return true;}
   if(o.type==='paradeGarland'){
-    const half=o.width*ZOOM/2,y=s.y-53;
-    for(let i=0;i<12;i++){
-      const a=i/12,b=(i+1)/12;
-      line(s.x-half+a*half*2,y+Math.sin(a*Math.PI)*14,s.x-half+b*half*2,y+Math.sin(b*Math.PI)*14,'#3b6b53',3);
-    }
-    for(let i=1;i<12;i++){const x=s.x-half+i/12*half*2,yy=y+Math.sin(i/12*Math.PI)*14;box(x-1,yy,3,4,['#cf6870','#e5c477','#7fa790'][i%3]);}
-    for(const side of [-1,1]){const x=s.x+side*half*.5;box(x-6,y+8,5,5,'#b74d59');box(x+1,y+8,5,5,'#b74d59');box(x-1,y+8,3,9,'#dfb66e');}
-    return true;
+    const width=Math.round(o.width*ZOOM),half=width/2;
+    const tile=specialTile('parade-garland:'+width,width+16,40,(t,px)=>{
+      const x=(width+16)/2,y=7;
+      t.strokeStyle=gritMaterial('#3b6b53');t.lineWidth=3;
+      for(let i=0;i<12;i++){const a=i/12,b=(i+1)/12;t.beginPath();t.moveTo(x-half+a*width,y+Math.sin(a*Math.PI)*14);t.lineTo(x-half+b*width,y+Math.sin(b*Math.PI)*14);t.stroke();}
+      for(let i=1;i<12;i++){const xx=x-half+i/12*width,yy=y+Math.sin(i/12*Math.PI)*14;px(xx-1,yy,3,4,['#cf6870','#e5c477','#7fa790'][i%3]);}
+      for(const side of [-1,1]){const xx=x+side*half*.5;px(xx-6,y+8,5,5,'#b74d59');px(xx+1,y+8,5,5,'#b74d59');px(xx-1,y+8,3,9,'#dfb66e');}
+    });
+    ctx.drawImage(tile,Math.round(s.x)-tile.width/2,Math.round(s.y)-60);return true;
   }
   if(o.type==='christmasTree'){
     const tile=specialTile('christmas-tree',96,138,(t,px,poly)=>{

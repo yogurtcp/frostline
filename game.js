@@ -300,10 +300,8 @@ window.FROSTLINE_READY = (async () => {
     const wave=.82+.18*Math.sin(phase*TAU-Math.PI/2),forest=.75+.45*(.5+.5*Math.sin(phase*2.1)),lakes=.65+.85*(.5+.5*Math.sin(phase*1.7+1.3));
     return {t,wave,forest,lakes};
   }
-  function endlessScaleAt(metres){
-    const E=S.endless,t=1-Math.exp(-Math.max(0,metres)/E.speedRampMetres);
-    return mix(E.playerSpeedKmh,E.maxPlayerSpeedKmh,t)/E.playerSpeedKmh;
-  }
+  // Difficulty progresses through layouts and populations; downhill pace stays at its starting value.
+  function endlessScaleAt(){return 1;}
   function endlessSpeedScale(o=null){return state.endless&&(!o||activeCourseOwner(o))?state.endless.speedScale:1;}
   function updateEndlessSpeed(){
     const a=state.endless;if(!a)return;
@@ -1379,6 +1377,8 @@ window.FROSTLINE_READY = (async () => {
       for(let row=0;row<V.rows;row++)points.push({x:clamp(centers[row]+side*(halfWidths[row]+V.houseWidth[1]*V.houseFootWidthRatio+B.offset),base-V.halfWidth+B.width,base+V.halfWidth-B.width),y:rowYs[row]+(row?60:-70)});
       points.push(exit);town.backRoute={surface:'snow',natural:true,width:B.width,points};roads.push(town.backRoute);
     }
+    // Reserve the crypt's side courtyard before houses are placed; keep both town routes clear.
+    if(town.festival==='halloween')reserveHalloweenMausoleum(town,roads,layoutSeed%2?-1:1);
     const houseCount=Math.round(V.houseCount*(varied?between(...R.houseCountScale):1));
     const roadSamples=roads.map(r=>{
       const rows=new Map();for(let i=1;i<r.points.length;i++){const a=r.points[i-1],b=r.points[i],n=Math.ceil(Math.hypot(b.x-a.x,b.y-a.y)/12);for(let j=0;j<=n;j++){
@@ -1643,7 +1643,10 @@ window.FROSTLINE_READY = (async () => {
       for(let cy=Math.floor(view.top/chunk);cy<=Math.floor(view.bottom/chunk);cy++)for(let cx=Math.floor(view.left/chunk);cx<=Math.floor(view.right/chunk);cx++){
         const key=cx+','+cy,cells=r.paintGroups.get(key);if(!cells)continue;let tile=r.paintTiles.get(key);
         if(!tile){
-          tile=document.createElement('canvas');tile.width=tile.height=Math.ceil(chunk*ZOOM)+1;const t=tile.getContext('2d'),box=(x,y,w,h,color)=>{t.fillStyle=gritMaterial(color);t.fillRect(Math.round(x),Math.round(y),Math.round(w),Math.round(h));},size=Math.ceil(unit*ZOOM)+1;
+          tile=document.createElement('canvas');
+          const size=Math.ceil(unit*ZOOM)+1,left=Math.min(...cells.map(c=>Math.round((c.x-cx*chunk)*ZOOM))),top=Math.min(...cells.map(c=>Math.round((c.y-cy*chunk)*ZOOM)));
+          tile.paintX=left;tile.paintY=top;tile.width=Math.max(...cells.map(c=>Math.round((c.x-cx*chunk)*ZOOM)+size))-left;tile.height=Math.max(...cells.map(c=>Math.round((c.y-cy*chunk)*ZOOM)+size))-top;
+          const t=tile.getContext('2d'),box=(x,y,w,h,color)=>{t.fillStyle=gritMaterial(color);t.fillRect(Math.round(x)-left,Math.round(y)-top,Math.round(w),Math.round(h));};
           for(const cell of cells){const x=(cell.x-cx*chunk)*ZOOM,y=(cell.y-cy*chunk)*ZOOM;
             if(r.surface==='snow'){
               const colors=V.snowRoadColors;box(x,y,size,size,cell.edge?colors[0]:colors[1]);
@@ -1652,7 +1655,7 @@ window.FROSTLINE_READY = (async () => {
           }
           if(r.paintTiles.size>=64)r.paintTiles.delete(r.paintTiles.keys().next().value);r.paintTiles.set(key,tile);
         }
-        const at=screen(cx*chunk,cy*chunk);ctx.drawImage(tile,at.x,at.y);
+        const at=screen(cx*chunk,cy*chunk);ctx.drawImage(tile,at.x+tile.paintX,at.y+tile.paintY);
       }
     }
   }
@@ -2745,7 +2748,8 @@ window.FROSTLINE_READY = (async () => {
   function movePedestrianSafely(o,target,speed,dt,solids){
     const dx=target.x-o.x,dy=target.y-o.y,move=Math.min(speed*dt,Math.hypot(dx,dy)),radius=Math.max(8,o.r)+S.pedestrians.obstacleMargin;
     if(!move)return;
-    const near=solids.filter(h=>h!==o&&Math.abs(h.x-o.x)<(h.width||h.r*2)+radius+move&&Math.abs(h.y-o.y)<(h.width||h.r*2)+radius+move);
+    const reach=radius+move;
+    const near=solids.filter(h=>{if(h===o)return false;const b=h.solidBounds||solidBounds(h);return b[0]<=o.x+reach&&b[2]>=o.x-reach&&b[1]<=o.y+reach&&b[3]>=o.y-reach;});
     const clear=(x,y)=>!patchAt(x,y)&&near.every(h=>{const d=obstacleClearance(h,x,y);return d>=radius||d>obstacleClearance(h,o.x,o.y)+.001;});
     const desired=Math.atan2(dy,dx),angles=[0,.25,-.25,.5,-.5,.75,-.75,1].map(turn=>desired+turn*Math.PI);
     if(o.pedAvoidUntil>clock)angles.unshift(o.pedAvoidHeading);
@@ -2759,8 +2763,17 @@ window.FROSTLINE_READY = (async () => {
   }
   function updatePedestrians(dt){
     state.pedestrianElapsed=(state.pedestrianElapsed||0)+dt;if(state.pedestrianElapsed<1/30-1e-8)return;dt=state.pedestrianElapsed;state.pedestrianElapsed=0;
-    const P=S.pedestrians,people=[],solids=[],flags=[];let threats;
-    for(const o of state.objects){if(o.eaten||o.dead)continue;if(o.type.startsWith('person'))people.push(o);if(o.r>0&&PED_SOLIDS.has(o.type))solids.push(o);if(PED_FLAGS.has(o.type))flags.push(o);}
+    const P=S.pedestrians,people=[],solids=[],flags=[],p=state.p;let threats;
+    const reach=P.activeRadius*endlessSpeedScale()+Math.max(P.roamRadius,P.spectatorRadius)+P.walkSpeed[1]*3*dt*endlessSpeedScale()+64;
+    snapshotSolids();
+    for(const o of state.objects){
+      if(o.eaten||o.dead)continue;if(o.type.startsWith('person'))people.push(o);
+      if(o.r>0&&PED_SOLIDS.has(o.type)){
+        const b=o.solidBounds||solidBounds(o);
+        if(b[0]<=p.x+reach&&b[2]>=p.x-reach&&b[1]<=p.y+reach&&b[3]>=p.y-reach)solids.push(o);
+      }
+      if(PED_FLAGS.has(o.type)&&Math.abs(o.y-p.y)<=reach)flags.push(o);
+    }
     for(const o of people){
       o.walking=false;
       if(Math.hypot(o.x-state.p.x,o.y-state.p.y)>P.activeRadius*endlessSpeedScale(o))continue;
@@ -3477,7 +3490,18 @@ window.FROSTLINE_READY = (async () => {
     }else ctx.drawImage(spriteCache.get(key),Math.round(-width/2),opts.center?-Math.round(h/2):-h);
     ctx.restore();
   }
-  function shadow(x,y,rx=15,ry=4,alpha=.11) {const before=ctx.globalAlpha,color=ctx.fillStyle;ctx.globalAlpha=before*Math.min(.5,alpha*2);ctx.fillStyle='#758bb4';const w=Math.max(3,Math.round(rx*ZOOM)),h=Math.max(2,Math.round(ry*ZOOM));for(let row=-h;row<=h;row++){const half=Math.max(1,w-Math.round(Math.abs(row)*w/(h+2)));ctx.fillRect(Math.round(x-half+row),Math.round(y+row),half*2,1);}ctx.globalAlpha=before;ctx.fillStyle=color;}
+  const shadowTiles=new Map();
+  function shadow(x,y,rx=15,ry=4,alpha=.11){
+    const w=Math.max(3,Math.round(rx*ZOOM)),h=Math.max(2,Math.round(ry*ZOOM)),key=w+':'+h;
+    let tile=shadowTiles.get(key);
+    if(!tile){
+      tile=document.createElement('canvas');tile.width=(w+h)*2;tile.height=h*2+1;const t=tile.getContext('2d');t.fillStyle='#758bb4';
+      for(let row=-h;row<=h;row++){const half=Math.max(1,w-Math.round(Math.abs(row)*w/(h+2)));t.fillRect(w+h-half+row,h+row,half*2,1);}
+      if(shadowTiles.size>=64)shadowTiles.delete(shadowTiles.keys().next().value);shadowTiles.set(key,tile);
+    }
+    const before=ctx.globalAlpha;ctx.globalAlpha=before*Math.min(.5,alpha*2);
+    ctx.drawImage(tile,Math.round(x)-w-h,Math.round(y)-h);ctx.globalAlpha=before;
+  }
   function snow() {
     box(0,0,W,H,nightSnowColor());drawSpecialAreas();
     for(const e of state.endless?.encounters||[])if(e.kind==='cemetery'){const a=screen(state.course.x-e.band,e.startY),b=screen(state.course.x+e.band,e.endY);if(b.y>0&&a.y<H){ctx.fillStyle='#e7ecf8';ctx.fillRect(a.x,a.y,b.x-a.x,b.y-a.y);}}
@@ -3983,7 +4007,9 @@ window.FROSTLINE_READY = (async () => {
       for(let i=span-1;i>=0;i--)for(let j=0;j<across;j++){const at=y-i*step,xx=x+(j-(across-1)/2)*stepX;t.globalAlpha=.72;t.drawImage(shade,Math.round(xx-w*.48),at-2);t.globalAlpha=1;t.drawImage(facade.tile,xx-facade.x,at-facade.y);}
       cached={tile,x,y};if(paradeBlockTiles.size>=96)paradeBlockTiles.delete(paradeBlockTiles.keys().next().value);paradeBlockTiles.set(key,cached);
     }
-    ctx.drawImage(cached.tile,Math.round(s.x)-cached.x,Math.round(s.y)-cached.y);
+    // Rear rows can span twelve houses; submit only the visible part of the cached strip.
+    const x=Math.round(s.x)-cached.x,y=Math.round(s.y)-cached.y,left=Math.max(0,-16-x),top=Math.max(0,-16-y),right=Math.min(cached.tile.width,W+16-x),bottom=Math.min(cached.tile.height,H+16-y);
+    if(right>left&&bottom>top)ctx.drawImage(cached.tile,left,top,right-left,bottom-top,x+left,y+top,right-left,bottom-top);
   }
   function drawHouse(o,s){
     if(o.paradeBoundary){drawParadeBlock(o,s);return;}

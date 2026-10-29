@@ -74,7 +74,7 @@
         "pursueSeconds": 3
       }
     },
-    "maxPlayerSpeedKmh": 130,
+    "maxPlayerSpeedKmh": 90,
     "speedRampMetres": 9600,
     "encounters": {
       "firstMetres": 450,
