@@ -18,4 +18,4 @@ To regenerate, use the optional Node/Playwright/Chrome authoring tool:
 node tools/render-ravager-preview.cjs design/ravager-options-2
 ```
 
-Set NODE_PATH/CHROME_BIN if those dependencies are not on the normal paths. No game/runtime dependency is added. The [first set](../ravager-options/README.md) and [previous gallery](../../ravager-options-round-1.html) remain available.
+Set NODE_PATH/CHROME_BIN if those dependencies are not on the normal paths. No game/runtime dependency is added. The [first set](../ravager-options/README.md) and [previous gallery](https://yogurtcp.github.io/frostline/ravager-options-round-1.html) remain available.
