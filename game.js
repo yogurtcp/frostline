@@ -1688,6 +1688,36 @@ window.FROSTLINE_READY = (async () => {
     filterObjects(keep);state.chasers=state.chasers.filter(keep);
     if(removed)state.speech=state.speech.filter(s=>!removed.has(s.object));
   }
+  function pruneDistantEnemies(){
+    const p=state.p,range=S.chasers.despawnScreens*H/ZOOM,range2=range*range;
+    let removed;
+    const keep=(o,chaser=false)=>{
+      const monster=chaser||MONSTER_KINDS.has(enemyKind(o));
+      // An old mausoleum must not keep producing enemies outside the chase boundary.
+      if(!monster&&!(o.grandMausoleum&&o.y<p.y-range))return true;
+      const dx=o.x-p.x,dy=o.y-p.y;
+      if(dx*dx+dy*dy<=range2){if(monster)o.enemyRangeEntered=true;return true;}
+      // Terrain is authored ahead of the skier. Preserve unvisited future enemies.
+      if(monster&&dy>=0&&!o.enemyRangeEntered&&(!chaser||o.waiting))return true;
+      (removed??=new Set()).add(o);o.eaten=true;o.r=0;o.divert=null;o.obstacleDetour=null;
+      return false;
+    };
+    filterObjects(o=>keep(o));
+    // Retain the array when nothing is removed so actor/contact caches remain reusable.
+    let kept=null;
+    for(let i=0;i<state.chasers.length;i++){
+      const c=state.chasers[i];if(keep(c,true)){if(kept)kept.push(c);}else if(!kept)kept=state.chasers.slice(0,i);
+    }
+    if(kept)state.chasers=kept;
+    if(removed){
+      state.speech=state.speech.filter(s=>!removed.has(s.object));
+      const releaseTarget=o=>{if(removed.has(o.divert)){o.divert=o.divertOrigin=o.obstacleDetour=null;o.avoidUntil=0;o.nextDivertCheck=0;}};
+      for(const o of state.objects){releaseTarget(o);if(removed.has(o.socialAnimal)){o.socialAnimal=null;o.socialUntil=0;}}
+      for(const c of state.chasers)releaseTarget(c);
+      for(const o of removed)p.slowContacts.delete(o);
+      if(removed.has(p.crashObstacle))p.crashObstacle=null;
+    }
+  }
   function protectScenery(){
     removeInactiveEnemies();
     // Newly selected terrain is below the viewport; don't reveal replacements on screen.
@@ -2645,7 +2675,7 @@ window.FROSTLINE_READY = (async () => {
     if(state.liftTimer>0){state.liftTimer-=dt;state.p.y-=S.lift.rideSpeed*dt;state.cam.y=ease(state.cam.y,state.p.y-H*S.render.playerScreenY/ZOOM,S.render.cameraYFollow,dt);if(state.liftTimer<=0)resetSummit(true);return;}
     state.activeTime+=state.started?dt:0;
     updateEndlessSpeed();
-    const p=state.p,previous={x:p.x,y:p.y};movePlayer(dt);constrainParadeBuildings(p,previous);extendEndless();ensureWorld();spawnFastSkier();
+    const p=state.p,previous={x:p.x,y:p.y};movePlayer(dt);constrainParadeBuildings(p,previous);pruneDistantEnemies();extendEndless();ensureWorld();spawnFastSkier();
     if(state.course){const run=state.course;if(!run.timingStarted&&p.y>=run.startY){run.timingStarted=true;run.time+=dt*clamp((p.y-run.startY)/(p.y-previous.y||1),0,1);}else if(run.timingStarted)run.time+=dt;spawnTerrain();}
     updateTerrainFeatures(dt,previous);updateVillageLife(dt);updateWildlife(dt);if(state.sceneCard||state.deathTimer)return;updateZombies(dt);if(state.sceneCard||state.deathTimer)return;updateFestivalTraffic(dt);updateSkiers(dt);updateSleighTeams(dt);resolveGroundPredatorPrey();updatePedestrians(dt);updateSpecialEvents();
     for(const o of state.objects){

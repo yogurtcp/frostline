@@ -2313,7 +2313,8 @@
       "catchUpSpeedKmh": 16,
       "challengeSeconds": 1,
       "challengeSpeedKmh": 42
-    }
+    },
+    "despawnScreens": 3
   },
   "predators": {
     "mealPauseSeconds": 0.8,

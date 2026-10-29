@@ -5667,6 +5667,12 @@
               "maximum": 70
             }
           }
+        },
+        "despawnScreens": {
+          "type": "number",
+          "minimum": 1,
+          "maximum": 20,
+          "description": "Remove encountered enemies farther than this many current viewport heights from the skier."
         }
       }
     },

@@ -20,6 +20,7 @@ window.loadFrostlineConfig = async function () {
   config.endless.yetis.wakeMetres ??= 140;
   config.endless.yetis.ravager ??= {};
   for(const [key,value] of Object.entries({firstMetres:1200,every:4,speedMultiplier:1.15,noticeMetres:55}))config.endless.yetis.ravager[key] ??= value;
+  config.chasers.despawnScreens ??= 3;
   config.chasers.dogCompanion ??= {};
   for(const [key,value] of Object.entries({feedMetres:8,maxFollowing:2,scareMetres:18,barkMetres:14,scareSeconds:2.5,retreatSeconds:3,followDistanceMetres:3.2,playRadiusMetres:5,cruiseSpeedKmh:24,catchUpSpeedKmh:16,challengeSeconds:1,challengeSpeedKmh:42}))config.chasers.dogCompanion[key] ??= value;
   const regionDefaults = {"enabled":true,"minimumWidthMetres":600,"order":["town","quiet","trees","lake","quiet","rivalRace","forest","cemetery","denseForest","scramble","quiet","christmas","quiet","halloween","quiet"],"firstMetres":450,"gapMetres":[0,0],"lengthMetres":{"beginner":[320,400],"quiet":[180,250],"lake":[240,330],"denseForest":[110,160],"forest":[300,450],"cemetery":[650,850],"crowd":[320,400],"scramble":[70,110]},"beginnerPeople":[65,140],"quietTreesPer100Metres":8,"forestTreesPer100Metres":[12,26],"cemeteryOpeningMetres":[12,18],"zombies":{"count":[8,14],"speedKmh":[7,11],"noticeMetres":22},"crowd":{"firstMetres":1200,"chance":0.55,"minimumGapMetres":1600,"maximumGapMetres":4200,"widthMetres":240,"people":[180,280]},"denseForestDensity":[1,2],"scrambleDensity":[1,1.35]};
