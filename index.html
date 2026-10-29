@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#f1f6ff">
-<meta name="frostline-build" content="4baea08564e3aba1">
+<meta name="frostline-build" content="36b83e5eb4f71e16">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="manifest" href="manifest.webmanifest">
@@ -22,7 +22,7 @@ body{padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bot
 <dialog id="install-help" aria-labelledby="install-title"><h2 id="install-title">Install Frostline</h2><p id="install-instructions"></p><p>Once saved, Frostline plays offline. Online startups check for updates. Installing this same site keeps your scores and settings. A downloaded file or a different browser uses a separate save.</p><p><a href="https://yogurtcp.github.io/frostline/">Open published game</a></p><button id="close-install-help">Done</button></dialog>
 <script>/* Install/offline support. Updates are checked once, before the game starts. */
 (() => {
-  const BUILD = '4baea08564e3aba1';
+  const BUILD = '36b83e5eb4f71e16';
   window.FROSTLINE_DEV = new URL(location.href).searchParams.has('dev');
   let prompt = null, playing = false;
   const standalone = () => window.matchMedia('(display-mode: standalone)').matches || navigator.standalone;
@@ -3993,9 +3993,14 @@ function drawPerson(o,s){
       }
       o.obstacleDetour=route;
     }else o.obstacleDetour=null;
-    const clear=a=>{const m=motion(a);return [Math.min(m.probe,m.speed*dt),m.probe*.5,m.probe].every(d=>valid(o.x+m.ux*d,o.y+m.uy*d));};
-    let heading=o.avoidUntil>clock?o.avoidHeading:angle;
-    if(!clear(heading)){
+    // A wall beyond nearby prey must not block the approach to that prey.
+    // Route waypoints retain full lookahead; this limit is only for actual actors.
+    const closingTarget=chasing&&target&&(target===state.p||target.type||target.kind);
+    const arrivalReach=closingTarget?Math.max(0,Math.hypot(target.x-o.x,target.y-o.y)-Math.min(S.chasers.captureDistance,S.wildlife.captureDistance)*.5):Infinity;
+    const clear=a=>{const m=motion(a),probe=Math.max(m.speed*dt,Math.min(m.probe,arrivalReach));return [Math.min(probe,m.speed*dt),probe*.5,probe].every(d=>valid(o.x+m.ux*d,o.y+m.uy*d));};
+    let heading=o.avoidUntil>clock?o.avoidHeading:angle,approachClear=false;
+    if(closingTarget&&arrivalReach<Math.max(A.avoidProbeDistance,speed*A.avoidLookaheadSeconds)&&!o.obstacleDetour&&o.avoidUntil>clock&&clear(angle)){heading=angle;o.avoidUntil=0;approachClear=true;}
+    if(!approachClear&&!clear(heading)){
       const turn=o.avoidSide??(o.id>.5?1:-1),options=A.avoidProbeDegrees.map(d=>angle+d*Math.PI/180*turn);
       let next=options.find(clear);
       // If a moving target left us inside a newly protected region, walk out continuously.

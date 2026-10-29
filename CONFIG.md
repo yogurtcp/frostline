@@ -240,3 +240,5 @@ Collision preparation now preserves the object array during no-op maintenance, r
 
 
 The world generator now starts from a fresh random 32-bit seed on each page load. `world.seed` remains a legacy config field and no longer fixes the initial layout. Debug shortcuts still save/replay their session seed so difficulty comparisons remain repeatable. Ordinary restarts continue the current random sequence; area order and route templates are unchanged.
+
+Predator approach near walls: when the chase target is an actual player/NPC, obstacle lookahead stops shortly before that target instead of probing through it into a house. Each proposed movement step still checks the normal building/tree/ice boundaries. Near a target, an avoidance turn can end early once the direct approach is clear. Synthetic route waypoints retain full lookahead, and committed long-log/fallen-tree corner routes remain committed. No speed, catch radius or house footprint settings changed.
