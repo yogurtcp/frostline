@@ -161,16 +161,59 @@ function dogWalkTile(frame){
   const source=spriteCache.get(key),tile=document.createElement('canvas');tile.width=26;tile.height=28;const t=tile.getContext('2d');t.imageSmoothingEnabled=false;t.drawImage(source,1,1);
   if(frame<8){
     const phase=frame/8*TAU;
-    for(const [i,[x,y,w,h]] of [[2,15,6,7],[12,20,7,6]].entries()){
-      t.clearRect(x+1,y+1,w,h);const swing=Math.sin(phase+i*Math.PI),lift=Math.round(Math.max(0,Math.cos(phase+i*Math.PI)));
-      for(let row=0;row<h;row++)t.drawImage(source,x,y+row,w,1,x+1+Math.round(swing*row*.2),y+row+1-lift,w,1);
+    const feet=[[2,15,5,7],[8,17,4,7],[12,20,7,6]];
+    // Clear all original feet first so a swinging neighbour cannot erase another leg.
+    for(const [x,y,w,h] of feet)t.clearRect(x+1,y+1,w,h);
+    for(const [i,[x,y,w,h]] of feet.entries()){
+      const swing=Math.sin(phase+(i===1?0:Math.PI)),lift=Math.round(Math.max(0,Math.cos(phase+(i===1?0:Math.PI)))*2);
+      for(let row=0;row<h;row++)t.drawImage(source,x,y+row,w,1,x+1+Math.round(swing*row*.34),y+row+1-lift,w,1);
     }
   }
   dogWalkTiles.set(frame,tile);return tile;
 }
 function drawDog(o,s,width=o.width||39){
   const gait=o.dogGait??={x:o.x,y:o.y,time:clock,phase:0,active:false,flip:false},dt=clock-gait.time,dx=o.x-gait.x,dy=o.y-gait.y;
-  if(dt>0){const distance=Math.hypot(dx,dy);gait.active=distance>.01;if(gait.active){gait.phase=(gait.phase+distance/Math.max(28,width*1.3))%1;if(dx/dt<-3)gait.flip=true;else if(dx/dt>3)gait.flip=false;}gait.x=o.x;gait.y=o.y;gait.time=clock;}
+  if(dt>0){const distance=Math.hypot(dx,dy);gait.active=distance>.01;if(gait.active){gait.phase=(gait.phase+distance/Math.max(28,width*1.3))%1;if(dx/dt<-12)gait.flip=true;else if(dx/dt>12)gait.flip=false;}gait.x=o.x;gait.y=o.y;gait.time=clock;}
   const tile=dogWalkTile(gait.active?Math.floor(gait.phase*8):8),w=Math.round(width*ZOOM*26/24),h=Math.round(w*28/26),hop=o.hopUntil>clock?Math.sin((1-(o.hopUntil-clock)/1.2)*Math.PI)*7:0;
   shadow(s.x,s.y,11,3,.1);ctx.save();ctx.translate(Math.round(s.x),Math.round(s.y-hop));if(gait.flip)ctx.scale(-1,1);ctx.drawImage(tile,-Math.round(w/2),-h+1,w,h);ctx.restore();
+  if(o.dogTreatAt!==undefined&&clock-o.dogTreatAt<.7){
+    const t=clamp((clock-o.dogTreatAt)/.45,0,1),from=screen(o.dogTreatFrom.x,o.dogTreatFrom.y),x=mix(from.x,s.x,t),y=mix(from.y,s.y-10,t)-Math.sin(t*Math.PI)*15;
+    if(t<1){box(x-2,y-2,4,3,'#9b403e');box(x+1,y-3,2,2,'#f2c98f');}
+    else{box(s.x-2,s.y-29,2,3,'#cc5655');box(s.x+1,s.y-29,2,3,'#cc5655');box(s.x-1,s.y-27,3,2,'#cc5655');}
+  }
+  if(o.barkAt!==undefined&&clock-o.barkAt<.8){const r=5+(clock-o.barkAt)*19,side=o.retreatAngle&&Math.cos(o.retreatAngle)<0?-1:1;for(const dy of [-3,0,3])box(s.x+side*r,s.y-12+dy,2,1,'#dba45a');}
+}
+
+// Native articulated residents: the coat/head never swap shape between poses.
+const personMotionTiles=new Map();
+function personMotionTile(type,action,frame){
+  const key=type+':'+action+':'+frame;if(personMotionTiles.has(key))return personMotionTiles.get(key);
+  const a=atlas[type],source=document.createElement('canvas');source.width=a[3];source.height=a[4];const src=source.getContext('2d');src.drawImage(images[a[0]],a[1],a[2],a[3],a[4],0,0,a[3],a[4]);
+  const tile=document.createElement('canvas');tile.width=a[3]+8;tile.height=a[4]+5;const t=tile.getContext('2d');t.imageSmoothingEnabled=false;
+  const w=a[3],h=a[4],phase=frame/8*TAU,walking=action==='walk',legY=h-7,armY=9,armH=h-15;
+  t.drawImage(source,4,3);t.clearRect(4,legY+3,w,7);t.clearRect(4,armY+3,4,armH);t.clearRect(w,armY+3,4,armH);
+  for(const side of [0,1]){
+    const swing=walking?Math.sin(phase+side*Math.PI):0,lift=walking?Math.round(Math.max(0,Math.cos(phase+side*Math.PI))*2):0,x=side?10:4;
+    for(let y=0;y<7;y++)t.drawImage(source,x,legY+y,5,1,x+4+Math.round(swing*y*.28),legY+y+3-lift,5,1);
+  }
+  const limb=(x,y,xx,yy,width,color)=>{t.fillStyle=color;const steps=Math.max(Math.abs(xx-x),Math.abs(yy-y),1);for(let i=0;i<=steps;i++)t.fillRect(Math.round(mix(x,xx,i/steps))-Math.floor(width/2),Math.round(mix(y,yy,i/steps))-Math.floor(width/2),width,width);};
+  for(const side of [0,1]){
+    const dir=side?1:-1,x=4+(side?w-4:3),y=3+armY+1;
+    let upper=walking?Math.sin(phase+side*Math.PI)*.25:0,lower=upper;
+    if(side&&action==='wave'){upper=1.1+Math.cos(phase)*.3;lower=2.4+Math.sin(phase)*.5;}
+    if(side&&action==='chat'){upper=.7+Math.cos(phase)*.2;lower=1.2+Math.sin(phase)*.4;}
+    if(side&&action==='serve'){upper=1+Math.cos(phase)*.2;lower=1.5+Math.sin(phase)*.3;}
+    if(action==='cheer'){upper=2+Math.sin(phase)*.3;lower=2.6+Math.cos(phase)*.3;}
+    const ex=x+dir*Math.sin(upper)*3.5,ey=y+Math.cos(upper)*3.5,hx=ex+dir*Math.sin(lower)*3,hy=ey+Math.cos(lower)*3;
+    limb(x,y,ex,ey,4,'#202b43');limb(ex,ey,hx,hy,3,'#202b43');limb(x,y,ex,ey,2,'#a53b4c');limb(ex,ey,hx,hy,2,'#b8444b');t.fillStyle='#e6b784';t.fillRect(Math.round(hx)-1,Math.round(hy),2,2);
+  }
+  if(personMotionTiles.size>=144)personMotionTiles.delete(personMotionTiles.keys().next().value);personMotionTiles.set(key,tile);return tile;
+}
+function drawPerson(o,s){
+  const action=o.cheerUntil>clock?'cheer':o.serveUntil>clock?'serve':o.waveUntil>clock||o.throwUntil>clock?'wave':o.chatUntil>clock?'chat':o.walking?'walk':'idle';
+  const phase=action==='walk'?(o.walkCycle||0)/TAU:action==='idle'?0:clock*.9+(o.phase||0)/TAU,frame=action==='idle'?0:Math.floor(phase*8)%8;
+  const tile=personMotionTile(o.type,action,frame),scale=o.width*ZOOM/atlas[o.type][3],w=Math.round(tile.width*scale),h=Math.round(tile.height*scale),flip=action==='serve'?state.p.x<o.x:action==='chat'&&o.chatPartner?o.chatPartner.x<o.x:o.walkFacing<0;
+  ctx.save();ctx.translate(s.x,s.y);if(flip)ctx.scale(-1,1);ctx.drawImage(tile,-Math.round(w/2),-h+2,w,h);ctx.restore();
+  if(o.socialUntil>clock&&o.socialAnimal){const side=Math.sign(o.socialAnimal.x-o.x)||1;line(s.x+side*3,s.y-9,s.x+side*7,s.y-8-Math.round(Math.sin(clock*5)), '#d8af83',2);if(o.socialAnimal.type==='rabbit')box(s.x+side*8,s.y-7,3,2,'#be965e');}
+  if(o.job==='bakery'||o.job==='market')box(s.x+(flip?-5:2),s.y-10,4,3,'#e9dfc8');
 }

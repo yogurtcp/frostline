@@ -63,7 +63,13 @@
       "wakeSeconds": 2.5,
       "maxNearbyHunters": 4,
       "nearbyMetres": 180,
-      "wakeMetres": 140
+      "wakeMetres": 140,
+      "ravager": {
+        "firstMetres": 1200,
+        "every": 4,
+        "speedMultiplier": 1.15,
+        "noticeMetres": 55
+      }
     },
     "maxPlayerSpeedKmh": 130,
     "speedRampMetres": 9600,
@@ -2286,7 +2292,16 @@
     },
     "yetiCelebrationSeconds": 2.2,
     "yetiCelebrationHopsPerSecond": 2.4,
-    "yetiCelebrationJumpPixels": 14
+    "yetiCelebrationJumpPixels": 14,
+    "dogCompanion": {
+      "feedMetres": 8,
+      "maxFollowing": 2,
+      "speedMultiplier": 1.18,
+      "scareMetres": 18,
+      "barkMetres": 14,
+      "scareSeconds": 2.5,
+      "retreatSeconds": 3
+    }
   },
   "predators": {
     "mealPauseSeconds": 0.8,

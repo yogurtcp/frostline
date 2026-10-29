@@ -295,7 +295,7 @@ function warmFestivalGuestAtlas(kind){
   for(const style of styles)for(let skin=0;skin<3;skin++)for(const step of [-1,-.25,0,.25,1])festivalGuestFrame(style,skin,step);
 }
 function drawFestivalGuest(o,s){
-  const raw=o.walking?Math.sin(clock*8+o.phase):0,step=raw===0?0:Math.sign(raw)*(Math.abs(raw)>=.5?1:.25);
+  const raw=o.walking?Math.sin(o.walkCycle||0):0,step=raw===0?0:Math.sign(raw)*(Math.abs(raw)>=.5?1:.25);
   const tile=festivalGuestFrame(o.costume,Math.floor(o.phase*3)%3,step),x=Math.round(s.x),y=Math.round(s.y);
   shadow(x,y,o.costume==='santa'?11:7,2);ctx.drawImage(festivalGuestAtlas,tile.x,tile.y,32,44,x-16,y-40,32,44);
 }

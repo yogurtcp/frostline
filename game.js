@@ -58,6 +58,11 @@ window.FROSTLINE_READY = (async () => {
   function announce(title,detail='',color=C.teal,duration=S.render.messageSeconds) { state.messages.push({title,detail,color,until:clock+duration,start:clock});if(state.messages.length>S.render.messageLimit)state.messages.shift(); }
   function say(text,o,time=S.render.speechSeconds) { state.speech.push({text,object:o,until:clock+time}); if(state.speech.length>S.render.speechLimit)state.speech.shift(); }
   function burst(x,y,color,n=12) { for(let i=0;i<n;i++)state.particles.push({x,y,vx:range(-50,50),vy:range(-65,30),life:range(.25,.75),color}); }
+  function filterObjects(keep){
+    const source=state.objects;let result=null;
+    for(let i=0;i<source.length;i++){const o=source[i];if(keep(o)){if(result)result.push(o);}else if(!result)result=source.slice(0,i);}
+    if(result)state.objects=result;
+  }
   function entity(type,x,y,extra={}) {
     const o={type,x,y,homeX:x,homeY:y,id:random(),width:40,r:13,phase:range(0,TAU),touched:false,...extra};
     if((type==='pine'||type==='fir')&&!o.treeVariant)o.treeVariant=pick(S.spawnTables.treeVariants);
@@ -782,8 +787,9 @@ window.FROSTLINE_READY = (async () => {
           for(let i=0;i<8&&(patchAt(x,at)||state.objects.some(o=>o.r>0&&obstacleClearance(o,x,at)<40||o.type==='gate'&&Math.abs(o.x-x)<o.half+45&&Math.abs(o.y-at)<80));i++){
             at+=25*scale;x=path?encounterPathX(path,at)+side*corridor.half*(i%2?.68:-.68):x+side*35*scale;
           }
-          const speed=mix(...E.yetis.speedKmh,P.t),tier=speed>90?'special':speed>78?'fast':'slow';
-          if(!endlessTownAt(x,at)&&!patchAt(x,at)&&!state.objects.some(o=>o.r>0&&obstacleClearance(o,x,at)<40))entity('lurker',x,at,{width:55,r:18,arcadeRun:section,arcadeTier:tier,yetiSpeedKmh:speed*scale,endlessBaseKmh:speed,shoreLake:near,wakeSeconds:E.yetis.wakeSeconds});
+          const R=E.yetis.ravager,eligible=distance>=R.firstMetres,number=(a.yetiSpawnCount||0)+1,ravager=eligible&&number%R.every===0;
+          const speed=ravager?E.yetis.speedKmh[1]*R.speedMultiplier:mix(...E.yetis.speedKmh,P.t),tier=ravager?'fast':speed>90?'special':speed>78?'fast':'slow';
+          if(!endlessTownAt(x,at)&&!patchAt(x,at)&&!state.objects.some(o=>o.r>0&&obstacleClearance(o,x,at)<40)){entity('lurker',x,at,{width:55,r:18,arcadeRun:section,arcadeTier:tier,ravager,yetiSpeedKmh:speed*scale,endlessBaseKmh:speed,shoreLake:near,wakeSeconds:E.yetis.wakeSeconds});a.yetiSpawnCount=number;}
         }
         a.nextYetiY=Math.max(a.nextYetiY,endY)+mix(...E.yetis.intervalMetres,P.t)*PX_PER_M*scale;
       }
@@ -810,7 +816,7 @@ window.FROSTLINE_READY = (async () => {
     const far=o=>o.y<state.p.y-S.endless.yetis.nearbyMetres*PX_PER_M*a.speedScale;
     const dormant=o=>!o.dead&&!o.eaten&&(o.type==='lurker'||['wolf','bear'].includes(o.type)&&!o.linkedChase&&!o.wolfAwake&&!(o.alertUntil>clock)&&!o.divert&&!(o.feedingUntil>clock));
     // Discard missed, unengaged threats once offscreen. Awake hunters keep physically pursuing.
-    state.objects=state.objects.filter(o=>!((dormant(o)&&(far(o)||o.y<view.top-100))||(['skier','boarder'].includes(o.type)&&o.y>a.plannedY+800*a.speedScale))||!activeCourseOwner(o));
+    filterObjects(o=>!((dormant(o)&&(far(o)||o.y<view.top-100))||(['skier','boarder'].includes(o.type)&&o.y>a.plannedY+800*a.speedScale))||!activeCourseOwner(o));
   }
   function retireArcadeBlock(run){
     const owned=o=>{const owner=o.arcadeRun||o.chaseRun;return owner&&(owner===run||run?.block&&owner.block===run.block);};
@@ -1523,11 +1529,11 @@ window.FROSTLINE_READY = (async () => {
   function updateVillageLife(dt){
     state.villageLifeElapsed=(state.villageLifeElapsed||0)+dt;if(state.villageLifeElapsed<.05-1e-8)return;dt=state.villageLifeElapsed;state.villageLifeElapsed=0;
     const p=state.p,L=S.villageLife,near=state.objects.filter(o=>!o.dead&&!o.eaten&&Math.hypot(o.x-p.x,o.y-p.y)<S.pedestrians.activeRadius);
-    const animals=near.filter(o=>['rabbit','fox','cat','dog'].includes(o.type));
+    const animals=near.filter(o=>['rabbit','fox','cat','dog'].includes(o.type)&&!o.dogCompanion&&!o.dogRetreat);
     for(const o of animals)if(o.type==='dog'&&o.socialUntil>clock&&o.socialPartner&&Math.hypot(o.x-o.socialPartner.x,o.y-o.socialPartner.y)>30)travel(o,Math.atan2(o.socialPartner.y-o.y,o.socialPartner.x-o.x),L.npcAnimalApproachSpeed,dt);
     for(const o of near)if(o.type==='pigeons'&&Math.hypot(o.x-p.x,o.y-p.y)<65&&state.started)touchVillageProp(o);
     for(const n of near){
-      if(n.backyardPet&&Math.hypot(n.x-p.x,n.y-p.y)<75)touchVillageProp(n);
+      if(n.backyardPet&&!n.dogFed&&Math.hypot(n.x-p.x,n.y-p.y)<75)touchVillageProp(n);
       if(!n.type.startsWith('person')||!n.town||n.fearUntil>clock)continue;
       const distance=Math.hypot(n.x-p.x,n.y-p.y);
       if(distance<170&&clock>=(n.nextWave||0)){n.waveUntil=clock+1.8;n.nextWave=clock+12;}
@@ -1679,7 +1685,7 @@ window.FROSTLINE_READY = (async () => {
     };
     let removed;
     const keep=o=>{if(!blocked(o))return true;(removed??=new Set()).add(o);return false;};
-    state.objects=state.objects.filter(keep);state.chasers=state.chasers.filter(keep);
+    filterObjects(keep);state.chasers=state.chasers.filter(keep);
     if(removed)state.speech=state.speech.filter(s=>!removed.has(s.object));
   }
   function protectScenery(){
@@ -1732,12 +1738,13 @@ window.FROSTLINE_READY = (async () => {
   function objectGroups(){
     const c=objectGroupCache;
     if(c.time===clock&&c.source===state.objects&&c.length===state.objects.length)return c.groups;
-    const groups={wildlife:[],animals:[],skiers:[],zombies:[],mausoleums:[],groundHunters:[],terrainFeatures:[],ground:[],plots:[],sleighs:[]};
+    const groups={wildlife:[],animals:[],dogs:[],skiers:[],zombies:[],mausoleums:[],groundHunters:[],terrainFeatures:[],ground:[],plots:[],sleighs:[]};
     for(const o of state.objects){
       const type=o.type;
       if(o.animal||o.retiring||type==='wolf')groups.animals.push(o);
       if(o.grandMausoleum)groups.mausoleums.push(o);if(o.santaSleigh)groups.sleighs.push(o);
       switch(type){
+        case 'dog':groups.dogs.push(o);break;
         case 'rabbit':case 'cat':case 'fox':groups.wildlife.push(o);break;
         case 'wolf':groups.wildlife.push(o);groups.groundHunters.push(o);break;
         case 'skier':case 'boarder':groups.wildlife.push(o);groups.skiers.push(o);break;
@@ -1851,13 +1858,13 @@ window.FROSTLINE_READY = (async () => {
     // Retain the linear scan's tie order when two prey have the same contact time.
     found.sort((a,b)=>a-b);return found.map(i=>actors[i]);
   }
-  function contactPrey(hunter,previous,radius=S.chasers.captureDistance,index=null){
+  function contactPrey(hunter,previous,radius=S.chasers.captureDistance,index=null,actors=null,eligible=ediblePrey){
     let meal=null,best=Infinity;
-    for(const o of index?nearbyContactPrey(index,hunter,previous,radius):preyActors()){
+    for(const o of index?nearbyContactPrey(index,hunter,previous,radius):actors||preyActors()){
       const moving=o.motionFromStamp===clock,px=moving?o.motionFromX:o.x,py=moving?o.motionFromY:o.y;
       const sx=previous.x-px,sy=previous.y-py,dx=hunter.x-o.x,dy=hunter.y-o.y;
       if(sx>radius&&dx>radius||sx< -radius&&dx< -radius||sy>radius&&dy>radius||sy< -radius&&dy< -radius)continue;
-      if(!ediblePrey(o))continue;
+      if(!eligible(o))continue;
       const vx=dx-sx,vy=dy-sy,t=clamp(-(sx*vx+sy*vy)/(vx*vx+vy*vy||1),0,1);
       if(Math.hypot(sx+vx*t,sy+vy*t)>=radius)continue;
       if(humanArea(o.x,o.y)&&!courseCreature(hunter,o.x,o.y))continue;
@@ -1888,6 +1895,90 @@ window.FROSTLINE_READY = (async () => {
       if(!wolf&&!walker)continue;
       const previous=o.motionFromStamp===clock?{x:o.motionFromX,y:o.motionFromY}:o;
       consumeNearbyPrey(o,previous,wolf?S.wildlife.feedingSeconds:S.predators.mealPauseSeconds,wolf?S.wildlife.captureDistance:S.chasers.captureDistance,contacts);
+    }
+  }
+  const ravagerCache={};
+  function ravagerPrey(o,hunter){
+    if(o===hunter||o.eaten||o.dead||o.retiring||o.leaving||o.type==='awakened')return false;
+    if(ediblePrey(o))return true;
+    const kind=enemyKind(o);
+    return (kind==='fox'||MONSTER_KINDS.has(kind))&&(o.r>0||o.kind==='fast'||o.kind==='slow'||o.kind==='bear')&&!(kind==='zombie'&&o.zombieState==='spent');
+  }
+  function ravagerActors(){
+    const c=ravagerCache;
+    if(c.time!==clock||c.source!==state.objects||c.length!==state.objects.length||c.chasers!==state.chasers||c.chaserLength!==state.chasers.length){
+      Object.assign(c,{time:clock,source:state.objects,length:state.objects.length,chasers:state.chasers,chaserLength:state.chasers.length});
+      c.actors=state.objects.filter(o=>ravagerPrey(o,null));for(const o of state.chasers)if(ravagerPrey(o,null))c.actors.push(o);
+    }
+    return c.actors;
+  }
+  function updateRavagerTarget(hunter){
+    const old=hunter.divert,R=S.endless.yetis.ravager;
+    if(old&&ravagerPrey(old,hunter)&&(!humanArea(old.x,old.y)||courseCreature(hunter,old.x,old.y))){
+      const d=Math.hypot(old.x-hunter.x,old.y-hunter.y);
+      if(hunter.divertBestDistance===undefined||d<hunter.divertBestDistance-1){hunter.divertBestDistance=d;hunter.divertUntil=clock+S.predators.divertTimeoutSeconds;}
+      if(clock<(hunter.divertUntil||0))return;
+    }
+    hunter.divert=null;
+    if(clock<(hunter.nextDivertCheck||0))return;
+    hunter.nextDivertCheck=clock+.5;
+    let best=null,distance=R.noticeMetres*PX_PER_M*endlessSpeedScale(hunter);
+    for(const o of ravagerActors()){
+      if(!ravagerPrey(o,hunter)||Math.abs(o.x-hunter.x)>=distance||Math.abs(o.y-hunter.y)>=distance)continue;
+      const d=Math.hypot(o.x-hunter.x,o.y-hunter.y);
+      if(d<distance&&(!humanArea(o.x,o.y)||courseCreature(hunter,o.x,o.y))){best=o;distance=d;}
+    }
+    if(best){hunter.divert=best;hunter.divertBestDistance=distance;hunter.divertUntil=clock+S.predators.divertTimeoutSeconds;hunter.avoidUntil=0;hunter.obstacleDetour=null;}
+  }
+  function ravagerContact(hunter,previous){
+    return contactPrey(hunter,previous,S.chasers.captureDistance,null,ravagerActors(),o=>ravagerPrey(o,hunter));
+  }
+  function eatRavagerPrey(hunter,meal,previous){
+    const hostile=MONSTER_KINDS.has(enemyKind(meal));
+    eatChaserPrey(hunter,meal,previous,hostile?1.2:S.predators.mealPauseSeconds);
+    if(hostile){meal.eaten=false;meal.dead=true;meal.animal=false;meal.vx=meal.vy=meal.roam=0;meal.motionVx=meal.motionVy=meal.travelSpeed=0;meal.travelStamp=clock;meal.fadeUntil=clock+.6;burst(meal.x,meal.y,'#93a6c7',10);}
+  }
+  function feedDog(o,previous){
+    const p=state.p,D=S.chasers.dogCompanion;
+    if(o.type!=='dog'||o.dogFed||o.eaten||o.dead||p.air>0||p.fall||p.awaitingInput||p.speed<S.physics.walkingBumpLimit)return false;
+    const distance=segmentDistance(o.x,o.y,previous,p);
+    if(distance<=(o.r||10)+S.physics.playerRadius+3||distance>D.feedMetres*PX_PER_M)return false;
+    Object.assign(o,{dogFed:true,dogCompanion:true,dogRetreat:false,roam:0,vx:0,vy:0,socialUntil:0,visitUntil:0,hopUntil:clock+1.2,arcadeRun:state.course,dogTreatAt:clock,dogTreatFrom:{x:p.x,y:p.y-16}});
+    delete o.worldChunk;o.socialPartner=null;
+    for(const n of state.objects)if(n.socialAnimal===o){n.socialAnimal=null;n.socialUntil=0;}
+    say('WOOF! ♥',o,1.5);burst(o.x,o.y,C.gold,5);return true;
+  }
+  function updateDogCompanions(dt,previous){
+    const p=state.p,D=S.chasers.dogCompanion;
+    const dogs=objectGroups().dogs;
+    let following=0;for(const o of dogs)if(o.dogCompanion&&!o.dead&&!o.eaten)following++;
+    for(const o of dogs){
+      if(o.eaten||o.dead)continue;
+      if(!o.dogCompanion&&!o.dogRetreat&&following<D.maxFollowing&&feedDog(o,previous))following++;
+      if(!o.dogCompanion&&!o.dogRetreat)continue;
+      const speed=Math.max(topSpeed(),Math.hypot(p.vx,p.vy))*D.speedMultiplier;
+      if(o.dogRetreat){
+        travel(o,o.retreatAngle,speed,dt,false,false,true,false,null,true);
+        if(clock>=o.retreatUntil){o.eaten=true;o.r=0;}continue;
+      }
+      let threat=null,gap=D.scareMetres*PX_PER_M*endlessSpeedScale(o);
+      for(const c of state.chasers){
+        if(!['fast','slow'].includes(c.kind)||c.dead||c.eaten||c.leaving||c.waiting||c.wakeUntil>clock||c.stunnedUntil>clock||c.feedingUntil>clock||c.scaredUntil>clock)continue;
+        const d=Math.hypot(c.x-p.x,c.y-p.y),toDog=Math.hypot(c.x-o.x,c.y-o.y);
+        // A diverted Yeti is only an emergency if already within striking distance.
+        if(c.divert&&d>S.chasers.captureDistance*3)continue;
+        const approaching=(p.x-c.x)*(c.motionVx||0)+(p.y-c.y)*(c.motionVy||0)>0||c.y<=p.y;
+        if(approaching&&d<gap&&toDog<D.barkMetres*PX_PER_M*endlessSpeedScale(o)){gap=d;threat=c;}
+      }
+      if(threat){
+        threat.scaredUntil=clock+D.scareSeconds;threat.divert=threat.divertOrigin=null;threat.obstacleDetour=null;threat.avoidUntil=0;threat.nextDivertCheck=threat.scaredUntil;
+        threat.motionVx=threat.motionVy=threat.travelSpeed=0;threat.travelStamp=clock;
+        Object.assign(o,{dogCompanion:false,dogRetreat:true,leaving:true,barkAt:clock,retreatUntil:clock+D.retreatSeconds,retreatAngle:Math.atan2(-.35,o.x>=p.x?1:-1)});
+        say('WOOF! WOOF!',o,1.25);burst(o.x,o.y,C.gold,8);beep(210,.08,'square');continue;
+      }
+      const side=(o.id||0)>.5?1:-1,target={x:p.x+side*40,y:p.y-65},dx=target.x-o.x,dy=target.y-o.y,d=Math.hypot(dx,dy);
+      if(d>6)travel(o,Math.atan2(dy,dx),Math.min(speed,d/dt),dt,false,false,true,false,target,true);
+      else{o.motionVx=o.motionVy=o.travelSpeed=0;o.travelStamp=clock;}
     }
   }
   function patchAt(x,y){return freshIceCache().find(o=>lakeContains(o,x,y));}
@@ -2149,6 +2240,7 @@ window.FROSTLINE_READY = (async () => {
     return Math.hypot(v[0],v[1])*S.physics.hudKmhPerSpeed<=S.physics.minimumCollisionKmh;
   }
   function hit(o) {
+    if(o.dogCompanion||o.dogRetreat)return;
     if(o.mischief||o.type==='snowman'){if(!state.p.fall&&state.p.air<=0)touchVillageProp(o);return;}
     if(o.collectible){collectMushroom(o);return;}
     const p=state.p;if(o.dead||o.stunnedUntil>clock&&!['wolf','bear','lurker','zombie'].includes(o.type))return;
@@ -2217,7 +2309,7 @@ window.FROSTLINE_READY = (async () => {
     if(p.air>0 && !['lodge','rental','mausoleum','iceBlock','ruinWall','areaBarrier'].includes(o.type))return;
     o.touched=true;
     if((o.type==='pine'||o.type==='fir')&&fast&&!uphill) {
-      o.type='stump';o.width=65;o.r=15;burst(o.x,o.y,'#658479',24);say('TIMBERRR!',o);beep(115,.15,'sawtooth');
+      o.type='stump';o.width=65;o.r=15;invalidateSolidGrids();burst(o.x,o.y,'#658479',24);say('TIMBERRR!',o);beep(115,.15,'sawtooth');
     }
     if(o.type==='sled'&&fast){o.vx=90*Math.sign(p.vx||1);o.vy=240;p.speed*=S.physics.sledSpeedRetention;say('Express delivery!',o);return;}
     if(o.type==='bush'){o.flatten=true;p.speed*=S.physics.bushSpeedRetention;burst(o.x,o.y,C.gold,7);return;}
@@ -2492,9 +2584,9 @@ window.FROSTLINE_READY = (async () => {
     updateTerrainFeatures(dt,previous);updateVillageLife(dt);updateWildlife(dt);if(state.sceneCard||state.deathTimer)return;updateZombies(dt);if(state.sceneCard||state.deathTimer)return;updateFestivalTraffic(dt);updateSkiers(dt);updateSleighTeams(dt);resolveGroundPredatorPrey();updatePedestrians(dt);updateSpecialEvents();
     for(const o of state.objects){
       if(o.type==='mistletoe'&&tryMistletoe(o)||o.cocoaShop&&tryCocoaShop(o))return;
-      if(o.type!=='skier'&&o.type!=='boarder'&&o.type!=='rollingSnowball'&&!o.animal&&(o.vx||o.vy)){o.motionFromX=o.x;o.motionFromY=o.y;o.motionFromStamp=clock;o.motionVx=o.vx||0;o.motionVy=(o.vy||0)*cemeteryYScale(o.x,o.y);o.x+=o.motionVx*dt;o.y+=o.motionVy*dt;o.travelSpeed=Math.hypot(o.motionVx,o.motionVy);o.travelStamp=clock;}
+      if(o.type!=='skier'&&o.type!=='boarder'&&o.type!=='rollingSnowball'&&!o.animal&&(o.vx||o.vy)){o.motionFromX=o.x;o.motionFromY=o.y;o.motionFromStamp=clock;o.motionVx=o.vx||0;o.motionVy=(o.vy||0)*cemeteryYScale(o.x,o.y);o.x+=o.motionVx*dt;o.y+=o.motionVy*dt;o.travelSpeed=Math.hypot(o.motionVx,o.motionVy);o.travelStamp=clock;if(NPC_STATIC_SOLIDS.has(o.type))invalidateSolidGrids();}
       if(o.cheerUntil>clock&&clock>=(o.nextCheer||0)&&Math.hypot(o.x-p.x,o.y-p.y)<650){say(pick(o.cheerRun?.objective==='mushrooms'?S.dialogue.mushroomCheers:S.dialogue.cheers),o,2.2);o.nextCheer=clock+3.4+o.phase*.2;}
-      if(o.roam&&!(o.socialUntil>clock))o.x+=Math.cos(clock*.8+o.phase)*o.roam*dt*.3;
+      if(o.roam&&!o.dogCompanion&&!o.dogRetreat&&!(o.socialUntil>clock))o.x+=Math.cos(clock*.8+o.phase)*o.roam*dt*.3;
 
       if(o.type==='arcadeOvertaker'&&o.arcadeRun===state.course&&p.y>=o.y&&!o.collected){
         o.collected=true;entity('skier',p.x+pick([-1,1])*range(...S.skiers.fastSpawnOffsetX),viewBounds().top-S.skiers.fastSpawnAbove,{width:44,r:12,fast:true,vy:topSpeed()*S.skiers.fastSpeedRatio,vx:range(-13,13),arcadeRun:o.arcadeRun});
@@ -2503,7 +2595,7 @@ window.FROSTLINE_READY = (async () => {
       if(creature&&monsterContact(o))hit(o);
       if(state.sceneCard||state.deathTimer)return;
       if(o.dead)continue;
-      if(state.started&&!(o.stunnedUntil>clock)&&!o.retiring&&o.type==='lurker'&&(courseCreature(o,p.x,p.y)||!humanArea(o.x,o.y)&&!humanArea(p.x,p.y))&&(Math.hypot(o.x-p.x,o.y-p.y)<yetiWakeDistance(o)||o.shoreLake&&state.objects.some(q=>['skier','boarder'].includes(q.type)&&!q.eaten&&!q.dead&&q.r>0&&Math.hypot(q.x-o.x,q.y-o.y)<S.wildlife.yetiWakeDistance*endlessSpeedScale(o)&&!patchAt(q.x,q.y)))){o.type='awakened';o.r=0;state.chasers.push({kind:o.arcadeTier==='slow'?'slow':'fast',arcadeTier:o.arcadeTier,chaseRun:o.arcadeRun,shoreLake:o.shoreLake,endlessBaseKmh:o.endlessBaseKmh,x:o.x,y:o.y,speed:o.arcadeRun?o.yetiSpeedKmh/S.physics.hudKmhPerSpeed:topSpeed()*S.wildlife.yetiWildSpeedRatio,wakeUntil:clock+yetiWakeDelay(o),phase:o.phase,expires:p.y+S.wildlife.yetiWildChaseDistance,talkAt:clock+6});say('Oh. Breakfast.',o);}
+      if(state.started&&!(o.stunnedUntil>clock)&&!o.retiring&&o.type==='lurker'&&(courseCreature(o,p.x,p.y)||!humanArea(o.x,o.y)&&!humanArea(p.x,p.y))&&(Math.hypot(o.x-p.x,o.y-p.y)<yetiWakeDistance(o)||o.shoreLake&&state.objects.some(q=>['skier','boarder'].includes(q.type)&&!q.eaten&&!q.dead&&q.r>0&&Math.hypot(q.x-o.x,q.y-o.y)<S.wildlife.yetiWakeDistance*endlessSpeedScale(o)&&!patchAt(q.x,q.y)))){o.type='awakened';o.r=0;state.chasers.push({kind:o.arcadeTier==='slow'?'slow':'fast',arcadeTier:o.arcadeTier,ravager:o.ravager,chaseRun:o.arcadeRun,shoreLake:o.shoreLake,endlessBaseKmh:o.endlessBaseKmh,x:o.x,y:o.y,speed:o.arcadeRun?o.yetiSpeedKmh/S.physics.hudKmhPerSpeed:topSpeed()*S.wildlife.yetiWildSpeedRatio,wakeUntil:clock+yetiWakeDelay(o),phase:o.phase,expires:p.y+S.wildlife.yetiWildChaseDistance,talkAt:clock+6});say('Oh. Breakfast.',o);}
       if(o.type==='gate'&&o.run===state.course&&!o.checked&&previous.y<o.y&&p.y>=o.y)crossCourseGate(o,previous,p);
       if(o.type==='entrance'&&!state.course&&previous.y<o.y&&p.y>=o.y&&Math.abs(p.x-o.x)<o.half){startCourse(o.stage,o);break;}
       if(!state.arcade&&!state.endless&&o.type==='lift'&&!o.used&&previous.y<o.y&&p.y>=o.y&&Math.abs(p.x-o.x)<o.half){o.used=true;state.liftTimer=S.lift.rideSeconds;p.speed=0;announce('UP WE GO','Next stop: the summit.',C.teal,3);}
@@ -2522,13 +2614,13 @@ window.FROSTLINE_READY = (async () => {
     else if(state.zone.kind==='start'&&p.y>S.world.autoCourseY)startCourse('free',{x:p.x,y:S.world.autoCourseY});
     else if(state.zone.kind==='village'&&p.y>state.zone.end){if(state.arcade){state.arcade.stage++;startCourse('arcade',{x:state.zone.x,y:p.y});}else startCourse('free',{x:p.x,y:p.y});}
     if(state.arcade)state.arcade.furthestY=Math.max(state.arcade.furthestY,p.y);
-    updateEndless();updateChasers(dt);if(state.sceneCard||state.deathTimer)return;
+    updateEndless();updateDogCompanions(dt,previous);updateChasers(dt);if(state.sceneCard||state.deathTimer)return;
     // Confirm landing feedback after obstacles and chasers have resolved this step.
     if(p.landingFeedback){
       const landing=p.landingFeedback;p.landingFeedback=null;
       if(state.p===p&&!p.fall&&!p.awaitingInput&&!state.deathTimer){announce(landing.title,`+${landing.points} points`,C.blue,1.5);beep(710,.08);}
     }
-    state.objects=state.objects.filter(o=>!o.eaten&&!o.collected&&o.type!=='awakened'&&(!o.dead||clock<o.fadeUntil)&&(o.worldChunk||o.grandMausoleum&&o.triggerAt!==undefined&&o.released<o.waveSize||(o.type==='wolf'&&o.linkedChase||o.type==='zombie'&&(o.awake||o.graveWakeAt!==undefined)&&o.zombieState!=='spent')&&activeCourseOwner(o)||o.y>p.y-S.world.sceneryRetentionBehind));
+    filterObjects(o=>!o.eaten&&!o.collected&&o.type!=='awakened'&&(!o.dead||clock<o.fadeUntil)&&(o.dogCompanion||o.dogRetreat||o.worldChunk||o.grandMausoleum&&o.triggerAt!==undefined&&o.released<o.waveSize||(o.type==='wolf'&&o.linkedChase||o.type==='zombie'&&(o.awake||o.graveWakeAt!==undefined)&&o.zombieState!=='spent')&&activeCourseOwner(o)||o.y>p.y-S.world.sceneryRetentionBehind));
     state.snowballTrails=state.snowballTrails.filter(t=>t.until>clock&&t.by>p.y-S.world.sceneryRetentionBehind);
     updateFeedback(dt);
     state.cam.x=ease(state.cam.x,p.x,S.render.cameraXFollow,dt);state.cam.y=ease(state.cam.y,p.y-H*S.render.playerScreenY/ZOOM,S.render.cameraYFollow,dt);
@@ -2611,7 +2703,7 @@ window.FROSTLINE_READY = (async () => {
         }
       }
       const distance=Math.hypot(o.x-oldX,o.y-oldY);o.walking=distance>0;
-      o.walkCycle=(o.walkCycle||0)+distance*P.stridePerUnit;if(Math.abs(o.x-oldX)>.001)o.walkFacing=Math.sign(o.x-oldX);
+      o.walkCycle=(o.walkCycle||0)+distance*P.stridePerUnit;if(Math.abs(o.x-oldX)>.5)o.walkFacing=Math.sign(o.x-oldX);
     }
   }
   let iceCacheTime=-1,iceCache=[],iceCacheObjects=null,iceCacheLength=-1;
@@ -2627,34 +2719,58 @@ window.FROSTLINE_READY = (async () => {
     const radius=o.r||0;return [o.x-radius,o.y-radius/S.physics.collisionYScale,o.x+radius,o.y+radius/S.physics.collisionYScale];
   }
   const solidBoundsCache=new WeakMap();
-  function retainedSolidBounds(o){
-    const old=solidBoundsCache.get(o),house=['lodge','rental','mausoleum'].includes(o.type),rect=o.type==='iceBlock'||o.type==='ruinWall',segment=['wideLog','fallingTree','cemeteryFence','areaBarrier'].includes(o.type);
-    const w=house?houseFootHalfWidth(o):rect?o.width:0,d=house?houseFootDepth(o):rect?o.depth:0;
-    if(!segment&&old&&old.type===o.type&&old.x===o.x&&old.y===o.y&&old.r===o.r&&old.w===w&&old.d===d&&old.ys===S.physics.collisionYScale)return old.bounds;
-    const fresh=solidBounds(o),bounds=old&&old.bounds.every((v,i)=>v===fresh[i])?old.bounds:fresh;
-    solidBoundsCache.set(o,{type:o.type,x:o.x,y:o.y,r:o.r,w,d,ys:S.physics.collisionYScale,bounds});return bounds;
+  function retainedSolidBounds(o,old=solidBoundsCache.get(o)){
+    // Immutable fences/logs can reuse endpoints; only a tree actually falling changes each tick.
+    if(old&&old.type===o.type&&old.x===o.x&&old.y===o.y&&old.r===o.r){
+      let same=false;
+      switch(old.shape){
+        case 0:same=old.ys===S.physics.collisionYScale;break;
+        case 1:same=old.hwr===S.village.houseFootWidthRatio&&old.hhr===S.village.houseFootHeightRatio&&old.width===o.width&&old.span===o.paradeSpan&&old.step===o.paradeStep&&old.spanX===o.paradeSpanX&&old.stepX===o.paradeStepX;break;
+        case 2:same=old.width===o.width&&old.depth===o.depth;break;
+        case 3:same=old.ax===o.ax&&old.ay===o.ay&&old.bx===o.bx&&old.by===o.by;break;
+        case 4:same=old.width===o.width;break;
+        case 5:same=o.fallState!=='falling'&&old.fallState===o.fallState&&old.fallSide===o.fallSide&&old.fallAngle===o.fallAngle&&old.treeLength===o.treeLength;break;
+      }
+      if(same)return old.bounds;
+    }
+    const shape=o.type==='lodge'||o.type==='rental'||o.type==='mausoleum'?1:o.type==='iceBlock'||o.type==='ruinWall'?2:o.type==='cemeteryFence'||o.type==='areaBarrier'?3:o.type==='wideLog'?4:o.type==='fallingTree'?5:0;
+    const fresh=solidBounds(o),same=old&&old.bounds[0]===fresh[0]&&old.bounds[1]===fresh[1]&&old.bounds[2]===fresh[2]&&old.bounds[3]===fresh[3],bounds=same?old.bounds:fresh;
+    solidBoundsCache.set(o,{type:o.type,shape,hwr:S.village.houseFootWidthRatio,hhr:S.village.houseFootHeightRatio,x:o.x,y:o.y,r:o.r,width:o.width,depth:o.depth,span:o.paradeSpan,step:o.paradeStep,spanX:o.paradeSpanX,stepX:o.paradeStepX,ys:S.physics.collisionYScale,ax:o.ax,ay:o.ay,bx:o.bx,by:o.by,fallState:o.fallState,fallSide:o.fallSide,fallAngle:o.fallAngle,treeLength:o.treeLength,bounds});return bounds;
   }
   const solidGroups=new Map();
-  const solidSnapshot={time:-1,source:null,length:-1,groups:null};
+  let solidRevision=0;
+  function invalidateSolidGrids(){solidRevision++;solidSnapshot.time=-1;}
+  const solidSnapshot={time:-1,source:null,length:-1,groups:null,entries:null};
   function snapshotSolids(){
-    if(solidSnapshot.time===clock&&solidSnapshot.source===state.objects&&solidSnapshot.length===state.objects.length)return solidSnapshot;
-    const groups=new Map([[HOUSE_TYPES,[]],[TREE_TYPES,[]],[NPC_STATIC_SOLIDS,[]]]);
+    const c=solidSnapshot;
+    if(c.source===state.objects&&c.length===state.objects.length){
+      if(c.time===clock)return c;
+      let same=true;
+      for(const entry of c.entries){
+        const o=entry.o;if(o.type!==entry.type){same=false;break;}
+        if(!entry.mask)continue;
+        const active=!o.eaten&&!o.dead&&o.r>0;
+        if(active!==entry.active){same=false;break;}
+        if(active){const bounds=retainedSolidBounds(o,entry.record);if(bounds!==o.solidBounds){same=false;break;}}
+      }
+      if(same){c.time=clock;return c;}
+    }
+    const groups=new Map([[HOUSE_TYPES,[]],[TREE_TYPES,[]],[NPC_STATIC_SOLIDS,[]]]),entries=[];
     for(const o of state.objects){
-      if(o.eaten||o.dead||o.r<=0)continue;
-      const house=HOUSE_TYPES.has(o.type),tree=TREE_TYPES.has(o.type),npc=NPC_STATIC_SOLIDS.has(o.type);
-      if(!house&&!tree&&!npc)continue;o.solidBounds=retainedSolidBounds(o);
-      if(house)groups.get(HOUSE_TYPES).push(o);if(tree)groups.get(TREE_TYPES).push(o);if(npc)groups.get(NPC_STATIC_SOLIDS).push(o);
+      const mask=(HOUSE_TYPES.has(o.type)?1:0)|(TREE_TYPES.has(o.type)?2:0)|(NPC_STATIC_SOLIDS.has(o.type)?4:0),active=!o.eaten&&!o.dead&&o.r>0;
+      const entry={o,type:o.type,mask,active,record:null};entries.push(entry);if(!mask||!active)continue;o.solidBounds=retainedSolidBounds(o);entry.record=solidBoundsCache.get(o);
+      if(mask&1)groups.get(HOUSE_TYPES).push(o);if(mask&2)groups.get(TREE_TYPES).push(o);if(mask&4)groups.get(NPC_STATIC_SOLIDS).push(o);
     }
     for(const [type,items] of groups){
-      const old=solidGroups.get(type);
-      if(old&&old.items.length===items.length&&items.every((o,i)=>old.items[i]===o&&old.bounds[i]===o.solidBounds))groups.set(type,old.items);
-      else solidGroups.set(type,{items,bounds:items.map(o=>o.solidBounds)});
+      const old=solidGroups.get(type);let same=old&&old.items.length===items.length;
+      if(same)for(let i=0;i<items.length;i++)if(old.items[i]!==items[i]||old.bounds[i]!==items[i].solidBounds){same=false;break;}
+      if(same)groups.set(type,old.items);else solidGroups.set(type,{items,bounds:items.map(o=>o.solidBounds)});
     }
-    Object.assign(solidSnapshot,{time:clock,source:state.objects,length:state.objects.length,groups});return solidSnapshot;
+    Object.assign(c,{time:clock,source:state.objects,length:state.objects.length,groups,entries});return c;
   }
   function cachedSolidGrid(cache,types,cell,padding=0){
-    if(cache.time===clock&&cache.source===state.objects&&cache.length===state.objects.length)return cache;
-    cache.time=clock;cache.source=state.objects;cache.length=state.objects.length;
+    if(cache.revision===solidRevision&&cache.time===clock&&cache.source===state.objects&&cache.length===state.objects.length)return cache;
+    cache.revision=solidRevision;cache.time=clock;cache.source=state.objects;cache.length=state.objects.length;
     const snapshot=snapshotSolids(),shared=snapshot.groups.get(types),items=shared||state.objects.filter(o=>types.has(o.type)&&!o.eaten&&!o.dead&&o.r>0);let changed=!cache.records;
     if(shared&&cache.items===items)return cache;cache.items=items;
     for(const o of items){
@@ -3100,10 +3216,10 @@ window.FROSTLINE_READY = (async () => {
 
   function updateChasers(dt) {
     const p=state.p;if(!state.started)return;
-    updatePatrolWaves(dt);
+    updatePatrolWaves(dt);const contacts={};
     for(const c of state.chasers){
       if(c.eaten)continue;
-      if(c.patrolPass){updatePatrolPass(c,dt);continue;}
+      if(c.patrolPass){updatePatrolPass(c,dt);contacts.index=null;continue;}
       if(c.dead||c.eaten)continue;
       if(state.endless&&!c.chaseRun&&['fast','slow','bear'].includes(c.kind)&&!c.leaving){c.chaseRun=state.course;c.expires=Infinity;}
       if(c.endlessBaseKmh!==undefined&&activeCourseOwner(c))c.speed=c.endlessBaseKmh*endlessSpeedScale(c)/S.physics.hudKmhPerSpeed;
@@ -3123,13 +3239,14 @@ window.FROSTLINE_READY = (async () => {
       }
       if(c.wakeUntil>clock)continue;
       if(c.stunnedUntil>clock)continue;
+      if(c.scaredUntil>clock){c.motionVx=c.motionVy=c.travelSpeed=0;c.travelStamp=clock;continue;}
       if(p.y>c.expires){c.leaving=true;c.speed*=.97;continue;}
       const feeding=c.feedingUntil>clock,previous={x:c.x,y:c.y},entryTarget=christmasYetiEntryTarget(c);
       if(!feeding&&!entryTarget&&(c.kind==='fast'||c.kind==='slow'||c.kind==='bear')){
-        updatePreyTarget(c);
+        if(c.ravager)updateRavagerTarget(c);else updatePreyTarget(c);
       }
       const hunt=c.divert||p;
-      const routeTarget=entryTarget||endlessPursuitTarget(c,hunt),dx=routeTarget.x-c.x,dy=routeTarget.y-c.y,len=Math.hypot(dx,dy)||1;
+      const routeTarget=entryTarget||(c.ravager&&c.divert?hunt:endlessPursuitTarget(c,hunt)),dx=routeTarget.x-c.x,dy=routeTarget.y-c.y,len=Math.hypot(dx,dy)||1;
       const [vx,vy]=chaseVelocity(dx/len*c.speed,dy/len*c.speed);
       const lethal=['fast','slow','bear'].includes(c.kind),nx=c.x+vx*dt,ny=c.y+vy*cemeteryYScale(c.x,c.y)*dt;
       if(feeding||c.shoreLake&&patchAt(hunt.x,hunt.y)===c.shoreLake){
@@ -3147,8 +3264,9 @@ window.FROSTLINE_READY = (async () => {
       const contactDistance=Math.hypot(c.x-p.x,c.y-p.y);
       if(c.harmlessDog&&contactDistance>S.chasers.captureDistance*2)c.harmlessDog=false;
       if(resolveEnemyContact(c,{ramOnly:true}))continue;
-      const meal=lethal&&!feeding?contactPrey(c,previous):null;
-      if(meal){eatChaserPrey(c,meal,previous);continue;}
+      if(c.kind==='dog'||c.kind==='patrol')contacts.index=null;
+      const meal=lethal&&!feeding?(c.ravager?ravagerContact(c,previous):contactPrey(c,previous,S.chasers.captureDistance,contacts.index??=preyContactIndex())):null;
+      if(meal){if(c.ravager)eatRavagerPrey(c,meal,previous);else eatChaserPrey(c,meal,previous);continue;}
       if(lethal){resolveEnemyContact(c);if(state.deathTimer)break;continue;}
       if(monsterContact(c)&&p.shield<=0&&p.air<=0){
         // Slow dog contacts are harmless until separation; fast ones still tackle.
@@ -3584,6 +3702,7 @@ window.FROSTLINE_READY = (async () => {
     if(o.feedingUntil>clock)text('...',s.x,s.y-22,9,C.ink);
   }
   function yetiAppearance(o){
+    if(o.ravager)return {rank:1,tier:'fast',family:'Avalanche'};
     const tiers=['slow','fast','elite','special'];
     const rawSpeed=o.speed??(o.type==='lurker'?topSpeed()*S.wildlife.yetiWildSpeedRatio:0);
     const speed=o.endlessBaseKmh??o.yetiSpeedKmh??(rawSpeed*S.physics.hudKmhPerSpeed/endlessSpeedScale(o));
@@ -3863,23 +3982,7 @@ window.FROSTLINE_READY = (async () => {
     if(o.type==='villageTitle'){text(o.town.name.toUpperCase().split('').join(' '),s.x,s.y,22,C.teal);text(o.town.endlessRun?'COURSE TOWN - YETIS CAN FOLLOW':'VILLAGE  ·  PLEASE DISTURB THE PEACE QUIETLY',s.x,s.y+23,8,C.muted);return;}
     if(o.type==='liftLabel'){text('SUMMIT LIFT',s.x,s.y,10,C.ink);text(state.arcade?'ARCADE: KEEP SKIING DOWN':'SKI IN TO RIDE',s.x,s.y+15,8,C.muted);return;}
     const wiggle=o.roam?Math.sin(clock*6+o.phase)*1.2:0;
-    if(o.cheerUntil>clock&&o.type.startsWith('person')){
-      const wave=Math.sin(clock*11+o.phase)>0?0:3,coat=o.type==='personYellow'?'#dba45a':'#ce6855';
-      sprite(o.type,s.x,s.y,30);
-      for(const side of [-1,1]){box(s.x+side*5-1,s.y-15,3,4,coat);box(s.x+side*7-1,s.y-19+wave,2,5,coat);box(s.x+side*7-1,s.y-21+wave,2,2,'#f2c98f');}return;
-    }
-    if(o.type.startsWith('person')){
-      const phase=o.walkCycle||0,bob=o.walking?Math.sin(phase*2)*.6:Math.sin(clock*2+o.phase)*.75;
-      const action=o.serveUntil>clock?'Serve':o.waveUntil>clock||o.throwUntil>clock?'Wave':o.chatUntil>clock?'Chat':'Idle';
-      const animated=!!o.town&&!(o.socialUntil>clock&&o.socialAnimal)&&(!o.walking||action!=='Idle');
-      const frame=Math.floor(clock*(action==='Idle'?1.2:3.5)+o.phase)%2;
-      const flip=action==='Serve'?state.p.x<o.x:action==='Chat'&&o.chatPartner?o.chatPartner.x<o.x:o.walkFacing<0;
-      sprite(animated?o.type+action+frame:o.type,s.x,s.y+bob,o.width*(animated?1.15:1),{flip});
-      if(o.socialUntil>clock&&o.socialAnimal){const side=Math.sign(o.socialAnimal.x-o.x)||1,reach=Math.sin(clock*7+o.phase)>0?0:2;line(s.x+side*3,s.y-9,s.x+side*7,s.y-8-reach,'#d8af83',2);if(o.socialAnimal.type==='rabbit')box(s.x+side*8,s.y-7,3,2,'#be965e');}
-      if((o.job==='bakery'||o.job==='market')&&action!=='Serve')box(s.x-2,s.y-8,5,5,'#e9dfc8');
-      if(o.walking){for(const side of [-1,1]){const lift=Math.sin(phase+side*Math.PI/2)>0?1:0;box(s.x+side*2-1,s.y-3-lift,2,3,'#244451');}}
-      return;
-    }
+    if(o.type.startsWith('person')){drawPerson(o,s);return;}
     if(o.type==='skier'){sprite((o.motionVx??o.vx)<-5?'left':(o.motionVx??o.vx)>5?'right':'skier',s.x,s.y,o.width,{guest:true,fast:o.fast});if(o.rival)drawRival(o,s);if(o.fast){line(s.x-5,s.y+3,s.x-5,s.y+12,C.muted);line(s.x+5,s.y+3,s.x+5,s.y+15,C.muted);}return;}
     if(o.type==='dog'){drawDog(o,s);return;}
     if(o.type==='boarder'){sprite('boarder',s.x,s.y,o.width,{rotate:Math.sin(clock+o.phase)*.08});return;}
@@ -4008,6 +4111,7 @@ window.FROSTLINE_READY = (async () => {
       drawYeti(c,s,c.waiting?'idle':'alert',56);
       text(c.waiting?'...':'!',s.x+(c.waiting?0:18),s.y-(c.waiting?28:18),c.waiting?9:15,c.waiting?C.muted:C.red);return;
     }
+    if(c.scaredUntil>clock){drawYeti(c,{x:s.x+Math.round(Math.sin(clock*19)),y:s.y+3},'alert',52);text('!',s.x+15,s.y-35,12,C.gold);return;}
     if(c.feedingUntil>clock&&(c.kind==='fast'||c.kind==='slow')){drawYeti(c,s,'feed',56);return;}
     if(c.kind==='bear'){drawBear(c,s,true);return;}
     if(c.kind==='dog')drawDog(c,s,39);
