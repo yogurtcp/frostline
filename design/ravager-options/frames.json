@@ -1,0 +1,50 @@
+{
+  "pipeline": "Production sprite() palette and alpha baking",
+  "assets": [
+    {
+      "id": "1-the-maw",
+      "width": 30,
+      "height": 34,
+      "source": [
+        1312,
+        1199
+      ],
+      "crop": [
+        183,
+        181,
+        1008,
+        944
+      ]
+    },
+    {
+      "id": "2-bonecrown",
+      "width": 30,
+      "height": 34,
+      "source": [
+        1312,
+        1199
+      ],
+      "crop": [
+        175,
+        91,
+        1025,
+        1045
+      ]
+    },
+    {
+      "id": "3-rusthowl",
+      "width": 30,
+      "height": 34,
+      "source": [
+        1254,
+        1254
+      ],
+      "crop": [
+        137,
+        198,
+        1029,
+        889
+      ]
+    }
+  ]
+}
