@@ -12,7 +12,7 @@ window.FROSTLINE_READY = (async () => {
   const mix = (a,b,t) => a + (b-a)*t;
   const ease = (a,b,s,dt) => mix(a,b,1-Math.exp(-s*dt));
   const pick = arr => arr[Math.floor(random()*arr.length)];
-  let seed = S.world.seed;
+  let seed = Math.floor(Math.random()*4294967296) >>> 0;
   function random() { seed = (Math.imul(seed,1664525)+1013904223) >>> 0; return seed/4294967296; }
   const range = (a,b) => a + random()*(b-a);
   const C = S.colors, stages = S.courses;
