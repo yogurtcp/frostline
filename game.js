@@ -2870,7 +2870,7 @@ window.FROSTLINE_READY = (async () => {
     // A wall beyond nearby prey must not block the approach to that prey.
     // Route waypoints retain full lookahead; this limit is only for actual actors.
     const closingTarget=chasing&&target&&(target===state.p||target.type||target.kind);
-    const arrivalReach=closingTarget?Math.max(0,Math.hypot(target.x-o.x,target.y-o.y)-Math.min(S.chasers.captureDistance,S.wildlife.captureDistance)*.5):Infinity;
+    const arrivalReach=closingTarget?Math.max(0,Math.hypot(target.x-o.x,target.y-o.y)-Math.max(0,Math.min(S.chasers.captureDistance,S.wildlife.captureDistance)-1)):Infinity;
     const clear=a=>{const m=motion(a),probe=Math.max(m.speed*dt,Math.min(m.probe,arrivalReach));return [Math.min(probe,m.speed*dt),probe*.5,probe].every(d=>valid(o.x+m.ux*d,o.y+m.uy*d));};
     let heading=o.avoidUntil>clock?o.avoidHeading:angle,approachClear=false;
     if(closingTarget&&arrivalReach<Math.max(A.avoidProbeDistance,speed*A.avoidLookaheadSeconds)&&!o.obstacleDetour&&o.avoidUntil>clock&&clear(angle)){heading=angle;o.avoidUntil=0;approachClear=true;}
