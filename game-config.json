@@ -2296,11 +2296,16 @@
     "dogCompanion": {
       "feedMetres": 8,
       "maxFollowing": 2,
-      "speedMultiplier": 1.01,
       "scareMetres": 18,
       "barkMetres": 14,
       "scareSeconds": 2.5,
-      "retreatSeconds": 3
+      "retreatSeconds": 3,
+      "followDistanceMetres": 3.2,
+      "playRadiusMetres": 5,
+      "cruiseSpeedKmh": 24,
+      "catchUpSpeedKmh": 16,
+      "challengeSeconds": 1,
+      "challengeSpeedKmh": 42
     }
   },
   "predators": {

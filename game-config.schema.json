@@ -5565,7 +5565,6 @@
           "required": [
             "feedMetres",
             "maxFollowing",
-            "speedMultiplier",
             "scareMetres",
             "barkMetres",
             "scareSeconds",
@@ -5585,7 +5584,8 @@
             "speedMultiplier": {
               "type": "number",
               "minimum": 1,
-              "maximum": 2
+              "maximum": 2,
+              "description": "Legacy setting, ignored by the state-based companion controller."
             },
             "scareMetres": {
               "type": "number",
@@ -5606,6 +5606,36 @@
               "type": "number",
               "minimum": 1,
               "maximum": 6
+            },
+            "followDistanceMetres": {
+              "type": "number",
+              "minimum": 2,
+              "maximum": 8
+            },
+            "playRadiusMetres": {
+              "type": "number",
+              "minimum": 2,
+              "maximum": 10
+            },
+            "cruiseSpeedKmh": {
+              "type": "number",
+              "minimum": 8,
+              "maximum": 45
+            },
+            "catchUpSpeedKmh": {
+              "type": "number",
+              "minimum": 4,
+              "maximum": 30
+            },
+            "challengeSeconds": {
+              "type": "number",
+              "minimum": 0.4,
+              "maximum": 2
+            },
+            "challengeSpeedKmh": {
+              "type": "number",
+              "minimum": 20,
+              "maximum": 70
             }
           }
         }
