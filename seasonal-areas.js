@@ -190,7 +190,7 @@ function decorateFestival(e,section){
     for(let j=0;j<12;j++){p=festivalPoint(e,(i+.65)/(n+.3),(i%2?1:-1)*(.45+j*.035));p.y+=j*26;if(clearFestivalSpot(e,p,30))break;p=null;}
     if(!p)continue;
     const speed=mix(...S.endless.yetis.speedKmh,e.difficulty),scale=e.scale;
-    entity(kind,p.x,p.y,{...own,width:kind==='wolf'?43:55,r:kind==='wolf'?11:18,animal:kind==='wolf',wolfAwake:false,linkedChase:false,alertUntil:0,nextAI:clock+2,packId:'festival-'+e.id+'-'+Math.floor(i/2),packIndex:i%2,yetiSpeedKmh:speed*scale,endlessBaseKmh:speed,wakeSeconds:S.endless.yetis.wakeSeconds});
+    entity(kind,p.x,p.y,{...own,width:kind==='wolf'?43:55,r:kind==='wolf'?11:18,animal:kind==='wolf',wolfAwake:false,linkedChase:false,alertUntil:0,nextAI:clock+2,packId:'festival-'+e.id+'-'+Math.floor(i/2),packIndex:i%2,...(kind==='lurker'?endlessYetiVariant(p.y,speed,scale):{yetiSpeedKmh:speed*scale,endlessBaseKmh:speed}),wakeSeconds:S.endless.yetis.wakeSeconds});
   }
 }
 function sleighMotion(o,dt){
@@ -216,7 +216,8 @@ function updateChristmasYetis(e,dt){
     const distance=Math.abs(point.gapY-goal);if(distance<best){entry=point;best=distance;}
   }
   if(!entry){e.nextSideYetiAt=e.sideYetiElapsed+1;return;}
-  state.chasers.push({kind:fast?'fast':'slow',arcadeTier:fast?'fast':'slow',endlessBaseKmh:base,speed,x:entry.x,y:entry.y,chaseRun:state.course,christmasArrival:e.id,christmasEntry:{encounter:e,x:entry.insideX,y:entry.gapY},phase:range(0,TAU),id:random(),expires:Infinity,talkAt:clock+6});
+  const variant=endlessYetiVariant(entry.y,base,state.endless.speedScale);
+  state.chasers.push({kind:variant.ravager||fast?'fast':'slow',...variant,speed:variant.yetiSpeedKmh/S.physics.hudKmhPerSpeed,x:entry.x,y:entry.y,chaseRun:state.course,christmasArrival:e.id,christmasEntry:{encounter:e,x:entry.insideX,y:entry.gapY},phase:range(0,TAU),id:random(),expires:Infinity,talkAt:clock+6});
   e.sideYetiCount++;e.nextSideYetiAt=e.sideYetiElapsed+(e.sideYetiCount%2?Y.staggerSeconds:Y.intervalSeconds);
 }
 function christmasYetiEntryTarget(c){
