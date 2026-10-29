@@ -1,0 +1,18 @@
+{
+  "tool": "Built-in imagegen",
+  "references": [
+    "assets/scenes/death-yeti-avalanche.png",
+    "assets/scenes/death-yeti-avalanche-night.png",
+    "design/ravager-options-2/1-stiltwalker-source.png"
+  ],
+  "prompts": [
+    {
+      "time": "day",
+      "prompt": "Edit the first reference image, an existing daytime Frostline game-over card. Preserve its snowy alpine picnic setting, pixel-art composition, warm humorous non-gory tone, and golden winter daylight. Replace ONLY the bulky furry yeti with the Stiltwalker creature from reference image 2: extremely slender charcoal-blue body, very long thin limbs and neck, small smooth bone-pale skull face, pale rib ridges, hooked pale fingers. NO bulky gorilla body, NO fluffy fur, NO horns. This is the fast distracted monster. Pose it sitting awkwardly with very long folded knees at the tiny picnic stump, holding the skier's skis like chopsticks, looking comically pleased after lunch, with a red skier beanie on the stump. Funny implication only; no blood, guts or injured people. Creature identity and pale face must clearly match reference 2. True coarse limited-palette pixel art, crisp pixels, no text, no UI, landscape 8:5 composition. Entire card opaque."
+    },
+    {
+      "time": "night",
+      "prompt": "Edit the first reference image, an existing nighttime Frostline game-over card. Preserve its snowy alpine picnic setting, pixel-art composition, warm humorous non-gory tone, and moonlit blue night with warm lantern light. Replace ONLY the bulky furry yeti with the Stiltwalker creature from reference image 2: extremely slender charcoal-blue body, very long thin limbs and neck, small smooth bone-pale skull face, pale rib ridges, hooked pale fingers. NO bulky gorilla body, NO fluffy fur, NO horns. This is the fast distracted monster. Pose it sitting awkwardly with very long folded knees at the tiny picnic stump, holding the skier's skis like chopsticks, looking comically pleased after lunch, with a red skier beanie on the stump. Funny implication only; no blood, guts or injured people. Creature identity and pale face must clearly match reference 2. True coarse limited-palette pixel art, crisp pixels, no text, no UI, landscape 8:5 composition. Entire card opaque."
+    }
+  ]
+}

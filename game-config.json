@@ -1771,6 +1771,13 @@
       1024,
       80,
       71
+    ],
+    "yetiStiltwalkerIdle": [
+      "stiltwalker",
+      0,
+      0,
+      24,
+      38
     ]
   },
   "palette": [

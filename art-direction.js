@@ -154,6 +154,56 @@ function drawYetiStride(o,s,family,tier,width,gait){
   else ctx.drawImage(tile,Math.round(s.x)-Math.round(w/2),Math.round(s.y)+top,w,h);
 }
 
+// The Stiltwalker keeps its own proportions and pale head, including while feeding.
+// Split the approved native sprite once; eight distance-driven frames move limbs only.
+let stiltwalkerParts;
+const stiltwalkerTiles=new Map();
+function stiltwalkerTile(frame=-1){
+  if(stiltwalkerTiles.has(frame))return stiltwalkerTiles.get(frame);
+  const name='yetiStiltwalkerIdle',key=name+':24';
+  if(!spriteCache.has(key))sprite(name,-10000,-10000,24,{ui:true});
+  const source=spriteCache.get(key);
+  if(!stiltwalkerParts){
+    const left=[7,7,8,8,7,5,5,4,4,4,5,4,3,3,3,3,2,2,2,3,3,4,3,3,3];
+    const right=[14,14,14,14,15,15,16,16,16,16,18,18,18,19,19,19,20,20,20,20,20,20,20,20,22];
+    const front=[9,10,12,13,13,12,11,12,12,13,13,14,14,14,14,14,14,14,14,14];
+    stiltwalkerParts=Array.from({length:5},()=>{const c=document.createElement('canvas');c.width=24;c.height=38;return c;});
+    const t=document.createElement('canvas');t.width=24;t.height=38;const p=t.getContext('2d');p.drawImage(source,0,0);
+    const pixels=p.getImageData(0,0,24,38),parts=stiltwalkerParts.map(c=>c.getContext('2d').createImageData(24,38));
+    for(let y=0;y<38;y++)for(let x=0;x<24;x++){
+      const part=y>=6&&y<=30&&x<=left[y-6]?1:y>=8&&y<=32&&x>=right[y-8]?2:y>=18?(x>=front[y-18]?4:3):0;
+      const i=(y*24+x)*4;parts[part].data.set(pixels.data.subarray(i,i+4),i);
+    }
+    stiltwalkerParts.forEach((c,i)=>c.getContext('2d').putImageData(parts[i],0,0));
+  }
+  const tile=document.createElement('canvas');tile.width=30;tile.height=40;const t=tile.getContext('2d');t.imageSmoothingEnabled=false;
+  if(frame<0)t.drawImage(source,3,0);
+  else{
+    const phase=frame/8*TAU;
+    const limb=(part,start,offset,leg=false)=>{
+      const swing=Math.sin(phase+offset),lift=leg?Math.round(Math.max(0,Math.cos(phase+offset))):0;
+      for(let y=start;y<38;y++){
+        const dx=Math.round(swing*(y-start)*(leg?.13:.1));
+        t.drawImage(stiltwalkerParts[part],0,y,24,1,3+dx,y-lift,24,1);
+      }
+    };
+    limb(2,8,0);limb(3,18,Math.PI,true);limb(4,18,0,true);
+    t.drawImage(stiltwalkerParts[0],3,0);limb(1,6,Math.PI);
+  }
+  stiltwalkerTiles.set(frame,tile);return tile;
+}
+function drawStiltwalker(o,s,pose,gait){
+  const tile=stiltwalkerTile(pose==='run'&&gait.active?Math.floor(gait.phase*8)%8:-1),scale=ZOOM/.5;
+  ctx.save();ctx.translate(Math.round(s.x),Math.round(s.y));
+  if(pose==='down')ctx.rotate(Math.PI/2);else if(gait.flip)ctx.scale(-1,1);
+  ctx.drawImage(tile,Math.round(-15*scale),Math.round(-38*scale),Math.round(30*scale),Math.round(40*scale));
+  if(pose==='feed'){
+    const y=-33*scale;box(2*scale,y,2*scale,(Math.sin(clock*15)>0?2:1)*scale,'#202b43');
+    box(2*scale,y,scale,scale,'#e8dec3');
+  }
+  ctx.restore();
+}
+
 const dogWalkTiles=new Map();
 function dogWalkTile(frame){
   if(dogWalkTiles.has(frame))return dogWalkTiles.get(frame);

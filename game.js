@@ -2172,7 +2172,7 @@ window.FROSTLINE_READY = (async () => {
   function deathScene(cause,attacker){
     if(cause!=='YETI')return {key:'death-'+cause.toLowerCase(),title:{WOLF:'PACKED LUNCH',BEAR:'BEAR-LY A SNACK',ZOMBIE:'DEAD TIRED'}[cause],detail:{WOLF:'The pack insists you were complimentary.',BEAR:'The beanie was apparently the cherry on top.',ZOMBIE:'They came for the boots. Stayed for lunch.'}[cause]};
     const hunter=attacker||state.chasers.find(c=>!c.dead&&['fast','slow'].includes(c.kind))||{},look=yetiAppearance(hunter);
-    const variant=look.family==='White'?'white':look.family==='Avalanche'?'avalanche':look.rank>=3?'burgundy':'violet';
+    const variant=look.family==='Stiltwalker'?'stiltwalker':look.family==='White'?'white':look.family==='Avalanche'?'avalanche':look.rank>=3?'burgundy':'violet';
     return {key:'death-yeti-'+variant,title:'AN ABOMINABLE SNACK',detail:'Your skis made excellent chopsticks.'};
   }
   function tryCocoaShop(o){
@@ -2376,7 +2376,11 @@ window.FROSTLINE_READY = (async () => {
     if(o.type==='sled'&&fast){o.vx=90*Math.sign(p.vx||1);o.vy=240;p.speed*=S.physics.sledSpeedRetention;say('Express delivery!',o);return;}
     if(o.type==='bush'){o.flatten=true;p.speed*=S.physics.bushSpeedRetention;burst(o.x,o.y,C.gold,7);return;}
     if(['personRed','personGreen','personYellow'].includes(o.type))say(uphill?'BACKWARDS? Seriously?':pick(S.dialogue.personBumps),o);
-    else if(o.type==='dog'){const dog={kind:'dog',x:o.x,y:o.y,speed:S.chasers.dogContactSpeed,phase:0,expires:p.y+S.chasers.dogContactChaseDistance,talkAt:clock+7};state.chasers.push(dog);o.eaten=true;o.r=0;say('WOOF. WOOF. WOOF.',dog);if(p.speed<=S.physics.walkingBumpLimit)return;}
+    else if(o.type==='dog'){
+      // A bumped town pet remains a pet; only a clean snack pass recruits a companion.
+      o.hopUntil=clock+1.2;say('YIP!',o,1.4);
+      if(p.speed<=S.physics.walkingBumpLimit)return;
+    }
     else if(o.type==='skier'||o.type==='boarder'){say(pick(o.fast?S.dialogue.fastBumps:S.dialogue.skierBumps),o);o.speakAt=clock+S.skiers.bumpSpeechCooldownSeconds;}
     else if(o.type==='lodge'||o.type==='rental')say(uphill?'The door still works from the front.':'This is a HOUSE.',o);
     else if(uphill){say('A face full of snow. Naturally.',o);burst(p.x,p.y,'#bed9df',22);}
@@ -3777,7 +3781,7 @@ window.FROSTLINE_READY = (async () => {
     if(o.feedingUntil>clock)text('...',s.x,s.y-22,9,C.ink);
   }
   function yetiAppearance(o){
-    if(o.ravager)return {rank:1,tier:'fast',family:'Avalanche'};
+    if(o.ravager)return {rank:1,tier:'fast',family:'Stiltwalker'};
     const tiers=['slow','fast','elite','special'];
     const rawSpeed=o.speed??(o.type==='lurker'?topSpeed()*S.wildlife.yetiWildSpeedRatio:0);
     const speed=o.endlessBaseKmh??o.yetiSpeedKmh??(rawSpeed*S.physics.hudKmhPerSpeed/endlessSpeedScale(o));
@@ -3792,7 +3796,10 @@ window.FROSTLINE_READY = (async () => {
     const bob=feeding?(Math.sin(clock*15)>0?1:0):pose==='idle'?(Math.sin(clock*1.7+(o.phase||0))>.65?1:0):0;
     const lean=down?0:clamp(Math.round((o.motionVx||0)/180),-1,1),x=s.x+lean,y=s.y+bob;
     if(!down)shadow(s.x,s.y,19,5);
-    // Every family uses the approved tiny atlas: <=30x34 pixels at normal game zoom.
+    // Preserve the selected narrow 24x38 silhouette instead of fitting the gorilla rig.
+    if(family==='Stiltwalker'){
+      drawStiltwalker(o,{x,y},pose,gait);return;
+    }
     if(pose==='run'&&gait.active)drawYetiStride(o,{x,y},family,tier,width,gait);
     else sprite('yeti'+family+frame,x,y,width,{yetiTier:tier,rotate:down?Math.PI/2:0});
     if(feeding){
@@ -3819,7 +3826,9 @@ window.FROSTLINE_READY = (async () => {
     const a=state.deathAnimation;if(!a)return;a.shown=true;
     const s=screen(a.x,a.y),t=3-a.remaining,yeti=a.cause==='YETI',zombie=a.cause==='ZOMBIE',width=yeti?62:zombie?40:a.cause==='BEAR'?72:54;
     const crawl=zombie&&a.actor.zombieStyle===4,biteScale=zombie?width*ZOOM/(crawl?24:18):1,biteSide=(a.actor.motionVx||0)<-2?-1:1;
-    const mouthX=s.x+(yeti?0:zombie?(crawl?7:4)*biteScale*biteSide:a.cause==='BEAR'?14:11),mouthY=s.y-(yeti?21:zombie?(crawl?5:10)*biteScale:9),lift=clamp(t/.8,0,1);
+    const stiltwalker=yeti&&yetiAppearance(a.actor).family==='Stiltwalker',stiltScale=ZOOM/.5;
+    const stiltMouthX=stiltwalker?3*stiltScale*(a.actor.yetiGait?.flip?-1:1)+clamp(Math.round((a.actor.motionVx||0)/180),-1,1):0;
+    const mouthX=s.x+(yeti?stiltMouthX:zombie?(crawl?7:4)*biteScale*biteSide:a.cause==='BEAR'?14:11),mouthY=s.y-(yeti?(stiltwalker?33*stiltScale:21):zombie?(crawl?5:10)*biteScale:9),lift=clamp(t/.8,0,1);
     // A wobbling skier, discarded skis, kicking boots and a flying hat: no gore.
     for(const side of [-1,1])line(s.x+side*10,s.y+5,s.x+side*18,s.y+9,'#b48b54',2);
     if(t<.85){sprite('fall',mix(s.x,mouthX,lift),mix(s.y,mouthY+5,lift),42*(1-lift*.35),{rotate:Math.sin(t*12)*.12});}

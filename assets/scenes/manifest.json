@@ -193,6 +193,22 @@
       "width": 320,
       "height": 200,
       "colors": 64
+    },
+    {
+      "key": "death-yeti-stiltwalker",
+      "file": "death-yeti-stiltwalker.png",
+      "source": "stiltwalker-day-source.png",
+      "width": 320,
+      "height": 200,
+      "colors": 64
+    },
+    {
+      "key": "death-yeti-stiltwalker-night",
+      "file": "death-yeti-stiltwalker-night.png",
+      "source": "stiltwalker-night-source.png",
+      "width": 320,
+      "height": 200,
+      "colors": 64
     }
   ]
 }
