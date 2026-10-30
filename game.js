@@ -46,7 +46,7 @@ window.FROSTLINE_READY = (async () => {
     freefallAt:0,nextFastSkier:2, results:null, receipts:[], transitions:[], soundReady:false,
     chunks:new Map(),safeTrails:[],roads:[],villages:[],liftRoutes:[],plannedTown:null,deathTimer:0,liftTimer:0,deaths:0,keyboardStep:0,control:'keyboard',lastSteer:-10
   };
-  function newPlayer(){return {x:0,y:0,vx:0,vy:0,speed:0,heading:Math.PI/2,desiredHeading:Math.PI/2,mode:'still',awaitingInput:false,crashObstacle:null,slowContacts:new Set(),fall:0,shield:0,air:0,airTotal:0,jumpHeight:0,spin:0,boost:0,jumpLock:0,onIce:false,iceHeading:0,icePushPending:false,airHeading:0,airSpeed:0,airSpin:0,airPose:0,airTuck:0,onRugged:false,rainbow:0};}
+  function newPlayer(){return {x:0,y:0,vx:0,vy:0,speed:0,heading:Math.PI/2,desiredHeading:Math.PI/2,mode:'still',awaitingInput:false,crashObstacle:null,slowContacts:new Set(),fall:0,shield:0,air:0,airTotal:0,jumpHeight:0,spin:0,boost:0,gateBoost:0,jumpLock:0,onIce:false,iceHeading:0,icePushPending:false,airHeading:0,airSpeed:0,airSpin:0,airPose:0,airTuck:0,onRugged:false,rainbow:0};}
   function viewBounds(){return {left:state.cam.x-W/(2*ZOOM),right:state.cam.x+W/(2*ZOOM),top:state.cam.y,bottom:state.cam.y+H/ZOOM};}
   function belowView(margin=330){return Math.max(viewBounds().bottom,state.p.y+H*(1-S.render.playerScreenY)/ZOOM)+margin;}
   function topSpeed(){return (state.course?stages[state.course.id].pace:state.zone.kind==='village'?S.physics.villagePace:S.physics.freePace)*S.physics.speedMultiplier;}
@@ -471,9 +471,37 @@ window.FROSTLINE_READY = (async () => {
       e.paths=[Array.from({length:9},(_,i)=>point(i/8,Math.sin(i*Math.PI/2)*190*e.scale))];
     }else if(e.kind==='lake'){
       const length=e.endY-e.startY;
-      entity('ice',root.x,(e.startY+e.endY)/2,{rx:Math.max(R.minimumWidthMetres*PX_PER_M*e.scale/2,e.band,length*.65),ry:length/2,width:Math.max(R.minimumWidthMetres*PX_PER_M*e.scale/2,e.band,length*.65)*2,r:0,transitionLake:true,arcadeRun:section,encounter:e,arcadeFeature:true});
+      const lake=entity('ice',root.x,(e.startY+e.endY)/2,{rx:Math.max(R.minimumWidthMetres*PX_PER_M*e.scale/2,e.band,length*.65),ry:length/2,width:Math.max(R.minimumWidthMetres*PX_PER_M*e.scale/2,e.band,length*.65)*2,r:0,transitionLake:true,arcadeRun:section,encounter:e,arcadeFeature:true});
+      addLakeExitSprings(e,section,lake);
     }
     state.objects=state.objects.filter(o=>!o.worldChunk||o.arcadeRun||o.y<e.startY||o.y>e.endY||(e.kind==='quiet'?Math.abs(o.x-encounterPathX(e.paths[0],o.y))>410:Math.abs(o.x-(e.centerX??root.x))>e.band));
+  }
+  function addLakeExitSprings(e,section,lake){
+    const J=S.endless.regions.lakeExitSprings,width=J.widthMetres*PX_PER_M,span=lake.rx*2-width;
+    const count=Math.max(2,Math.ceil(span/(J.spacingMetres*PX_PER_M))+1),points=lakeGeometry(lake).points;
+    e.exitSprings=[];
+    for(let i=0;i<count;i++){
+      const x=lake.x-span/2+span*i/(count-1),local=x-lake.x;let shore=-Infinity;
+      for(let j=0;j<points.length;j++){
+        const a=points[j],b=points[(j+1)%points.length];if(local<Math.min(a[0],b[0])||local>Math.max(a[0],b[0]))continue;
+        const t=b[0]===a[0]?0:(local-a[0])/(b[0]-a[0]);shore=Math.max(shore,mix(a[1],b[1],t));
+      }
+      e.exitSprings.push(entity('spring',x,lake.y+shore+J.shoreGapMetres*PX_PER_M,{width,r:width/2,arcadeRun:section,encounter:e,arcadeFeature:true,lakeExitSpring:true,jumpSeconds:J.jumpSeconds,jumpDurationCap:J.durationCap}));
+    }
+  }
+  function nearLakeExitSpring(x,y,pad=0){
+    for(const e of state.endless?.encounters||[]){
+      const row=e.exitSprings;if(!row?.length)continue;const first=row[0],last=row.at(-1),radius=first.width/2+pad;
+      if(x<first.x-radius||x>last.x+radius)continue;
+      const index=Math.round((x-first.x)/(last.x-first.x)*(row.length-1));
+      for(let i=Math.max(0,index-1);i<=Math.min(row.length-1,index+1);i++)if(Math.abs(x-row[i].x)<radius&&Math.abs(y-row[i].y)<radius+30)return true;
+    }
+    return false;
+  }
+  const SPRING_CLEAR_SCENERY=new Set(['pine','fir','smallPine','spruceTree','crookedTree','cedarTree','alpineTree','rock','pebble','bush','stump']);
+  function clearLakeExitSpringApproaches(){
+    if(!state.endless?.encounters.some(e=>e.exitSprings))return;
+    filterObjects(o=>o.forestBoundary||!SPRING_CLEAR_SCENERY.has(o.type)||!nearLakeExitSpring(o.x,o.y,Math.max(o.r||0,(o.width||0)*.4)+22));
   }
   function populateEndlessRegion(e,section,from,to){
     const R=S.endless.regions,scale=e.scale,length=e.endY-e.startY,root=section.endlessRoot,own={arcadeRun:section,encounter:e};
@@ -824,7 +852,7 @@ window.FROSTLINE_READY = (async () => {
         }
         a.nextYetiY=Math.max(a.nextYetiY,endY)+mix(...E.yetis.intervalMetres,P.t)*PX_PER_M*scale;
       }
-      spawnEndlessWildlife(section,endY,P);spawnEndlessRavager(section,endY);
+      spawnEndlessWildlife(section,endY,P);spawnEndlessRavager(section,endY);clearLakeExitSpringApproaches();
       a.sections.push(section);a.plannedY=endY;
     }
     extendEndlessTownLanes();
@@ -2164,6 +2192,7 @@ window.FROSTLINE_READY = (async () => {
       const random=()=>{flankSeed=(Math.imul(flankSeed,1664525)+1013904223)>>>0;return flankSeed/4294967296;},range=(a,b)=>mix(a,b,random()),pick=items=>items[Math.floor(random()*items.length)];
       const own={arcadeRun:root,encounter:e,worldChunk:key,regionFlank:true},scale=e.scale;
       const clear=(x,y,hw=0,hh=0)=>{
+        if(nearLakeExitSpring(x,y,Math.max(hw,hh)+45))return false;
         if(y-hh<e.startY+220*scale||y+hh>e.endY-220*scale||Math.abs(x-center)+hw>e.band-60)return false;
         if(e.town)return Math.abs(x-center)-hw>e.coreBand+60;
         if(e.kind==='trees')return encounterClearance(e,x,y,hw,hh)>mix(140,210,e.difficulty)*scale+80;
@@ -2411,16 +2440,17 @@ window.FROSTLINE_READY = (async () => {
       return;
     }
     // Recovery protection does not suppress helpful jump surfaces.
-    if(o.type==='ramp'||o.type==='mogul'||o.type==='mushroom'||o.type==='rainbow'||o.type==='smallHill'||o.type==='largeHill'){
+    if(o.type==='spring'||o.type==='ramp'||o.type==='mogul'||o.type==='mushroom'||o.type==='rainbow'||o.type==='smallHill'||o.type==='largeHill'){
       if(p.awaitingInput||p.fall||p.air>0||p.jumpLock>0||o.touched)return;
       if(tooSlowForObstacle(o))p.slowContacts.add(o);
       if(p.slowContacts.has(o)||!p.onIce&&p.speed<=S.physics.walkingBumpLimit&&(p.mode==='traverse'||p.mode==='walk'))return;
-      o.touched=true;
-      launch(o.jumpSeconds??(o.arcadeFeature&&['ramp','mogul'].includes(o.type)?S.arcade.rampSeconds:o.type==='rainbow'?S.jump.rainbowSeconds:o.type==='mushroom'?S.jump.mushroomSeconds:o.type==='smallHill'?S.jump.smallHillSeconds:o.type==='largeHill'?S.jump.largeHillSeconds:o.type==='ramp'?S.jump.rampSeconds:S.jump.mogulSeconds),o.jumpDurationCap??(o.type==='smallHill'||o.type==='largeHill'?S.jump.hillDurationMax:S.jump.durationMax));
+      o.touched=true;if(o.type==='spring')o.springAt=clock;
+      launch(o.jumpSeconds??(o.type==='spring'?S.endless.regions.lakeExitSprings.jumpSeconds:o.arcadeFeature&&['ramp','mogul'].includes(o.type)?S.arcade.rampSeconds:o.type==='rainbow'?S.jump.rainbowSeconds:o.type==='mushroom'?S.jump.mushroomSeconds:o.type==='smallHill'?S.jump.smallHillSeconds:o.type==='largeHill'?S.jump.largeHillSeconds:o.type==='ramp'?S.jump.rampSeconds:S.jump.mogulSeconds),o.jumpDurationCap??(o.type==='spring'?S.endless.regions.lakeExitSprings.durationCap:o.type==='smallHill'||o.type==='largeHill'?S.jump.hillDurationMax:S.jump.durationMax));
       if(o.landingY!==undefined&&p.air>0){
         const downhill=Math.cos(p.airHeading)*p.airSpeed;
         if(downhill>0){p.air=p.airTotal=Math.min(p.air,Math.max(.12,(o.landingY-p.y)/downhill));p.jumpLock=p.airTotal+S.jump.cooldownSeconds;}
       }
+      if(o.type==='spring'&&p.air>0){p.jumpHeight=Math.min(p.jumpHeight,Math.max(80,(H*S.render.playerScreenY-90)/ZOOM));say('BOING!',p,1.2);}
       if(o.type==='rainbow'){p.rainbow=S.jump.rainbowTrailSeconds;p.boost=S.jump.rainbowBoostSeconds;announce('SOMEWHERE OVER THE RAINBOW','A spectacularly impractical shortcut.',C.blue,2.5);}
       if(o.type==='mushroom'){p.boost=S.jump.mushroomBoostSeconds;say('BOING. Bad decisions, good airtime.',o,2.1);}
       return;
@@ -2521,7 +2551,7 @@ window.FROSTLINE_READY = (async () => {
     if(p.crashObstacle&&obstacleClearance(p.crashObstacle,p.x,p.y)>S.physics.crashSeparation)p.crashObstacle=null;
     if(p.awaitingInput){
       p.speed=p.vx=p.vy=0;p.fall=Math.max(0,p.fall-dt);p.shield=Math.max(0,p.shield-dt);
-      p.boost=Math.max(0,p.boost-dt);p.rainbow=Math.max(0,p.rainbow-dt);p.jumpLock=Math.max(0,p.jumpLock-dt);return;
+      p.boost=Math.max(0,p.boost-dt);p.gateBoost=Math.max(0,(p.gateBoost||0)-dt);p.rainbow=Math.max(0,p.rainbow-dt);p.jumpLock=Math.max(0,p.jumpLock-dt);return;
     }
     // Resolve the surface before release handling so ice keeps the incoming momentum.
     const ice=p.air<=0?patchAt(p.x,p.y):null;
@@ -2539,7 +2569,7 @@ window.FROSTLINE_READY = (async () => {
     else {
       let delta=p.desiredHeading-p.heading;while(delta>Math.PI)delta-=TAU;while(delta<-Math.PI)delta+=TAU;p.heading+=delta*(1-Math.exp(-(p.releasing?S.physics.releaseTurnFollow:S.physics.turnFollow)*dt));
       const downhill=Math.max(0,Math.cos(p.heading));let cap=topSpeed()*(S.physics.acrossSpeedFraction+S.physics.downhillSpeedFraction*downhill*downhill)*(p.specialCap??1);
-      if(p.boost>0)cap*=S.physics.boostMultiplier;
+      if(p.boost>0||p.gateBoost>0)cap*=Math.max(p.boost>0?S.physics.boostMultiplier:1,p.gateBoost>0?S.race.gateBoost.multiplier:1);
       if(p.mode==='slide'){
         if(p.air<=0){if(p.speed<cap)p.speed=Math.min(cap,p.speed+(S.physics.accelerationBase+S.physics.accelerationDownhill*downhill*downhill)*endlessSpeedScale()*dt);else p.speed=Math.max(cap,p.speed-(p.speed>topSpeed()*S.physics.overSpeedRatio?S.physics.overSpeedDeceleration:S.physics.turnDeceleration)*dt);}
       }else if(p.mode==='walk')p.speed=ease(p.speed,S.physics.walkSpeed,S.physics.walkFollow,dt);
@@ -2553,7 +2583,7 @@ window.FROSTLINE_READY = (async () => {
     p.walkOrigin={x:p.x,y:p.y};
     p.impactMotion={stamp:clock,x:p.x,y:p.y,vx:p.vx,vy:p.vy,speed:p.speed,heading:p.heading,mode:p.mode,onIce:p.onIce,air:p.air,fall:p.fall,awaitingInput:p.awaitingInput};
     p.x+=p.vx*dt;p.y+=p.vy*dt;constrainCemeteryMotion(p,p.walkOrigin);
-    p.air=Math.max(0,p.air-dt);p.fall=Math.max(0,p.fall-dt);p.shield=Math.max(0,p.shield-dt);p.boost=Math.max(0,p.boost-dt);p.jumpLock=Math.max(0,p.jumpLock-dt);p.rainbow=Math.max(0,p.rainbow-dt);
+    p.air=Math.max(0,p.air-dt);p.fall=Math.max(0,p.fall-dt);p.shield=Math.max(0,p.shield-dt);p.boost=Math.max(0,p.boost-dt);p.gateBoost=Math.max(0,(p.gateBoost||0)-dt);p.jumpLock=Math.max(0,p.jumpLock-dt);p.rainbow=Math.max(0,p.rainbow-dt);
     if(p.air>0)p.spin+=p.airSpin*dt;
     if(p.air===0&&p.airTotal>0){const points=Math.round(S.race.jumpBasePoints+p.spin*S.race.spinPointMultiplier+p.jumpHeight*S.race.heightPointMultiplier);if(state.course){state.course.points+=points;state.course.tricks++;}p.airTotal=0;p.landingFeedback={title:p.spin>2?'STYLISH LANDING':'SOFT LANDING',points};}
     if(state.input.jump){launch(S.jump.manualSeconds);state.input.jump=false;}
@@ -2709,12 +2739,20 @@ window.FROSTLINE_READY = (async () => {
       }
     }
   }
+  function boostThroughGate(p){
+    if(p.fall||p.awaitingInput||p.speed<=0||p.vy<=0)return;
+    const G=S.race.gateBoost,cap=topSpeed()*(p.air>0?S.jump.speedBoost:1)*G.multiplier;
+    p.speed=Math.max(p.speed,Math.min(cap,p.speed*G.multiplier));
+    if(p.air>0)p.airSpeed=Math.max(p.airSpeed,p.speed);
+    p.vx=Math.sin(p.heading)*p.speed;p.vy=Math.cos(p.heading)*p.speed*cemeteryYScale(p.x,p.y);
+    p.gateBoost=Math.max(p.gateBoost||0,G.seconds);
+  }
   function crossCourseGate(o,previous,p){
-    const run=state.course,group=o.gateGroup,members=group?group.members:[o];if(!run||group?.checked)return;
+    const run=state.course,group=o.gateGroup,members=group?group.members:[o];if(!run||o.checked||group?.checked)return;
     const ratio=(o.y-previous.y)/(p.y-previous.y||1),crossX=mix(previous.x,p.x,ratio),chosen=members.find(g=>Math.abs(crossX-g.x)<g.half);
     if(group)group.checked=true;
     for(const g of members){g.checked=true;g.checkedAt=clock;g.good=!!chosen;g.alternativeSkipped=!!chosen&&g!==chosen;}
-    if(chosen){run.points+=S.race.gatePoints;run.cleared++;if(run.arcade)collectArcadeGear(chosen);burst(chosen.x,chosen.y,C.gold,9);beep(710,.04);}
+    if(chosen){boostThroughGate(p);run.points+=S.race.gatePoints;run.cleared++;if(run.arcade)collectArcadeGear(chosen);burst(chosen.x,chosen.y,C.gold,9);beep(710,.04);}
     else{run.missed++;if(run.arcade)(state.arcade||state.endless).combo=0;beep(210,.045);if(run.arcade)wakePenaltyWolves(o);}
   }
   function updateFeedback(dt){

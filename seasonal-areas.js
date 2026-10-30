@@ -330,6 +330,16 @@ function drawFestivalHouse(o,s,paint={box,line}){
 function drawSeasonalProp(o,s){
   if(o.eaten||o.dead)return false;
   if(o.costume){drawFestivalGuest(o,s);return true;}
+  if(o.type==='spring'){
+    const compressed=o.springAt!==undefined&&clock-o.springAt<.18,w=Math.round(o.width*ZOOM),h=Math.round(w*.6);
+    const tile=specialTile('lake-spring:'+w+':'+compressed,w,h+8,(t,px)=>{
+      const mid=w/2,top=compressed?h*.6:h*.18;
+      px(w*.12,h-2,w*.76,5,'#63778b');px(w*.18,h-3,w*.64,2,'#dce8e3');
+      for(let i=0;i<3;i++){const y=mix(top+6,h-7,i/2),side=i%2?1:-1;px(mid-8,y,16,3,'#a7bdca');px(mid-8,y,3,3,'#52697a');px(mid+side*5,y-2,3,3,'#dce8e3');}
+      px(w*.08,top,w*.84,5,'#b64f5b');px(w*.12,top-2,w*.76,3,'#e5a66c');px(w*.2,top-2,w*.25,2,'#f3d8a4');
+    });
+    shadow(s.x,s.y,35,5);ctx.drawImage(tile,Math.round(s.x-w/2),Math.round(s.y-h));return true;
+  }
   if(o.type==='paradeGarland'){
     const width=Math.round(o.width*ZOOM),half=width/2;
     const tile=specialTile('parade-garland:'+width,width+16,40,(t,px)=>{
@@ -372,7 +382,7 @@ function drawSeasonalProp(o,s){
 }
 // Static light is cached in world coordinates. Moving bodies are lit every render.
 const NIGHT_TILE_SIZE=256,NIGHT_LIGHT_RESOLUTION=4,NIGHT_TILE_LIMIT=96;
-const NIGHT_STATIC_TYPES=new Set(['lamp','lodge','rental','mausoleum','iceBlock','ruinWall','gate','entrance','finish','courseStart','raceRail','christmasTree','paradeGarland','jackLantern','mistletoe','ramp','rainbow','lift','liftLabel','trailChoices']);
+const NIGHT_STATIC_TYPES=new Set(['lamp','lodge','rental','mausoleum','iceBlock','ruinWall','gate','entrance','finish','courseStart','raceRail','christmasTree','paradeGarland','jackLantern','mistletoe','spring','ramp','rainbow','lift','liftLabel','trailChoices']);
 const nightMask=document.createElement('canvas'),nightMaskCtx=nightMask.getContext('2d'),nightGlow=document.createElement('canvas'),nightGlowCtx=nightGlow.getContext('2d');
 const nightTileGlow=document.createElement('canvas'),nightTileGlowCtx=nightTileGlow.getContext('2d');
 nightTileGlow.width=nightTileGlow.height=NIGHT_TILE_SIZE/NIGHT_LIGHT_RESOLUTION;
@@ -415,7 +425,7 @@ function appendNightLights(o,lights){
     for(let i=1;i<12;i++)add(x-w/2+i/12*w,y-53+Math.sin(i/12*Math.PI)*14,26,['#ecaa96','#f4d08b','#bfd1a1'][i%3],.8,true);
   }else if(o.type==='jackLantern')add(x,y-6,44,'#ffab5b',1,true);
   else if(o.type==='mistletoe')add(x,y-24,60,'#eeb0b3');
-  else if(['ramp','rainbow','lift','liftLabel','trailChoices'].includes(o.type))add(x,y-10,40,'#e8c18d',1,true);
+  else if(['spring','ramp','rainbow','lift','liftLabel','trailChoices'].includes(o.type))add(x,y-10,40,'#e8c18d',1,true);
 }
 function nightLights(layers){
   const lights=[];appendNightLights(state.p,lights);for(const o of layers)if(o!==state.p)appendNightLights(o,lights);

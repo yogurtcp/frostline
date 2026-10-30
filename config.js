@@ -7,6 +7,7 @@ window.loadFrostlineConfig = async function () {
     try { response = await fetch(url, { cache: 'no-store' }); } catch (_) { /* Network loss: the embedded snapshot is playable offline. */ }
     if(response){if (!response.ok) throw new Error(`Cannot load game-config.json (${response.status})`);config = await response.json();}
   }
+  config.race.gateBoost ??= {seconds:.65,multiplier:1.08};
   config.endless ??= {"autoStart":false,"recordVersion":1,"playerSpeedKmh":90,"sectionMetres":240,"lookAheadMetres":180,"difficultyRampMetres":2800,"waveMetres":900,"itemSpreadMetres":55,"gates":{"spacingMetres":38,"openingMetres":[19,14],"swingMetres":[11,16],"swordEvery":8},"rates":{"trees":[0.9,3.8],"skiers":[0.8,4.8],"fastSkiers":[0,0.7],"lakes":[0.12,0.85],"jumps":[0.12,0.5]},"lakeRadiusMetres":[20,34],"firstLakeMetres":350,"yetis":{"firstMetres":700,"additionalEveryMetres":900,"intervalMetres":[650,300],"speedKmh":[68,94],"maxActive":4,"wakeSeconds":2.5,"retireBehindMetres":180}};
   config.endless.yetis.maxNearbyHunters ??= config.endless.yetis.maxActive ?? 4;
   config.endless.yetis.nearbyMetres ??= config.endless.yetis.retireBehindMetres ?? 180;
@@ -23,6 +24,8 @@ window.loadFrostlineConfig = async function () {
   config.chasers.despawnScreens ??= 3;
   config.chasers.dogCompanion ??= {};
   for(const [key,value] of Object.entries({feedMetres:8,maxFollowing:2,scareMetres:18,barkMetres:14,scareSeconds:2.5,retreatSeconds:3,followDistanceMetres:3.2,playRadiusMetres:5,cruiseSpeedKmh:24,catchUpSpeedKmh:16,challengeSeconds:1,challengeSpeedKmh:42}))config.chasers.dogCompanion[key] ??= value;
+  config.endless.regions ??= {};
+  config.endless.regions.lakeExitSprings ??= {spacingMetres:10,widthMetres:9,shoreGapMetres:8,jumpSeconds:2.4,durationCap:1.6};
   const regionDefaults = {"enabled":true,"minimumWidthMetres":600,"order":["town","quiet","trees","lake","quiet","rivalRace","forest","cemetery","denseForest","scramble","quiet","christmas","quiet","halloween","quiet"],"firstMetres":450,"gapMetres":[0,0],"lengthMetres":{"beginner":[320,400],"quiet":[180,250],"lake":[240,330],"denseForest":[110,160],"forest":[300,450],"cemetery":[650,850],"crowd":[320,400],"scramble":[70,110]},"beginnerPeople":[65,140],"quietTreesPer100Metres":8,"forestTreesPer100Metres":[12,26],"cemeteryOpeningMetres":[12,18],"zombies":{"count":[8,14],"speedKmh":[7,11],"noticeMetres":22},"crowd":{"firstMetres":1200,"chance":0.55,"minimumGapMetres":1600,"maximumGapMetres":4200,"widthMetres":240,"people":[180,280]},"denseForestDensity":[1,2],"scrambleDensity":[1,1.35]};
   config.endless.regions ??= regionDefaults;
   for(const [key,value] of Object.entries(regionDefaults))config.endless.regions[key] ??= value;

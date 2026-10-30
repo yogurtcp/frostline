@@ -335,6 +335,13 @@
             "fastSpeedKmh": 94
           }
         }
+      },
+      "lakeExitSprings": {
+        "spacingMetres": 10,
+        "widthMetres": 9,
+        "shoreGapMetres": 8,
+        "jumpSeconds": 2.4,
+        "durationCap": 1.6
       }
     },
     "wildlife": {
@@ -2022,7 +2029,11 @@
       "polite",
       "panic",
       "forest"
-    ]
+    ],
+    "gateBoost": {
+      "seconds": 0.65,
+      "multiplier": 1.08
+    }
   },
   "village": {
     "populationMultiplier": 2,
