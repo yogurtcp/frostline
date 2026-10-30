@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#f1f6ff">
-<meta name="frostline-build" content="7321a63b1364dbe8">
+<meta name="frostline-build" content="752521829c0e821f">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="manifest" href="manifest.webmanifest">
@@ -22,7 +22,7 @@ body{padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bot
 <dialog id="install-help" aria-labelledby="install-title"><h2 id="install-title">Install Frostline</h2><p id="install-instructions"></p><p>Once saved, Frostline plays offline. Online startups check for updates. Installing this same site keeps your scores and settings. A downloaded file or a different browser uses a separate save.</p><p><a href="https://yogurtcp.github.io/frostline/">Open published game</a></p><button id="close-install-help">Done</button></dialog>
 <script>/* Install/offline support. Updates are checked once, before the game starts. */
 (() => {
-  const BUILD = '7321a63b1364dbe8';
+  const BUILD = '752521829c0e821f';
   window.FROSTLINE_DEV = new URL(location.href).searchParams.has('dev');
   let prompt = null, playing = false;
   const standalone = () => window.matchMedia('(display-mode: standalone)').matches || navigator.standalone;
@@ -1889,6 +1889,18 @@ function drawPerson(o,s){
     if(next===current){announce('VISIT '+current+'/'+limit,current===1?'ALREADY AT THE EASIEST VISIT':'ALREADY AT THE HARDEST VISIT',C.teal,2);return true;}
     return debugEndlessArea(number,next);
   }
+  function ravagerPreySpot(hunter){
+    const side=pick([-1,1]),near=state.objects.filter(o=>o!==hunter&&o.r>0&&!o.dead&&!o.eaten&&Math.abs(o.x-hunter.x)<150+Math.max(o.width||0,o.r,o.treeLength||0)&&Math.abs(o.y-hunter.y)<150+Math.max(o.width||0,o.depth||0,o.r,o.treeLength||0));
+    for(const [dx,dy] of [[side*65,60],[-side*65,60],[0,95],[side*90,0],[-side*90,0],[0,-75],[side*35,30],[-side*35,30]]){
+      const p={x:hunter.x+dx,y:hunter.y+dy};
+      if([.25,.5,.75,1].every(t=>{const x=hunter.x+dx*t,y=hunter.y+dy*t;return !patchAt(x,y)&&!near.some(o=>obstacleClearance(o,x,y)<14);}))return p;
+    }
+    return null;
+  }
+  function spawnRavagerPrey(hunter,spot=ravagerPreySpot(hunter)){
+    if(!spot)return null;
+    return entity('rabbit',spot.x,spot.y,{width:26,r:5,animal:true,arcadeRun:hunter.arcadeRun||hunter.chaseRun,encounter:hunter.encounter,ravagerIntroFor:hunter,ai:'idle',angle:0,nextAI:clock+1});
+  }
   function spawnEndlessRavager(section,endY){
     const a=state.endless,R=S.endless.yetis.ravager,scale=section.endlessScale;
     const from=Math.max(section.startY,a.startY+R.firstMetres*PX_PER_M);
@@ -1902,8 +1914,10 @@ function drawPerson(o,s){
       const radius=S.endless.yetis.nearbyMetres*PX_PER_M*scale;
       const near=o=>o.ravager&&!o.dead&&!o.eaten&&!o.leaving&&activeCourseOwner(o)&&Math.hypot(o.x-x,o.y-y)<radius;
       if(state.chasers.filter(near).length+state.objects.filter(near).length>=R.maxNearby)return;
+      const spot=ravagerPreySpot({x,y});if(!spot)continue;
       const speed=S.endless.yetis.speedKmh[1]*R.speedMultiplier;
-      entity('lurker',x,y,{arcadeRun:section,encounter:e,width:55,r:18,ravager:true,arcadeTier:'fast',endlessBaseKmh:speed,yetiSpeedKmh:speed*scale,wakeSeconds:S.endless.yetis.wakeSeconds});
+      const hunter=entity('lurker',x,y,{arcadeRun:section,encounter:e,width:55,r:18,ravager:true,arcadeTier:'fast',endlessBaseKmh:speed,yetiSpeedKmh:speed*scale,wakeSeconds:S.endless.yetis.wakeSeconds});
+      hunter.ravagerIntroPrey=spawnRavagerPrey(hunter,spot);
       return;
     }
   }
@@ -3167,6 +3181,11 @@ function drawPerson(o,s){
   }
   function updateRavagerTarget(hunter){
     const old=hunter.divert,R=S.endless.yetis.ravager;
+    if(hunter.ravagerIntroPrey){
+      let prey=hunter.ravagerIntroPrey;delete hunter.ravagerIntroPrey;
+      if(!state.objects.includes(prey)||!ravagerPrey(prey,hunter)||Math.hypot(prey.x-hunter.x,prey.y-hunter.y)>R.noticeMetres*PX_PER_M*endlessSpeedScale(hunter))prey=spawnRavagerPrey(hunter);
+      if(prey){delete prey.ravagerIntroFor;hunter.divert=prey;hunter.ravagerDivertUntil=clock+R.divertSeconds;hunter.avoidUntil=0;hunter.obstacleDetour=null;return;}
+    }
     if(clock<(hunter.ravagerPursueUntil||0)){hunter.divert=null;return;}
     if(old){
       const distance=Math.hypot(old.x-hunter.x,old.y-hunter.y);
@@ -3917,7 +3936,7 @@ function drawPerson(o,s){
       if(creature&&monsterContact(o))hit(o);
       if(state.sceneCard||state.deathTimer)return;
       if(o.dead)continue;
-      if(state.started&&!(o.stunnedUntil>clock)&&!o.retiring&&o.type==='lurker'&&(courseCreature(o,p.x,p.y)||!humanArea(o.x,o.y)&&!humanArea(p.x,p.y))&&(Math.hypot(o.x-p.x,o.y-p.y)<yetiWakeDistance(o)||o.shoreLake&&state.objects.some(q=>['skier','boarder'].includes(q.type)&&!q.eaten&&!q.dead&&q.r>0&&Math.hypot(q.x-o.x,q.y-o.y)<S.wildlife.yetiWakeDistance*endlessSpeedScale(o)&&!patchAt(q.x,q.y)))){o.type='awakened';o.r=0;state.chasers.push({kind:o.arcadeTier==='slow'?'slow':'fast',arcadeTier:o.arcadeTier,ravager:o.ravager,chaseRun:o.arcadeRun,shoreLake:o.shoreLake,endlessBaseKmh:o.endlessBaseKmh,x:o.x,y:o.y,speed:o.arcadeRun?o.yetiSpeedKmh/S.physics.hudKmhPerSpeed:topSpeed()*S.wildlife.yetiWildSpeedRatio,wakeUntil:clock+yetiWakeDelay(o),phase:o.phase,expires:p.y+S.wildlife.yetiWildChaseDistance,talkAt:clock+6});say('Oh. Breakfast.',o);}
+      if(state.started&&!(o.stunnedUntil>clock)&&!o.retiring&&o.type==='lurker'&&(courseCreature(o,p.x,p.y)||!humanArea(o.x,o.y)&&!humanArea(p.x,p.y))&&(Math.hypot(o.x-p.x,o.y-p.y)<yetiWakeDistance(o)||o.shoreLake&&state.objects.some(q=>['skier','boarder'].includes(q.type)&&!q.eaten&&!q.dead&&q.r>0&&Math.hypot(q.x-o.x,q.y-o.y)<S.wildlife.yetiWakeDistance*endlessSpeedScale(o)&&!patchAt(q.x,q.y)))){o.type='awakened';o.r=0;const hunter={kind:o.arcadeTier==='slow'?'slow':'fast',arcadeTier:o.arcadeTier,ravager:o.ravager,ravagerIntroPrey:o.ravagerIntroPrey,encounter:o.encounter,chaseRun:o.arcadeRun,shoreLake:o.shoreLake,endlessBaseKmh:o.endlessBaseKmh,x:o.x,y:o.y,speed:o.arcadeRun?o.yetiSpeedKmh/S.physics.hudKmhPerSpeed:topSpeed()*S.wildlife.yetiWildSpeedRatio,wakeUntil:clock+yetiWakeDelay(o),phase:o.phase,expires:p.y+S.wildlife.yetiWildChaseDistance,talkAt:clock+6};if(hunter.ravagerIntroPrey)hunter.ravagerIntroPrey.ravagerIntroFor=hunter;state.chasers.push(hunter);say('Oh. Breakfast.',o);}
       if(o.type==='gate'&&o.run===state.course&&!o.checked&&previous.y<o.y&&p.y>=o.y)crossCourseGate(o,previous,p);
       if(o.type==='entrance'&&!state.course&&previous.y<o.y&&p.y>=o.y&&Math.abs(p.x-o.x)<o.half){startCourse(o.stage,o);break;}
       if(!state.arcade&&!state.endless&&o.type==='lift'&&!o.used&&previous.y<o.y&&p.y>=o.y&&Math.abs(p.x-o.x)<o.half){o.used=true;state.liftTimer=S.lift.rideSeconds;p.speed=0;announce('UP WE GO','Next stop: the summit.',C.teal,3);}
@@ -4450,6 +4469,11 @@ function drawPerson(o,s){
     const p=state.p,A=S.wildlife,rabbits=[],cats=[],skis=[],hunters=[];
     for(const o of objectGroups().wildlife){const t=o.type;if(t==='rabbit'){if(!o.eaten)rabbits.push(o);}else if(t==='cat')cats.push(o);else if(t==='skier'||t==='boarder')skis.push(o);else if(t==='fox'||t==='wolf')hunters.push(o);}
     for(const o of objectGroups().animals){
+      if(o.ravagerIntroFor){
+        const h=o.ravagerIntroFor;
+        if(!h.dead&&!h.eaten&&!h.leaving&&(h.type==='lurker'||h.wakeUntil>clock)){o.running=false;o.motionVx=o.motionVy=o.travelSpeed=0;o.nextAI=clock+1;continue;}
+        delete o.ravagerIntroFor;
+      }
       if(o.type==='wolf'&&activeCourseOwner(o)&&!state.started)continue;
       if(o.retiring){o.y-=A.roamSpeed*dt;o.running=true;if(o.y<viewBounds().top-100)o.eaten=true;continue;}
       if(state.endless&&o.type==='wolf'&&(o.wolfAwake||o.alertUntil>clock)&&!activeCourseOwner(o)){o.arcadeRun=state.course;o.linkedChase=true;delete o.worldChunk;}
