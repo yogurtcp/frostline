@@ -96,6 +96,7 @@ function makeChristmasParade(e,root,name){
     for(const side of [-1,1])houses.push(entity((row+(side>0?1:0))%3?'rental':'lodge',base+side*houseX,y,{width,r:width*V.houseFootWidthRatio,town,houseStyle:(row+(side>0?2:0))%S.houseAnimation.trimRGB.length,band:row}));
     if(row%6===1)entity('paradeGarland',base,y-22,{town,width:houseX*2,r:0});
   }
+  town.liftGapY=(rowYs.at(-1)+e.endY-40-width*V.houseFootHeightRatio*2)/2;
   const decorate=(type,x,y,extra)=>{
     if(Math.abs(x-base)<half+(extra.r||0)+12||houses.some(h=>houseClearance(h,x,y)<(extra.r||0)+8))return;
     return entity(type,x,y,{...extra,town});

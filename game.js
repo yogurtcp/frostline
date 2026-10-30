@@ -415,6 +415,7 @@ window.FROSTLINE_READY = (async () => {
       for(const o of state.objects)if(o.town===town){o.arcadeRun=section;o.encounter=e;if(['skier','boarder'].includes(o.type))o.endlessBaseVy=o.vy;}
       for(const road of state.roads)if(road.town===town){road.endlessEncounter=e;road.endlessEndY=e.endY;}
       if(FESTIVAL_KINDS.has(kind))decorateFestival(e,section);
+      addEndlessLift(town,section,e);
       e.generatedY=e.endY;
     }else if(kind!=='trees'){
       planEndlessRegion(e,section);
@@ -658,6 +659,7 @@ window.FROSTLINE_READY = (async () => {
     for(const o of state.objects)if(o.type==='entrance')o.selected=o===gate;
     entity('courseStart',run.x,startY,{r:0,width:700,name:'ARCADE'});
     const route=state.liftRoutes.at(-1);if(route)route.y1=Math.min(route.y1,startY);
+    state.endless.liftTail={x0:run.x+S.lift.x,x1:run.x+S.lift.x,y0:startY,y1:Infinity,endlessRun:run};state.liftRoutes.push(state.endless.liftTail);
     extendEndless();
     if(debugKind){
       const a=state.endless,e=a.encounters[0],y=e.startY+20*e.scale;
@@ -831,6 +833,7 @@ window.FROSTLINE_READY = (async () => {
   }
   function updateEndless(){
     const a=state.endless;if(!a)return;
+    state.liftRoutes=state.liftRoutes.filter(r=>!r.endlessRun||r.y1>state.p.y-S.world.sceneryRetentionBehind);
     a.furthestY=Math.max(a.furthestY,state.p.y);const distance=Math.max(0,(a.furthestY-a.startY)/PX_PER_M);
     if(distance>=a.savedMetres+250){a.savedMetres=distance;recordEndless('RUNNING');state.endlessResult=null;}
     const active=endlessEncounterAt(state.p.y);
@@ -1672,6 +1675,25 @@ window.FROSTLINE_READY = (async () => {
         const at=screen(cx*chunk,cy*chunk);ctx.drawImage(tile,at.x+tile.paintX,at.y+tile.paintY);
       }
     }
+  }
+  function addEndlessLift(town,section,e){
+    if(town.arcadeLift)return;
+    const a=state.endless,root=section.endlessRoot||state.course;
+    if(town.parade){
+      const side=town.layoutSeed%2?1:-1;
+      town.stationX=town.x+side*(e.half+300);town.stationY=town.liftGapY;
+      const road={surface:'snow',width:36,points:[{x:town.x,y:town.stationY},{x:town.stationX,y:town.stationY}],town,endlessEncounter:e,endlessEndY:e.endY};
+      state.roads.push(road);
+    }
+    const own={town,arcadeRun:section,encounter:e};
+    town.arcadeLift=entity('lift',town.stationX,town.stationY,{...own,width:174,r:0,half:73,used:false});
+    entity('liftLabel',town.stationX,town.stationY+55,{...own,r:0,width:160});
+    for(let i=0;i<4;i++)entity(i%2?'personRed':'personGreen',town.stationX-45+i*22,town.stationY+20,{...own,width:30,r:0,job:'queue',costume:town.festival==='christmas'?'furCoat':town.festival==='halloween'?'pumpkin':undefined});
+    const tail=a.liftTail,bendStart=Math.max(tail.y0,town.stationY-S.lift.routeBendDistance),x=liftX(tail,bendStart);
+    tail.y1=bendStart;
+    state.liftRoutes.push({x0:x,x1:town.stationX,y0:bendStart,y1:town.stationY,endlessRun:root});
+    a.liftTail={x0:town.stationX,x1:root.x+Math.sign(town.stationX-root.x)*S.lift.x,y0:town.stationY,y1:Infinity,endlessRun:root};
+    state.liftRoutes.push(a.liftTail);
   }
   function liftX(route,y){return mix(route.x0,route.x1,clamp((y-route.y0)/S.lift.routeBendDistance,0,1));}
   function safeApproach(x,y){return state.villages.some(t=>!t.endlessRun&&y>=t.roadEndY&&y<=t.approachEndY&&Math.abs(x-t.x)<S.village.halfWidth+150);}
@@ -4164,6 +4186,7 @@ window.FROSTLINE_READY = (async () => {
       text('FINISH',s.x,s.y-31,20,C.teal);text('BETWEEN THE FLAGS',s.x,s.y+26,9,C.muted);return;
     }
     if(o.type==='villageTitle'){text(o.town.name.toUpperCase().split('').join(' '),s.x,s.y,22,C.teal);text(o.town.endlessRun?'COURSE TOWN - YETIS CAN FOLLOW':'VILLAGE  ·  PLEASE DISTURB THE PEACE QUIETLY',s.x,s.y+23,8,C.muted);return;}
+    if(o.type==='liftLabel'&&o.town?.endlessRun){text('CHAIRLIFT',s.x,s.y,10,C.ink);return;}
     if(o.type==='liftLabel'){text('SUMMIT LIFT',s.x,s.y,10,C.ink);text(state.arcade?'ARCADE: KEEP SKIING DOWN':'SKI IN TO RIDE',s.x,s.y+15,8,C.muted);return;}
     const wiggle=o.roam?Math.sin(clock*6+o.phase)*1.2:0;
     if(o.type.startsWith('person')){drawPerson(o,s);return;}
