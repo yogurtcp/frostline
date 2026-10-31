@@ -68,10 +68,12 @@
         "firstMetres": 1200,
         "speedMultiplier": 1.15,
         "noticeMetres": 30,
-        "chancePerSection": 0.5,
+        "chancePerSection": 0.25,
         "maxNearby": 1,
         "divertSeconds": 2,
-        "pursueSeconds": 3
+        "pursueSeconds": 0.5,
+        "mealPauseSeconds": 1,
+        "monsterMealPauseSeconds": 1.5
       }
     },
     "maxPlayerSpeedKmh": 90,

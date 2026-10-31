@@ -2056,7 +2056,8 @@ window.FROSTLINE_READY = (async () => {
   }
   function eatRavagerPrey(hunter,meal,previous){
     const hostile=MONSTER_KINDS.has(enemyKind(meal));
-    eatChaserPrey(hunter,meal,previous,hostile?1.2:S.predators.mealPauseSeconds);
+    const R=S.endless.yetis.ravager;
+    eatChaserPrey(hunter,meal,previous,hostile?R.monsterMealPauseSeconds:R.mealPauseSeconds);
     hunter.ravagerPursueUntil=(hunter.feedingUntil||clock)+S.endless.yetis.ravager.pursueSeconds;
     if(hostile){meal.eaten=false;meal.dead=true;meal.animal=false;meal.vx=meal.vy=meal.roam=0;meal.motionVx=meal.motionVy=meal.travelSpeed=0;meal.travelStamp=clock;meal.fadeUntil=clock+.6;burst(meal.x,meal.y,'#93a6c7',10);}
   }

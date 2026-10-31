@@ -1,5 +1,5 @@
 /* All shell files are prepared before a new build becomes active. */
-const VERSION = '0180110321c1ece2';
+const VERSION = '47d4dc9c1c992435';
 const ROOT = new URL('./', self.registration.scope);
 const PREFIX = 'frostline-shell-' + ROOT.pathname + '-';
 const CACHE = PREFIX + VERSION;
