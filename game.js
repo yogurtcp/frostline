@@ -46,7 +46,7 @@ window.FROSTLINE_READY = (async () => {
     freefallAt:0,nextFastSkier:2, results:null, receipts:[], transitions:[], soundReady:false,
     chunks:new Map(),safeTrails:[],roads:[],villages:[],liftRoutes:[],plannedTown:null,deathTimer:0,liftTimer:0,deaths:0,keyboardStep:0,control:'keyboard',lastSteer:-10
   };
-  function newPlayer(){return {x:0,y:0,vx:0,vy:0,speed:0,heading:Math.PI/2,desiredHeading:Math.PI/2,mode:'still',awaitingInput:false,crashObstacle:null,slowContacts:new Set(),fall:0,shield:0,air:0,airTotal:0,jumpHeight:0,spin:0,boost:0,gateBoost:0,jumpLock:0,onIce:false,iceHeading:0,icePushPending:false,airHeading:0,airSpeed:0,airSpin:0,airPose:0,airTuck:0,onRugged:false,rainbow:0};}
+  function newPlayer(){return {x:0,y:0,vx:0,vy:0,speed:0,heading:Math.PI/2,desiredHeading:Math.PI/2,mode:'still',awaitingInput:false,crashObstacle:null,slowContacts:new Set(),fall:0,shield:0,air:0,airTotal:0,jumpHeight:0,spin:0,boost:0,gateBoost:0,jumpLock:0,onIce:false,iceHeading:0,icePushPending:false,airHeading:0,airSpeed:0,airSpin:0,airPose:0,airTuck:0,landingSteer:null,onRugged:false,rainbow:0};}
   function viewBounds(){return {left:state.cam.x-W/(2*ZOOM),right:state.cam.x+W/(2*ZOOM),top:state.cam.y,bottom:state.cam.y+H/ZOOM};}
   function belowView(margin=330){return Math.max(viewBounds().bottom,state.p.y+H*(1-S.render.playerScreenY)/ZOOM)+margin;}
   function topSpeed(){return (state.course?stages[state.course.id].pace:state.zone.kind==='village'?S.physics.villagePace:S.physics.freePace)*S.physics.speedMultiplier;}
@@ -2320,7 +2320,7 @@ window.FROSTLINE_READY = (async () => {
     if(state.course)state.course.hits++;
     // Obstacle contacts are already suppressed while down. A fall does not protect against predators.
     p.awaitingInput=true;p.crashObstacle=obstacle;p.fall=duration;p.shield=0;
-    p.speed=p.vx=p.vy=0;p.air=p.airTotal=0;p.mode='still';state.lastTrack=null;
+    p.speed=p.vx=p.vy=0;p.air=p.airTotal=0;p.landingSteer=null;p.mode='still';state.lastTrack=null;
     state.input={left:false,right:false,up:false,down:false,pointer:null,jump:false};
     state.screenShake=.2;burst(p.x,p.y,'#b9d2d8',15);beep(140,.12,'triangle');return true;
   }
@@ -2585,7 +2585,7 @@ window.FROSTLINE_READY = (async () => {
     p.x+=p.vx*dt;p.y+=p.vy*dt;constrainCemeteryMotion(p,p.walkOrigin);
     p.air=Math.max(0,p.air-dt);p.fall=Math.max(0,p.fall-dt);p.shield=Math.max(0,p.shield-dt);p.boost=Math.max(0,p.boost-dt);p.gateBoost=Math.max(0,(p.gateBoost||0)-dt);p.jumpLock=Math.max(0,p.jumpLock-dt);p.rainbow=Math.max(0,p.rainbow-dt);
     if(p.air>0)p.spin+=p.airSpin*dt;
-    if(p.air===0&&p.airTotal>0){const points=Math.round(S.race.jumpBasePoints+p.spin*S.race.spinPointMultiplier+p.jumpHeight*S.race.heightPointMultiplier);if(state.course){state.course.points+=points;state.course.tricks++;}p.airTotal=0;p.landingFeedback={title:p.spin>2?'STYLISH LANDING':'SOFT LANDING',points};}
+    if(p.air===0&&p.airTotal>0){if(p.landingSteer){p.mode=p.landingSteer.mode;state.input.tap={key:p.landingSteer.key,until:clock+.14};p.landingSteer=null;}const points=Math.round(S.race.jumpBasePoints+p.spin*S.race.spinPointMultiplier+p.jumpHeight*S.race.heightPointMultiplier);if(state.course){state.course.points+=points;state.course.tricks++;}p.airTotal=0;p.landingFeedback={title:p.spin>2?'STYLISH LANDING':'SOFT LANDING',points};}
     if(state.input.jump){launch(S.jump.manualSeconds);state.input.jump=false;}
     if(p.air===0&&!p.fall&&(!state.lastTrack||Math.hypot(p.x-state.lastTrack.x,p.y-state.lastTrack.y)>S.render.trailSpacing)){
       if(state.lastTrack&&Math.hypot(p.x-state.lastTrack.x,p.y-state.lastTrack.y)<45)state.trails.push({x:p.x,y:p.y,px:state.lastTrack.x,py:state.lastTrack.y,angle:p.heading,rainbow:p.rainbow>0});state.lastTrack={x:p.x,y:p.y};
@@ -2607,22 +2607,24 @@ window.FROSTLINE_READY = (async () => {
     const dx=e.clientX-t.clientStartX,dy=e.clientY-t.clientStartY;
     if(Math.abs(dy)>=S.controls.swipeShortPixels&&Math.abs(dy)>Math.abs(dx)&&pointerSteer('down')){t.direction='down';t.presses=1;t.handled=true;}
   }
+  function tapDirection(t){return t.sy>=H*(1-S.controls.tapBottomFraction)?'down':t.sx<W/2?'left':'right';}
   function finishPointerTap(e){
     const t=state.input.pointer;if(!t||t.multiTouch||t.handled)return;
-    if(Math.hypot(e.clientX-t.clientStartX,e.clientY-t.clientStartY)>=S.controls.swipeShortPixels)return;
-    const key=t.sy>=H*(1-S.controls.tapBottomFraction)?'down':t.sx<W/2?'left':'right';
-    pointerSteer(key,true);
+    // A horizontal drift is still one tap; vertical swipes were handled above.
+    pointerSteer(tapDirection(t),true);
   }
   function keyboardDirection(key,repeat=false){
-    if(state.sceneCard||state.p.air>0)return;
+    if(state.sceneCard)return;
     if(repeat&&clock-state.lastSteer<S.controls.keyRepeatSeconds)return;state.lastSteer=clock;state.control='keyboard';
-    const p=state.p;p.releasing=false;
-    if(key==='up'){p.desiredHeading=state.keyboardStep<0?-Math.PI:Math.PI;p.mode='walk';return;}
+    const p=state.p,mode=p.landingSteer?.mode??p.mode;p.releasing=false;
+    const setMode=next=>{if(p.air>0)p.landingSteer={key,mode:next};else p.mode=next;};
+    // Airborne input changes the landing plan; flight keeps its takeoff heading.
+    if(key==='up'){p.desiredHeading=state.keyboardStep<0?-Math.PI:Math.PI;setMode('walk');return;}
     if(key==='down')state.keyboardStep=0;
-    else if(p.speed<S.physics.stopEpsilon||p.mode==='traverse'||Math.cos(p.desiredHeading)<-S.physics.downhillCosMinimum||(p.mode==='still'&&Math.abs(Math.cos(p.desiredHeading))<S.physics.downhillCosMinimum))state.keyboardStep=key==='left'?-3:3;
+    else if(p.speed<S.physics.stopEpsilon||mode==='traverse'||Math.cos(p.desiredHeading)<-S.physics.downhillCosMinimum||(mode==='still'&&Math.abs(Math.cos(p.desiredHeading))<S.physics.downhillCosMinimum))state.keyboardStep=key==='left'?-3:3;
     else state.keyboardStep=clamp(state.keyboardStep+(key==='left'?-1:1),-3,3);
     p.desiredHeading=Math.abs(state.keyboardStep)===3?Math.sign(state.keyboardStep)*Math.PI/2:state.keyboardStep*S.controls.stepDegrees*Math.PI/180;
-    p.mode=Math.abs(state.keyboardStep)===3?'traverse':'slide';
+    setMode(Math.abs(state.keyboardStep)===3?'traverse':'slide');
   }
 
   function knockDownByTerrain(o){
@@ -4488,6 +4490,7 @@ window.FROSTLINE_READY = (async () => {
   function pointerCoords(e){const r=canvas.getBoundingClientRect();return {x:(e.clientX-r.left)*W/r.width,y:(e.clientY-r.top)*H/r.height};}
   const activePointers=new Set();
   canvas.addEventListener('pointerdown',e=>{
+    if(e.pointerType==='mouse'&&e.button!==0)return;
     e.preventDefault();activePointers.add(e.pointerId);
     if(state.deathAnimation)return;
     if(state.sceneCard){dismissSceneCard();return;}
@@ -4495,6 +4498,7 @@ window.FROSTLINE_READY = (async () => {
     if(activePointers.size>1){if(state.input.pointer)state.input.pointer.multiTouch=true;if(startMoving())state.input.jump=true;return;}
     const p=pointerCoords(e);state.control='pointer';
     state.input.pointer={id:e.pointerId,sx:p.x,sy:p.y,...p,clientStartX:e.clientX,clientStartY:e.clientY,direction:null,presses:0,handled:false,multiTouch:false};canvas.setPointerCapture(e.pointerId);
+    if(e.pointerType==='mouse'){const t=state.input.pointer;t.handled=pointerSteer(tapDirection(t),true);}
   });
   // Screen-reader activation has no pointerdown; ignore a held ski gesture's trailing click.
   canvas.addEventListener('click',e=>{if(state.sceneCard&&e.detail===0)dismissSceneCard();});
