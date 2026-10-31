@@ -385,6 +385,7 @@ const NIGHT_TILE_SIZE=256,NIGHT_LIGHT_RESOLUTION=4,NIGHT_TILE_LIMIT=96;
 const NIGHT_STATIC_TYPES=new Set(['lamp','lodge','rental','mausoleum','iceBlock','ruinWall','gate','entrance','finish','courseStart','raceRail','christmasTree','paradeGarland','jackLantern','mistletoe','spring','ramp','rainbow','lift','liftLabel','trailChoices']);
 const nightMask=document.createElement('canvas'),nightMaskCtx=nightMask.getContext('2d'),nightGlow=document.createElement('canvas'),nightGlowCtx=nightGlow.getContext('2d');
 const nightTileGlow=document.createElement('canvas'),nightTileGlowCtx=nightTileGlow.getContext('2d');
+const NIGHT_STATIC_VIEW=objectView(o=>NIGHT_STATIC_TYPES.has(o.type));
 nightTileGlow.width=nightTileGlow.height=NIGHT_TILE_SIZE/NIGHT_LIGHT_RESOLUTION;
 const lightTiles=new Map(),nightLightObjects=new Map(),nightLightBuckets=new Map(),nightStaticTiles=new Map(),nightTilePool=[];
 let nightLightEpoch=0,nightLightSerial=0;
@@ -442,8 +443,8 @@ function removeNightLightEntry(entry){
 }
 function syncNightStaticLights(){
   const epoch=++nightLightEpoch;
-  for(const o of state.objects){
-    if(!NIGHT_STATIC_TYPES.has(o.type)||o.dead||o.eaten||o.collected)continue;
+  for(const o of viewItems(NIGHT_STATIC_VIEW)){
+    if(o.dead||o.eaten||o.collected)continue;
     const old=nightLightObjects.get(o);
     if(old&&old.x===o.x&&old.y===o.y&&old.width===o.width&&old.half===o.half&&old.type===o.type&&old.festival===o.festival&&old.grand===o.grandMausoleum&&old.lampRadius===S.night.lampRadiusMetres&&old.lightRadiusWorld===o.lightRadiusWorld&&old.lightReachMultiplier===S.night.lightReachMultiplier){old.seen=epoch;continue;}
     if(old)removeNightLightEntry(old);

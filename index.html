@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#f1f6ff">
-<meta name="frostline-build" content="0180110321c1ece2">
+<meta name="frostline-build" content="f56abe71e00ceccd">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="manifest" href="manifest.webmanifest">
@@ -22,7 +22,7 @@ body{padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bot
 <dialog id="install-help" aria-labelledby="install-title"><h2 id="install-title">Install Frostline</h2><p id="install-instructions"></p><p>Once saved, Frostline plays offline. Online startups check for updates. Installing this same site keeps your scores and settings. A downloaded file or a different browser uses a separate save.</p><p><a href="https://yogurtcp.github.io/frostline/">Open published game</a></p><button id="close-install-help">Done</button></dialog>
 <script>/* Install/offline support. Updates are checked once, before the game starts. */
 (() => {
-  const BUILD = '0180110321c1ece2';
+  const BUILD = 'f56abe71e00ceccd';
   window.FROSTLINE_DEV = new URL(location.href).searchParams.has('dev');
   let prompt = null, playing = false;
   const standalone = () => window.matchMedia('(display-mode: standalone)').matches || navigator.standalone;
@@ -834,6 +834,7 @@ const NIGHT_TILE_SIZE=256,NIGHT_LIGHT_RESOLUTION=4,NIGHT_TILE_LIMIT=96;
 const NIGHT_STATIC_TYPES=new Set(['lamp','lodge','rental','mausoleum','iceBlock','ruinWall','gate','entrance','finish','courseStart','raceRail','christmasTree','paradeGarland','jackLantern','mistletoe','spring','ramp','rainbow','lift','liftLabel','trailChoices']);
 const nightMask=document.createElement('canvas'),nightMaskCtx=nightMask.getContext('2d'),nightGlow=document.createElement('canvas'),nightGlowCtx=nightGlow.getContext('2d');
 const nightTileGlow=document.createElement('canvas'),nightTileGlowCtx=nightTileGlow.getContext('2d');
+const NIGHT_STATIC_VIEW=objectView(o=>NIGHT_STATIC_TYPES.has(o.type));
 nightTileGlow.width=nightTileGlow.height=NIGHT_TILE_SIZE/NIGHT_LIGHT_RESOLUTION;
 const lightTiles=new Map(),nightLightObjects=new Map(),nightLightBuckets=new Map(),nightStaticTiles=new Map(),nightTilePool=[];
 let nightLightEpoch=0,nightLightSerial=0;
@@ -891,8 +892,8 @@ function removeNightLightEntry(entry){
 }
 function syncNightStaticLights(){
   const epoch=++nightLightEpoch;
-  for(const o of state.objects){
-    if(!NIGHT_STATIC_TYPES.has(o.type)||o.dead||o.eaten||o.collected)continue;
+  for(const o of viewItems(NIGHT_STATIC_VIEW)){
+    if(o.dead||o.eaten||o.collected)continue;
     const old=nightLightObjects.get(o);
     if(old&&old.x===o.x&&old.y===o.y&&old.width===o.width&&old.half===o.half&&old.type===o.type&&old.festival===o.festival&&old.grand===o.grandMausoleum&&old.lampRadius===S.night.lampRadiusMetres&&old.lightRadiusWorld===o.lightRadiusWorld&&old.lightReachMultiplier===S.night.lightReachMultiplier){old.seen=epoch;continue;}
     if(old)removeNightLightEntry(old);
@@ -1279,6 +1280,23 @@ function drawPerson(o,s){
     const source=state.objects;let result=null;
     for(let i=0;i<source.length;i++){const o=source[i];if(keep(o)){if(result)result.push(o);}else if(!result)result=source.slice(0,i);}
     if(result)state.objects=result;
+  }
+  // Most objects are static scenery, much of it authored far ahead. Passes that only care about a few
+  // kinds read an ordered sub-list instead of rescanning everything each 120 Hz tick. A view's test may
+  // only read type/kind and creation-time flags; it rebuilds when the array, its length or any type changes.
+  let typeRevision=0;
+  function retype(o,type){o.type=type;typeRevision++;}
+  function objectView(test){return {test,source:null,length:-1,revision:-1,items:[]};}
+  function viewItems(view){
+    const source=state.objects;
+    if(view.source!==source||view.length!==source.length||view.revision!==typeRevision){view.items=source.filter(view.test);view.source=source;view.length=source.length;view.revision=typeRevision;}
+    return view.items;
+  }
+  // Same result as filterObjects(keep) when keep(o) is true for every object outside the view.
+  function filterViewObjects(view,keep){
+    let removed=null;
+    for(const o of viewItems(view))if(!keep(o))(removed??=new Set()).add(o);
+    if(removed)state.objects=state.objects.filter(o=>!removed.has(o));
   }
   function entity(type,x,y,extra={}) {
     const o={type,x,y,homeX:x,homeY:y,id:random(),width:40,r:13,phase:range(0,TAU),touched:false,...extra};
@@ -2076,6 +2094,8 @@ function drawPerson(o,s){
     a.sections=a.sections.filter(r=>r.endY>state.p.y-S.world.sceneryRetentionBehind);
     a.encounters=a.encounters.filter(e=>e.endY>state.p.y-S.world.sceneryRetentionBehind||state.chasers.some(c=>activeCourseOwner(c)&&!c.dead&&!c.leaving&&c.y>=e.startY-200*e.scale&&c.y<=e.endY)||state.objects.some(o=>(o.type==='wolf'&&o.linkedChase||o.type==='zombie'&&(o.awake||o.graveWakeAt!==undefined)&&o.zombieState!=='spent')&&activeCourseOwner(o)&&o.y>=e.startY-200*e.scale&&o.y<=e.endY));
   }
+  // Only dormant threats (lurker, wolf, bear) and skiers/boarders can be discarded below.
+  const ENDLESS_PRUNE_VIEW=objectView(o=>['lurker','wolf','bear','skier','boarder'].includes(o.type));
   function updateEndless(){
     const a=state.endless;if(!a)return;
     state.liftRoutes=state.liftRoutes.filter(r=>!r.endlessRun||r.y1>state.p.y-S.world.sceneryRetentionBehind);
@@ -2093,7 +2113,7 @@ function drawPerson(o,s){
     const far=o=>o.y<state.p.y-S.endless.yetis.nearbyMetres*PX_PER_M*a.speedScale;
     const dormant=o=>!o.dead&&!o.eaten&&(o.type==='lurker'||['wolf','bear'].includes(o.type)&&!o.linkedChase&&!o.wolfAwake&&!(o.alertUntil>clock)&&!o.divert&&!(o.feedingUntil>clock));
     // Discard missed, unengaged threats once offscreen. Awake hunters keep physically pursuing.
-    filterObjects(o=>!((dormant(o)&&(far(o)||o.y<view.top-100))||(['skier','boarder'].includes(o.type)&&o.y>a.plannedY+800*a.speedScale))||!activeCourseOwner(o));
+    filterViewObjects(ENDLESS_PRUNE_VIEW,o=>!((dormant(o)&&(far(o)||o.y<view.top-100))||(['skier','boarder'].includes(o.type)&&o.y>a.plannedY+800*a.speedScale))||!activeCourseOwner(o));
   }
   function retireArcadeBlock(run){
     const owned=o=>{const owner=o.arcadeRun||o.chaseRun;return owner&&(owner===run||run?.block&&owner.block===run.block);};
@@ -2977,6 +2997,8 @@ function drawPerson(o,s){
     if(humanArea(x,y))return roll<S.world.humanPredatorChance&&random()>=S.world.wolfShareOfPredators?'fox':pick(S.spawnTables.human);
     return roll<S.world.wildPredatorChance?(random()<S.world.wolfShareOfPredators?'wolf':'fox'):pick(S.spawnTables.wild);
   }
+  // blocked() is false for every non-monster; pruneDistantEnemies also keeps every non-monster except grand mausoleums.
+  const MONSTER_VIEW=objectView(o=>MONSTER_KINDS.has(enemyKind(o))),PRUNE_VIEW=objectView(o=>MONSTER_KINDS.has(enemyKind(o))||o.grandMausoleum);
   function removeInactiveEnemies(){
     const blocked=o=>{
       if(!MONSTER_KINDS.has(enemyKind(o))||o.dead||o.eaten)return false;
@@ -2986,7 +3008,7 @@ function drawPerson(o,s){
     };
     let removed;
     const keep=o=>{if(!blocked(o))return true;(removed??=new Set()).add(o);return false;};
-    filterObjects(keep);state.chasers=state.chasers.filter(keep);
+    filterViewObjects(MONSTER_VIEW,keep);state.chasers=state.chasers.filter(keep);
     if(removed)state.speech=state.speech.filter(s=>!removed.has(s.object));
   }
   function pruneDistantEnemies(){
@@ -3003,7 +3025,7 @@ function drawPerson(o,s){
       (removed??=new Set()).add(o);o.eaten=true;o.r=0;o.divert=null;o.obstacleDetour=null;
       return false;
     };
-    filterObjects(o=>keep(o));
+    filterViewObjects(PRUNE_VIEW,o=>keep(o));
     // Retain the array when nothing is removed so actor/contact caches remain reusable.
     let kept=null;
     for(let i=0;i<state.chasers.length;i++){
@@ -3024,7 +3046,7 @@ function drawPerson(o,s){
     // Newly selected terrain is below the viewport; don't reveal replacements on screen.
     const bottom=viewBounds().bottom;
     for(const o of state.objects)if(!o.arcadeRun&&o.y>bottom+100&&humanArea(o.x,o.y)&&['bear','lurker','fox','wolf'].includes(o.type)){
-      o.type='bush';o.width=35;o.r=10;o.animal=false;o.ai='idle';
+      retype(o,'bush');o.width=35;o.r=10;o.animal=false;o.ai='idle';
     }
   }
   function polygonContains(points,x,y){
@@ -3061,16 +3083,21 @@ function drawPerson(o,s){
   // Edible creatures for opportunistic predators. Predator kinds (wolf, fox, bear, lurkers)
   // are deliberately absent: predators never hunt each other.
   const CREATURE_TYPES=new Set(['skier','boarder','personRed','personYellow','personGreen','dog','cat','rabbit']);
+  // Candidate prey: exactly the objects whose ediblePrey type test can pass.
+  const PREY_VIEW=objectView(o=>CREATURE_TYPES.has(o.type||(o.kind==='dog'?'dog':o.kind==='patrol'?'skier':null)));
   function ediblePrey(o){
     const chasingNpc=o.kind==='dog'||o.kind==='patrol',type=o.type||(chasingNpc?(o.kind==='dog'?'dog':'skier'):null);
     return CREATURE_TYPES.has(type)&&!o.eaten&&!o.dead&&!o.leaving&&(!o.patrolPass||o.remaining>0)&&(!chasingNpc||!(state.p.y>o.expires))&&((o.r??(chasingNpc?12:0))>0||type.startsWith('person'));
   }
   const objectGroupCache={};
+  // Every object objectGroups can sort into a group: by type, or by flags only ever set when created (animal is only ever cleared).
+  const GROUP_TYPES=new Set(['dog','rabbit','cat','fox','wolf','skier','boarder','zombie','fallingTree','rollingSnowball','cemeteryPlot','ice','rugged','ramp','mogul','smallHill','largeHill','logBump']);
+  const GROUP_VIEW=objectView(o=>o.animal||o.retiring||o.grandMausoleum||o.santaSleigh||GROUP_TYPES.has(o.type));
   function objectGroups(){
     const c=objectGroupCache;
     if(c.time===clock&&c.source===state.objects&&c.length===state.objects.length)return c.groups;
     const groups={wildlife:[],animals:[],dogs:[],skiers:[],zombies:[],mausoleums:[],groundHunters:[],terrainFeatures:[],ground:[],plots:[],sleighs:[]};
-    for(const o of state.objects){
+    for(const o of viewItems(GROUP_VIEW)){
       const type=o.type;
       if(o.animal||o.retiring||type==='wolf')groups.animals.push(o);
       if(o.grandMausoleum)groups.mausoleums.push(o);if(o.santaSleigh)groups.sleighs.push(o);
@@ -3092,7 +3119,7 @@ function drawPerson(o,s){
   function preyActors(){
     if(preyCache.time!==clock||preyCache.objects!==state.objects||preyCache.length!==state.objects.length||preyCache.chasers!==state.chasers||preyCache.chaserLength!==state.chasers.length){
       preyCache.time=clock;preyCache.objects=state.objects;preyCache.length=state.objects.length;preyCache.chasers=state.chasers;preyCache.chaserLength=state.chasers.length;
-      preyCache.actors=state.objects.filter(ediblePrey);for(const c of state.chasers)if((c.kind==='dog'||c.kind==='patrol')&&ediblePrey(c))preyCache.actors.push(c);
+      preyCache.actors=viewItems(PREY_VIEW).filter(ediblePrey);for(const c of state.chasers)if((c.kind==='dog'||c.kind==='patrol')&&ediblePrey(c))preyCache.actors.push(c);
     }
     return preyCache.actors;
   }
@@ -3712,7 +3739,7 @@ function drawPerson(o,s){
     if(p.air>0 && !['lodge','rental','mausoleum','iceBlock','ruinWall','areaBarrier'].includes(o.type))return;
     o.touched=true;
     if((o.type==='pine'||o.type==='fir')&&fast&&!uphill) {
-      o.type='stump';o.width=65;o.r=15;invalidateSolidGrids();burst(o.x,o.y,'#658479',24);say('TIMBERRR!',o);beep(115,.15,'sawtooth');
+      retype(o,'stump');o.width=65;o.r=15;invalidateSolidGrids();burst(o.x,o.y,'#658479',24);say('TIMBERRR!',o);beep(115,.15,'sawtooth');
     }
     if(o.type==='sled'&&fast){o.vx=90*Math.sign(p.vx||1);o.vy=240;p.speed*=S.physics.sledSpeedRetention;say('Express delivery!',o);return;}
     if(o.type==='bush'){o.flatten=true;p.speed*=S.physics.bushSpeedRetention;burst(o.x,o.y,C.gold,7);return;}
@@ -4012,7 +4039,7 @@ function drawPerson(o,s){
       if(creature&&monsterContact(o))hit(o);
       if(state.sceneCard||state.deathTimer)return;
       if(o.dead)continue;
-      if(state.started&&!(o.stunnedUntil>clock)&&!o.retiring&&o.type==='lurker'&&(courseCreature(o,p.x,p.y)||!humanArea(o.x,o.y)&&!humanArea(p.x,p.y))&&(Math.hypot(o.x-p.x,o.y-p.y)<yetiWakeDistance(o)||o.shoreLake&&state.objects.some(q=>['skier','boarder'].includes(q.type)&&!q.eaten&&!q.dead&&q.r>0&&Math.hypot(q.x-o.x,q.y-o.y)<S.wildlife.yetiWakeDistance*endlessSpeedScale(o)&&!patchAt(q.x,q.y)))){o.type='awakened';o.r=0;const hunter={kind:o.arcadeTier==='slow'?'slow':'fast',arcadeTier:o.arcadeTier,ravager:o.ravager,ravagerIntroPrey:o.ravagerIntroPrey,encounter:o.encounter,chaseRun:o.arcadeRun,shoreLake:o.shoreLake,endlessBaseKmh:o.endlessBaseKmh,x:o.x,y:o.y,speed:o.arcadeRun?o.yetiSpeedKmh/S.physics.hudKmhPerSpeed:topSpeed()*S.wildlife.yetiWildSpeedRatio,wakeUntil:clock+yetiWakeDelay(o),phase:o.phase,expires:p.y+S.wildlife.yetiWildChaseDistance,talkAt:clock+6};if(hunter.ravagerIntroPrey)hunter.ravagerIntroPrey.ravagerIntroFor=hunter;state.chasers.push(hunter);say('Oh. Breakfast.',o);}
+      if(state.started&&!(o.stunnedUntil>clock)&&!o.retiring&&o.type==='lurker'&&(courseCreature(o,p.x,p.y)||!humanArea(o.x,o.y)&&!humanArea(p.x,p.y))&&(Math.hypot(o.x-p.x,o.y-p.y)<yetiWakeDistance(o)||o.shoreLake&&state.objects.some(q=>['skier','boarder'].includes(q.type)&&!q.eaten&&!q.dead&&q.r>0&&Math.hypot(q.x-o.x,q.y-o.y)<S.wildlife.yetiWakeDistance*endlessSpeedScale(o)&&!patchAt(q.x,q.y)))){retype(o,'awakened');o.r=0;const hunter={kind:o.arcadeTier==='slow'?'slow':'fast',arcadeTier:o.arcadeTier,ravager:o.ravager,ravagerIntroPrey:o.ravagerIntroPrey,encounter:o.encounter,chaseRun:o.arcadeRun,shoreLake:o.shoreLake,endlessBaseKmh:o.endlessBaseKmh,x:o.x,y:o.y,speed:o.arcadeRun?o.yetiSpeedKmh/S.physics.hudKmhPerSpeed:topSpeed()*S.wildlife.yetiWildSpeedRatio,wakeUntil:clock+yetiWakeDelay(o),phase:o.phase,expires:p.y+S.wildlife.yetiWildChaseDistance,talkAt:clock+6};if(hunter.ravagerIntroPrey)hunter.ravagerIntroPrey.ravagerIntroFor=hunter;state.chasers.push(hunter);say('Oh. Breakfast.',o);}
       if(o.type==='gate'&&o.run===state.course&&!o.checked&&previous.y<o.y&&p.y>=o.y)crossCourseGate(o,previous,p);
       if(o.type==='entrance'&&!state.course&&previous.y<o.y&&p.y>=o.y&&Math.abs(p.x-o.x)<o.half){startCourse(o.stage,o);break;}
       if(!state.arcade&&!state.endless&&o.type==='lift'&&!o.used&&previous.y<o.y&&p.y>=o.y&&Math.abs(p.x-o.x)<o.half){o.used=true;state.liftTimer=S.lift.rideSeconds;p.speed=0;announce('UP WE GO','Next stop: the summit.',C.teal,3);}
@@ -4043,6 +4070,7 @@ function drawPerson(o,s){
     state.cam.x=ease(state.cam.x,p.x,S.render.cameraXFollow,dt);state.cam.y=ease(state.cam.y,p.y-H*S.render.playerScreenY/ZOOM,S.render.cameraYFollow,dt);
   }
   const PED_SOLIDS=new Set(['pine','fir','rock','pebble','lodge','rental','lift','bench','lamp','snowman','stump','breadStand','skiRack','grave','mausoleum','cemeteryFence','areaBarrier','cemeteryPillar','christmasTree']),PED_FLAGS=new Set(['gate','entrance','finish']);
+  const PEOPLE_VIEW=objectView(o=>o.type.startsWith('person')),PED_SOLID_VIEW=objectView(o=>PED_SOLIDS.has(o.type)),PED_FLAG_VIEW=objectView(o=>PED_FLAGS.has(o.type));
   function movePedestrianSafely(o,target,speed,dt,solids){
     const dx=target.x-o.x,dy=target.y-o.y,move=Math.min(speed*dt,Math.hypot(dx,dy)),radius=Math.max(8,o.r)+S.pedestrians.obstacleMargin;
     if(!move)return;
@@ -4064,14 +4092,13 @@ function drawPerson(o,s){
     const P=S.pedestrians,people=[],solids=[],flags=[],p=state.p;let threats;
     const reach=P.activeRadius*endlessSpeedScale()+Math.max(P.roamRadius,P.spectatorRadius)+P.walkSpeed[1]*3*dt*endlessSpeedScale()+64;
     snapshotSolids();
-    for(const o of state.objects){
-      if(o.eaten||o.dead)continue;if(o.type.startsWith('person'))people.push(o);
-      if(o.r>0&&PED_SOLIDS.has(o.type)){
-        const b=o.solidBounds||solidBounds(o);
-        if(b[0]<=p.x+reach&&b[2]>=p.x-reach&&b[1]<=p.y+reach&&b[3]>=p.y-reach)solids.push(o);
-      }
-      if(PED_FLAGS.has(o.type)&&Math.abs(o.y-p.y)<=reach)flags.push(o);
+    for(const o of viewItems(PEOPLE_VIEW))if(!o.eaten&&!o.dead)people.push(o);
+    for(const o of viewItems(PED_SOLID_VIEW)){
+      if(o.eaten||o.dead||!(o.r>0))continue;
+      const b=o.solidBounds||solidBounds(o);
+      if(b[0]<=p.x+reach&&b[2]>=p.x-reach&&b[1]<=p.y+reach&&b[3]>=p.y-reach)solids.push(o);
     }
+    for(const o of viewItems(PED_FLAG_VIEW))if(!o.eaten&&!o.dead&&Math.abs(o.y-p.y)<=reach)flags.push(o);
     for(const o of people){
       o.walking=false;
       if(Math.hypot(o.x-state.p.x,o.y-state.p.y)>P.activeRadius*endlessSpeedScale(o))continue;
@@ -4167,25 +4194,29 @@ function drawPerson(o,s){
   const solidGroups=new Map();
   let solidRevision=0;
   function invalidateSolidGrids(){solidRevision++;solidSnapshot.time=-1;}
-  const solidSnapshot={time:-1,source:null,length:-1,groups:null,entries:null};
+  const solidSnapshot={time:-1,source:null,length:-1,typeRevision:-1,groups:null,entries:null};
   function snapshotSolids(){
     const c=solidSnapshot;
-    if(c.source===state.objects&&c.length===state.objects.length){
+    // Entries cover solid types only; a non-solid becoming solid always goes through retype().
+    if(c.source===state.objects&&c.length===state.objects.length&&c.typeRevision===typeRevision){
       if(c.time===clock)return c;
-      let same=true;
+      let same=true;const ys=S.physics.collisionYScale;
       for(const entry of c.entries){
         const o=entry.o;if(o.type!==entry.type){same=false;break;}
-        if(!entry.mask)continue;
         const active=!o.eaten&&!o.dead&&o.r>0;
         if(active!==entry.active){same=false;break;}
-        if(active){const bounds=retainedSolidBounds(o,entry.record);if(bounds!==o.solidBounds){same=false;break;}}
+        if(active){
+          // Fast path for plain round solids (most trees and props): retainedSolidBounds would return record.bounds.
+          const r=entry.record;if(r.shape===0&&r.type===o.type&&r.x===o.x&&r.y===o.y&&r.r===o.r&&r.ys===ys){if(r.bounds!==o.solidBounds){same=false;break;}continue;}
+          const bounds=retainedSolidBounds(o,r);if(bounds!==o.solidBounds){same=false;break;}
+        }
       }
       if(same){c.time=clock;return c;}
     }
     const groups=new Map([[HOUSE_TYPES,[]],[TREE_TYPES,[]],[NPC_STATIC_SOLIDS,[]]]),entries=[];
     for(const o of state.objects){
       const mask=(HOUSE_TYPES.has(o.type)?1:0)|(TREE_TYPES.has(o.type)?2:0)|(NPC_STATIC_SOLIDS.has(o.type)?4:0),active=!o.eaten&&!o.dead&&o.r>0;
-      const entry={o,type:o.type,mask,active,record:null};entries.push(entry);if(!mask||!active)continue;o.solidBounds=retainedSolidBounds(o);entry.record=solidBoundsCache.get(o);
+      if(!mask)continue;const entry={o,type:o.type,mask,active,record:null};entries.push(entry);if(!active)continue;o.solidBounds=retainedSolidBounds(o);entry.record=solidBoundsCache.get(o);
       if(mask&1)groups.get(HOUSE_TYPES).push(o);if(mask&2)groups.get(TREE_TYPES).push(o);if(mask&4)groups.get(NPC_STATIC_SOLIDS).push(o);
     }
     for(const [type,items] of groups){
@@ -4193,7 +4224,7 @@ function drawPerson(o,s){
       if(same)for(let i=0;i<items.length;i++)if(old.items[i]!==items[i]||old.bounds[i]!==items[i].solidBounds){same=false;break;}
       if(same)groups.set(type,old.items);else solidGroups.set(type,{items,bounds:items.map(o=>o.solidBounds)});
     }
-    Object.assign(c,{time:clock,source:state.objects,length:state.objects.length,groups,entries});return c;
+    Object.assign(c,{time:clock,source:state.objects,length:state.objects.length,typeRevision,groups,entries});return c;
   }
   function cachedSolidGrid(cache,types,cell,padding=0){
     if(cache.revision===solidRevision&&cache.time===clock&&cache.source===state.objects&&cache.length===state.objects.length)return cache;
@@ -4211,7 +4242,8 @@ function drawPerson(o,s){
     }
     return cache;
   }
-  function freshIceCache(){if(iceCacheTime!==clock||iceCacheObjects!==state.objects||iceCacheLength!==state.objects.length){iceCache=state.objects.filter(h=>h.type==='ice');iceCacheTime=clock;iceCacheObjects=state.objects;iceCacheLength=state.objects.length;}return iceCache;}
+  const ICE_VIEW=objectView(o=>o.type==='ice');
+  function freshIceCache(){if(iceCacheTime!==clock||iceCacheObjects!==state.objects||iceCacheLength!==state.objects.length){iceCache=viewItems(ICE_VIEW).slice();iceCacheTime=clock;iceCacheObjects=state.objects;iceCacheLength=state.objects.length;}return iceCache;}
   function chaseVelocity(vx,vy){const ratio=S.predators.offDownhillSpeedRatio;return [vx*ratio,vy*(vy>0?1:ratio)];}
   function travel(o,angle,speed,dt,animal=false,avoidTowns=false,avoidTrees=false,chasing=false,target=null,allowIce=false,groundApplied=false,worldPace=false){
     if(!groundApplied)speed*=specialActorFactor(o,dt);
@@ -4326,8 +4358,9 @@ function drawPerson(o,s){
       }
     }
   }
+  const THREAT_VIEW=objectView(o=>o.type==='wolf'||o.type==='bear'||o.type==='zombie'),SKIER_VIEW=objectView(o=>o.type==='skier'||o.type==='boarder');
   function npcPredatorThreats(){
-    const threats=state.objects.filter(o=>(o.type==='wolf'||o.type==='bear'||o.type==='zombie'&&(o.awake||o.zombieRoamer)&&o.zombieState!=='spent')&&!o.eaten&&!o.dead&&!o.retiring&&o.r>0&&!(o.stunnedUntil>clock)&&(!o.penaltyGate||o.wolfAwake));
+    const threats=viewItems(THREAT_VIEW).filter(o=>(o.type==='wolf'||o.type==='bear'||o.type==='zombie'&&(o.awake||o.zombieRoamer)&&o.zombieState!=='spent')&&!o.eaten&&!o.dead&&!o.retiring&&o.r>0&&!(o.stunnedUntil>clock)&&(!o.penaltyGate||o.wolfAwake));
     if(state.started)for(const c of state.chasers)if(['fast','slow','bear'].includes(c.kind)&&!c.dead&&!c.leaving&&!c.waiting&&!(c.wakeUntil>clock)&&!(c.stunnedUntil>clock)&&(!c.chaseRun||activeCourseOwner(c))&&(c.chaseRun||!(state.p.y>c.expires)))threats.push(c);
     return threats;
   }
@@ -4357,8 +4390,8 @@ function drawPerson(o,s){
   const NPC_STATIC_SOLIDS=new Set([...NPC_CRASH_SOLIDS].filter(type=>type!=='skier'&&type!=='boarder'));
   function skierCollisionGrid(){
     const grid=new Map(),cell=160,p=state.p;grid.staticGrid=cachedSolidGrid(skierSolids,NPC_STATIC_SOLIDS,cell).grid;
-    for(const o of state.objects){
-      if(!['skier','boarder'].includes(o.type)||o.r<=0||o.eaten||o.dead||Math.abs(o.y-p.y)>S.wildlife.activeRadius*endlessSpeedScale(o)+1200)continue;
+    for(const o of viewItems(SKIER_VIEW)){
+      if(o.r<=0||o.eaten||o.dead||Math.abs(o.y-p.y)>S.wildlife.activeRadius*endlessSpeedScale(o)+1200)continue;
       const b=solidBounds(o);for(let x=Math.floor(b[0]/cell);x<=Math.floor(b[2]/cell);x++){let col=grid.get(x);if(!col)grid.set(x,col=new Map());for(let y=Math.floor(b[1]/cell);y<=Math.floor(b[3]/cell);y++){let a=col.get(y);if(!a)col.set(y,a=[]);a.push(o);}}
     }
     return grid;
@@ -4557,7 +4590,7 @@ function drawPerson(o,s){
       if(linkedWolf)o.linkedChase=true;
       if(o.eaten||o.dead||o.stunnedUntil>clock||!o.animal||o.penaltyGate&&!o.wolfAwake||!linkedWolf&&Math.hypot(o.x-p.x,o.y-p.y)>A.activeRadius)continue;
       if(o.type==='bear'){resolveEnemyContact(o,{passive:true});if(o.dead)continue;}
-      if(state.started&&o.type==='bear'&&(courseCreature(o,p.x,p.y)||!humanArea(o.x,o.y)&&!humanArea(p.x,p.y))&&Math.hypot(o.x-p.x,o.y-p.y)<endlessAnimalNotice(o,A.bearWakeDistance)){o.animal=false;o.type='awakened';o.r=0;state.chasers.push({kind:'bear',chaseRun:o.arcadeRun,x:o.x,y:o.y,speed:A.bearChaseSpeed,endlessBaseKmh:state.endless&&activeCourseOwner(o)?A.bearChaseSpeed*S.physics.hudKmhPerSpeed:undefined,phase:o.phase,expires:p.y+A.bearChaseDistance,talkAt:Infinity});continue;}
+      if(state.started&&o.type==='bear'&&(courseCreature(o,p.x,p.y)||!humanArea(o.x,o.y)&&!humanArea(p.x,p.y))&&Math.hypot(o.x-p.x,o.y-p.y)<endlessAnimalNotice(o,A.bearWakeDistance)){o.animal=false;retype(o,'awakened');o.r=0;state.chasers.push({kind:'bear',chaseRun:o.arcadeRun,x:o.x,y:o.y,speed:A.bearChaseSpeed,endlessBaseKmh:state.endless&&activeCourseOwner(o)?A.bearChaseSpeed*S.physics.hudKmhPerSpeed:undefined,phase:o.phase,expires:p.y+A.bearChaseDistance,talkAt:Infinity});continue;}
       if(['rabbit','fox'].includes(o.type)&&moveSocialAnimal(o,dt,hunters))continue;
       if(o.feedingUntil>clock){o.running=false;continue;}
       if(o.type==='cat'){
