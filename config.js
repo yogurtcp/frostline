@@ -80,7 +80,7 @@ window.loadFrostlineConfig = async function () {
   config.endless.regions.festivals ??= {};
   for(const [key,value] of Object.entries({"peopleMultiplier":1.6,"treeCrowd":[10,16],"santaFraction":0.24,"sleighEveryMetres":280,"reindeerPairs":3,"yetis":[2,4],"wolves":[4,8],"zombies":[20,40],"skeletons":[8,14]}))config.endless.regions.festivals[key] ??= value;
   config.endless.regions.festivals.christmasParade ??= {};
-  for(const [key,value] of Object.entries({streetWidthMetres:[28,40],people:[75,120],houseSpacingMetres:20,lengthMultiplier:5,rainbowSpacingMetres:140}))config.endless.regions.festivals.christmasParade[key] ??= value;
+  for(const [key,value] of Object.entries({streetWidthMetres:[28,40],people:[75,120],houseSpacingMetres:20,lengthMultiplier:2.5,rainbowSpacingMetres:140}))config.endless.regions.festivals.christmasParade[key] ??= value;
   config.endless.regions.festivals.christmasParade.sideYetis ??= {};
   for(const [key,value] of Object.entries({delaySeconds:5,intervalSeconds:14,staggerSeconds:1.2,count:[16,24],maxNearby:4,slowSpeedKmh:68,fastSpeedKmh:94}))config.endless.regions.festivals.christmasParade.sideYetis[key] ??= value;
   config.endless.regions.order=config.endless.regions.order.map(kind=>({marsh:"christmas",bowls:"halloween"}[kind]||kind));

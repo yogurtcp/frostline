@@ -322,7 +322,7 @@
             120
           ],
           "houseSpacingMetres": 20,
-          "lengthMultiplier": 5,
+          "lengthMultiplier": 2.5,
           "rainbowSpacingMetres": 140,
           "sideYetis": {
             "delaySeconds": 5,
