@@ -14,8 +14,21 @@ function spawnEncounterEnemies(section,endY){
       if(kind==='burrower'){
         entity('burrower',center,y,{r:0,width:42,arcadeRun:section,encounter:e,burrowState:'waiting'});return;
       }
-      // Disguises belong beside the route, not to a random distant resident.
-      const routeAt=at=>e?.town?.route?encounterPathX(e.town.route,at):path?encounterPathX(path,at):root.x;
+      // The skier weaves between actual gates, often far from the section's center line.
+      const gates=[];
+      if(!e?.town)for(const g of state.objects){
+        if(g.type!=='gate'||g.run!==root||g.y<section.startY-500||g.y>endY)continue;
+        const old=gates.find(q=>q.y===g.y),base=path?encounterPathX(path,g.y):root.x;
+        if(!old)gates.push(g);else if(Math.abs(g.x-base)<Math.abs(old.x-base))gates[gates.indexOf(old)]=g;
+      }
+      gates.sort((a,b)=>a.y-b.y);
+      const routeAt=at=>{
+        if(e?.town?.route)return encounterPathX(e.town.route,at);
+        let before,after;for(const g of gates){if(g.y<=at)before=g;else {after=g;break;}}
+        if(before&&after)return mix(before.x,after.x,(at-before.y)/(after.y-before.y));
+        if(before||after)return (before||after).x;
+        return path?encounterPathX(path,at):root.x;
+      };
       const residents=state.objects.filter(o=>o.type.startsWith('person')&&!o.werewolf&&!o.dead&&!o.eaten&&o.r>0&&!o.job&&!o.cheerRun&&o.y>=from&&o.y<endY&&Math.abs(o.x-routeAt(o.y))>=28&&Math.abs(o.x-routeAt(o.y))<=50&&surpriseAreaAllowed(endlessEncounterAt(o.y)));
       let person=residents.length?pick(residents):null;
       if(!person){

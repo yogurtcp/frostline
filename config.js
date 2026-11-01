@@ -22,7 +22,7 @@ window.loadFrostlineConfig = async function () {
   config.endless.yetis.ravager ??= {};
   for(const [key,value] of Object.entries({firstMetres:1200,speedMultiplier:1.15,noticeMetres:30,chancePerSection:.25,maxNearby:1,divertSeconds:2,pursueSeconds:.5,mealPauseSeconds:1,monsterMealPauseSeconds:1.5}))config.endless.yetis.ravager[key] ??= value;
   config.endless.encounterEnemies ??= {};
-  for(const [kind,defaults] of Object.entries({burrower:{firstMetres:900,chancePerSection:.18,maxNearby:1,noticeMetres:80,speedMultiplier:2,pauseSeconds:1,zigzagSeconds:.65,zigzagAngleDegrees:32,openSeconds:1.1,cooldownSeconds:12,holeRadius:9},werewolf:{firstMetres:750,chancePerSection:.22,maxNearby:2,noticeMetres:32,transformSeconds:1,speedKmh:94,afterPassSeconds:1,passDistanceMetres:8}})){
+  for(const [kind,defaults] of Object.entries({burrower:{firstMetres:600,chancePerSection:.5,maxNearby:1,noticeMetres:80,speedMultiplier:2,pauseSeconds:1,zigzagSeconds:.65,zigzagAngleDegrees:32,openSeconds:1.1,cooldownSeconds:12,holeRadius:9},werewolf:{firstMetres:600,chancePerSection:.6,maxNearby:2,noticeMetres:32,transformSeconds:1,speedKmh:94,afterPassSeconds:1,passDistanceMetres:8}})){
     config.endless.encounterEnemies[kind] ??= {};
     for(const [key,value] of Object.entries(defaults))config.endless.encounterEnemies[kind][key] ??= value;
   }
