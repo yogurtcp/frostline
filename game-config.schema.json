@@ -10231,12 +10231,14 @@
                 "reactionSeconds": {
                   "type": "number",
                   "minimum": 0.6,
-                  "maximum": 1.5
+                  "maximum": 1.5,
+                  "description": "Legacy setting accepted for older configurations; ignored by the zigzag/park/pop behavior."
                 },
                 "rushSeconds": {
                   "type": "number",
                   "minimum": 0.12,
-                  "maximum": 0.5
+                  "maximum": 0.5,
+                  "description": "Legacy setting accepted for older configurations; ignored by the zigzag/park/pop behavior."
                 },
                 "cooldownSeconds": {
                   "type": "number",
@@ -10247,6 +10249,31 @@
                   "type": "number",
                   "minimum": 5,
                   "maximum": 14
+                },
+                "speedMultiplier": {
+                  "type": "number",
+                  "minimum": 1.1,
+                  "maximum": 4
+                },
+                "pauseSeconds": {
+                  "type": "number",
+                  "minimum": 0.6,
+                  "maximum": 3
+                },
+                "zigzagSeconds": {
+                  "type": "number",
+                  "minimum": 0.4,
+                  "maximum": 2
+                },
+                "zigzagAngleDegrees": {
+                  "type": "number",
+                  "minimum": 10,
+                  "maximum": 50
+                },
+                "openSeconds": {
+                  "type": "number",
+                  "minimum": 0.4,
+                  "maximum": 3
                 }
               }
             },

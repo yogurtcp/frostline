@@ -31,8 +31,8 @@ function spawnEncounterEnemies(section,endY){
 function burrowIntercept(o){
   const p=state.p,B=S.endless.encounterEnemies.burrower;
   if(p.air>0||p.fall||p.awaitingInput||p.speed<100)return null;
-  // Account for the skier's leading edge, so first contact leaves the full reaction window.
-  const contactSpeed=Math.hypot(p.vx,p.vy*S.physics.collisionYScale)||1,lead=B.reactionSeconds+(B.holeRadius+S.physics.playerRadius)/contactSpeed;
+  // Arrival locks a point one full pause ahead; the mound stays harmless until it pops.
+  const lead=B.pauseSeconds;
   const point={x:p.x+p.vx*lead,y:p.y+p.vy*lead},bounds=viewBounds();
   // A warning below the viewport is not a fair warning, especially at fast ice exits.
   if(point.x<bounds.left+50||point.x>bounds.right-50||point.y<bounds.top+150||point.y>bounds.bottom-70||patchAt(point.x,point.y))return null;
@@ -51,13 +51,13 @@ function nearbyFootprints(x,y,pad){
 function startBurrow(o){
   const target=burrowIntercept(o);if(!target)return false;
   const b=viewBounds(),side=pick([-1,1]);o.x=side<0?b.left-90:b.right+90;o.y=target.y-50;
-  o.burrowState='rushing';o.rushFrom={x:o.x,y:o.y};o.rushAt=clock;o.rushTarget=target;o.r=0;o.burrowTrail=[];
+  o.burrowState='rushing';o.rushAt=clock;o.rushTarget=target;o.r=0;o.burrowTrail=[];
   return true;
 }
 function updateEncounterEnemies(dt){
   if(!state.started)return;
   const p=state.p,E=S.endless.encounterEnemies;
-  let active=objectGroups().burrowers.some(o=>!o.dead&&!o.eaten&&['rushing','open'].includes(o.burrowState));
+  let active=objectGroups().burrowers.some(o=>!o.dead&&!o.eaten&&['rushing','settled','open'].includes(o.burrowState));
   for(const o of objectGroups().burrowers){
     if(o.dead||o.eaten||!activeCourseOwner(o))continue;
     if(o.burrowState==='waiting'){
@@ -65,16 +65,29 @@ function updateEncounterEnemies(dt){
       continue;
     }
     if(o.burrowState==='rushing'){
-      const target=burrowIntercept(o);if(!target){o.eaten=true;continue;}
-      o.rushTarget=target;const t=clamp((clock-o.rushAt)/E.burrower.rushSeconds,0,1);
-      o.x=mix(o.rushFrom.x,target.x,t);o.y=mix(o.rushFrom.y,target.y,t)+Math.sin(t*Math.PI)*25;
-      if(clock>=(o.nextTrailAt||0)){o.burrowTrail.push({x:o.x,y:o.y,until:clock+.42});if(o.burrowTrail.length>9)o.burrowTrail.shift();o.nextTrailAt=clock+.025;}
-      if(t>=1){o.x=target.x;o.y=target.y;o.burrowState='open';o.openAt=clock;o.r=E.burrower.holeRadius;o.motionVx=o.motionVy=o.travelSpeed=0;o.travelStamp=clock;burst(o.x,o.y,C.ice,7);beep(180,.08,'triangle',.015);}
-      // It cannot collide on the tick it appears; the prior motion was not a player approach.
+      const B=E.burrower,target=burrowIntercept(o)||o.rushTarget;o.rushTarget=target;
+      const dx=target.x-o.x,dy=target.y-o.y,distance=Math.hypot(dx,dy),speed=topSpeed()*B.speedMultiplier,step=speed*dt;
+      o.motionFromX=o.x;o.motionFromY=o.y;o.motionFromStamp=clock;
+      if(distance<=step){
+        o.x=target.x;o.y=target.y;o.burrowState='settled';o.settleAt=clock;
+        o.motionVx=o.motionVy=o.travelSpeed=0;o.travelStamp=clock;
+      }else{
+        // Fade the wave near arrival so it settles cleanly instead of orbiting the intercept.
+        const sway=Math.sin((clock-o.rushAt)*TAU/B.zigzagSeconds)*B.zigzagAngleDegrees*Math.PI/180*clamp(distance/150,0,1);
+        const angle=Math.atan2(dy,dx)+sway;o.x+=Math.cos(angle)*step;o.y+=Math.sin(angle)*step;
+        o.motionVx=(o.x-o.motionFromX)/dt;o.motionVy=(o.y-o.motionFromY)/dt;o.travelSpeed=speed;o.travelStamp=clock;
+        // An evasive skier can make the interception miss; never chase underground indefinitely.
+        if(clock-o.rushAt>4){o.burrowState='closing';o.closeAt=clock;}
+      }
+      if(clock>=(o.nextTrailAt||0)){o.burrowTrail.push({x:o.x,y:o.y,until:clock+.8});if(o.burrowTrail.length>28)o.burrowTrail.shift();o.nextTrailAt=clock+.03;}
+      continue;
+    }
+    if(o.burrowState==='settled'){
+      if(clock-o.settleAt>=E.burrower.pauseSeconds){o.burrowState='open';o.openAt=clock;o.r=E.burrower.holeRadius;burst(o.x,o.y,C.ice,10);beep(180,.08,'triangle',.015);resolveEnemyContact(o);if(state.deathTimer)return;}
       continue;
     }
     if(o.burrowState==='open'){
-      if(clock-o.openAt>E.burrower.reactionSeconds+.65){o.burrowState='closing';o.closeAt=clock;o.r=0;continue;}
+      if(clock-o.openAt>E.burrower.openSeconds){o.burrowState='closing';o.closeAt=clock;o.r=0;continue;}
       resolveEnemyContact(o);if(state.deathTimer)return;
     }else if(o.burrowState==='closing'&&clock-o.closeAt>.28)o.eaten=true;
   }
@@ -184,10 +197,15 @@ function burrowerTile(open=true,chew=0){
 function drawEncounterEnemy(o,s,feeding=false){
   if(o.type==='burrower'){
     if(o.burrowState==='waiting')return true;
-    for(const t of o.burrowTrail||[])if(t.until>clock){const q=screen(t.x,t.y);ctx.save();ctx.globalAlpha=clamp((t.until-clock)/.42,0,.55);box(q.x-7,q.y-2,14,4,'#9bafbf');box(q.x-5,q.y-4,10,3,'#eef4ee');ctx.restore();}
-    if(o.burrowState==='rushing'){shadow(s.x,s.y,16,3);box(s.x-11,s.y-5,22,5,'#b8ccd6');box(s.x-8,s.y-8,15,5,'#f9faf1');box(s.x+9,s.y-3,4,2,'#8da6b7');return true;}
+    const trail=o.burrowTrail||[];
+    for(let i=1;i<trail.length;i++)if(trail[i-1].until>clock){const a=screen(trail[i-1].x,trail[i-1].y),b=screen(trail[i].x,trail[i].y);ctx.save();ctx.globalAlpha=clamp((trail[i-1].until-clock)/.8,0,.6);line(a.x,a.y,b.x,b.y,'#a7bdcb',4);line(a.x,a.y-2,b.x,b.y-2,'#eef4ed',2);ctx.restore();}
+    if(o.burrowState==='rushing'||o.burrowState==='settled'){
+      shadow(s.x,s.y,16,3);box(s.x-11,s.y-5,22,5,'#8ea9bc');box(s.x-8,s.y-8,15,5,'#f9faf1');box(s.x+9,s.y-3,4,2,'#8da6b7');
+      if(o.burrowState==='settled'){const t=clamp((clock-o.settleAt)/S.endless.encounterEnemies.burrower.pauseSeconds,0,1);line(s.x-5,s.y-5,s.x-2,s.y-2,'#627e94',1);if(t>.45)line(s.x-2,s.y-2,s.x+4,s.y-4,'#627e94',1);}
+      return true;
+    }
     const tile=burrowerTile(o.burrowState==='open'||feeding,feeding?Math.floor(clock*10)%2:0),width=o.width*ZOOM;
-    ctx.save();if(o.dead||o.burrowState==='closing')ctx.globalAlpha=clamp(o.dead?(o.fadeUntil-clock)/S.wildlife.predatorFadeSeconds:1-(clock-o.closeAt)/.28,0,1);ctx.drawImage(tile,Math.round(s.x-width/2),Math.round(s.y-width*tile.height/tile.width/2),width,width*tile.height/tile.width);ctx.restore();return true;
+    ctx.save();if(o.dead||o.burrowState==='closing')ctx.globalAlpha=clamp(o.dead?(o.fadeUntil-clock)/S.wildlife.predatorFadeSeconds:1-(clock-o.closeAt)/.28,0,1);const pop=o.burrowState==='open'?clamp((clock-o.openAt)/.14,0,1):1;ctx.drawImage(tile,Math.round(s.x-width/2),Math.round(s.y-width*tile.height/tile.width/2+(1-pop)*4),width,width*tile.height/tile.width);ctx.restore();return true;
   }
   if(!o.werewolf||o.werewolfState==='disguised')return false;
   const transforming=o.werewolfState==='transforming',progress=transforming?clamp((clock-o.transformAt)/S.endless.encounterEnemies.werewolf.transformSeconds,0,1):1;

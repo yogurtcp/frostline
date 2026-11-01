@@ -365,10 +365,13 @@
         "chancePerSection": 0.18,
         "maxNearby": 1,
         "noticeMetres": 80,
-        "reactionSeconds": 0.6,
-        "rushSeconds": 0.22,
         "cooldownSeconds": 12,
-        "holeRadius": 9
+        "holeRadius": 9,
+        "speedMultiplier": 2,
+        "pauseSeconds": 1,
+        "zigzagSeconds": 0.65,
+        "zigzagAngleDegrees": 32,
+        "openSeconds": 1.1
       },
       "werewolf": {
         "firstMetres": 750,

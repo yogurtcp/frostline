@@ -2349,6 +2349,8 @@ window.FROSTLINE_READY = (async () => {
     const body=o.r>0,radius=body?o.r+S.physics.playerRadius:S.chasers.captureDistance,ys=body?S.physics.collisionYScale:1;
     const dx=p.x-o.x,dy=(p.y-o.y)*ys;
     if(dx*dx+dy*dy<radius*radius)return true;
+    // A newly opened mouth cannot hit a position the skier occupied before it popped.
+    if(o.type==='burrower'&&o.openAt===clock)return false;
     const m=p.impactMotion;if(m?.stamp!==clock||m.air>0)return false;
     const moved=o.motionFromStamp===clock,sx=m.x-(moved?o.motionFromX:o.x),sy=(m.y-(moved?o.motionFromY:o.y))*ys;
     if(sx>radius&&dx>radius||sx< -radius&&dx< -radius||sy>radius&&dy>radius||sy< -radius&&dy< -radius)return false;
@@ -2357,6 +2359,8 @@ window.FROSTLINE_READY = (async () => {
   }
   function canRamMonster(o,kind=o.type||o.kind){
     const p=state.p,m=p.impactMotion?.stamp===clock?p.impactMotion:p;
+    // A hole in the snow cannot be body-rammed; exposed creatures retain the shared ram rule.
+    if(kind==='burrower')return false;
     if(!MONSTER_KINDS.has(kind)||o.dead||o.eaten||p.air>0||m.fall||m.awaitingInput)return false;
     if(!monsterContact(o))return false;
     const from=o.motionFromStamp===clock?{x:o.motionFromX,y:o.motionFromY}:o;
