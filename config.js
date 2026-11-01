@@ -22,7 +22,7 @@ window.loadFrostlineConfig = async function () {
   config.endless.yetis.ravager ??= {};
   for(const [key,value] of Object.entries({firstMetres:1200,speedMultiplier:1.15,noticeMetres:30,chancePerSection:.25,maxNearby:1,divertSeconds:2,pursueSeconds:.5,mealPauseSeconds:1,monsterMealPauseSeconds:1.5}))config.endless.yetis.ravager[key] ??= value;
   config.endless.encounterEnemies ??= {};
-  for(const [kind,defaults] of Object.entries({burrower:{firstMetres:900,chancePerSection:.18,maxNearby:1,noticeMetres:80,reactionSeconds:.6,rushSeconds:.22,cooldownSeconds:12,holeRadius:9},werewolf:{firstMetres:750,chancePerSection:.22,maxNearby:2,noticeMetres:32,transformSeconds:1.25,speedKmh:96}})){
+  for(const [kind,defaults] of Object.entries({burrower:{firstMetres:900,chancePerSection:.18,maxNearby:1,noticeMetres:80,reactionSeconds:.6,rushSeconds:.22,cooldownSeconds:12,holeRadius:9},werewolf:{firstMetres:750,chancePerSection:.22,maxNearby:2,noticeMetres:32,transformSeconds:1,speedKmh:94,afterPassSeconds:1,passDistanceMetres:8}})){
     config.endless.encounterEnemies[kind] ??= {};
     for(const [key,value] of Object.entries(defaults))config.endless.encounterEnemies[kind][key] ??= value;
   }
@@ -95,6 +95,7 @@ window.loadFrostlineConfig = async function () {
   config.controls.swipeLongPixels ??= 88;
   const yetiFrames = {"yetiWhiteIdle":["yetis",0,0,30,34],"yetiWhiteRunL":["yetis",30,0,30,34],"yetiWhiteRunR":["yetis",60,0,30,34],"yetiAvalancheIdle":["yetis",90,0,30,34],"yetiAvalancheRunL":["yetis",120,0,30,34],"yetiAvalancheRunR":["yetis",150,0,30,34],"yetiStalkerIdle":["yetis",180,0,30,34],"yetiStalkerRunL":["yetis",210,0,30,34],"yetiStalkerRunR":["yetis",240,0,30,34]};
   yetiFrames.yetiStiltwalkerIdle=['stiltwalker',0,0,24,38];
+  yetiFrames.werewolfIdle=['werewolf',0,0,32,40];
   for(const [key,frame] of Object.entries(yetiFrames))config.atlas[key] ??= frame;
   config.wildlife.ramSpeedFraction ??= .85;
   config.physics.releaseTurnFollow ??= 3;

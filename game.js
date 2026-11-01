@@ -2829,7 +2829,7 @@ window.FROSTLINE_READY = (async () => {
     filterObjects(o=>!o.eaten&&!o.collected&&o.type!=='awakened'&&(!o.dead||clock<o.fadeUntil)&&(o.dogCompanion||o.dogRetreat||o.worldChunk||o.grandMausoleum&&o.triggerAt!==undefined&&o.released<o.waveSize||(o.type==='wolf'&&o.linkedChase||o.type==='zombie'&&(o.awake||o.graveWakeAt!==undefined)&&o.zombieState!=='spent')&&activeCourseOwner(o)||o.y>p.y-S.world.sceneryRetentionBehind));
     state.snowballTrails=state.snowballTrails.filter(t=>t.until>clock&&t.by>p.y-S.world.sceneryRetentionBehind);
     updateFeedback(dt);
-    state.cam.x=ease(state.cam.x,p.x,S.render.cameraXFollow,dt);state.cam.y=ease(state.cam.y,p.y-H*S.render.playerScreenY/ZOOM,S.render.cameraYFollow,dt);
+    state.cam.x=ease(state.cam.x,p.x,S.render.cameraXFollow,dt);state.cam.y=ease(state.cam.y,p.y-H*S.render.playerScreenY/ZOOM-werewolfRevealOffset(),S.render.cameraYFollow,dt);
   }
   const PED_SOLIDS=new Set(['pine','fir','rock','pebble','lodge','rental','lift','bench','lamp','snowman','stump','breadStand','skiRack','grave','mausoleum','cemeteryFence','areaBarrier','cemeteryPillar','christmasTree']),PED_FLAGS=new Set(['gate','entrance','finish']);
   function movePedestrianSafely(o,target,speed,dt,solids){
@@ -3395,7 +3395,7 @@ window.FROSTLINE_READY = (async () => {
       if(route)o.angle=Math.atan2(route.y-o.y,route.x-o.x);
       const previous={x:o.x,y:o.y};
       travel(o,o.angle??o.phase,speed,dt,true,false,o.type==='wolf'||o.type==='bear',o.type==='wolf'&&!!target,o.type==='wolf'?route:null);
-      if(o.werewolf){o.gaitDistance=(o.gaitDistance||0)+Math.hypot(o.x-previous.x,o.y-previous.y);if(Math.abs(o.motionVx)>5)o.werewolfFlip=o.motionVx<0;}
+      if(o.werewolf){o.gaitDistance=(o.gaitDistance||0)+Math.hypot(o.x-previous.x,o.y-previous.y);if(Math.abs(o.motionVx)>35)o.werewolfFlip=o.motionVx<0;}
       if(o.type==='wolf')consumeNearbyPrey(o,previous,A.feedingSeconds,A.captureDistance);
     }
     for(const o of skis){
@@ -4454,7 +4454,7 @@ window.FROSTLINE_READY = (async () => {
   }
   function drawSceneCard(){
     ctx.globalAlpha=1;
-    const card=state.sceneCard,img=images['scene:'+card.key+(card.night?'-night':'')]||images['scene:'+card.key]||encounterDeathCard(card.key,card.night),width=W-40,height=Math.round(width*200/320),caption=110,top=Math.round((H-height-caption)/2),left=20;
+    const card=state.sceneCard,img=images['scene:'+card.key+(card.night?'-night':'')]||images['scene:'+card.key],width=W-40,height=Math.round(width*200/320),caption=110,top=Math.round((H-height-caption)/2),left=20;
     box(0,0,W,H,'#18333f');
     for(let i=0;i<35;i++)box((i*137)%W,(i*197)%H,2,1,i%3?'#45606c':'#73938f');
     box(left-5,top-5,width+10,height+caption+10,'#0e2632');box(left-3,top-3,width+6,height+caption+6,'#c7a474');

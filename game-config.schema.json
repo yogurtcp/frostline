@@ -3657,6 +3657,35 @@
               "minimum": 1
             }
           ]
+        },
+        "werewolfIdle": {
+          "type": "array",
+          "minItems": 5,
+          "maxItems": 5,
+          "prefixItems": [
+            {
+              "type": "string",
+              "enum": [
+                "werewolf"
+              ]
+            },
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "integer",
+              "minimum": 1
+            },
+            {
+              "type": "integer",
+              "minimum": 1
+            }
+          ]
         }
       }
     },
@@ -10254,6 +10283,16 @@
                   "type": "number",
                   "minimum": 60,
                   "maximum": 110
+                },
+                "afterPassSeconds": {
+                  "type": "number",
+                  "minimum": 0.5,
+                  "maximum": 3
+                },
+                "passDistanceMetres": {
+                  "type": "number",
+                  "minimum": 4,
+                  "maximum": 15
                 }
               }
             }

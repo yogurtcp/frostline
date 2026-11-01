@@ -14,14 +14,16 @@ function spawnEncounterEnemies(section,endY){
       if(kind==='burrower'){
         entity('burrower',center,y,{r:0,width:42,arcadeRun:section,encounter:e,burrowState:'waiting'});return;
       }
-      const residents=state.objects.filter(o=>o.type.startsWith('person')&&!o.werewolf&&!o.dead&&!o.eaten&&o.r>0&&!o.job&&!o.cheerRun&&o.y>=from&&o.y<endY&&Math.abs(o.x-center)<350&&surpriseAreaAllowed(endlessEncounterAt(o.y)));
+      // Disguises belong beside the route, not to a random distant resident.
+      const routeAt=at=>e?.town?.route?encounterPathX(e.town.route,at):path?encounterPathX(path,at):root.x;
+      const residents=state.objects.filter(o=>o.type.startsWith('person')&&!o.werewolf&&!o.dead&&!o.eaten&&o.r>0&&!o.job&&!o.cheerRun&&o.y>=from&&o.y<endY&&Math.abs(o.x-routeAt(o.y))>=28&&Math.abs(o.x-routeAt(o.y))<=50&&surpriseAreaAllowed(endlessEncounterAt(o.y)));
       let person=residents.length?pick(residents):null;
       if(!person){
-        const x=center+pick([-1,1])*range(55,130);
-        if(patchAt(x,y)||state.objects.some(o=>o.r>0&&!o.eaten&&!o.dead&&obstacleClearance(o,x,y)<30))continue;
+        const x=routeAt(y)+pick([-1,1])*range(32,48);
+        if(patchAt(x,y)||nearbyFootprints(x,y,80).some(o=>obstacleClearance(o,x,y)<24))continue;
         person=entity(pick(['personRed','personGreen','personYellow']),x,y,{width:32,r:10,arcadeRun:section,encounter:e});
       }
-      Object.assign(person,{werewolf:true,werewolfState:'disguised',werewolfName:pick(WEREWOLF_NAMES),arcadeRun:person.arcadeRun||section});return;
+      Object.assign(person,{werewolf:true,werewolfState:'disguised',werewolfName:pick(WEREWOLF_NAMES),walker:false,roam:0,stroll:null,pauseUntil:Infinity,arcadeRun:person.arcadeRun||section});return;
     }
   };
   spawn('burrower',E.burrower);spawn('werewolf',E.werewolf);
@@ -79,18 +81,44 @@ function updateEncounterEnemies(dt){
   for(const o of objectGroups().werewolves){
     if(o.dead||o.eaten||!activeCourseOwner(o)||o.werewolfState==='wolf')continue;
     if(o.werewolfState==='disguised'){
-      const range=Math.max(E.werewolf.noticeMetres*PX_PER_M,p.speed*(E.werewolf.transformSeconds+1));
-      if(p.air>0||Math.hypot(o.x-p.x,o.y-p.y)>range||!surpriseAreaAllowed(endlessEncounterAt(p.y)))continue;
+      const W=E.werewolf,m=p.impactMotion?.stamp===clock?p.impactMotion:p;
+      const before=o.passProbe||{x:m.x,y:m.y,npcY:o.y},oldY=before.y-before.npcY,newY=p.y-o.y;
+      o.passProbe={x:p.x,y:p.y,npcY:o.y};
+      if(o.passedAt===undefined&&oldY<=0&&newY>=0&&newY-oldY>1e-6&&p.vy>0){
+        const t=clamp(-oldY/(newY-oldY),0,1),crossX=mix(before.x,p.x,t);
+        if(Math.abs(crossX-o.x)<=W.passDistanceMetres*PX_PER_M){o.passedAt=clock-dt*(1-t);o.walker=false;o.stroll=null;o.pauseUntil=clock+W.afterPassSeconds+W.transformSeconds;o.walking=false;o.roam=o.vx=o.vy=0;}
+      }
+      if(o.passedAt===undefined||clock-o.passedAt<W.afterPassSeconds)continue;
       o.werewolfState='transforming';o.transformAt=clock;o.socialUntil=clock+E.werewolf.transformSeconds;o.walking=false;o.roam=o.vx=o.vy=0;o.fearUntil=0;o.threat=null;
       // At most three spoken reactions, but everyone close by enters normal fear behavior.
       let voices=0;for(const n of preyActors())if(n!==o&&(n.type?.startsWith('person')||n.type==='skier'||n.type==='boarder')&&Math.hypot(n.x-o.x,n.y-o.y)<340){if(voices>=3)n.speakAt=Math.max(n.speakAt||0,clock+2.5);else n.speakAt=0;frighten(n,o);voices++;}
       say('Uh... not again.',o,1.2);continue;
     }
+    // The emerging wolf bounds after the skier; the reveal is not left behind offscreen.
+    const progress=clamp((clock-o.transformAt)/E.werewolf.transformSeconds,0,1);
+    if(progress>.2){
+      const target=endlessPursuitTarget(o,p),previous={x:o.x,y:o.y},speed=E.werewolf.speedKmh/S.physics.hudKmhPerSpeed*clamp((progress-.2)/.25,0,1);
+      travel(o,Math.atan2(target.y-o.y,target.x-o.x),speed,dt,false,false,true,true,target);
+      o.gaitDistance=(o.gaitDistance||0)+Math.hypot(o.x-previous.x,o.y-previous.y);if(Math.abs(o.motionVx)>35)o.werewolfFlip=o.motionVx<0;
+    }
     if(clock-o.transformAt>=E.werewolf.transformSeconds){
-      o.type='wolf';o.werewolfState='wolf';o.width=48;o.r=12;o.animal=true;o.ai='hunt';o.linkedChase=o.wolfAwake=true;o.alertUntil=Infinity;o.wolfSpeedKmh=E.werewolf.speedKmh;o.packId=o.id;o.packIndex=0;o.costume=null;o.job=null;o.walker=false;o.path=null;o.socialUntil=0;o.nextAI=clock;
+      o.type='wolf';o.werewolfState='wolf';o.width=52;o.r=12;o.animal=true;o.ai='hunt';o.linkedChase=o.wolfAwake=true;o.alertUntil=Infinity;o.wolfSpeedKmh=E.werewolf.speedKmh;o.packId=o.id;o.packIndex=0;o.costume=null;o.job=null;o.walker=false;o.path=null;o.socialUntil=0;o.nextAI=clock;
       o.motionVx=o.motionVy=o.travelSpeed=0;o.travelStamp=clock;delete o.worldChunk;burst(o.x,o.y,'#c3c7ce',8);say('AWOOOO!',o,1.5);
     }
   }
+}
+function werewolfRevealOffset(){
+  if(!state.endless)return 0;
+  let offset=0;const Ww=S.endless.encounterEnemies.werewolf,p=state.p;
+  for(const o of objectGroups().werewolves){
+    if(o.dead||o.eaten||o.passedAt===undefined||Math.abs(o.x-p.x)>W/ZOOM*.7)continue;
+    const elapsed=clock-o.passedAt,end=Ww.afterPassSeconds+Ww.transformSeconds+.65;
+    if(elapsed<.55||elapsed>end)continue;
+    const strength=Math.min(clamp((elapsed-.55)/.3,0,1),clamp((end-elapsed)/.5,0,1));
+    const normal=p.y-H*S.render.playerScreenY/ZOOM,look=o.y-H*.18/ZOOM;
+    offset=Math.max(offset,clamp(normal-look,0,H*.16/ZOOM)*strength);
+  }
+  return offset;
 }
 const encounterArt=new Map();
 function encounterTile(key,width,height,paint){
@@ -99,24 +127,51 @@ function encounterTile(key,width,height,paint){
   paint(c,(x,y,w,h,color)=>{c.fillStyle=gritMaterial(color);c.fillRect(Math.round(x),Math.round(y),Math.round(w),Math.round(h));});
   if(encounterArt.size>=24)encounterArt.delete(encounterArt.keys().next().value);encounterArt.set(key,tile);return tile;
 }
-function werewolfTile(frame=0,feeding=false){
-  return encounterTile('werewolf:'+frame+':'+feeding,30,38,(paint,px)=>{
-    const ink='#28343f',fur='#687480',light='#b5bec0',coat='#685263',stride=feeding?0:Math.sin(frame*Math.PI/4)*3;
-    // Hunched fur shoulders, pointed ears/muzzle and separate digitigrade feet.
-    px(6,16,20,6,ink);px(9,21,13,9,ink);px(7,17,17,4,fur);px(10,21,11,7,fur);px(12,19,7,6,light);px(13,24,5,2,light);
-    px(3,28,5,3,ink);px(2,26,3,3,fur); // a little swept tail
-    for(const side of [-1,1]){
-      const x=side<0?10:19,leg=side*stride-(feeding?0:Math.max(0,Math.cos(frame*Math.PI/4+(side<0?0:Math.PI)))*2);
-      px(x,26,4,6+leg,ink);px(x+1,26,2,5+leg,fur);px(x+(side>0?0:-2),31+leg,6,3,ink);px(x+(side>0?0:-2),31+leg,4,1,fur);
-      const arm=feeding?side:Math.round(-side*stride*.5),ax=side<0?4:24;px(ax,18+arm,4,6,ink);px(ax+(side<0?-1:0),23+arm,4,5,fur);px(ax+(side<0?-2:0),27+arm,5,2,ink);px(ax+(side<0?-2:0),28+arm,1,2,light);px(ax+(side<0?0:2),28+arm,1,2,light);
+let werewolfRig;
+const werewolfFrames=new Map(),werewolfMorphs=new Map();
+function werewolfTile(frame=-1,feeding=false){
+  const key=frame+':'+feeding;if(werewolfFrames.has(key))return werewolfFrames.get(key);
+  if(!werewolfRig){
+    const cacheKey='werewolfIdle:32';if(!spriteCache.has(cacheKey))sprite('werewolfIdle',-10000,-10000,32,{ui:true});
+    const source=spriteCache.get(cacheKey),pixels=source.getContext('2d').getImageData(0,0,32,40);
+    const parts=Array.from({length:5},()=>{const c=document.createElement('canvas');c.width=32;c.height=40;return c;});
+    const data=parts.map(c=>c.getContext('2d').createImageData(32,40));
+    const left=[13,13,13,13,13,12,11,10,9,9,9,9,10,11,12,12,11,10,9,8,7];
+    const right=[25,25,25,26,26,27,28,29,28,28,28,29,28,29];
+    for(let y=0;y<40;y++)for(let x=0;x<32;x++){
+      const armLeft=y>=8&&y<=28&&x<=left[y-8]&&(y<22||x>=6),armRight=y>=15&&y<=28&&x>=right[y-15];
+      const part=armLeft?1:armRight?2:y>=26&&x>=8?(x<19?3:4):0,i=(y*32+x)*4;
+      data[part].data.set(pixels.data.subarray(i,i+4),i);
     }
-    px(10,1,2,3,ink);px(9,3,4,5,ink);px(8,6,6,5,ink);px(10,4,2,4,coat);
-    px(21,0,2,3,ink);px(20,2,4,5,ink);px(19,5,6,6,ink);px(21,3,2,5,coat);
-    px(9,8,15,10,ink);px(10,8,13,9,fur);px(8,13,3,6,fur);px(10,17,3,3,fur);px(12,13,10,5,light);
-    px(11,10,4,1,ink);px(19,10,4,1,ink);px(12,11,2,2,'#ebc76c');px(20,11,2,2,'#ebc76c');
-    px(18,13,10,5,ink);px(18,13,8,2,light);px(26,12,3,3,ink);px(19,16,7,feeding&&frame%2?3:1,'#714957');px(20,16,1,2,'#f2ead5');px(24,16,1,2,'#f2ead5');
-    px(10,21,3,4,coat);px(19,23,4,3,coat); // torn scraps of the villager's clothes
-  });
+    parts.forEach((c,i)=>c.getContext('2d').putImageData(data[i],0,0));werewolfRig={source,parts};
+  }
+  const tile=document.createElement('canvas');tile.width=40;tile.height=44;const t=tile.getContext('2d');t.imageSmoothingEnabled=false;
+  const phase=Math.max(0,frame)/12*TAU;
+  const limb=(part,start,offset,leg=false)=>{
+    const a=phase+offset,swing=frame<0||feeding?0:Math.sin(a),lift=leg&&frame>=0&&!feeding?Math.max(0,Math.cos(a))*2:0;
+    for(let y=start;y<40;y++){
+      const u=clamp((y-start)/(leg?14:19),0,1),dx=Math.round(swing*(leg?2.7:2.2)*u),up=Math.round(lift*Math.sin(u*Math.PI/2));
+      t.drawImage(werewolfRig.parts[part],0,y,32,1,4+dx,1+y-up-(feeding&&!leg?2:0),32,1);
+    }
+  };
+  if(frame<0&&!feeding)t.drawImage(werewolfRig.source,4,1);
+  else {limb(2,15,0);limb(4,26,Math.PI,true);limb(3,26,0,true);t.drawImage(werewolfRig.parts[0],4,1);limb(1,8,Math.PI);}
+  if(feeding&&frame%2)t.drawImage(werewolfRig.source,19,13,10,4,23,15,10,4);
+  if(werewolfFrames.size>=24)werewolfFrames.delete(werewolfFrames.keys().next().value);werewolfFrames.set(key,tile);return tile;
+}
+function werewolfTransformTile(o,progress){
+  const frame=Math.min(9,Math.floor(progress*10)),gait=Math.floor((o.gaitDistance||0)/130*12)%12,key=(o.costume||o.type)+':'+frame+':'+gait;
+  if(werewolfMorphs.has(key))return werewolfMorphs.get(key);
+  const wolf=werewolfTile(progress>.55?gait:-1),tile=document.createElement('canvas');tile.width=40;tile.height=44;const t=tile.getContext('2d');t.imageSmoothingEnabled=false;
+  if(o.costume){const f=festivalGuestFrame(o.costume,0,0);t.drawImage(festivalGuestAtlas,f.x,f.y,32,44,9,11,22,30);}
+  else {const name=o.type,cacheKey=name+':22:guest';if(!spriteCache.has(cacheKey))sprite(name,-10000,-10000,22,{ui:true,guest:true});const human=spriteCache.get(cacheKey);t.drawImage(human,9,41-human.height);}
+  // Solid pixel replacement grows ears/muzzle first, then fur/limbs; no ghostly cross-fade.
+  const base=t.getImageData(0,0,40,44),fur=wolf.getContext('2d').getImageData(0,0,40,44),grow=clamp((progress-.12)/.88,0,1);
+  for(let y=0;y<44;y++)for(let x=0;x<40;x++){
+    const zone=y<18?.04:y<30?.22:.4,threshold=zone+((x*7+y*11)%16)/16*.58,i=(y*40+x)*4;
+    if(grow>=threshold)base.data.set(fur.data.subarray(i,i+4),i);
+  }
+  t.putImageData(base,0,0);if(werewolfMorphs.size>=64)werewolfMorphs.delete(werewolfMorphs.keys().next().value);werewolfMorphs.set(key,tile);return tile;
 }
 function burrowerTile(open=true,chew=0){
   return encounterTile('burrow-mouth:'+open+':'+chew,36,22,(paint,px)=>{
@@ -135,31 +190,8 @@ function drawEncounterEnemy(o,s,feeding=false){
     ctx.save();if(o.dead||o.burrowState==='closing')ctx.globalAlpha=clamp(o.dead?(o.fadeUntil-clock)/S.wildlife.predatorFadeSeconds:1-(clock-o.closeAt)/.28,0,1);ctx.drawImage(tile,Math.round(s.x-width/2),Math.round(s.y-width*tile.height/tile.width/2),width,width*tile.height/tile.width);ctx.restore();return true;
   }
   if(!o.werewolf||o.werewolfState==='disguised')return false;
-  if(o.werewolfState==='transforming'){
-    const t=clamp((clock-o.transformAt)/S.endless.encounterEnemies.werewolf.transformSeconds,0,1);o.costume?drawFestivalGuest(o,s):sprite(o.type,s.x,s.y,32,{guest:true});
-    const tile=werewolfTile();ctx.save();ctx.globalAlpha=t;ctx.drawImage(tile,Math.round(s.x-12),Math.round(s.y-33),25,34);ctx.restore();
-    for(const side of [-1,1])box(s.x+side*(11+t*4),s.y-10,2,4,'#c7cdd0');return true;
-  }
-  const frame=feeding?Math.floor(clock*10)%2:(o.travelSpeed||0)>1?Math.floor((o.gaitDistance||0)/10)%8:0,tile=werewolfTile(frame,feeding),width=(o.width||48)*ZOOM,height=width*tile.height/tile.width;
-  ctx.save();if(o.dead){ctx.globalAlpha=clamp((o.fadeUntil-clock)/S.wildlife.wolfFadeSeconds,0,1);ctx.translate(s.x,s.y);ctx.rotate(Math.PI/2);ctx.drawImage(tile,-width/2,-height,width,height);}else {const flip=o.werewolfFlip??false;ctx.translate(Math.round(s.x),Math.round(s.y));ctx.scale(flip?-1:1,1);shadow(0,0,18,3);ctx.drawImage(tile,Math.round(-width/2),Math.round(-height),width,height);}ctx.restore();return true;
-}
-const encounterCardCache=new Map();
-function encounterDeathCard(key,night){
-  if(!['death-burrower','death-werewolf'].includes(key))return null;
-  const cacheKey=key+night;if(encounterCardCache.has(cacheKey))return encounterCardCache.get(cacheKey);
-  const tile=document.createElement('canvas');tile.width=320;tile.height=200;const c=tile.getContext('2d');c.imageSmoothingEnabled=false;
-  const px=(x,y,w,h,color)=>{c.fillStyle=color;c.fillRect(x,y,w,h);};
-  px(0,0,320,200,night?'#25364d':'#b9d7de');px(0,108,320,92,night?'#abbfcf':'#f0f1e4');
-  for(let i=0;i<5;i++){const x=i*81-20;px(x,71,70,46,night?'#405971':'#8daeb9');px(x+10,52,50,25,night?'#405971':'#8daeb9');px(x+23,43,25,15,'#e1e8df');}
-  px(262,18,18,18,night?'#f2dfaf':'#fff0c2');
-  for(const [x,y] of [[18,94],[255,89]]){px(x,y,48,43,'#866a66');px(x-6,y-10,60,13,'#e9e9df');px(x+5,y+10,12,14,'#f2cd88');px(x+29,y+10,12,14,'#f2cd88');px(x+21,y+27,11,16,'#604f57');}
-  for(let i=0;i<23;i++)px((i*97)%320,140+(i*31)%58,3,1,night?'#d1dbe0':'#cad8d7');
-  if(key==='death-werewolf'){c.drawImage(werewolfTile(0,true),126,53,75,95);px(168,91,8,8,'#c06460');px(170,88,13,5,'#bd5658');}
-  else c.drawImage(burrowerTile(true,1),105,112,108,66);
-  const bx=key==='death-werewolf'?179:153,by=key==='death-werewolf'?94:148;
-  for(const side of [-1,1]){px(bx+side*7,by,5,17,'#3d566d');px(bx+side*7-2,by+15,10,5,'#273947');}
-  px(85,168,81,3,'#9c6c59');px(181,176,69,3,'#9c6c59');px(206,138,13,10,'#b85158');px(203,147,20,3,'#d58a80');
-  // A mitten waved like a little surrender flag: playful, never gruesome.
-  px(98,131,3,23,'#ad9870');px(101,129,14,10,'#e6c674');px(103,128,3,13,'#d5aa5c');
-  encounterCardCache.set(cacheKey,tile);return tile;
+  const transforming=o.werewolfState==='transforming',progress=transforming?clamp((clock-o.transformAt)/S.endless.encounterEnemies.werewolf.transformSeconds,0,1):1;
+  const frame=feeding?Math.floor(clock*10)%2:(o.travelSpeed||0)>1?Math.floor((o.gaitDistance||0)/130*12)%12:-1;
+  const tile=transforming?werewolfTransformTile(o,progress):werewolfTile(frame,feeding),scale=(o.width&&o.width>40?o.width:52)*ZOOM/32,width=tile.width*scale,height=tile.height*scale;
+  ctx.save();if(o.dead){ctx.globalAlpha=clamp((o.fadeUntil-clock)/S.wildlife.wolfFadeSeconds,0,1);ctx.translate(s.x,s.y);ctx.rotate(Math.PI/2);ctx.drawImage(tile,-width/2,-41*scale,width,height);}else {const flip=o.werewolfFlip??false;ctx.translate(Math.round(s.x),Math.round(s.y));ctx.scale(flip?-1:1,1);shadow(0,0,18,3);ctx.drawImage(tile,Math.round(-width/2),Math.round(-41*scale),width,height);}ctx.restore();return true;
 }

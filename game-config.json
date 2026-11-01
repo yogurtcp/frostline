@@ -375,8 +375,10 @@
         "chancePerSection": 0.22,
         "maxNearby": 2,
         "noticeMetres": 32,
-        "transformSeconds": 1.25,
-        "speedKmh": 96
+        "transformSeconds": 1,
+        "speedKmh": 94,
+        "afterPassSeconds": 1,
+        "passDistanceMetres": 8
       }
     }
   },
@@ -1810,6 +1812,13 @@
       0,
       24,
       38
+    ],
+    "werewolfIdle": [
+      "werewolf",
+      0,
+      0,
+      32,
+      40
     ]
   },
   "palette": [

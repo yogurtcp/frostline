@@ -209,6 +209,38 @@
       "width": 320,
       "height": 200,
       "colors": 64
+    },
+    {
+      "key": "death-werewolf",
+      "file": "death-werewolf.png",
+      "source": "encounter-enemies/werewolf-day-source.png",
+      "width": 320,
+      "height": 200,
+      "colors": 64
+    },
+    {
+      "key": "death-werewolf-night",
+      "file": "death-werewolf-night.png",
+      "source": "encounter-enemies/werewolf-night-source.png",
+      "width": 320,
+      "height": 200,
+      "colors": 64
+    },
+    {
+      "key": "death-burrower",
+      "file": "death-burrower.png",
+      "source": "encounter-enemies/burrower-day-source.png",
+      "width": 320,
+      "height": 200,
+      "colors": 64
+    },
+    {
+      "key": "death-burrower-night",
+      "file": "death-burrower-night.png",
+      "source": "encounter-enemies/burrower-night-source.png",
+      "width": 320,
+      "height": 200,
+      "colors": 64
     }
   ]
 }
