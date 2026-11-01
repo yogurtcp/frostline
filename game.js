@@ -16,11 +16,12 @@ window.FROSTLINE_READY = (async () => {
   function random() { seed = (Math.imul(seed,1664525)+1013904223) >>> 0; return seed/4294967296; }
   const range = (a,b) => a + random()*(b-a);
   const C = S.colors, stages = S.courses;
-  const MONSTER_KINDS=new Set(['wolf','bear','lurker','zombie','fast','slow']);
+  const MONSTER_KINDS=new Set(['wolf','bear','lurker','zombie','fast','slow','burrower']);
   const ENDLESS_DEBUG_AREAS=['forest','trees','town','crowd','quiet','cemetery','lake','denseForest','scramble','rivalRace','christmas','halloween'];
   const WIDE_REGIONS=new Set(['town','christmas','halloween','trees','cemetery','denseForest','scramble','crowd','beginner']);
   // __SPECIAL_AREAS_CODE__
   // __SEASONAL_AREAS_CODE__
+  // __ENCOUNTER_ENEMIES_CODE__
   // __ART_DIRECTION_CODE__
   // Source rectangles in the actual generated PNG atlases. No stand-in art.
   const atlas = S.atlas;
@@ -852,7 +853,7 @@ window.FROSTLINE_READY = (async () => {
         }
         a.nextYetiY=Math.max(a.nextYetiY,endY)+mix(...E.yetis.intervalMetres,P.t)*PX_PER_M*scale;
       }
-      spawnEndlessWildlife(section,endY,P);spawnEndlessRavager(section,endY);clearLakeExitSpringApproaches();
+      spawnEndlessWildlife(section,endY,P);spawnEndlessRavager(section,endY);spawnEncounterEnemies(section,endY);clearLakeExitSpringApproaches();
       a.sections.push(section);a.plannedY=endY;
     }
     extendEndlessTownLanes();
@@ -1254,12 +1255,12 @@ window.FROSTLINE_READY = (async () => {
 
   function die(cause='YETI',attacker=null) {
     if(state.deathTimer)return;
-    const animated=['YETI','WOLF','BEAR','ZOMBIE'].includes(cause),scene=animated?deathScene(cause,attacker):null;
+    const animated=['YETI','WOLF','BEAR','ZOMBIE','BURROWER','WEREWOLF'].includes(cause),scene=animated?deathScene(cause,attacker):null;
     state.deathYeti=null;state.deathTimer=animated?3:S.physics.deathSeconds;state.deaths++;
     state.p.fall=2;state.p.speed=0;state.p.vx=state.p.vy=0;state.p.draft=0;state.p.draftTarget=null;state.input={left:false,right:false,up:false,down:false,pointer:null,jump:false};
     if(state.arcade)state.arcade.endReason='CAUGHT BY '+cause;
     if(state.endless)recordEndless('CAUGHT BY '+cause);
-    announce(cause==='BEAR'?'THE BEAR CAUGHT YOU.':cause==='WOLF'?'THE PACK CAUGHT YOU.':cause==='ZOMBIE'?'THE DEAD CAUGHT YOU.':'THE YETI GOT YOU.',scene?.detail||`Your ${state.bank} coins are safe.`,C.red,3);
+    announce(cause==='BURROWER'?'THE SNOW HAD TEETH.':cause==='WEREWOLF'?'A VERY HAIRY VILLAGER.':cause==='BEAR'?'THE BEAR CAUGHT YOU.':cause==='WOLF'?'THE PACK CAUGHT YOU.':cause==='ZOMBIE'?'THE DEAD CAUGHT YOU.':'THE YETI GOT YOU.',scene?.detail||`Your ${state.bank} coins are safe.`,C.red,3);
     beep(110,.3,'triangle');save();
     if(animated){
       const actor=attacker||(cause==='YETI'?state.chasers.find(c=>!c.dead&&['fast','slow'].includes(c.kind)):null)||{kind:cause==='YETI'?'fast':cause.toLowerCase(),type:cause.toLowerCase(),zombieRole:'wanderer',zombieStyle:0,width:34,phase:0};
@@ -1852,12 +1853,14 @@ window.FROSTLINE_READY = (async () => {
   function objectGroups(){
     const c=objectGroupCache;
     if(c.time===clock&&c.source===state.objects&&c.length===state.objects.length)return c.groups;
-    const groups={wildlife:[],animals:[],dogs:[],skiers:[],zombies:[],mausoleums:[],groundHunters:[],terrainFeatures:[],ground:[],plots:[],sleighs:[]};
+    const groups={wildlife:[],animals:[],dogs:[],skiers:[],zombies:[],mausoleums:[],groundHunters:[],terrainFeatures:[],ground:[],plots:[],sleighs:[],burrowers:[],werewolves:[]};
     for(const o of state.objects){
       const type=o.type;
+      if(o.werewolf)groups.werewolves.push(o);
       if(o.animal||o.retiring||type==='wolf')groups.animals.push(o);
       if(o.grandMausoleum)groups.mausoleums.push(o);if(o.santaSleigh)groups.sleighs.push(o);
       switch(type){
+        case 'burrower':groups.burrowers.push(o);break;
         case 'dog':groups.dogs.push(o);break;
         case 'rabbit':case 'cat':case 'fox':groups.wildlife.push(o);break;
         case 'wolf':groups.wildlife.push(o);groups.groundHunters.push(o);break;
@@ -2294,6 +2297,8 @@ window.FROSTLINE_READY = (async () => {
     canvas.focus({preventScroll:true});render();
   }
   function deathScene(cause,attacker){
+    if(cause==='BURROWER')return {key:'death-burrower',title:'SNOW MUCH FOR THAT',detail:'You have been upgraded to a packed lunch.'};
+    if(cause==='WEREWOLF')return {key:'death-werewolf',title:'A HAIRY DINNER GUEST',detail:'Next time, check the guest list for paw prints.'};
     if(cause!=='YETI')return {key:'death-'+cause.toLowerCase(),title:{WOLF:'PACKED LUNCH',BEAR:'BEAR-LY A SNACK',ZOMBIE:'DEAD TIRED'}[cause],detail:{WOLF:'The pack insists you were complimentary.',BEAR:'The beanie was apparently the cherry on top.',ZOMBIE:'They came for the boots. Stayed for lunch.'}[cause]};
     const hunter=attacker||state.chasers.find(c=>!c.dead&&['fast','slow'].includes(c.kind))||{},look=yetiAppearance(hunter);
     const variant=look.family==='Stiltwalker'?'stiltwalker':look.family==='White'?'white':look.family==='Avalanche'?'avalanche':look.rank>=3?'burgundy':'violet';
@@ -2340,7 +2345,7 @@ window.FROSTLINE_READY = (async () => {
   }
 
   function monsterContact(o){
-    const p=state.p;if(o.type==='zombie'&&(['hidden','emerging'].includes(o.zombieState)||o.zombieState==='leaping'&&(o.leapProgress||0)<.82))return false;if(p.air>0||o.dead||o.eaten||o.retiring||o.leaving)return false;
+    const p=state.p;if(o.type==='burrower'&&o.burrowState!=='open')return false;if(o.type==='zombie'&&(['hidden','emerging'].includes(o.zombieState)||o.zombieState==='leaping'&&(o.leapProgress||0)<.82))return false;if(p.air>0||o.dead||o.eaten||o.retiring||o.leaving)return false;
     const body=o.r>0,radius=body?o.r+S.physics.playerRadius:S.chasers.captureDistance,ys=body?S.physics.collisionYScale:1;
     const dx=p.x-o.x,dy=(p.y-o.y)*ys;
     if(dx*dx+dy*dy<radius*radius)return true;
@@ -2381,7 +2386,7 @@ window.FROSTLINE_READY = (async () => {
       o.fadeUntil=clock+(kind==='wolf'?A.wolfFadeSeconds:A.predatorFadeSeconds);
       crash(o,S.physics.crashSeconds,true);
       burst(o.x,o.y,kind==='wolf'?C.ice:C.gold,kind==='wolf'?18:12);
-      say(kind==='wolf'?'WOLF DOWN!':kind==='bear'?'BEAR DOWN!':kind==='zombie'?'ZOMBIE DOWN!':'YETI DOWN!',o);
+      say(kind==='burrower'?'BURROWER DOWN!':kind==='wolf'?'WOLF DOWN!':kind==='bear'?'BEAR DOWN!':kind==='zombie'?'ZOMBIE DOWN!':'YETI DOWN!',o);
       if(kind==='wolf')thankWolfRescue(o);
       return true;
     }
@@ -2400,7 +2405,7 @@ window.FROSTLINE_READY = (async () => {
     }
     if(kind==='zombie')o.feedingUntil=clock+3;
     burst(p.x,p.y,C.ice,12);
-    die(kind==='wolf'?'WOLF':kind==='bear'?'BEAR':kind==='zombie'?'ZOMBIE':'YETI',o);
+    die(kind==='burrower'?'BURROWER':o.werewolf?'WEREWOLF':kind==='wolf'?'WOLF':kind==='bear'?'BEAR':kind==='zombie'?'ZOMBIE':'YETI',o);
     return true;
   }
   function objectVelocity(o){
@@ -2429,7 +2434,7 @@ window.FROSTLINE_READY = (async () => {
     if(o.dogCompanion||o.dogRetreat)return;
     if(o.mischief||o.type==='snowman'){if(!state.p.fall&&state.p.air<=0)touchVillageProp(o);return;}
     if(o.collectible){collectMushroom(o);return;}
-    const p=state.p;if(o.dead||o.stunnedUntil>clock&&!['wolf','bear','lurker','zombie'].includes(o.type))return;
+    const p=state.p;if(o.dead||o.stunnedUntil>clock&&!['wolf','bear','lurker','zombie','burrower'].includes(o.type))return;
     if(p.air>0&&['wideLog','fallingTree','rollingSnowball'].includes(o.type))return;
     if(o.type==='logBump'){
       if(p.awaitingInput||p.fall||p.air>0||p.vy<=S.physics.walkingBumpLimit)return;
@@ -2458,7 +2463,7 @@ window.FROSTLINE_READY = (async () => {
     }
     // Remember slow overlaps during recovery too, until the player moves fully clear.
     if(tooSlowForObstacle(o))p.slowContacts.add(o);
-    if(['wolf','bear','lurker','zombie'].includes(o.type)){resolveEnemyContact(o);return;}
+    if(['wolf','bear','lurker','zombie','burrower'].includes(o.type)){resolveEnemyContact(o);return;}
     if(o.solidWall){
       const before=p.walkOrigin??p,[ax,ay,bx,by]=obstacleSegment(o),dx=bx-ax,dy=by-ay,length2=dx*dx+dy*dy||1;
       const t=clamp(((p.x-ax)*dx+(p.y-ay)*dy)/length2,0,1),x=ax+t*dx,y=ay+t*dy;
@@ -2636,7 +2641,7 @@ window.FROSTLINE_READY = (async () => {
   function terrainHitsPredators(feature,swept=null){
     let hitAny=false;
     const contact=o=>swept?obstacleSegmentDistance(o.x,o.y,...swept)-feature.r:obstacleClearance(feature,o.x,o.y);
-    for(const o of state.objects)if((o.type==='wolf'||o.type==='bear'||o.type==='lurker'||o.type==='zombie')&&!o.dead&&!o.eaten&&Math.abs(o.y-feature.y)<(feature.treeLength||feature.width)+50&&contact(o)<(o.r||12)){knockDownByTerrain(o);hitAny=true;}
+    for(const o of state.objects)if((o.type==='wolf'||o.type==='bear'||o.type==='lurker'||o.type==='zombie'||o.type==='burrower'&&o.burrowState==='open')&&!o.dead&&!o.eaten&&Math.abs(o.y-feature.y)<(feature.treeLength||feature.width)+50&&contact(o)<(o.r||12)){knockDownByTerrain(o);hitAny=true;}
     for(const c of state.chasers)if((c.kind==='fast'||c.kind==='slow'||c.kind==='bear')&&!c.dead&&Math.abs(c.y-feature.y)<(feature.treeLength||feature.width)+50&&contact(c)<S.chasers.knockoutDistance){knockDownByTerrain(c);hitAny=true;}
     return hitAny;
   }
@@ -2682,7 +2687,7 @@ window.FROSTLINE_READY = (async () => {
         const x=mix(oldX,o.x,i/samples),y=mix(oldY,o.y,i/samples);
         if(obstacleClearance(other,x,y)<o.r){
           o.x=x;o.y=y;
-          if(['wolf','bear','lurker','zombie'].includes(other.type))knockDownByTerrain(other);
+          if(['wolf','bear','lurker','zombie','burrower'].includes(other.type))knockDownByTerrain(other);
           breakSnowball(o);return true;
         }
       }
@@ -2782,7 +2787,7 @@ window.FROSTLINE_READY = (async () => {
     updateEndlessSpeed();
     const p=state.p,previous={x:p.x,y:p.y};movePlayer(dt);constrainParadeBuildings(p,previous);pruneDistantEnemies();extendEndless();ensureWorld();spawnFastSkier();
     if(state.course){const run=state.course;if(!run.timingStarted&&p.y>=run.startY){run.timingStarted=true;run.time+=dt*clamp((p.y-run.startY)/(p.y-previous.y||1),0,1);}else if(run.timingStarted)run.time+=dt;spawnTerrain();}
-    updateTerrainFeatures(dt,previous);updateVillageLife(dt);updateWildlife(dt);if(state.sceneCard||state.deathTimer)return;updateZombies(dt);if(state.sceneCard||state.deathTimer)return;updateFestivalTraffic(dt);updateSkiers(dt);updateSleighTeams(dt);resolveGroundPredatorPrey();updatePedestrians(dt);updateSpecialEvents();
+    updateTerrainFeatures(dt,previous);updateEncounterEnemies(dt);if(state.deathTimer)return;updateVillageLife(dt);updateWildlife(dt);if(state.sceneCard||state.deathTimer)return;updateZombies(dt);if(state.sceneCard||state.deathTimer)return;updateFestivalTraffic(dt);updateSkiers(dt);updateSleighTeams(dt);resolveGroundPredatorPrey();updatePedestrians(dt);updateSpecialEvents();
     for(const o of state.objects){
       if(o.type==='mistletoe'&&tryMistletoe(o)||o.cocoaShop&&tryCocoaShop(o))return;
       if(o.type!=='skier'&&o.type!=='boarder'&&o.type!=='rollingSnowball'&&!o.animal&&(o.vx||o.vy)){o.motionFromX=o.x;o.motionFromY=o.y;o.motionFromStamp=clock;o.motionVx=o.vx||0;o.motionVy=(o.vy||0)*cemeteryYScale(o.x,o.y);o.x+=o.motionVx*dt;o.y+=o.motionVy*dt;o.travelSpeed=Math.hypot(o.motionVx,o.motionVy);o.travelStamp=clock;if(NPC_STATIC_SOLIDS.has(o.type))invalidateSolidGrids();}
@@ -2792,7 +2797,7 @@ window.FROSTLINE_READY = (async () => {
       if(o.type==='arcadeOvertaker'&&o.arcadeRun===state.course&&p.y>=o.y&&!o.collected){
         o.collected=true;entity('skier',p.x+pick([-1,1])*range(...S.skiers.fastSpawnOffsetX),viewBounds().top-S.skiers.fastSpawnAbove,{width:44,r:12,fast:true,vy:topSpeed()*S.skiers.fastSpeedRatio,vx:range(-13,13),arcadeRun:o.arcadeRun});
       }
-      const creature=o.type==='wolf'||o.type==='bear'||o.type==='lurker'||o.type==='zombie';
+      const creature=o.type==='wolf'||o.type==='bear'||o.type==='lurker'||o.type==='zombie'||o.type==='burrower';
       if(creature&&monsterContact(o))hit(o);
       if(state.sceneCard||state.deathTimer)return;
       if(o.dead)continue;
@@ -2857,6 +2862,7 @@ window.FROSTLINE_READY = (async () => {
       if(PED_FLAGS.has(o.type)&&Math.abs(o.y-p.y)<=reach)flags.push(o);
     }
     for(const o of people){
+      if(o.werewolfState==='transforming')continue;
       o.walking=false;
       if(Math.hypot(o.x-state.p.x,o.y-state.p.y)>P.activeRadius*endlessSpeedScale(o))continue;
       const oldX=o.x,oldY=o.y;
@@ -3111,7 +3117,7 @@ window.FROSTLINE_READY = (async () => {
     }
   }
   function npcPredatorThreats(){
-    const threats=state.objects.filter(o=>(o.type==='wolf'||o.type==='bear'||o.type==='zombie'&&(o.awake||o.zombieRoamer)&&o.zombieState!=='spent')&&!o.eaten&&!o.dead&&!o.retiring&&o.r>0&&!(o.stunnedUntil>clock)&&(!o.penaltyGate||o.wolfAwake));
+    const threats=state.objects.filter(o=>(o.type==='wolf'||o.type==='bear'||o.werewolfState==='transforming'||o.type==='burrower'&&o.burrowState==='open'||o.type==='zombie'&&(o.awake||o.zombieRoamer)&&o.zombieState!=='spent')&&!o.eaten&&!o.dead&&!o.retiring&&o.r>0&&!(o.stunnedUntil>clock)&&(!o.penaltyGate||o.wolfAwake));
     if(state.started)for(const c of state.chasers)if(['fast','slow','bear'].includes(c.kind)&&!c.dead&&!c.leaving&&!c.waiting&&!(c.wakeUntil>clock)&&!(c.stunnedUntil>clock)&&(!c.chaseRun||activeCourseOwner(c))&&(c.chaseRun||!(state.p.y>c.expires)))threats.push(c);
     return threats;
   }
@@ -3126,7 +3132,7 @@ window.FROSTLINE_READY = (async () => {
   function frighten(skier,threat){
     skier.threat=threat;skier.fearUntil=clock+S.wildlife.npcFearSeconds;skier.catInterest=null;skier.socialUntil=0;
     skier.chatUntil=skier.waveUntil=skier.serveUntil=skier.throwUntil=skier.cheerUntil=0;skier.socialAnimal=null;
-    const lines=threat.type==='zombie'?['ZOMBIES!','RUN! THE DEAD!']:threat.type==='bear'||threat.kind==='bear'?S.dialogue.bearTerrified:threat.kind==='fast'||threat.kind==='slow'?S.dialogue.yetiTerrified:S.dialogue.terrified;
+    const lines=threat.werewolf?['Oh no! '+threat.werewolfName+' is a werewolf!',threat.werewolfName+'?! RUN!','I knew it, '+threat.werewolfName+'!']:threat.type==='burrower'?['WATCH THE SNOW!','TEETH! IN THE SNOW!']:threat.type==='zombie'?['ZOMBIES!','RUN! THE DEAD!']:threat.type==='bear'||threat.kind==='bear'?S.dialogue.bearTerrified:threat.kind==='fast'||threat.kind==='slow'?S.dialogue.yetiTerrified:S.dialogue.terrified;
     if(clock>=(skier.speakAt||0)){say(pick(lines),skier);skier.speakAt=clock+S.wildlife.npcSpeechCooldown;}
   }
   function crashSkier(o,obstacle){
@@ -3363,7 +3369,7 @@ window.FROSTLINE_READY = (async () => {
           o.shoreWaiting=false;o.alertUntil=clock+A.wolfAlertSeconds;
         }
         if((o.alertUntil>clock||linkedWolf)&&(courseCreature(o,p.x,p.y)||!humanArea(p.x,p.y))){target=p;speed=o.wolfSpeedKmh?o.wolfSpeedKmh/S.physics.hudKmhPerSpeed:A.wolfPlayerChaseSpeed;}
-        if(o.divert){target=o.divert;speed=A.wolfSkierChaseSpeed;}
+        if(o.divert){target=o.divert;speed=o.werewolf?o.wolfSpeedKmh/S.physics.hudKmhPerSpeed:A.wolfSkierChaseSpeed;}
         o.hunting=!!o.divert||o.alertUntil>clock||linkedWolf;
         o.targetSkier=target&&target!==p?target:null;
       }
@@ -3389,6 +3395,7 @@ window.FROSTLINE_READY = (async () => {
       if(route)o.angle=Math.atan2(route.y-o.y,route.x-o.x);
       const previous={x:o.x,y:o.y};
       travel(o,o.angle??o.phase,speed,dt,true,false,o.type==='wolf'||o.type==='bear',o.type==='wolf'&&!!target,o.type==='wolf'?route:null);
+      if(o.werewolf){o.gaitDistance=(o.gaitDistance||0)+Math.hypot(o.x-previous.x,o.y-previous.y);if(Math.abs(o.motionVx)>5)o.werewolfFlip=o.motionVx<0;}
       if(o.type==='wolf')consumeNearbyPrey(o,previous,A.feedingSeconds,A.captureDistance);
     }
     for(const o of skis){
@@ -3985,15 +3992,15 @@ window.FROSTLINE_READY = (async () => {
   }
   function drawDeathAnimation(){
     const a=state.deathAnimation;if(!a)return;a.shown=true;
-    const s=screen(a.x,a.y),t=3-a.remaining,yeti=a.cause==='YETI',zombie=a.cause==='ZOMBIE',width=yeti?62:zombie?40:a.cause==='BEAR'?72:54;
+    const s=screen(a.x,a.y),t=3-a.remaining,encounter=a.cause==='BURROWER'||a.cause==='WEREWOLF',yeti=a.cause==='YETI',zombie=a.cause==='ZOMBIE',width=yeti?62:zombie?40:a.cause==='BEAR'?72:54;
     const crawl=zombie&&a.actor.zombieStyle===4,biteScale=zombie?width*ZOOM/(crawl?24:18):1,biteSide=(a.actor.motionVx||0)<-2?-1:1;
     const stiltwalker=yeti&&yetiAppearance(a.actor).family==='Stiltwalker',stiltScale=ZOOM/.5;
     const stiltMouthX=stiltwalker?3*stiltScale*(a.actor.yetiGait?.flip?-1:1)+clamp(Math.round((a.actor.motionVx||0)/180),-1,1):0;
-    const mouthX=s.x+(yeti?stiltMouthX:zombie?(crawl?7:4)*biteScale*biteSide:a.cause==='BEAR'?14:11),mouthY=s.y-(yeti?(stiltwalker?33*stiltScale:21):zombie?(crawl?5:10)*biteScale:9),lift=clamp(t/.8,0,1);
+    const mouthX=s.x+(encounter?0:yeti?stiltMouthX:zombie?(crawl?7:4)*biteScale*biteSide:a.cause==='BEAR'?14:11),mouthY=s.y-(encounter?(a.cause==='WEREWOLF'?29:2):yeti?(stiltwalker?33*stiltScale:21):zombie?(crawl?5:10)*biteScale:9),lift=clamp(t/.8,0,1);
     // A wobbling skier, discarded skis, kicking boots and a flying hat: no gore.
     for(const side of [-1,1])line(s.x+side*10,s.y+5,s.x+side*18,s.y+9,'#b48b54',2);
     if(t<.85){sprite('fall',mix(s.x,mouthX,lift),mix(s.y,mouthY+5,lift),42*(1-lift*.35),{rotate:Math.sin(t*12)*.12});}
-    if(yeti)drawYeti(a.actor,s,'feed',width);else if(zombie)drawZombieFeeding(a.actor,s,width);else drawAnimalFeeding(a.cause,a.actor,s,width);
+    if(encounter)drawEncounterEnemy({...a.actor,x:a.x,y:a.y,width:a.cause==='WEREWOLF'?58:64,burrowState:'open'},s,true);else if(yeti)drawYeti(a.actor,s,'feed',width);else if(zombie)drawZombieFeeding(a.actor,s,width);else drawAnimalFeeding(a.cause,a.actor,s,width);
     if(t>=.65&&t<2.4){
       const length=8*(1-clamp((t-1.1)/1.3,0,1)),kick=Math.sin(t*21)*2;
       for(const side of [-1,1]){box(mouthX+side*2,mouthY+2,2,length+kick*side,'#405664');box(mouthX+side*2-1,mouthY+2+length+kick*side,4,2,'#283e4a');}
@@ -4165,7 +4172,7 @@ window.FROSTLINE_READY = (async () => {
     if(s.x<-margin||s.x>W+margin||s.y<-80-vertical||s.y>H+230+vertical)return;
     // Ordinary bodies do not need the long-obstacle drawing margin. Keep harnesses and moving trunks broad.
     if(TIGHT_DRAW_TYPES.has(o.type)&&!o.santaSleigh){const half=(o.paradeSpanX?houseFootHalfWidth(o)*ZOOM:(o.width||40)*ZOOM*.75)+24+(GRIT_BUILDINGS.has(o.houseSprite||o.type)?12:0);if(s.x+half<0||s.x-half>W)return;}
-    if(drawSeasonalProp(o,s)||drawSpecialProp(o,s))return;
+    if(drawEncounterEnemy(o,s,o.feedingUntil>clock)||drawSeasonalProp(o,s)||drawSpecialProp(o,s))return;
     if(o.villageDetail){drawVillageDetail(o,s);return;}
     if(o.type==='encounterTitle'){text(o.encounter.title.toUpperCase(),s.x,s.y,13,C.teal);return;}
     if(o.dead){ctx.save();ctx.globalAlpha=clamp((o.fadeUntil-clock)/(o.type==='wolf'?S.wildlife.wolfFadeSeconds:S.wildlife.predatorFadeSeconds),0,1);if(o.type==='wolf')sprite('wolf',s.x,s.y,o.width,{rotate:Math.PI/2});else drawKnockedOut(o,s,o.type);ctx.restore();return;}
@@ -4370,7 +4377,7 @@ window.FROSTLINE_READY = (async () => {
     for(const q of state.speech){const s=screen(q.object.x,q.object.y);if(s.y<-20||s.y>H+80)continue;
       const words=q.text.split(' '),lines=[''];for(const word of words){let n=lines.length-1;if((lines[n]+word).length>27)lines.push(word+' ');else lines[n]+=word+' ';}
       const width=Math.max(...lines.map(l=>l.trim().length))*6+14,height=lines.length*12+12,x=clamp(s.x-width/2,8,W-width-8),y=s.y-(q.object.width||50)*1.13*ZOOM-height-8;
-      ctx.globalAlpha=clamp((q.until-clock)*3,0,1);box(x+2,y+3,width,height,'#c6d6d0');box(x,y,width,height,'#fffcef');box(clamp(s.x,x+4,x+width-8),y+height,5,4,'#fffcef');lines.forEach((l,i)=>text(l.trim(),x+width/2,y+12+i*12,9,C.ink));ctx.globalAlpha=1;
+      const dark=state.nightBlend>.5;ctx.globalAlpha=clamp((q.until-clock)*3,0,1);lines.forEach((l,i)=>{text(l.trim(),x+width/2+1,y+13+i*12,9,dark?'#172b3c':'#f7f3df');text(l.trim(),x+width/2,y+12+i*12,9,dark?'#efdfbb':C.ink);});ctx.globalAlpha=1;
     }
   }
   // Picks the chaser named by the offscreen warning: among pursuers above the view,
@@ -4447,7 +4454,7 @@ window.FROSTLINE_READY = (async () => {
   }
   function drawSceneCard(){
     ctx.globalAlpha=1;
-    const card=state.sceneCard,img=images['scene:'+card.key+(card.night?'-night':'')]||images['scene:'+card.key],width=W-40,height=Math.round(width*200/320),caption=110,top=Math.round((H-height-caption)/2),left=20;
+    const card=state.sceneCard,img=images['scene:'+card.key+(card.night?'-night':'')]||images['scene:'+card.key]||encounterDeathCard(card.key,card.night),width=W-40,height=Math.round(width*200/320),caption=110,top=Math.round((H-height-caption)/2),left=20;
     box(0,0,W,H,'#18333f');
     for(let i=0;i<35;i++)box((i*137)%W,(i*197)%H,2,1,i%3?'#45606c':'#73938f');
     box(left-5,top-5,width+10,height+caption+10,'#0e2632');box(left-3,top-3,width+6,height+caption+6,'#c7a474');
@@ -4482,7 +4489,7 @@ window.FROSTLINE_READY = (async () => {
     for(const c of state.chasers)if(c.y>top&&c.y<bottom&&Math.abs(c.x-state.cam.x)<W/(2*ZOOM)+230)layers.push(c);
     layers.push(state.p);layers.sort((a,b)=>a.y-b.y);for(const o of layers)if(o===state.p)drawPlayer();else if(o.type)drawObject(o);else drawChaser(o);
     for(const q of state.particles){const s=screen(q.x,q.y);ctx.globalAlpha=q.totalLife?clamp(q.life/q.totalLife,0,1):1;box(s.x,s.y,q.size||3,q.size||3,q.color);}ctx.globalAlpha=1;
-    drawDeathAnimation();drawSpecialEffects();drawGearEffect();drawSpeech();drawNightLighting(layers.concat(groundLights));ctx.restore();hud();touchControl();
+    drawDeathAnimation();drawSpecialEffects();drawGearEffect();drawNightLighting(layers.concat(groundLights));drawSpeech();ctx.restore();hud();touchControl();
     if(state.deathTimer>0&&state.deathTimer<.5&&!state.deathAnimation){ctx.globalAlpha=1-state.deathTimer/.5;box(0,0,W,H,C.snow);ctx.globalAlpha=1;}
   }
   function resize() {

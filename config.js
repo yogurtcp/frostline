@@ -21,6 +21,11 @@ window.loadFrostlineConfig = async function () {
   config.endless.yetis.wakeMetres ??= 140;
   config.endless.yetis.ravager ??= {};
   for(const [key,value] of Object.entries({firstMetres:1200,speedMultiplier:1.15,noticeMetres:30,chancePerSection:.25,maxNearby:1,divertSeconds:2,pursueSeconds:.5,mealPauseSeconds:1,monsterMealPauseSeconds:1.5}))config.endless.yetis.ravager[key] ??= value;
+  config.endless.encounterEnemies ??= {};
+  for(const [kind,defaults] of Object.entries({burrower:{firstMetres:900,chancePerSection:.18,maxNearby:1,noticeMetres:80,reactionSeconds:.6,rushSeconds:.22,cooldownSeconds:12,holeRadius:9},werewolf:{firstMetres:750,chancePerSection:.22,maxNearby:2,noticeMetres:32,transformSeconds:1.25,speedKmh:96}})){
+    config.endless.encounterEnemies[kind] ??= {};
+    for(const [key,value] of Object.entries(defaults))config.endless.encounterEnemies[kind][key] ??= value;
+  }
   config.chasers.despawnScreens ??= 3;
   config.chasers.dogCompanion ??= {};
   for(const [key,value] of Object.entries({feedMetres:8,maxFollowing:2,scareMetres:18,barkMetres:14,scareSeconds:2.5,retreatSeconds:3,followDistanceMetres:3.2,playRadiusMetres:5,cruiseSpeedKmh:24,catchUpSpeedKmh:16,challengeSeconds:1,challengeSpeedKmh:42}))config.chasers.dogCompanion[key] ??= value;

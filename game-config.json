@@ -358,6 +358,26 @@
         3
       ],
       "noticeMetres": 55
+    },
+    "encounterEnemies": {
+      "burrower": {
+        "firstMetres": 900,
+        "chancePerSection": 0.18,
+        "maxNearby": 1,
+        "noticeMetres": 80,
+        "reactionSeconds": 0.6,
+        "rushSeconds": 0.22,
+        "cooldownSeconds": 12,
+        "holeRadius": 9
+      },
+      "werewolf": {
+        "firstMetres": 750,
+        "chancePerSection": 0.22,
+        "maxNearby": 2,
+        "noticeMetres": 32,
+        "transformSeconds": 1.25,
+        "speedKmh": 96
+      }
     }
   },
   "arcade": {
