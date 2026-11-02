@@ -368,10 +368,11 @@
         "cooldownSeconds": 12,
         "holeRadius": 9,
         "speedMultiplier": 2,
-        "pauseSeconds": 1,
+        "pauseSeconds": 0.6,
         "zigzagSeconds": 0.65,
         "zigzagAngleDegrees": 32,
-        "openSeconds": 1.1
+        "openSeconds": 1.1,
+        "stopAheadSeconds": 0.6
       },
       "werewolf": {
         "firstMetres": 600,
@@ -380,8 +381,8 @@
         "noticeMetres": 32,
         "transformSeconds": 1,
         "speedKmh": 94,
-        "afterPassSeconds": 1,
-        "passDistanceMetres": 8
+        "passDistanceMetres": 8,
+        "beforeArrivalSeconds": 0.25
       }
     }
   },

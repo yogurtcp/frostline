@@ -10274,6 +10274,11 @@
                   "type": "number",
                   "minimum": 0.4,
                   "maximum": 3
+                },
+                "stopAheadSeconds": {
+                  "type": "number",
+                  "minimum": 0.3,
+                  "maximum": 2
                 }
               }
             },
@@ -10314,12 +10319,18 @@
                 "afterPassSeconds": {
                   "type": "number",
                   "minimum": 0.5,
-                  "maximum": 3
+                  "maximum": 3,
+                  "description": "Legacy setting accepted but ignored; transformation now finishes before the approaching skier arrives."
                 },
                 "passDistanceMetres": {
                   "type": "number",
                   "minimum": 4,
                   "maximum": 15
+                },
+                "beforeArrivalSeconds": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
                 }
               }
             }

@@ -68,14 +68,14 @@ function debugEncounterEnemy(kind){
   if(!state.endless.debug){state.endless.furthestY=Math.max(state.endless.furthestY,p.y);recordEndless('DEBUG ENEMY SPAWN');state.endless.debug=true;}
   state.endless.debugVisit??=endlessEncounterAt(p.y)?.visit??1;
   state.endlessResult=null; // Saving the legitimate distance must not display an ended-run panel.
-  announce('DEBUG - '+(kind==='burrower'?'BURROWER':'WEREWOLF'),kind==='burrower'?(actor.burrowState==='waiting'?(state.started?'ADDED - WAITING FOR A CLEAR APPROACH':'ADDED - START SKIING TO TRIGGER'):'ADDED'):'PERSON ADDED BELOW - PASS CLOSE TO TRIGGER',C.teal,2);
+  announce('DEBUG - '+(kind==='burrower'?'BURROWER':'WEREWOLF'),kind==='burrower'?(actor.burrowState==='waiting'?(state.started?'ADDED - WAITING FOR A CLEAR APPROACH':'ADDED - START SKIING TO TRIGGER'):'ADDED'):'PERSON ADDED BELOW - APPROACH TO TRIGGER',C.teal,2);
   render();return true;
 }
 function burrowIntercept(o){
   const p=state.p,B=S.endless.encounterEnemies.burrower;
   if(p.air>0||p.fall||p.awaitingInput||p.speed<100)return null;
-  // Arrival locks a point one full pause ahead; the mound stays harmless until it pops.
-  const lead=B.pauseSeconds;
+  // The closer stopping point and warning duration are tuned together for an intercept.
+  const lead=B.stopAheadSeconds;
   const point={x:p.x+p.vx*lead,y:p.y+p.vy*lead},bounds=viewBounds();
   // A warning below the viewport is not a fair warning, especially at fast ice exits.
   if(point.x<bounds.left+50||point.x>bounds.right-50||point.y<bounds.top+150||point.y>bounds.bottom-70||!o?.debugSpawn&&patchAt(point.x,point.y))return null;
@@ -95,7 +95,7 @@ function startBurrow(o){
   let target=burrowIntercept(o);const b=viewBounds();
   // Debug presses still show an approach when ice/air speed puts the real intercept offscreen.
   if(!target&&o.debugSpawn&&state.started){
-    const p=state.p,y=clamp(p.y+Math.max(200,p.vy*S.endless.encounterEnemies.burrower.pauseSeconds),b.top+160,b.bottom-120/ZOOM);
+    const p=state.p,y=clamp(p.y+Math.max(200,p.vy*S.endless.encounterEnemies.burrower.stopAheadSeconds),b.top+160,b.bottom-120/ZOOM);
     for(const offset of [0,40,-40,80,-80,120,-120]){const x=clamp(p.x+offset,b.left+60,b.right-60);if(!nearbyFootprints(x,y,80).some(h=>obstacleClearance(h,x,y)<28)){target={x,y};break;}}
   }
   if(!target)return false;
@@ -147,44 +147,30 @@ function updateEncounterEnemies(dt){
   for(const o of objectGroups().werewolves){
     if(o.dead||o.eaten||!activeCourseOwner(o)||o.werewolfState==='wolf')continue;
     if(o.werewolfState==='disguised'){
-      const W=E.werewolf,m=p.impactMotion?.stamp===clock?p.impactMotion:p;
-      const before=o.passProbe||{x:m.x,y:m.y,npcY:o.y},oldY=before.y-before.npcY,newY=p.y-o.y;
-      o.passProbe={x:p.x,y:p.y,npcY:o.y};
-      if(o.passedAt===undefined&&oldY<=0&&newY>=0&&newY-oldY>1e-6&&p.vy>0){
-        const t=clamp(-oldY/(newY-oldY),0,1),crossX=mix(before.x,p.x,t);
-        if(Math.abs(crossX-o.x)<=W.passDistanceMetres*PX_PER_M){o.passedAt=clock-dt*(1-t);o.walker=false;o.stroll=null;o.pauseUntil=clock+W.afterPassSeconds+W.transformSeconds;o.walking=false;o.roam=o.vx=o.vy=0;}
-      }
-      if(o.passedAt===undefined||clock-o.passedAt<W.afterPassSeconds)continue;
+      const W=E.werewolf,speed2=p.vx*p.vx+p.vy*p.vy;if(p.fall||p.awaitingInput||speed2<900)continue;
+      const dx=o.x-p.x,dy=o.y-p.y,arrival=(dx*p.vx+dy*p.vy)/speed2;
+      if(arrival<0||arrival>W.transformSeconds+W.beforeArrivalSeconds)continue;
+      if(Math.hypot(dx-p.vx*arrival,dy-p.vy*arrival)>W.passDistanceMetres*PX_PER_M)continue;
+      const visible=screen(o.x,o.y);if(visible.x<20||visible.x>S.render.width-20||visible.y<90||visible.y>H-60)continue;
+      // At high approach speeds, keep the whole change visible and finish before contact.
+      o.transformDuration=Math.min(W.transformSeconds,Math.max(.12,arrival-W.beforeArrivalSeconds));
       o.werewolfState='transforming';o.transformAt=clock;o.socialUntil=clock+E.werewolf.transformSeconds;o.walking=false;o.roam=o.vx=o.vy=0;o.fearUntil=0;o.threat=null;
       // At most three spoken reactions, but everyone close by enters normal fear behavior.
       let voices=0;for(const n of preyActors())if(n!==o&&(n.type?.startsWith('person')||n.type==='skier'||n.type==='boarder')&&Math.hypot(n.x-o.x,n.y-o.y)<340){if(voices>=3)n.speakAt=Math.max(n.speakAt||0,clock+2.5);else n.speakAt=0;frighten(n,o);voices++;}
       say('Uh... not again.',o,1.2);continue;
     }
-    // The emerging wolf bounds after the skier; the reveal is not left behind offscreen.
-    const progress=clamp((clock-o.transformAt)/E.werewolf.transformSeconds,0,1);
-    if(progress>.2){
-      const target=endlessPursuitTarget(o,p),previous={x:o.x,y:o.y},speed=E.werewolf.speedKmh/S.physics.hudKmhPerSpeed*clamp((progress-.2)/.25,0,1);
-      travel(o,Math.atan2(target.y-o.y,target.x-o.x),speed,dt,false,false,true,true,target);
-      o.gaitDistance=(o.gaitDistance||0)+Math.hypot(o.x-previous.x,o.y-previous.y);if(Math.abs(o.motionVx)>35)o.werewolfFlip=o.motionVx<0;
+    // A boost or ice acceleration must not carry the skier past an unfinished reveal.
+    const velocity2=p.vx*p.vx+p.vy*p.vy;
+    if(velocity2>900){
+      const arrival=((o.x-p.x)*p.vx+(o.y-p.y)*p.vy)/velocity2;
+      if(arrival>=0)o.transformDuration=Math.min(o.transformDuration??E.werewolf.transformSeconds,clock-o.transformAt+Math.max(.08,arrival-E.werewolf.beforeArrivalSeconds));
     }
-    if(clock-o.transformAt>=E.werewolf.transformSeconds){
+    // Stay planted during the reveal so the skier actually sees a person become a wolf.
+    if(clock-o.transformAt>=(o.transformDuration??E.werewolf.transformSeconds)){
       o.type='wolf';o.werewolfState='wolf';o.width=52;o.r=12;o.animal=true;o.ai='hunt';o.linkedChase=o.wolfAwake=true;o.alertUntil=Infinity;o.wolfSpeedKmh=E.werewolf.speedKmh;o.packId=o.id;o.packIndex=0;o.costume=null;o.job=null;o.walker=false;o.path=null;o.socialUntil=0;o.nextAI=clock;
       o.motionVx=o.motionVy=o.travelSpeed=0;o.travelStamp=clock;delete o.worldChunk;burst(o.x,o.y,'#c3c7ce',8);say('AWOOOO!',o,1.5);
     }
   }
-}
-function werewolfRevealOffset(){
-  if(!state.endless)return 0;
-  let offset=0;const Ww=S.endless.encounterEnemies.werewolf,p=state.p;
-  for(const o of objectGroups().werewolves){
-    if(o.dead||o.eaten||o.passedAt===undefined||Math.abs(o.x-p.x)>W/ZOOM*.7)continue;
-    const elapsed=clock-o.passedAt,end=Ww.afterPassSeconds+Ww.transformSeconds+.65;
-    if(elapsed<.55||elapsed>end)continue;
-    const strength=Math.min(clamp((elapsed-.55)/.3,0,1),clamp((end-elapsed)/.5,0,1));
-    const normal=p.y-H*S.render.playerScreenY/ZOOM,look=o.y-H*.18/ZOOM;
-    offset=Math.max(offset,clamp(normal-look,0,H*.16/ZOOM)*strength);
-  }
-  return offset;
 }
 const encounterArt=new Map();
 function encounterTile(key,width,height,paint){
@@ -261,7 +247,7 @@ function drawEncounterEnemy(o,s,feeding=false){
     ctx.save();if(o.dead||o.burrowState==='closing')ctx.globalAlpha=clamp(o.dead?(o.fadeUntil-clock)/S.wildlife.predatorFadeSeconds:1-(clock-o.closeAt)/.28,0,1);const pop=o.burrowState==='open'?clamp((clock-o.openAt)/.14,0,1):1;ctx.drawImage(tile,Math.round(s.x-width/2),Math.round(s.y-width*tile.height/tile.width/2+(1-pop)*4),width,width*tile.height/tile.width);ctx.restore();return true;
   }
   if(!o.werewolf||o.werewolfState==='disguised')return false;
-  const transforming=o.werewolfState==='transforming',progress=transforming?clamp((clock-o.transformAt)/S.endless.encounterEnemies.werewolf.transformSeconds,0,1):1;
+  const transforming=o.werewolfState==='transforming',progress=transforming?clamp((clock-o.transformAt)/(o.transformDuration??S.endless.encounterEnemies.werewolf.transformSeconds),0,1):1;
   const frame=feeding?Math.floor(clock*10)%2:(o.travelSpeed||0)>1?Math.floor((o.gaitDistance||0)/130*12)%12:-1;
   const tile=transforming?werewolfTransformTile(o,progress):werewolfTile(frame,feeding),scale=(o.width&&o.width>40?o.width:52)*ZOOM/32,width=tile.width*scale,height=tile.height*scale;
   ctx.save();if(o.dead){ctx.globalAlpha=clamp((o.fadeUntil-clock)/S.wildlife.wolfFadeSeconds,0,1);ctx.translate(s.x,s.y);ctx.rotate(Math.PI/2);ctx.drawImage(tile,-width/2,-41*scale,width,height);}else {const flip=o.werewolfFlip??false;ctx.translate(Math.round(s.x),Math.round(s.y));ctx.scale(flip?-1:1,1);shadow(0,0,18,3);ctx.drawImage(tile,Math.round(-width/2),Math.round(-41*scale),width,height);}ctx.restore();return true;
