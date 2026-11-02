@@ -41,6 +41,36 @@ function spawnEncounterEnemies(section,endY){
   };
   spawn('burrower',E.burrower);spawn('werewolf',E.werewolf);
 }
+function debugEncounterEnemy(kind){
+  if(!ready||!['burrower','werewolf'].includes(kind)||state.sceneCard||state.deathTimer||state.liftTimer)return false;
+  if(!state.endless){
+    if(state.course||state.zone.kind!=='start'||!debugEndlessArea(1))return false;
+  }
+  const p=state.p,root=state.course,bounds=viewBounds();let actor;
+  if(kind==='burrower'){
+    actor=entity('burrower',p.x,p.y+200,{r:0,width:42,arcadeRun:root,debugSpawn:true,burrowState:'waiting',enemyRangeEntered:true});
+    startBurrow(actor);
+  }else{
+    const bottom=bounds.bottom-120/ZOOM,predict=y=>clamp(p.x+(p.vy>30?p.vx/p.vy*(y-p.y):0),bounds.left+80,bounds.right-80);
+    let point;
+    for(const rise of [0,60,120,180]){
+      const y=bottom-rise/ZOOM;if(y<p.y+100)continue;
+      for(const offset of [40,-40,80,-80,0,120,-120,180,-180,260,-260,340,-340]){
+        const x=clamp(predict(y)+offset,bounds.left+40,bounds.right-40);
+        if(nearbyFootprints(x,y,80).some(o=>obstacleClearance(o,x,y)<24)||state.objects.some(o=>o.debugSpawn&&!o.dead&&!o.eaten&&Math.hypot(o.x-x,o.y-y)<28))continue;
+        point={x,y};break;
+      }
+      if(point)break;
+    }
+    if(!point){announce('DEBUG - NO CLEAR SPOT','MOVE A LITTLE AND TRY T AGAIN',C.teal,2);return true;}
+    actor=entity(pick(['personRed','personGreen','personYellow']),point.x,point.y,{width:32,r:10,arcadeRun:root,encounter:endlessEncounterAt(point.y),debugSpawn:true,werewolf:true,werewolfState:'disguised',werewolfName:pick(WEREWOLF_NAMES),walker:false,roam:0,pauseUntil:Infinity});
+  }
+  if(!state.endless.debug){state.endless.furthestY=Math.max(state.endless.furthestY,p.y);recordEndless('DEBUG ENEMY SPAWN');state.endless.debug=true;}
+  state.endless.debugVisit??=endlessEncounterAt(p.y)?.visit??1;
+  state.endlessResult=null; // Saving the legitimate distance must not display an ended-run panel.
+  announce('DEBUG - '+(kind==='burrower'?'BURROWER':'WEREWOLF'),kind==='burrower'?(actor.burrowState==='waiting'?(state.started?'ADDED - WAITING FOR A CLEAR APPROACH':'ADDED - START SKIING TO TRIGGER'):'ADDED'):'PERSON ADDED BELOW - PASS CLOSE TO TRIGGER',C.teal,2);
+  render();return true;
+}
 function burrowIntercept(o){
   const p=state.p,B=S.endless.encounterEnemies.burrower;
   if(p.air>0||p.fall||p.awaitingInput||p.speed<100)return null;
@@ -48,7 +78,7 @@ function burrowIntercept(o){
   const lead=B.pauseSeconds;
   const point={x:p.x+p.vx*lead,y:p.y+p.vy*lead},bounds=viewBounds();
   // A warning below the viewport is not a fair warning, especially at fast ice exits.
-  if(point.x<bounds.left+50||point.x>bounds.right-50||point.y<bounds.top+150||point.y>bounds.bottom-70||patchAt(point.x,point.y))return null;
+  if(point.x<bounds.left+50||point.x>bounds.right-50||point.y<bounds.top+150||point.y>bounds.bottom-70||!o?.debugSpawn&&patchAt(point.x,point.y))return null;
   const near=nearbyFootprints(point.x,point.y,120);
   if(near.some(h=>obstacleClearance(h,point.x,point.y)<B.holeRadius+18))return null;
   const speed=Math.hypot(p.vx,p.vy)||1,nx=p.vy/speed,ny=-p.vx/speed;
@@ -62,8 +92,14 @@ function nearbyFootprints(x,y,pad){
   return [...found];
 }
 function startBurrow(o){
-  const target=burrowIntercept(o);if(!target)return false;
-  const b=viewBounds(),side=pick([-1,1]);o.x=side<0?b.left-90:b.right+90;o.y=target.y-50;
+  let target=burrowIntercept(o);const b=viewBounds();
+  // Debug presses still show an approach when ice/air speed puts the real intercept offscreen.
+  if(!target&&o.debugSpawn&&state.started){
+    const p=state.p,y=clamp(p.y+Math.max(200,p.vy*S.endless.encounterEnemies.burrower.pauseSeconds),b.top+160,b.bottom-120/ZOOM);
+    for(const offset of [0,40,-40,80,-80,120,-120]){const x=clamp(p.x+offset,b.left+60,b.right-60);if(!nearbyFootprints(x,y,80).some(h=>obstacleClearance(h,x,y)<28)){target={x,y};break;}}
+  }
+  if(!target)return false;
+  const side=pick([-1,1]);o.x=side<0?b.left-90:b.right+90;o.y=target.y-50;
   o.burrowState='rushing';o.rushAt=clock;o.rushTarget=target;o.r=0;o.burrowTrail=[];
   return true;
 }
@@ -74,7 +110,11 @@ function updateEncounterEnemies(dt){
   for(const o of objectGroups().burrowers){
     if(o.dead||o.eaten||!activeCourseOwner(o))continue;
     if(o.burrowState==='waiting'){
-      if(!active&&clock>=(state.endless.nextBurrowAt||0)&&surpriseAreaAllowed(endlessEncounterAt(p.y))&&Math.hypot(o.x-p.x,o.y-p.y)<E.burrower.noticeMetres*PX_PER_M&&startBurrow(o)){active=true;state.endless.nextBurrowAt=clock+E.burrower.cooldownSeconds;}
+      // Manual stress spawns wait with the player until a real approach is possible.
+      if(o.debugSpawn){o.x=p.x;o.y=p.y+200;}
+      if((o.debugSpawn||!active&&clock>=(state.endless.nextBurrowAt||0)&&surpriseAreaAllowed(endlessEncounterAt(p.y)))&&Math.hypot(o.x-p.x,o.y-p.y)<E.burrower.noticeMetres*PX_PER_M&&startBurrow(o)){
+        active=true;if(!o.debugSpawn)state.endless.nextBurrowAt=clock+E.burrower.cooldownSeconds;
+      }
       continue;
     }
     if(o.burrowState==='rushing'){
@@ -86,7 +126,7 @@ function updateEncounterEnemies(dt){
         o.motionVx=o.motionVy=o.travelSpeed=0;o.travelStamp=clock;
       }else{
         // Fade the wave near arrival so it settles cleanly instead of orbiting the intercept.
-        const sway=Math.sin((clock-o.rushAt)*TAU/B.zigzagSeconds)*B.zigzagAngleDegrees*Math.PI/180*clamp(distance/150,0,1);
+        const sway=Math.sin((clock-o.rushAt)*TAU/B.zigzagSeconds+(o.debugSpawn?o.phase:0))*B.zigzagAngleDegrees*Math.PI/180*clamp(distance/150,0,1);
         const angle=Math.atan2(dy,dx)+sway;o.x+=Math.cos(angle)*step;o.y+=Math.sin(angle)*step;
         o.motionVx=(o.x-o.motionFromX)/dt;o.motionVy=(o.y-o.motionFromY)/dt;o.travelSpeed=speed;o.travelStamp=clock;
         // An evasive skier can make the interception miss; never chase underground indefinitely.
