@@ -310,7 +310,7 @@ window.FROSTLINE_READY = (async () => {
     for(const run of block.runs){armPenaltyGates(run);prepareArcadeTerrain(run);spawnArcadeYetis(run,run.arcade.yetiTier,run.arcade.yetis);}
     const oldRoute=state.liftRoutes.at(-1);
     if(oldRoute&&oldRoute.y1>startY)oldRoute.y1=startY;
-    state.liftRoutes.push({x0:oldRoute?liftX(oldRoute,startY):x+S.lift.x,x1:block.town.stationX,y0:startY,y1:block.town.stationY});
+    state.liftRoutes.push(...liftRoutesToStation(oldRoute?liftX(oldRoute,startY):x+S.lift.x,x,startY,block.town));
     activateArcadeStage(first);return true;
   }
   function activeCourseOwner(o){
@@ -709,7 +709,8 @@ window.FROSTLINE_READY = (async () => {
     for(const o of state.objects)if(o.type==='entrance')o.selected=o===gate;
     entity('courseStart',run.x,startY,{r:0,width:700,name:'ARCADE'});
     const route=state.liftRoutes.at(-1);if(route)route.y1=Math.min(route.y1,startY);
-    state.endless.liftTail={x0:run.x+S.lift.x,x1:run.x+S.lift.x,y0:startY,y1:Infinity,endlessRun:run};state.liftRoutes.push(state.endless.liftTail);
+    const liftFrom=route?liftX(route,startY):run.x+S.lift.x;
+    state.endless.liftTail={x0:liftFrom,lane:{center:run.x,side:liftSide(liftFrom,run.x)},y0:startY,y1:Infinity,endlessRun:run};state.liftRoutes.push(state.endless.liftTail);
     extendEndless();
     if(debugKind){
       const a=state.endless,e=a.encounters[0],y=e.startY+20*e.scale;
@@ -938,7 +939,7 @@ window.FROSTLINE_READY = (async () => {
     if(id==='slalom')state.objects=state.objects.filter(o=>!classicArea(o.x,o.y,70)||['gate','courseStart','finish','entrance','skier','boarder','personRed','personGreen','personYellow'].includes(o.type));
     const oldRoute=state.liftRoutes[state.liftRoutes.length-1];
     if(oldRoute&&oldRoute.y1>startY)oldRoute.y1=startY;
-    state.liftRoutes.push({x0:oldRoute?liftX(oldRoute,startY):run.x+S.lift.x,x1:state.plannedTown.stationX,y0:startY,y1:state.plannedTown.stationY});
+    state.liftRoutes.push(...liftRoutesToStation(oldRoute?liftX(oldRoute,startY):run.x+S.lift.x,run.x,startY,state.plannedTown));
     announce(s.name.toUpperCase(),`${Math.round(s.length)} m ahead${s.fee?(paid?`  ·  ${s.fee} coins paid`:'  ·  Unpaid adventure!'):'  ·  Follow the flags.'}`,s.color);
     if(run.objective==='mushrooms')announce('SPORE DECISIONS',`COLLECT ${Math.ceil(run.totalMushrooms*S.mushroomHunt.minimumFraction)}/${run.totalMushrooms} MUSHROOMS - THEN FINISH${s.fee&&paid?' · '+s.fee+' PAID':''}`,s.color,5);
     if(!paid)triggerAmbush();else if(s.kind==='slow'){addChasers('slow',S.politePursuit.count,run);announce('POLITE PURSUIT',`${S.politePursuit.count} SLOW YETIS - THEY FOLLOW YOU OFF PISTE`,s.color,5);}else if(s.kind==='fast')addChasers('fast',1);
@@ -1741,13 +1742,39 @@ window.FROSTLINE_READY = (async () => {
     town.arcadeLift=entity('lift',town.stationX,town.stationY,{...own,width:174,r:0,half:73,used:false});
     entity('liftLabel',town.stationX,town.stationY+55,{...own,r:0,width:160});
     for(let i=0;i<4;i++)entity(i%2?'personRed':'personGreen',town.stationX-45+i*22,town.stationY+20,{...own,width:30,r:0,job:'queue',costume:town.festival==='christmas'?'furCoat':town.festival==='halloween'?'pumpkin':undefined});
-    const tail=a.liftTail,bendStart=Math.max(tail.y0,town.stationY-S.lift.routeBendDistance),x=liftX(tail,bendStart);
+    const tail=a.liftTail,bendStart=clamp(Math.max(town.origin,town.stationY-S.lift.routeBendDistance),tail.y0,town.stationY);
     tail.y1=bendStart;
-    state.liftRoutes.push({x0:x,x1:town.stationX,y0:bendStart,y1:town.stationY,endlessRun:root});
-    a.liftTail={x0:town.stationX,x1:root.x+Math.sign(town.stationX-root.x)*S.lift.x,y0:town.stationY,y1:Infinity,endlessRun:root};
+    state.liftRoutes.push({from:tail,x1:town.stationX,y0:bendStart,y1:town.stationY,bend:Math.max(1,town.stationY-bendStart),endlessRun:root});
+    a.liftTail={x0:town.stationX,lane:{center:root.x,side:liftSide(town.stationX,root.x)},y0:town.stationY,y1:Infinity,endlessRun:root};
     state.liftRoutes.push(a.liftTail);
   }
-  function liftX(route,y){return mix(route.x0,route.x1,clamp((y-route.y0)/S.lift.routeBendDistance,0,1));}
+  // The chairlift keeps to a lane beside the course, on the side it is already on, and bends further out around any
+  // gate that would otherwise sit under it. It only swings across to a station inside a village, just before the station.
+  const LIFT_GATES=objectView(o=>o.type==='gate');
+  const liftGateIndex={source:null,sorted:[]};
+  function liftLaneX(lane,y){
+    const L=S.lift,side=lane.side;let x=lane.center+side*L.courseSideOffset;
+    // Gates never move, so a y-sorted copy (rebuilt only when the gate list changes) lets us visit just the nearby ones.
+    const gates=viewItems(LIFT_GATES);if(liftGateIndex.source!==gates){liftGateIndex.source=gates;liftGateIndex.sorted=gates.slice().sort((a,b)=>a.y-b.y);}
+    const sorted=liftGateIndex.sorted;let lo=0,hi=sorted.length;while(lo<hi){const mid=(lo+hi)>>1;if(sorted[mid].y<y-1400)lo=mid+1;else hi=mid;}
+    for(let i=lo;i<sorted.length&&sorted[i].y<=y+1400;i++){
+      const g=sorted[i],dy=Math.abs(g.y-y);
+      // Full clearance alongside a gate, easing back over the following/preceding stretch.
+      const edge=g.x+side*((g.half||0)+L.gateClearance)-side*Math.max(0,dy-260)*.45;
+      x=side>0?Math.max(x,edge):Math.min(x,edge);
+    }
+    return x;
+  }
+  function liftX(route,y){
+    const x0=route.from?liftX(route.from,route.y0):route.x0,x1=route.lane?liftLaneX(route.lane,y):route.x1;
+    return mix(x0,x1,clamp((y-route.y0)/(route.bend||S.lift.routeBendDistance),0,1));
+  }
+  function liftSide(fromX,centerX){return Math.sign(fromX-centerX)||1;}
+  function liftRoutesToStation(fromX,centerX,startY,town){
+    const bendStart=clamp(Math.max(town.origin,town.stationY-S.lift.routeBendDistance),startY,town.stationY);
+    const out={x0:fromX,lane:{center:centerX,side:liftSide(fromX,centerX)},y0:startY,y1:bendStart};
+    return [out,{from:out,x1:town.stationX,y0:bendStart,y1:town.stationY,bend:Math.max(1,town.stationY-bendStart)}];
+  }
   function safeApproach(x,y){return state.villages.some(t=>!t.endlessRun&&y>=t.roadEndY&&y<=t.approachEndY&&Math.abs(x-t.x)<S.village.halfWidth+150);}
   function insideTown(x,y){return state.villages.some(t=>Math.abs(x-t.x)<(t.halfWidth??S.village.halfWidth+150)&&y>t.origin-70&&y<t.end);}
   // Preserve protected corridors after a run ends, including when walking back uphill.
@@ -4586,5 +4613,5 @@ window.FROSTLINE_READY = (async () => {
   const loaded=Promise.all(Object.entries(window.FROSTLINE_ASSETS).filter(([key])=>requiredTextures.has(key)||key.startsWith('scene:')).map(([key,src])=>new Promise((resolve,reject)=>{const im=new Image();im.onload=()=>{images[key]=im;resolve();};im.onerror=()=>reject(new Error('Cannot load sprite atlas: '+key));im.src=src;})));
   loaded.then(()=>{ready=true;window.FrostlineApp?.ready();if(S.endless.autoStart)autoStartEndless();else if(S.arcade.autoStart)autoStartArcade();render();requestAnimationFrame(frame);}).catch(window.showFrostlineError);
   // Kept out of the UI: deterministic hooks for simulation and renderer checks.
-  window.Frostline={debugEncounterEnemy,debugEndlessDifficulty,debugEndlessArea,debugAreas:ENDLESS_DEBUG_AREAS,config:S,state,stages,atlas,loaded,step,render,startCourse,creditRun,makeVillage,hit,triggerAmbush,addChasers,startMoving,resize,launch,playerPose,keyboardDirection,releasePointer,ensureWorld,updateWildlife,updateSkiers,crashSkier,endlessPressure,endlessScaleAt,obstacleClearance,encounterPathX,encounterClearance,endlessTownAt,extendEndless,die,resetSummit,patchAt,onRoad,entity,topSpeed,viewBounds,humanArea,lakeContains,pickWarningChaser,isNight,toggleDayNight,get ready(){return ready;},get height(){return H;}};
+  window.Frostline={liftX,debugEncounterEnemy,debugEndlessDifficulty,debugEndlessArea,debugAreas:ENDLESS_DEBUG_AREAS,config:S,state,stages,atlas,loaded,step,render,startCourse,creditRun,makeVillage,hit,triggerAmbush,addChasers,startMoving,resize,launch,playerPose,keyboardDirection,releasePointer,ensureWorld,updateWildlife,updateSkiers,crashSkier,endlessPressure,endlessScaleAt,obstacleClearance,encounterPathX,encounterClearance,endlessTownAt,extendEndless,die,resetSummit,patchAt,onRoad,entity,topSpeed,viewBounds,humanArea,lakeContains,pickWarningChaser,isNight,toggleDayNight,get ready(){return ready;},get height(){return H;}};
 })().catch(window.showFrostlineError);

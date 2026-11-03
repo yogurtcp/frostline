@@ -2438,6 +2438,8 @@
     "x": 400,
     "startY": -600,
     "routeBendDistance": 900,
+    "courseSideOffset": 460,
+    "gateClearance": 140,
     "rideSeconds": 2.4,
     "rideSpeed": 150,
     "chairSpeed": 78,

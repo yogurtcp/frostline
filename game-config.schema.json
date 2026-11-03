@@ -6046,6 +6046,18 @@
           "type": "number",
           "minimum": 0,
           "exclusiveMinimum": 0
+        },
+        "courseSideOffset": {
+          "type": "number",
+          "minimum": 300,
+          "maximum": 1500,
+          "description": "Default distance of the chairlift lane from a course's centre line. The lane bends further out around any gate that reaches it, and only swings in to a station inside a village."
+        },
+        "gateClearance": {
+          "type": "number",
+          "minimum": 20,
+          "maximum": 400,
+          "description": "Minimum gap between the chairlift line and the outer flag of any nearby gate."
         }
       }
     },
