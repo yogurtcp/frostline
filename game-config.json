@@ -384,7 +384,9 @@
         "passDistanceMetres": 8,
         "beforeArrivalSeconds": 0.45,
         "warningSeconds": 0.35,
-        "triggerLeadSeconds": 1.8
+        "triggerLeadSeconds": 1.8,
+        "knockdownSeconds": 1.6,
+        "knockdownLines": ["HEY! I was in the MIDDLE of something!", "Argh! You clumsy ski-goblin!", "My transformation! RUINED!", "Watch where you ski, you menace!", "Blast it! Now I have to start OVER!"]
       }
     }
   },

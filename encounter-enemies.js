@@ -103,6 +103,14 @@ function startBurrow(o){
   o.burrowState='rushing';o.rushAt=clock;o.rushTarget=target;o.r=0;o.burrowTrail=[];
   return true;
 }
+// A crash during the scream or the change knocks the villager flat, half-changed. Once up, they start over.
+function knockDownWerewolf(o){
+  const W=S.endless.encounterEnemies.werewolf;
+  o.knockProgress=o.werewolfState==='transforming'?clamp((clock-o.transformAt)/(o.transformDuration??W.transformSeconds),0,1):0;
+  o.werewolfState='knocked';o.knockedAt=clock;o.knockedUntil=clock+W.knockdownSeconds;o.knockSide=Math.sign(o.x-state.p.x)||1;
+  o.socialUntil=o.knockedUntil+W.warningSeconds+W.transformSeconds;o.waveUntil=0;o.walking=false;o.vx=o.vy=0;
+  burst(o.x,o.y,C.ice,10);state.speech=state.speech.filter(b=>b.object!==o);say(pick(W.knockdownLines),o,Math.max(1.4,W.knockdownSeconds));beep(240,.16,'square',.016);
+}
 function updateEncounterEnemies(dt){
   if(!state.started)return;
   const p=state.p,E=S.endless.encounterEnemies;
@@ -156,6 +164,12 @@ function updateEncounterEnemies(dt){
       const budget=Math.max(.12,arrival-W.beforeArrivalSeconds),warning=Math.min(W.warningSeconds,Math.max(0,budget-.12));
       o.werewolfState='warning';o.warningAt=clock;o.transformStartAt=clock+warning;o.warningDeadline=clock+budget;o.socialUntil=clock+warning+W.transformSeconds;o.waveUntil=clock+warning;o.walking=false;o.roam=o.vx=o.vy=0;o.fearUntil=0;o.threat=null;
       say('AAAAH!',o,Math.max(.7,warning+.6));beep(780,.18,'sawtooth',.014);continue;
+    }
+    if(o.werewolfState==='knocked'){
+      if(clock<o.knockedUntil)continue;
+      // Back on their feet: scream again, then the full transformation from the start.
+      o.werewolfState='warning';o.warningAt=clock;o.transformStartAt=clock+W.warningSeconds;o.warningDeadline=clock+W.warningSeconds+W.transformSeconds;o.waveUntil=clock+W.warningSeconds;o.socialUntil=clock+W.warningSeconds+W.transformSeconds;
+      say('AAAAH!',o,W.warningSeconds+.6);beep(780,.18,'sawtooth',.014);continue;
     }
     if(o.werewolfState==='warning'){
       if(speed2>900){const arrival=((o.x-p.x)*p.vx+(o.y-p.y)*p.vy)/speed2;if(arrival>=0)o.warningDeadline=Math.min(o.warningDeadline,clock+Math.max(.08,arrival-W.beforeArrivalSeconds));}
@@ -246,6 +260,14 @@ function drawEncounterEnemy(o,s,feeding=false){
     }
     const tile=burrowerTile(o.burrowState==='open'||feeding,feeding?Math.floor(clock*10)%2:0),width=o.width*ZOOM;
     ctx.save();if(o.dead||o.burrowState==='closing')ctx.globalAlpha=clamp(o.dead?(o.fadeUntil-clock)/S.wildlife.predatorFadeSeconds:1-(clock-o.closeAt)/.28,0,1);const pop=o.burrowState==='open'?clamp((clock-o.openAt)/.14,0,1):1;ctx.drawImage(tile,Math.round(s.x-width/2),Math.round(s.y-width*tile.height/tile.width/2+(1-pop)*4),width,width*tile.height/tile.width);ctx.restore();return true;
+  }
+  if(o.werewolf&&o.werewolfState==='knocked'&&!o.dead){
+    // Topple over, lie flat with dizzy stars, then sit back up just before standing.
+    const W=S.endless.encounterEnemies.werewolf,elapsed=clock-o.knockedAt,left=o.knockedUntil-clock,tile=werewolfTransformTile(o,o.knockProgress||0);
+    const turn=elapsed<.25?elapsed/.25:left<.3?clamp(left/.3,0,1):1,scale=52*ZOOM/32,width=tile.width*scale,height=tile.height*scale;
+    ctx.save();ctx.translate(Math.round(s.x),Math.round(s.y));shadow(0,0,20*turn+10,3);ctx.rotate(o.knockSide*turn*Math.PI/2);ctx.drawImage(tile,Math.round(-width/2),Math.round(-41*scale+turn*10*scale),width,height);ctx.restore();
+    if(turn>=1)for(let i=0;i<3;i++){const a=clock*5+i*TAU/3;box(s.x+o.knockSide*-6+Math.cos(a)*7,s.y-14+Math.sin(a)*2.5,2,2,i%2?C.gold:'#f4f1e6');}
+    return true;
   }
   if(!o.werewolf||['disguised','warning'].includes(o.werewolfState))return false;
   const transforming=o.werewolfState==='transforming',progress=transforming?clamp((clock-o.transformAt)/(o.transformDuration??S.endless.encounterEnemies.werewolf.transformSeconds),0,1):1;

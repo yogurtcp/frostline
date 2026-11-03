@@ -2564,7 +2564,8 @@ window.FROSTLINE_READY = (async () => {
     }
     if(o.type==='sled'&&fast){o.vx=90*Math.sign(p.vx||1);o.vy=240;p.speed*=S.physics.sledSpeedRetention;say('Express delivery!',o);return;}
     if(o.type==='bush'){o.flatten=true;p.speed*=S.physics.bushSpeedRetention;burst(o.x,o.y,C.gold,7);return;}
-    if(['personRed','personGreen','personYellow'].includes(o.type))say(uphill?'BACKWARDS? Seriously?':pick(S.dialogue.personBumps),o);
+    if(o.werewolf&&(o.werewolfState==='warning'||o.werewolfState==='transforming'))knockDownWerewolf(o);
+    else if(['personRed','personGreen','personYellow'].includes(o.type))say(uphill?'BACKWARDS? Seriously?':pick(S.dialogue.personBumps),o);
     else if(o.type==='dog'){
       // A bumped town pet remains a pet; only a clean snack pass recruits a companion.
       o.hopUntil=clock+1.2;say('YIP!',o,1.4);

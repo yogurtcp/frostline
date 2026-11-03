@@ -8836,7 +8836,7 @@
             "pathPlacementChance",
             "pathOffsetMetres"
           ],
-          "description": "Tall pine that warns, rotates rigidly sideways toward the skier\u2019s side, and remains a jumpable fallen obstacle.",
+          "description": "Tall pine that warns, rotates rigidly sideways toward the skier’s side, and remains a jumpable fallen obstacle.",
           "properties": {
             "pathPlacementChance": {
               "type": "number",
@@ -10371,6 +10371,23 @@
                   "minimum": 0.5,
                   "maximum": 5,
                   "description": "Projected seconds before the nearest pass to begin the warning; independent of transformation duration."
+                },
+                "knockdownSeconds": {
+                  "type": "number",
+                  "minimum": 0.3,
+                  "maximum": 5,
+                  "description": "How long a werewolf stays down after the skier crashes into it while it screams or transforms. It then gets up and restarts the full transformation."
+                },
+                "knockdownLines": {
+                  "type": "array",
+                  "minItems": 1,
+                  "maxItems": 20,
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 60
+                  },
+                  "description": "One is shouted at random when a crash knocks a changing werewolf down."
                 }
               }
             }
