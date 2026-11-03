@@ -376,7 +376,7 @@
       },
       "werewolf": {
         "firstMetres": 600,
-        "chancePerSection": 0.6,
+        "chancePerSection": 0.3,
         "maxNearby": 2,
         "noticeMetres": 32,
         "transformSeconds": 2,
