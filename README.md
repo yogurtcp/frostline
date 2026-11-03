@@ -18,6 +18,21 @@ Crashes leave you stopped until a fresh arrow-key press, Space press, or touch a
 
 The body stays upright while standing and climbing. Fast and slow diagonal skiing have distinct 30° and 60° ski poses with animated crouching and poles. Snow acceleration is strongest on a straight descent (doubled from the original tuning for faster crash recovery), and snow top speeds are about 23% higher than the preceding revision. Faster jumps gain more height and airtime.
 
+## Museum
+
+Ski through **MUSEUM** at the left of the summit clearing for a slow, automatic glide past everything on the mountain: every creature, villager, obstacle, jump, hazard and pickup, each standing still with a short note written on the snow. You travel sideways along rows of exhibits, switching back at each end, so the notes are easy to read. Hold Down (or tap the bottom of the screen) to hurry; press Up to leave. The tour returns you to the summit. Exhibit wording is in `game-config.json` under `museum.exhibits`.
+
+## Creature rules
+
+Every creature follows the same four rules:
+
+1. **Jumping clears every creature.**
+2. **A full-speed ram knocks any creature out, and you fall too.** A shield cannot stop that fall. The snow burrower is a hole, so it cannot be rammed.
+3. **A creature that is not hunting you yet only knocks you down.** That covers sleeping, resting, waiting, waking or stunned creatures: a sleeping Yeti, a resting bear, a wolf that has not noticed you, or a zombie lying by its grave or getting up.
+4. **A hunting creature catches you, unless a sword saves you.** Skeletons are the exception: their leap knocks you down instead and never spends a sword. Any undead creature can still catch you while you are down.
+
+A shield saves you from one fall (obstacles, people, sleeping creatures, skeleton leaps). A sword saves you from one catch. A dog-scared creature is busy backing away and is harmless while it does.
+
 ## The mountain
 
 **Arcade** is the infinite mixed slope: changing regions, gates, towns and growing pursuit on one continuous run. It replaces the former stage campaign entrance. Existing infinite-distance records are preserved. Town cocoa shops offer a floating, steaming pixel-art cup with gold sparkles; collect it once per town for a shield and a cozy break.
@@ -48,7 +63,7 @@ Residents now have eight articulated walking poses plus waving, talking, serving
 
 ## Arcade
 
-Ski through **Arcade** on the left of the summit entrance row. All four trail entrances share the same starting line. Arcade remains separate. Endless is a continuous, free slope with no finish lines or stage resets. Occasional towns are part of the course, where existing Yetis can follow you. Distance is the record; missed gates break the equipment combo but do not end the run. Gates earn the same shields/swords as Arcade.
+Ski through **Arcade** on the left of the summit entrance row. Every Arcade town has a **CHECKPOINT** banner at its entrance. Ski through it to save: if you are caught afterwards, you restart just above that checkpoint, with the same area sequence, difficulty, distance, town and gear you had when you grabbed it. The save survives closing the game; a **CONTINUE** gate next to Arcade at the summit resumes from it. A new checkpoint replaces the old one. All four trail entrances share the same starting line. Arcade remains separate. Endless is a continuous, free slope with no finish lines or stage resets. Occasional towns are part of the course, where existing Yetis can follow you. Distance is the record; missed gates break the equipment combo but do not end the run. Gates earn the same shields/swords as Arcade.
 
 Arcade keeps its configured initial base speed throughout the run (90 km/h by default). Distance no longer raises player pace or the shared geometry/traffic/enemy speed multiplier; ice, jumps and temporary boosts retain their own mechanics. Endless now follows a configurable sequence of distinct areas, with no stage resets: the original gentle opening, followed by towns, cozy snowy trails, long tree corridors, a huge empty lake, a cemetery, a short dense forest, ordinary open forest and a separate short randomized Wild Patch. Wide crowds are inserted randomly farther downhill, after safe transitions. The sequence repeats; section difficulty grows between visits. See [REGIONS.md](REGIONS.md) for the mechanics and settings.
 

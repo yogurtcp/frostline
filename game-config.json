@@ -2,6 +2,9 @@
   "$schema": "./game-config.schema.json",
   "version": 1,
   "endless": {
+    "checkpoint": {
+      "halfWidthMetres": 11
+    },
     "autoStart": false,
     "recordVersion": 4,
     "playerSpeedKmh": 90,
@@ -1085,7 +1088,7 @@
       "length": 540,
       "fee": 0,
       "pace": 156,
-      "spacing": 380,
+      "spacing": 520,
       "density": 1,
       "color": "#24716d",
       "kind": "forest"
@@ -2839,5 +2842,191 @@
     "transitionSeconds": 1.8,
     "lampSetbackMetres": 7,
     "lightReachMultiplier": 3.2
+  },
+  "museum": {
+    "glideMetresPerSecond": 10,
+    "hurryMultiplier": 3,
+    "exhibitsPerRow": 6,
+    "spacing": 520,
+    "exhibitDrop": 150,
+    "textOffset": 55,
+    "wrapCharacters": 27,
+    "exhibits": [
+      {
+        "id": "rules",
+        "title": "HOW CREATURES WORK",
+        "text": "Jump over anything. Ram one at full speed: it's out, but you fall. Sleeping or waking ones only knock you down. Awake hunters catch you, unless you carry a sword."
+      },
+      {
+        "id": "sleepingYeti",
+        "title": "SLEEPING YETI",
+        "text": "Dozes near the trail and wakes when you get close. Bumping it only knocks you down."
+      },
+      {
+        "id": "yeti",
+        "title": "WHITE FANG YETI",
+        "text": "The regular chaser. Ski straight downhill to stay ahead; it gains on you when you turn."
+      },
+      {
+        "id": "fastYeti",
+        "title": "AVALANCHE YETI",
+        "text": "A faster chaser. Lead it past other skiers: Yetis stop to eat whoever is in the way."
+      },
+      {
+        "id": "stiltwalker",
+        "title": "STILTWALKER",
+        "text": "Tall, pale, easily distracted. The fastest Yeti, but it grabs any snack nearby first, even another Yeti."
+      },
+      {
+        "id": "bear",
+        "title": "BEAR",
+        "text": "Snoozes in the woods, then gallops after you. Slower than a Yeti."
+      },
+      {
+        "id": "wolves",
+        "title": "WOLF PACK",
+        "text": "Hunts in packs of three or four. Wolves chase rabbits and skiers too."
+      },
+      {
+        "id": "werewolf",
+        "title": "WEREWOLF",
+        "text": "Looks like a villager until you ski close: a scream, then a two-second change. Crash into it mid-change to knock it flat."
+      },
+      {
+        "id": "zombie",
+        "title": "ZOMBIE",
+        "text": "Wanders cemeteries. Lying by its grave it only trips you; walking, it catches you."
+      },
+      {
+        "id": "skeleton",
+        "title": "SKELETON",
+        "text": "Rests by a grave, rattles, then leaps once. The leap knocks you down, so get up before the zombies arrive."
+      },
+      {
+        "id": "burrower",
+        "title": "SNOW BURROWER",
+        "text": "Tunnels in, stops just ahead of you, then pops open. Turn or jump during its pause. Can't be rammed."
+      },
+      {
+        "id": "dog",
+        "title": "DOG",
+        "text": "Pass close by and it gets a treat. Next time it follows you and barks a few monsters away."
+      },
+      {
+        "id": "smallAnimals",
+        "title": "RABBIT AND FOX",
+        "text": "Come close slowly and they sniff around. Foxes and wolves hunt rabbits."
+      },
+      {
+        "id": "cat",
+        "title": "CAT",
+        "text": "Lures slow skiers over for a pet. Hit it fast and it bolts up the nearest tree."
+      },
+      {
+        "id": "villagers",
+        "title": "VILLAGERS",
+        "text": "Walk, chat, cheer and feed the animals. Monsters will gladly eat them instead of you."
+      },
+      {
+        "id": "skiers",
+        "title": "SKIERS AND BOARDERS",
+        "text": "Slow traffic. Bump one and you both go down. Also on the menu for hungry monsters."
+      },
+      {
+        "id": "fastSkier",
+        "title": "FAST SKIER",
+        "text": "Red jacket. Overtakes from behind and cuts toward your line."
+      },
+      {
+        "id": "snowman",
+        "title": "SNOWMAN",
+        "text": "Harmless. Knock its hat off and it grows a new one."
+      },
+      {
+        "id": "trees",
+        "title": "TREES",
+        "text": "Solid. Hit one fast and it snaps, and so do you. Jumps clear them."
+      },
+      {
+        "id": "rocks",
+        "title": "ROCKS AND STUMPS",
+        "text": "Solid obstacles. A shield saves you from one fall."
+      },
+      {
+        "id": "softStuff",
+        "title": "BUSHES AND SLEDS",
+        "text": "Bushes slow you down. Hit a sled fast and it rockets off downhill."
+      },
+      {
+        "id": "fallingTree",
+        "title": "FALLING TREE",
+        "text": "Leans as you approach, then topples across the trail. Watch which way it goes."
+      },
+      {
+        "id": "rollingSnowball",
+        "title": "ROLLING SNOWBALL",
+        "text": "Sets off as you come near and curves across your path, growing as it rolls."
+      },
+      {
+        "id": "logJump",
+        "title": "LOG JUMP",
+        "text": "A trunk across the whole trail. Hit the bump in the middle to sail over."
+      },
+      {
+        "id": "ice",
+        "title": "ICE",
+        "text": "Locks your direction until you reach snow again. Entering downhill speeds you up."
+      },
+      {
+        "id": "rugged",
+        "title": "CHURNED SNOW",
+        "text": "Rough patches that slow you down."
+      },
+      {
+        "id": "hills",
+        "title": "HILLS",
+        "text": "Jumps. Bigger hills mean longer flights. Steer in the air to plan your landing."
+      },
+      {
+        "id": "ramps",
+        "title": "RAMPS AND MOGULS",
+        "text": "Launch pads. Every jump boosts your speed."
+      },
+      {
+        "id": "rainbow",
+        "title": "RAINBOW",
+        "text": "A colourful jump with a speed boost and a powder trail."
+      },
+      {
+        "id": "mushroom",
+        "title": "MUSHROOM",
+        "text": "Bouncy! Throws you into the air with a boost."
+      },
+      {
+        "id": "shieldGate",
+        "title": "SHIELD GATE",
+        "text": "Ski between the flags to earn gear. A shield saves you from one fall."
+      },
+      {
+        "id": "swordGate",
+        "title": "SWORD GATE",
+        "text": "A sword saves you from one catch. Missing a gate breaks your gear streak."
+      },
+      {
+        "id": "checkpoint",
+        "title": "CHECKPOINT",
+        "text": "At every Arcade town. Ski through it: if you're caught, you restart there. Continue later from the summit."
+      },
+      {
+        "id": "chairlift",
+        "title": "CHAIRLIFT",
+        "text": "On the free slopes, ski into the station to ride back up."
+      },
+      {
+        "id": "theEnd",
+        "title": "THAT'S EVERYTHING",
+        "text": "Now go and meet them for real."
+      }
+    ]
   }
 }
