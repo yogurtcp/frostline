@@ -10357,13 +10357,20 @@
                 "beforeArrivalSeconds": {
                   "type": "number",
                   "minimum": 0,
-                  "maximum": 1
+                  "maximum": 1,
+                  "description": "Legacy warning deadline lead for fast-approach warning shortening; does not force the transformation to finish before the player."
                 },
                 "warningSeconds": {
                   "type": "number",
                   "minimum": 0,
                   "maximum": 1,
                   "description": "Human scream warning before the visible transformation; shortened if a fast approach leaves less time."
+                },
+                "triggerLeadSeconds": {
+                  "type": "number",
+                  "minimum": 0.5,
+                  "maximum": 5,
+                  "description": "Projected seconds before the nearest pass to begin the warning; independent of transformation duration."
                 }
               }
             }

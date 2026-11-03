@@ -150,27 +150,22 @@ function updateEncounterEnemies(dt){
     if(o.werewolfState==='disguised'){
       if(p.fall||p.awaitingInput||speed2<900)continue;
       const dx=o.x-p.x,dy=o.y-p.y,arrival=(dx*p.vx+dy*p.vy)/speed2;
-      if(arrival<0||arrival>W.warningSeconds+W.transformSeconds+W.beforeArrivalSeconds)continue;
+      if(arrival<0||arrival>W.triggerLeadSeconds)continue;
       if(Math.hypot(dx-p.vx*arrival,dy-p.vy*arrival)>W.passDistanceMetres*PX_PER_M)continue;
       const visible=screen(o.x,o.y);if(visible.x<20||visible.x>S.render.width-20||visible.y<90||visible.y>H-60)continue;
       const budget=Math.max(.12,arrival-W.beforeArrivalSeconds),warning=Math.min(W.warningSeconds,Math.max(0,budget-.12));
-      o.werewolfState='warning';o.warningAt=clock;o.transformStartAt=clock+warning;o.transformDeadline=clock+budget;o.socialUntil=o.transformDeadline;o.waveUntil=clock+warning;o.walking=false;o.roam=o.vx=o.vy=0;o.fearUntil=0;o.threat=null;
-      say('AAAAH!',o,Math.max(.7,warning+W.transformSeconds*.6));beep(780,.18,'sawtooth',.014);continue;
+      o.werewolfState='warning';o.warningAt=clock;o.transformStartAt=clock+warning;o.warningDeadline=clock+budget;o.socialUntil=clock+warning+W.transformSeconds;o.waveUntil=clock+warning;o.walking=false;o.roam=o.vx=o.vy=0;o.fearUntil=0;o.threat=null;
+      say('AAAAH!',o,Math.max(.7,warning+.6));beep(780,.18,'sawtooth',.014);continue;
     }
     if(o.werewolfState==='warning'){
-      if(speed2>900){const arrival=((o.x-p.x)*p.vx+(o.y-p.y)*p.vy)/speed2;if(arrival>=0)o.transformDeadline=Math.min(o.transformDeadline,clock+Math.max(.08,arrival-W.beforeArrivalSeconds));}
-      if(clock<o.transformStartAt&&o.transformDeadline-clock>.12)continue;
-      o.werewolfState='transforming';o.transformAt=clock;o.transformDuration=Math.min(W.transformSeconds,Math.max(.08,o.transformDeadline-clock));o.waveUntil=0;
+      if(speed2>900){const arrival=((o.x-p.x)*p.vx+(o.y-p.y)*p.vy)/speed2;if(arrival>=0)o.warningDeadline=Math.min(o.warningDeadline,clock+Math.max(.08,arrival-W.beforeArrivalSeconds));}
+      if(clock<o.transformStartAt&&o.warningDeadline-clock>.12)continue;
+      o.werewolfState='transforming';o.transformAt=clock;o.transformDuration=W.transformSeconds;o.socialUntil=clock+o.transformDuration;o.waveUntil=0;
       // At most three spoken reactions, but everyone close by enters normal fear behavior.
       let voices=0;for(const n of preyActors())if(n!==o&&(n.type?.startsWith('person')||n.type==='skier'||n.type==='boarder')&&Math.hypot(n.x-o.x,n.y-o.y)<340){if(voices>=3)n.speakAt=Math.max(n.speakAt||0,clock+2.5);else n.speakAt=0;frighten(n,o);voices++;}
       continue;
     }
-    // A boost or ice acceleration must not carry the skier past an unfinished reveal.
-    const velocity2=p.vx*p.vx+p.vy*p.vy;
-    if(velocity2>900){
-      const arrival=((o.x-p.x)*p.vx+(o.y-p.y)*p.vy)/velocity2;
-      if(arrival>=0)o.transformDuration=Math.min(o.transformDuration??E.werewolf.transformSeconds,clock-o.transformAt+Math.max(.08,arrival-E.werewolf.beforeArrivalSeconds));
-    }
+    // Once the morph starts, keep its full duration even if the player passes or accelerates.
     // Stay planted during the reveal so the skier actually sees a person become a wolf.
     if(clock-o.transformAt>=(o.transformDuration??E.werewolf.transformSeconds)){
       o.type='wolf';o.werewolfState='wolf';o.width=52;o.r=12;o.animal=true;o.ai='hunt';o.linkedChase=o.wolfAwake=true;o.alertUntil=Infinity;o.wolfSpeedKmh=E.werewolf.speedKmh;o.packId=o.id;o.packIndex=0;o.costume=null;o.job=null;o.walker=false;o.path=null;o.socialUntil=0;o.nextAI=clock;

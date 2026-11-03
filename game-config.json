@@ -379,11 +379,12 @@
         "chancePerSection": 0.6,
         "maxNearby": 2,
         "noticeMetres": 32,
-        "transformSeconds": 1,
+        "transformSeconds": 2,
         "speedKmh": 94,
         "passDistanceMetres": 8,
         "beforeArrivalSeconds": 0.45,
-        "warningSeconds": 0.35
+        "warningSeconds": 0.35,
+        "triggerLeadSeconds": 1.8
       }
     }
   },
