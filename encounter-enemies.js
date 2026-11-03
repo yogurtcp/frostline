@@ -146,18 +146,24 @@ function updateEncounterEnemies(dt){
   }
   for(const o of objectGroups().werewolves){
     if(o.dead||o.eaten||!activeCourseOwner(o)||o.werewolfState==='wolf')continue;
+    const W=E.werewolf,speed2=p.vx*p.vx+p.vy*p.vy;
     if(o.werewolfState==='disguised'){
-      const W=E.werewolf,speed2=p.vx*p.vx+p.vy*p.vy;if(p.fall||p.awaitingInput||speed2<900)continue;
+      if(p.fall||p.awaitingInput||speed2<900)continue;
       const dx=o.x-p.x,dy=o.y-p.y,arrival=(dx*p.vx+dy*p.vy)/speed2;
-      if(arrival<0||arrival>W.transformSeconds+W.beforeArrivalSeconds)continue;
+      if(arrival<0||arrival>W.warningSeconds+W.transformSeconds+W.beforeArrivalSeconds)continue;
       if(Math.hypot(dx-p.vx*arrival,dy-p.vy*arrival)>W.passDistanceMetres*PX_PER_M)continue;
       const visible=screen(o.x,o.y);if(visible.x<20||visible.x>S.render.width-20||visible.y<90||visible.y>H-60)continue;
-      // At high approach speeds, keep the whole change visible and finish before contact.
-      o.transformDuration=Math.min(W.transformSeconds,Math.max(.12,arrival-W.beforeArrivalSeconds));
-      o.werewolfState='transforming';o.transformAt=clock;o.socialUntil=clock+E.werewolf.transformSeconds;o.walking=false;o.roam=o.vx=o.vy=0;o.fearUntil=0;o.threat=null;
+      const budget=Math.max(.12,arrival-W.beforeArrivalSeconds),warning=Math.min(W.warningSeconds,Math.max(0,budget-.12));
+      o.werewolfState='warning';o.warningAt=clock;o.transformStartAt=clock+warning;o.transformDeadline=clock+budget;o.socialUntil=o.transformDeadline;o.waveUntil=clock+warning;o.walking=false;o.roam=o.vx=o.vy=0;o.fearUntil=0;o.threat=null;
+      say('AAAAH!',o,Math.max(.7,warning+W.transformSeconds*.6));beep(780,.18,'sawtooth',.014);continue;
+    }
+    if(o.werewolfState==='warning'){
+      if(speed2>900){const arrival=((o.x-p.x)*p.vx+(o.y-p.y)*p.vy)/speed2;if(arrival>=0)o.transformDeadline=Math.min(o.transformDeadline,clock+Math.max(.08,arrival-W.beforeArrivalSeconds));}
+      if(clock<o.transformStartAt&&o.transformDeadline-clock>.12)continue;
+      o.werewolfState='transforming';o.transformAt=clock;o.transformDuration=Math.min(W.transformSeconds,Math.max(.08,o.transformDeadline-clock));o.waveUntil=0;
       // At most three spoken reactions, but everyone close by enters normal fear behavior.
       let voices=0;for(const n of preyActors())if(n!==o&&(n.type?.startsWith('person')||n.type==='skier'||n.type==='boarder')&&Math.hypot(n.x-o.x,n.y-o.y)<340){if(voices>=3)n.speakAt=Math.max(n.speakAt||0,clock+2.5);else n.speakAt=0;frighten(n,o);voices++;}
-      say('Uh... not again.',o,1.2);continue;
+      continue;
     }
     // A boost or ice acceleration must not carry the skier past an unfinished reveal.
     const velocity2=p.vx*p.vx+p.vy*p.vy;
@@ -246,9 +252,19 @@ function drawEncounterEnemy(o,s,feeding=false){
     const tile=burrowerTile(o.burrowState==='open'||feeding,feeding?Math.floor(clock*10)%2:0),width=o.width*ZOOM;
     ctx.save();if(o.dead||o.burrowState==='closing')ctx.globalAlpha=clamp(o.dead?(o.fadeUntil-clock)/S.wildlife.predatorFadeSeconds:1-(clock-o.closeAt)/.28,0,1);const pop=o.burrowState==='open'?clamp((clock-o.openAt)/.14,0,1):1;ctx.drawImage(tile,Math.round(s.x-width/2),Math.round(s.y-width*tile.height/tile.width/2+(1-pop)*4),width,width*tile.height/tile.width);ctx.restore();return true;
   }
-  if(!o.werewolf||o.werewolfState==='disguised')return false;
+  if(!o.werewolf||['disguised','warning'].includes(o.werewolfState))return false;
   const transforming=o.werewolfState==='transforming',progress=transforming?clamp((clock-o.transformAt)/(o.transformDuration??S.endless.encounterEnemies.werewolf.transformSeconds),0,1):1;
   const frame=feeding?Math.floor(clock*10)%2:(o.travelSpeed||0)>1?Math.floor((o.gaitDistance||0)/130*12)%12:-1;
   const tile=transforming?werewolfTransformTile(o,progress):werewolfTile(frame,feeding),scale=(o.width&&o.width>40?o.width:52)*ZOOM/32,width=tile.width*scale,height=tile.height*scale;
-  ctx.save();if(o.dead){ctx.globalAlpha=clamp((o.fadeUntil-clock)/S.wildlife.wolfFadeSeconds,0,1);ctx.translate(s.x,s.y);ctx.rotate(Math.PI/2);ctx.drawImage(tile,-width/2,-41*scale,width,height);}else {const flip=o.werewolfFlip??false;ctx.translate(Math.round(s.x),Math.round(s.y));ctx.scale(flip?-1:1,1);shadow(0,0,18,3);ctx.drawImage(tile,Math.round(-width/2),Math.round(-41*scale),width,height);}ctx.restore();return true;
+  ctx.save();if(o.dead){ctx.globalAlpha=clamp((o.fadeUntil-clock)/S.wildlife.wolfFadeSeconds,0,1);ctx.translate(s.x,s.y);ctx.rotate(Math.PI/2);ctx.drawImage(tile,-width/2,-41*scale,width,height);}else {const flip=o.werewolfFlip??false;ctx.translate(Math.round(s.x),Math.round(s.y));ctx.scale(flip?-1:1,1);shadow(0,0,18,3);ctx.drawImage(tile,Math.round(-width/2),Math.round(-41*scale),width,height);}ctx.restore();if(o.scaredUntil>clock)text('!',s.x+15,s.y-35,12,C.gold);return true;
+}
+
+function drawWerewolfWarnings(){
+  for(const o of objectGroups().werewolves){
+    if(o.dead||o.eaten||!['warning','transforming'].includes(o.werewolfState))continue;
+    const s=screen(o.x,o.y);if(s.x<-30||s.x>W+30||s.y<90||s.y>H-45)continue;
+    // A steady warm marker remains readable after night shading; no flashing or speech box.
+    const head=s.y-27;line(s.x-18,head-4,s.x-13,head-1,C.gold,2);line(s.x+13,head-1,s.x+18,head-4,C.gold,2);line(s.x-14,head-12,s.x-10,head-7,'#f6dea6',2);line(s.x+10,head-7,s.x+14,head-12,'#f6dea6',2);
+    text('!',s.x+21,head,13,'#263945');text('!',s.x+20,head-1,13,'#f5c96d');
+  }
 }

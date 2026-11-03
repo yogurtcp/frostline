@@ -382,7 +382,8 @@
         "transformSeconds": 1,
         "speedKmh": 94,
         "passDistanceMetres": 8,
-        "beforeArrivalSeconds": 0.25
+        "beforeArrivalSeconds": 0.45,
+        "warningSeconds": 0.35
       }
     }
   },
@@ -2361,7 +2362,13 @@
       "cruiseSpeedKmh": 24,
       "catchUpSpeedKmh": 16,
       "challengeSeconds": 1,
-      "challengeSpeedKmh": 42
+      "challengeSpeedKmh": 42,
+      "scareCounts": {
+        "yeti": 1,
+        "wolf": 3,
+        "bear": 2,
+        "werewolf": 1
+      }
     },
     "despawnScreens": 3
   },

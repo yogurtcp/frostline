@@ -5714,6 +5714,33 @@
               "type": "number",
               "minimum": 20,
               "maximum": 70
+            },
+            "scareCounts": {
+              "type": "object",
+              "additionalProperties": false,
+              "description": "Separate per-dog allowances; one scare per distinct enemy, return to following until all allowances are used.",
+              "properties": {
+                "yeti": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 10
+                },
+                "wolf": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 10
+                },
+                "bear": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 10
+                },
+                "werewolf": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 10
+                }
+              }
             }
           }
         },
@@ -10331,6 +10358,12 @@
                   "type": "number",
                   "minimum": 0,
                   "maximum": 1
+                },
+                "warningSeconds": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1,
+                  "description": "Human scream warning before the visible transformation; shortened if a fast approach leaves less time."
                 }
               }
             }

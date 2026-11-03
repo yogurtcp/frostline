@@ -2000,7 +2000,7 @@ window.FROSTLINE_READY = (async () => {
     say('CHOMP!',hunter,1.2);burst(meal.x,meal.y,C.ice,9);
   }
   function consumeNearbyPrey(hunter,previous,pause=S.predators.mealPauseSeconds,radius=S.chasers.captureDistance,contacts=null){
-    if(hunter.dead||hunter.eaten||hunter.retiring||hunter.leaving||hunter.stunnedUntil>clock||hunter.feedingUntil>clock)return false;
+    if(hunter.dead||hunter.eaten||hunter.retiring||hunter.leaving||hunter.stunnedUntil>clock||hunter.feedingUntil>clock||hunter.scaredUntil>clock)return false;
     if(resolveEnemyContact(hunter,{ramOnly:true}))return false;
     const index=contacts&&(contacts.index??=preyContactIndex()),meal=contactPrey(hunter,previous,radius,index);if(!meal)return false;
     eatChaserPrey(hunter,meal,previous,pause);return true;
@@ -2070,7 +2070,7 @@ window.FROSTLINE_READY = (async () => {
     const distance=segmentDistance(o.x,o.y,previous,p);
     if(distance<=(o.r||10)+S.physics.playerRadius+3||distance>D.feedMetres*PX_PER_M)return false;
     const friend=objectGroups().dogs.find(q=>q!==o&&q.dogCompanion&&!q.eaten&&!q.dead),side=friend?-(friend.dogSide||((friend.id||0)>.5?1:-1)):((o.id||0)>.5?1:-1);
-    Object.assign(o,{dogFed:true,dogCompanion:true,dogRetreat:false,dogMood:'follow',dogSide:side,roam:0,vx:0,vy:0,socialUntil:0,visitUntil:0,hopUntil:clock+1.2,arcadeRun:state.course,dogTreatAt:clock,dogTreatFrom:{x:p.x,y:p.y-16},dogReplyAt:clock+1.9});
+    Object.assign(o,{dogFed:true,dogCompanion:true,dogRetreat:false,dogMood:'follow',dogScaresUsed:{},dogScaredEnemies:new WeakSet(),dogSide:side,roam:0,vx:0,vy:0,socialUntil:0,visitUntil:0,hopUntil:clock+1.2,arcadeRun:state.course,dogTreatAt:clock,dogTreatFrom:{x:p.x,y:p.y-16},dogReplyAt:clock+1.9});
     delete o.worldChunk;o.socialPartner=null;
     for(const n of state.objects)if(n.socialAnimal===o){n.socialAnimal=null;n.socialUntil=0;}
     say("Here's a snack. Come along!",p,1.8);burst(o.x,o.y,C.gold,5);return true;
@@ -2103,24 +2103,50 @@ window.FROSTLINE_READY = (async () => {
     Object.assign(o,{dogCompanion:false,dogRetreat:true,leaving:true,dogMood:'flee',retreatUntil:clock+S.chasers.dogCompanion.retreatSeconds,retreatAngle:Math.atan2(-.35,o.x>=state.p.x?1:-1)});
     delete o.dogChallengeTarget;delete o.dogChallengeUntil;delete o.dogReplyAt;
   }
+  function dogScareKind(c){return c.werewolf&&c.werewolfState==='wolf'?'werewolf':c.type==='wolf'?'wolf':c.kind==='bear'?'bear':['fast','slow'].includes(c.kind)?'yeti':null;}
+  function dogHasScares(o,kind=null){
+    const counts=S.chasers.dogCompanion.scareCounts,used=o.dogScaresUsed||{};
+    return kind?(used[kind]||0)<counts[kind]:Object.entries(counts).some(([k,n])=>(used[k]||0)<n);
+  }
   function dogThreat(o){
     const p=state.p,D=S.chasers.dogCompanion;let threat=null,gap=D.scareMetres*PX_PER_M*endlessSpeedScale(o);
-    for(const c of state.chasers){
-      if(!['fast','slow'].includes(c.kind)||c.dead||c.eaten||c.leaving||c.waiting||c.wakeUntil>clock||c.stunnedUntil>clock||c.feedingUntil>clock||c.scaredUntil>clock)continue;
+    const consider=c=>{
+      const kind=dogScareKind(c);
+      if(!kind||!dogHasScares(o,kind)||o.dogScaredEnemies?.has(c)||c.dead||c.eaten||c.leaving||c.retiring||c.waiting||c.wakeUntil>clock||c.stunnedUntil>clock||c.feedingUntil>clock||c.scaredUntil>clock)return;
+      if(c.type==='wolf'&&(!c.animal||c.penaltyGate&&!c.wolfAwake||!(c.linkedChase||c.wolfAwake||c.alertUntil>clock||c.hunting)))return;
       const d=Math.hypot(c.x-p.x,c.y-p.y),toDog=Math.hypot(c.x-o.x,c.y-o.y);
-      if(c.divert&&c.divert!==o&&d>S.chasers.captureDistance*3)continue;
+      if(c.divert&&c.divert!==o&&d>S.chasers.captureDistance*3)return;
       const approaching=(p.x-c.x)*(c.motionVx||0)+(p.y-c.y)*(c.motionVy||0)>0||c.y<=p.y;
       if(approaching&&d<gap&&toDog<D.barkMetres*PX_PER_M*endlessSpeedScale(o)){gap=d;threat=c;}
-    }
+    };
+    for(const c of state.chasers)consider(c);
+    for(const c of objectGroups().animals)if(c.type==='wolf')consider(c);
     return threat;
   }
-  function challengeYeti(o,c){
-    const D=S.chasers.dogCompanion;
-    c.scaredUntil=clock+D.scareSeconds;c.dogFearOrigin={x:o.x,y:o.y};c.divert=c.divertOrigin=null;c.obstacleDetour=null;c.avoidUntil=0;c.nextDivertCheck=c.scaredUntil;
+  function challengePredator(o,c){
+    const D=S.chasers.dogCompanion,kind=dogScareKind(c);
+    if(!kind||!dogHasScares(o,kind)||o.dogScaredEnemies?.has(c))return;
+    (o.dogScaredEnemies??=new WeakSet()).add(c);(o.dogScaresUsed??={})[kind]=(o.dogScaresUsed[kind]||0)+1;
+    c.scaredUntil=clock+D.scareSeconds;c.dogFearOrigin={x:o.x,y:o.y};c.divert=c.divertOrigin=c.targetSkier=null;c.obstacleDetour=null;c.avoidUntil=0;c.nextDivertCheck=c.scaredUntil;c.hunting=false;
+    if(c.type==='wolf')c.alertUntil=Math.max(c.alertUntil||0,c.scaredUntil+S.wildlife.wolfAlertSeconds);
     c.motionVx=c.motionVy=c.travelSpeed=0;c.travelStamp=clock;
-    Object.assign(o,{dogGuardSpent:true,dogMood:'challenge',dogChallengeTarget:c,dogChallengeUntil:clock+D.challengeSeconds,barkAt:clock});
+    Object.assign(o,{dogGuardSpent:!dogHasScares(o),dogMood:'challenge',dogChallengeTarget:c,dogChallengeUntil:clock+D.challengeSeconds});
     delete o.dogReplyAt;o.avoidUntil=0;o.obstacleDetour=null;
-    say('WOOF! WOOF!',o,1.25);burst(o.x,o.y,C.gold,8);beep(210,.08,'square');
+    if(o.barkAt===undefined||clock-o.barkAt>.3){o.barkAt=clock;state.speech=state.speech.filter(q=>q.object!==o);say('WOOF! WOOF!',o,1.25);burst(o.x,o.y,C.gold,8);beep(210,.08,'square');}
+  }
+  function dogFearRetreat(c,dt,speed){
+    if(c.scaredUntil>clock){
+      const from=c.dogFearOrigin;
+      if(from){const x=c.x,y=c.y;travel(c,Math.atan2(c.y-from.y,c.x-from.x),Math.min(speed*.3,120*endlessSpeedScale(c)),dt,c.type==='wolf',!!c.kind,true);if(c.werewolf){c.gaitDistance=(c.gaitDistance||0)+Math.hypot(c.x-x,c.y-y);if(Math.abs(c.motionVx)>35)c.werewolfFlip=c.motionVx<0;}}
+      else {c.motionVx=c.motionVy=c.travelSpeed=0;c.travelStamp=clock;}
+      return true;
+    }
+    if(c.dogFearOrigin)delete c.dogFearOrigin;
+    return false;
+  }
+  function finishDogChallenge(o){
+    if(!dogHasScares(o)){leaveDog(o);return;}
+    delete o.dogChallengeTarget;delete o.dogChallengeUntil;o.dogMood='follow';o.dogPlayGoal=null;o.dogConcerned=false;
   }
   function updateDogCompanions(dt,previous){
     const p=state.p,D=S.chasers.dogCompanion,dogs=objectGroups().dogs,playerSpeed=Math.hypot(p.vx,p.vy);
@@ -2135,14 +2161,14 @@ window.FROSTLINE_READY = (async () => {
         moveDog(o,{x:o.x+Math.cos(o.retreatAngle)*100,y:o.y+Math.sin(o.retreatAngle)*100},cruise*1.5,dt);
         if(clock>=o.retreatUntil){o.eaten=true;o.r=0;}continue;
       }
+      const threat=dogHasScares(o)&&dogThreat(o);
+      if(threat){challengePredator(o,threat);continue;}
       if(o.dogChallengeTarget){
         const c=o.dogChallengeTarget;
-        if(clock>=o.dogChallengeUntil||c.dead||c.eaten||c.leaving){leaveDog(o);continue;}
+        if(clock>=o.dogChallengeUntil||c.dead||c.eaten||c.leaving||!(c.type?state.objects:state.chasers).includes(c)){finishDogChallenge(o);continue;}
         const dx=c.x-o.x,dy=c.y-o.y,d=Math.hypot(dx,dy)||1,goal=dogGoal(o,c.x-dx/d*34,c.y-dy/d*34);
         o.dogMood='challenge';moveDog(o,goal,D.challengeSpeedKmh/S.physics.hudKmhPerSpeed*scale,dt,{vx:c.motionVx||0,vy:c.motionVy||0});continue;
       }
-      const threat=!o.dogGuardSpent&&dogThreat(o);
-      if(threat){challengeYeti(o,threat);continue;}
       const down=p.fall>0||p.awaitingInput&&!!p.crashObstacle;
       if(down){
         if(!o.dogConcerned){o.dogConcerned=true;delete o.dogReplyAt;say('Whine...',o,1.2);o.avoidUntil=0;o.obstacleDetour=null;}
@@ -2394,7 +2420,7 @@ window.FROSTLINE_READY = (async () => {
       if(kind==='wolf')thankWolfRescue(o);
       return true;
     }
-    if(ramOnly)return false;
+    if(ramOnly||o.scaredUntil>clock)return false;
     if(p.shield>0)return true;
     if(passive){
       if(kind==='wolf'){o.wolfAwake=true;o.angle=Math.atan2(o.y-p.y,o.x-p.x);o.nextAI=clock+2;o.running=true;}
@@ -2866,7 +2892,7 @@ window.FROSTLINE_READY = (async () => {
       if(PED_FLAGS.has(o.type)&&Math.abs(o.y-p.y)<=reach)flags.push(o);
     }
     for(const o of people){
-      if(o.werewolfState==='transforming')continue;
+      if(['warning','transforming'].includes(o.werewolfState))continue;
       o.walking=false;
       if(Math.hypot(o.x-state.p.x,o.y-state.p.y)>P.activeRadius*endlessSpeedScale(o))continue;
       const oldX=o.x,oldY=o.y;
@@ -3350,6 +3376,7 @@ window.FROSTLINE_READY = (async () => {
       const linkedWolf=o.type==='wolf'&&activeCourseOwner(o)&&(o.linkedChase||o.wolfAwake||o.alertUntil>clock);
       if(linkedWolf)o.linkedChase=true;
       if(o.eaten||o.dead||o.stunnedUntil>clock||!o.animal||o.penaltyGate&&!o.wolfAwake||!linkedWolf&&Math.hypot(o.x-p.x,o.y-p.y)>A.activeRadius)continue;
+      if(o.type==='wolf'&&dogFearRetreat(o,dt,(o.wolfSpeedKmh?o.wolfSpeedKmh/S.physics.hudKmhPerSpeed:A.wolfPlayerChaseSpeed)*endlessSpeedScale(o))){o.running=true;continue;}
       if(o.type==='bear'){resolveEnemyContact(o,{passive:true});if(o.dead)continue;}
       if(state.started&&o.type==='bear'&&(courseCreature(o,p.x,p.y)||!humanArea(o.x,o.y)&&!humanArea(p.x,p.y))&&Math.hypot(o.x-p.x,o.y-p.y)<endlessAnimalNotice(o,A.bearWakeDistance)){o.animal=false;o.type='awakened';o.r=0;state.chasers.push({kind:'bear',chaseRun:o.arcadeRun,x:o.x,y:o.y,speed:A.bearChaseSpeed,endlessBaseKmh:state.endless&&activeCourseOwner(o)?A.bearChaseSpeed*S.physics.hudKmhPerSpeed:undefined,phase:o.phase,expires:p.y+A.bearChaseDistance,talkAt:Infinity});continue;}
       if(['rabbit','fox'].includes(o.type)&&moveSocialAnimal(o,dt,hunters))continue;
@@ -3473,13 +3500,7 @@ window.FROSTLINE_READY = (async () => {
       }
       if(c.wakeUntil>clock)continue;
       if(c.stunnedUntil>clock)continue;
-      if(c.scaredUntil>clock){
-        const from=c.dogFearOrigin;
-        if(from)travel(c,Math.atan2(c.y-from.y,c.x-from.x),Math.min(c.speed*.3,120*endlessSpeedScale(c)),dt,false,true,true);
-        else{c.motionVx=c.motionVy=c.travelSpeed=0;c.travelStamp=clock;}
-        continue;
-      }
-      if(c.dogFearOrigin)delete c.dogFearOrigin;
+      if(dogFearRetreat(c,dt,c.speed))continue;
       if(p.y>c.expires){c.leaving=true;c.speed*=.97;continue;}
       const feeding=c.feedingUntil>clock,previous={x:c.x,y:c.y},entryTarget=christmasYetiEntryTarget(c);
       if(!feeding&&!entryTarget&&(c.kind==='fast'||c.kind==='slow'||c.kind==='bear')){
@@ -4181,7 +4202,7 @@ window.FROSTLINE_READY = (async () => {
     if(o.type==='encounterTitle'){text(o.encounter.title.toUpperCase(),s.x,s.y,13,C.teal);return;}
     if(o.dead){ctx.save();ctx.globalAlpha=clamp((o.fadeUntil-clock)/(o.type==='wolf'?S.wildlife.wolfFadeSeconds:S.wildlife.predatorFadeSeconds),0,1);if(o.type==='wolf')sprite('wolf',s.x,s.y,o.width,{rotate:Math.PI/2});else drawKnockedOut(o,s,o.type);ctx.restore();return;}
     if(o.npcFallUntil>clock){drawSkierFall(o,s);return;}
-    if(o.fearUntil>clock)text('!',s.x,s.y-o.width*ZOOM-10,11,C.red);
+    if(o.fearUntil>clock||o.scaredUntil>clock)text('!',s.x,s.y-o.width*ZOOM-10,11,C.red);
     if(o.type==='ice'||o.type==='rugged'||o.type==='awakened'||o.eaten||o.collected)return;
     if(o.collectible){sprite('mushroom',s.x,s.y,o.width);const glint=(clock/S.mushroomHunt.glintSeconds+o.phase)%1;if(glint<.3){box(s.x+8,s.y-12,1,5,C.gold);box(s.x+6,s.y-10,5,1,C.gold);}return;}
     if(o.stunnedUntil>clock){drawKnockedOut(o,s,o.type);return;}
@@ -4370,7 +4391,7 @@ window.FROSTLINE_READY = (async () => {
       drawYeti(c,s,c.waiting?'idle':'alert',56);
       text(c.waiting?'...':'!',s.x+(c.waiting?0:18),s.y-(c.waiting?28:18),c.waiting?9:15,c.waiting?C.muted:C.red);return;
     }
-    if(c.scaredUntil>clock){drawYeti(c,s,c.dogFearOrigin?'run':'alert',52);text('!',s.x+15,s.y-35,12,C.gold);return;}
+    if(c.scaredUntil>clock){if(c.kind==='bear')drawBear(c,s,true);else drawYeti(c,s,c.dogFearOrigin?'run':'alert',52);text('!',s.x+15,s.y-35,12,C.gold);return;}
     if(c.feedingUntil>clock&&(c.kind==='fast'||c.kind==='slow')){drawYeti(c,s,'feed',56);return;}
     if(c.kind==='bear'){drawBear(c,s,true);return;}
     if(c.kind==='dog')drawDog(c,s,39);
@@ -4493,7 +4514,7 @@ window.FROSTLINE_READY = (async () => {
     for(const c of state.chasers)if(c.y>top&&c.y<bottom&&Math.abs(c.x-state.cam.x)<W/(2*ZOOM)+230)layers.push(c);
     layers.push(state.p);layers.sort((a,b)=>a.y-b.y);for(const o of layers)if(o===state.p)drawPlayer();else if(o.type)drawObject(o);else drawChaser(o);
     for(const q of state.particles){const s=screen(q.x,q.y);ctx.globalAlpha=q.totalLife?clamp(q.life/q.totalLife,0,1):1;box(s.x,s.y,q.size||3,q.size||3,q.color);}ctx.globalAlpha=1;
-    drawDeathAnimation();drawSpecialEffects();drawGearEffect();drawNightLighting(layers.concat(groundLights));drawSpeech();ctx.restore();hud();touchControl();
+    drawDeathAnimation();drawSpecialEffects();drawGearEffect();drawNightLighting(layers.concat(groundLights));drawWerewolfWarnings();drawSpeech();ctx.restore();hud();touchControl();
     if(state.deathTimer>0&&state.deathTimer<.5&&!state.deathAnimation){ctx.globalAlpha=1-state.deathTimer/.5;box(0,0,W,H,C.snow);ctx.globalAlpha=1;}
   }
   function resize() {
