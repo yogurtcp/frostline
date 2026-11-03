@@ -5766,7 +5766,7 @@
         "mealPauseSeconds": {
           "type": "number",
           "minimum": 0,
-          "description": "Pause after a Yeti or chasing bear eats NPC prey. Defaults to 0.8 seconds; player contact remains dangerous during the meal."
+          "description": "Pause after a Yeti, chasing bear or zombie eats NPC prey. Defaults to 2 seconds; player contact remains dangerous during the meal."
         },
         "divertChance": {
           "type": "number",

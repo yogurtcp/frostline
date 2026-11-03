@@ -20,7 +20,7 @@ window.loadFrostlineConfig = async function () {
   config.endless.encounters.townPeople ??= [36,120];
   config.endless.yetis.wakeMetres ??= 140;
   config.endless.yetis.ravager ??= {};
-  for(const [key,value] of Object.entries({firstMetres:1200,speedMultiplier:1.15,noticeMetres:30,chancePerSection:.25,maxNearby:1,divertSeconds:2,pursueSeconds:.5,mealPauseSeconds:1,monsterMealPauseSeconds:1.5}))config.endless.yetis.ravager[key] ??= value;
+  for(const [key,value] of Object.entries({firstMetres:1200,speedMultiplier:1.15,noticeMetres:30,chancePerSection:.25,maxNearby:1,divertSeconds:2,pursueSeconds:.5,mealPauseSeconds:2,monsterMealPauseSeconds:2}))config.endless.yetis.ravager[key] ??= value;
   config.endless.encounterEnemies ??= {};
   for(const [kind,defaults] of Object.entries({burrower:{firstMetres:600,chancePerSection:.5,maxNearby:1,noticeMetres:80,speedMultiplier:2,pauseSeconds:.6,zigzagSeconds:.65,zigzagAngleDegrees:32,openSeconds:1.1,cooldownSeconds:12,holeRadius:9},werewolf:{firstMetres:600,chancePerSection:.3,maxNearby:2,noticeMetres:32,transformSeconds:2,triggerLeadSeconds:1.8,speedKmh:94,beforeArrivalSeconds:.45,warningSeconds:.35,passDistanceMetres:8,knockdownSeconds:1.6,knockdownLines:["HEY! I was in the MIDDLE of something!", "Argh! You clumsy ski-goblin!", "My transformation! RUINED!", "Watch where you ski, you menace!", "Blast it! Now I have to start OVER!"]}})){
     config.endless.encounterEnemies[kind] ??= {};
@@ -82,7 +82,7 @@ window.loadFrostlineConfig = async function () {
   config.predators.divertReleaseWidthMetres ??= 16;
   config.predators.divertPathAngleDegrees ??= 45;
   config.predators.divertReleaseAngleDegrees ??= 60;
-  config.predators.mealPauseSeconds ??= .8;
+  config.predators.mealPauseSeconds ??= 2;
   config.night ??= {};
   for(const [key,value] of Object.entries({"enabled":true,"dayNightRounds":true,"playerRadiusMetres":14,"skierRadiusMetres":5,"lampRadiusMetres":24,"lampSpacingMetres":20,"lampSetbackMetres":7,"lightReachMultiplier":3.2,"ambientOpacity":0.97,"transitionSeconds":1.8}))config.night[key] ??= value;
   config.endless.regions.festivals ??= {};

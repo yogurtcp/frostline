@@ -72,8 +72,8 @@
         "maxNearby": 1,
         "divertSeconds": 2,
         "pursueSeconds": 0.5,
-        "mealPauseSeconds": 1,
-        "monsterMealPauseSeconds": 1.5
+        "mealPauseSeconds": 2,
+        "monsterMealPauseSeconds": 2
       }
     },
     "maxPlayerSpeedKmh": 90,
@@ -2376,7 +2376,7 @@
     "despawnScreens": 3
   },
   "predators": {
-    "mealPauseSeconds": 0.8,
+    "mealPauseSeconds": 2,
     "divertChance": 1,
     "divertRadiusMetres": 35,
     "divertRecheckSeconds": 0.2,
