@@ -36,7 +36,7 @@ function spawnEncounterEnemies(section,endY){
         if(patchAt(x,y)||nearbyFootprints(x,y,80).some(o=>obstacleClearance(o,x,y)<24))continue;
         person=entity(pick(['personRed','personGreen','personYellow']),x,y,{width:32,r:10,arcadeRun:section,encounter:e});
       }
-      Object.assign(person,{werewolf:true,werewolfState:'disguised',werewolfName:pick(WEREWOLF_NAMES),walker:false,roam:0,stroll:null,pauseUntil:Infinity,arcadeRun:person.arcadeRun||section});return;
+      touchKinds();Object.assign(person,{werewolf:true,werewolfState:'disguised',werewolfName:pick(WEREWOLF_NAMES),walker:false,roam:0,stroll:null,pauseUntil:Infinity,arcadeRun:person.arcadeRun||section});return;
     }
   };
   spawn('burrower',E.burrower);spawn('werewolf',E.werewolf);
@@ -168,7 +168,7 @@ function updateEncounterEnemies(dt){
     // Once the morph starts, keep its full duration even if the player passes or accelerates.
     // Stay planted during the reveal so the skier actually sees a person become a wolf.
     if(clock-o.transformAt>=(o.transformDuration??E.werewolf.transformSeconds)){
-      o.type='wolf';o.werewolfState='wolf';o.width=52;o.r=12;o.animal=true;o.ai='hunt';o.linkedChase=o.wolfAwake=true;o.alertUntil=Infinity;o.wolfSpeedKmh=E.werewolf.speedKmh;o.packId=o.id;o.packIndex=0;o.costume=null;o.job=null;o.walker=false;o.path=null;o.socialUntil=0;o.nextAI=clock;
+      retype(o,'wolf');o.werewolfState='wolf';o.width=52;o.r=12;o.animal=true;o.ai='hunt';o.linkedChase=o.wolfAwake=true;o.alertUntil=Infinity;o.wolfSpeedKmh=E.werewolf.speedKmh;o.packId=o.id;o.packIndex=0;o.costume=null;o.job=null;o.walker=false;o.path=null;o.socialUntil=0;o.nextAI=clock;
       o.motionVx=o.motionVy=o.travelSpeed=0;o.travelStamp=clock;delete o.worldChunk;burst(o.x,o.y,'#c3c7ce',8);say('AWOOOO!',o,1.5);
     }
   }
