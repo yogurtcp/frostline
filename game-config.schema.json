@@ -10270,7 +10270,7 @@
                       "maxItems": 2,
                       "description": "[easy, hard]"
                     },
-                    "crowds": {
+                    "crowdSpacingMetres": {
                       "type": "array",
                       "items": {
                         "type": "number",
@@ -10278,7 +10278,7 @@
                       },
                       "minItems": 2,
                       "maxItems": 2,
-                      "description": "[easy, hard]"
+                      "description": "[easy, hard] metres between waiting crowds; crowds continue while the exit is held"
                     },
                     "crowdPeople": {
                       "type": "array",
@@ -10309,6 +10309,16 @@
                       "minItems": 2,
                       "maxItems": 2,
                       "description": "[easy, hard]"
+                    },
+                    "catchUpBoost": {
+                      "type": "array",
+                      "items": {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      "minItems": 2,
+                      "maxItems": 2,
+                      "description": "[easy, hard] extra speed fraction for a hungry Yeti that has fallen far behind"
                     }
                   }
                 },
@@ -10376,6 +10386,16 @@
                       "minItems": 2,
                       "maxItems": 2,
                       "description": "[easy, hard]"
+                    },
+                    "volleyEvery": {
+                      "type": "array",
+                      "items": {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      "minItems": 2,
+                      "maxItems": 2,
+                      "description": "[easy, hard] every Nth spawn is a volley of three balls across the corridor"
                     }
                   }
                 },
@@ -10560,6 +10580,36 @@
                       "minItems": 2,
                       "maxItems": 2,
                       "description": "[easy, hard] chase speed once woken"
+                    },
+                    "stirFasterPerKmh": {
+                      "type": "array",
+                      "items": {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      "minItems": 2,
+                      "maxItems": 2,
+                      "description": "[easy, hard] stir rate gained per km/h above quiet speed"
+                    },
+                    "roarRadiusMetres": {
+                      "type": "array",
+                      "items": {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      "minItems": 2,
+                      "maxItems": 2,
+                      "description": "[easy, hard] a giant you woke roars and wakes sleepers within this radius"
+                    },
+                    "catchUpBoost": {
+                      "type": "array",
+                      "items": {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      "minItems": 2,
+                      "maxItems": 2,
+                      "description": "[easy, hard] extra speed fraction for a woken giant that has fallen far behind"
                     }
                   }
                 }

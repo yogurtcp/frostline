@@ -184,20 +184,20 @@
           1200
         ],
         "piedPiper": [
-          520,
-          680
+          900,
+          1200
         ],
         "avalanche": [
-          700,
-          900
+          2800,
+          3600
         ],
         "burrowField": [
-          650,
-          850
+          2600,
+          3400
         ],
         "sleepingGiants": [
-          380,
-          480
+          1500,
+          1900
         ]
       },
       "beginnerPeople": [
@@ -372,16 +372,16 @@
       "levels": {
         "piedPiper": {
           "yetis": [
-            3,
-            6
-          ],
-          "crowds": [
             6,
-            4
+            10
+          ],
+          "crowdSpacingMetres": [
+            120,
+            150
           ],
           "crowdPeople": [
-            12,
-            9
+            10,
+            8
           ],
           "yetiSpeedKmh": [
             65,
@@ -390,16 +390,20 @@
           "sideTreesPer100Metres": [
             4,
             4
+          ],
+          "catchUpBoost": [
+            0.7,
+            0.6
           ]
         },
         "avalanche": {
           "ballSeconds": [
-            1.4,
-            0.7
+            1.1,
+            0.55
           ],
           "ballTravelMetres": [
-            400,
-            400
+            600,
+            600
           ],
           "fallingTreesPer100Metres": [
             0.8,
@@ -410,12 +414,16 @@
             5
           ],
           "ballExtraKmh": [
-            25,
-            40
+            30,
+            45
           ],
           "trailSeconds": [
             2.5,
             2.5
+          ],
+          "volleyEvery": [
+            6,
+            4
           ]
         },
         "burrowField": {
@@ -428,16 +436,16 @@
             3
           ],
           "burrowerSpacingMetres": [
-            35,
-            22
+            7,
+            4.5
           ],
           "maxActive": [
-            2,
-            4
+            4,
+            7
           ],
           "cooldownSeconds": [
-            1.2,
-            0.6
+            0.7,
+            0.35
           ],
           "sideTreesPer100Metres": [
             6,
@@ -488,6 +496,18 @@
           "yetiSpeedKmh": [
             95,
             105
+          ],
+          "stirFasterPerKmh": [
+            0.12,
+            0.15
+          ],
+          "roarRadiusMetres": [
+            25,
+            35
+          ],
+          "catchUpBoost": [
+            0.3,
+            0.35
           ]
         }
       }
@@ -532,7 +552,13 @@
         "warningSeconds": 0.35,
         "triggerLeadSeconds": 1.8,
         "knockdownSeconds": 1.6,
-        "knockdownLines": ["HEY! I was in the MIDDLE of something!", "Argh! You clumsy ski-goblin!", "My transformation! RUINED!", "Watch where you ski, you menace!", "Blast it! Now I have to start OVER!"]
+        "knockdownLines": [
+          "HEY! I was in the MIDDLE of something!",
+          "Argh! You clumsy ski-goblin!",
+          "My transformation! RUINED!",
+          "Watch where you ski, you menace!",
+          "Blast it! Now I have to start OVER!"
+        ]
       }
     }
   },

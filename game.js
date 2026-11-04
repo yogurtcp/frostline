@@ -870,8 +870,10 @@ window.FROSTLINE_READY = (async () => {
       const trees=rate('trees')*P.forest;
       Object.assign(itemRates,{pine:trees,fir:trees*.6,spruceTree:trees*.25,smallPine:trees*.3,skier:rate('skiers'),fastSkier:rate('fastSkiers'),smallHill:rate('jumps'),largeHill:rate('jumps')*.35,rainbow:rate('jumps')*.25});
       const section={id:'endless',endlessRoot:root,endlessScale:scale,block:root.block,x:root.x,startY,endY,finishHalf:0,arcade:{knobs:[1,1,1,1,1],trees:true,specialLayout:'none',gates:{count:0,swordGateCount:0,icePercent:0,openingWidthMetres:mix(...E.gates.openingMetres,P.t)},spacing:E.gates.spacingMetres*PX_PER_M*scale,pace:E.playerSpeedKmh*scale/(S.physics.speedMultiplier*S.physics.hudKmhPerSpeed),itemSpreadMetres:E.itemSpreadMetres*scale,itemRates,tierRates:{slightlyRare:0,veryRare:0},endTrafficMultiplier:1}};
+      holdLevelExit(a,endY,scale);
       while(a.nextEncounterY<endY+1200*scale){const e=planEndlessEncounter(section,a.nextEncounterY);a.nextEncounterY=e.endY+range(...(E.regions.enabled?E.regions.gapMetres:E.encounters.gapMetres))*PX_PER_M*e.scale;}
       for(const e of a.encounters)if(e.startY<endY&&e.endY>startY)populateEndlessEncounter(e,section,endY);
+      holdLevelExit(a,endY,scale);
       while(a.nextGateY<endY){
         const encounter=endlessEncounterAt(a.nextGateY);
         if(encounter?.noFlags){a.nextGateY=encounter.endY+1;continue;}
@@ -2001,10 +2003,11 @@ window.FROSTLINE_READY = (async () => {
     // Any edible NPC is fair game along a hunter's route toward the player.
     if(!['fast','slow','bear'].includes(hunter?.kind)&&hunter?.type!=='wolf'&&hunter?.type!=='zombie')return true;
     const p=state.p,P=S.predators;
-    const width=(committed?P.divertReleaseWidthMetres:P.divertPathWidthMetres)*PX_PER_M*endlessSpeedScale(hunter);
+    const width=(committed?P.divertReleaseWidthMetres:P.divertPathWidthMetres)*PX_PER_M*endlessSpeedScale(hunter)*levelDivertWidth(hunter);
     const angle=(committed?P.divertReleaseAngleDegrees:P.divertPathAngleDegrees)*Math.PI/180;
     // Finish a nearby committed catch even if a stopped/fallen target slips just behind us.
     if(committed&&Math.hypot(prey.x-hunter.x,prey.y-hunter.y)<S.chasers.captureDistance*2)return true;
+    if(committed&&hunter.encounter?.kind==='piedPiper')return true; // a Pied Piper Yeti that turns for a crowd sees it through
     const route=endlessPursuitRoute(hunter,p),e=route?.encounter;
     if(route?.cemetery){const h=cemeteryProjection(e,hunter.x,hunter.y),q=cemeteryProjection(e,prey.x,prey.y),goal=cemeteryProjection(e,p.x,p.y),direction=Math.sign(goal.along-h.along)||1,along=(q.along-h.along)*direction;return q.distance<=width&&(!committed||h.distance<=width)&&along>0&&along<=Math.abs(goal.along-h.along)+width;}
     const path=e&&!route.cemetery&&hunter.y>=e.startY&&prey.y>=e.startY&&prey.y<=e.endY?e.paths[route.index]:null;
@@ -2858,9 +2861,9 @@ window.FROSTLINE_READY = (async () => {
   }
   function snowballHitsScenery(o,oldX,oldY){
     // Sample the short swept step using each object's actual footprint (including houses and trunks).
+    if(o.avalancheBall)return false; // avalanche balls are huge: they roll straight over trees and trunks
     const samples=Math.max(1,Math.ceil(Math.hypot(o.x-oldX,o.y-oldY)/Math.max(1,o.r*.35)));
     for(const other of state.objects){
-      if(o.avalancheBall&&(other.type!=='fallingTree'||other.fallState==='standing'||other.fallState==='warning'))continue; // only toppled trunks stop the avalanche
       if(other===o||other.r<=0||other.eaten||other.dead||other.collected||['logBump','ramp','mogul','smallHill','largeHill','mushroom','rainbow','ice','rugged'].includes(other.type))continue;
       const extent=other.treeLength||other.width||other.r;
       if(Math.abs(other.x-o.x)>extent+o.r+Math.abs(o.x-oldX)||Math.abs(other.y-o.y)>extent+o.r+Math.abs(o.y-oldY))continue;
@@ -2917,7 +2920,7 @@ window.FROSTLINE_READY = (async () => {
         o.vx=o.rollSide*o.rollAmplitude*o.rollOmega*Math.sin(angle)*speedRatio;o.vy=o.rollDownhillSpeed*speedRatio*flat;
         const move=Math.hypot(o.x-oldX,o.y-oldY);o.rollDistance+=move;o.rollAngle+=move/o.r*o.rollSide;
         o.r=Math.min(f.maxRadiusMetres*PX_PER_M,f.radiusMetres*PX_PER_M+o.rollDistance*f.radiusGrowthPerMetre);o.width=o.r*2;
-        if(Math.hypot(o.x-o.trailX,o.y-o.trailY)>=Math.max(3,o.r*.3)){
+        if(Math.hypot(o.x-o.trailX,o.y-o.trailY)>=Math.max(3,o.r*(o.avalancheBall?.5:.3))){
           state.snowballTrails.push({ax:o.trailX,ay:o.trailY,bx:o.x,by:o.y,r:o.r,until:clock+(o.trailSeconds??f.trailSeconds)});o.trailX=o.x;o.trailY=o.y;
         }
         if(snowballHitsScenery(o,oldX,oldY))continue;
@@ -3641,7 +3644,7 @@ window.FROSTLINE_READY = (async () => {
       if(c.patrolPass){updatePatrolPass(c,dt);contacts.index=null;continue;}
       if(c.dead||c.eaten)continue;
       if(state.endless&&!c.chaseRun&&['fast','slow','bear'].includes(c.kind)&&!c.leaving){c.chaseRun=state.course;c.expires=Infinity;}
-      if(c.endlessBaseKmh!==undefined&&activeCourseOwner(c))c.speed=c.endlessBaseKmh*endlessSpeedScale(c)/S.physics.hudKmhPerSpeed;
+      if(c.endlessBaseKmh!==undefined&&activeCourseOwner(c))c.speed=c.endlessBaseKmh*endlessSpeedScale(c)*levelChaserBoost(c)/S.physics.hudKmhPerSpeed;
       // Owned pursuers share linked runs; protected towns stop them, but Endless course towns do not.
       if(c.leaving||c.chaseRun&&!activeCourseOwner(c)){c.leaving=true;c.y-=c.speed*dt;continue;}
       const pursuit=!!c.chaseRun&&activeCourseOwner(c);
@@ -4697,10 +4700,17 @@ window.FROSTLINE_READY = (async () => {
     if(state.screenShake>0)ctx.translate(Math.sin(clock*71)*2,Math.cos(clock*67)*2);
     snow();drawLift();drawMuseumNotes();drawLevelGround();
     ctx.save();ctx.lineCap='round';
-    for(const [color,width] of [['#9ebbc5',1.7],['#dce9e7',1.25]])for(const t of state.snowballTrails){
+    // Batched: segments sharing a fade step and a width go into one path, so an avalanche of tracks stays cheap to draw.
+    const trailBuckets=new Map();
+    for(const t of state.snowballTrails){
       const a=screen(t.ax,t.ay),b=screen(t.bx,t.by);if(Math.max(a.y,b.y)<0||Math.min(a.y,b.y)>H)continue;
-      ctx.globalAlpha=Math.min(1,(t.until-clock)/2)*.65;
-      line(a.x,a.y,b.x,b.y,color,t.r*ZOOM*width);
+      const fade=Math.ceil(Math.min(1,(t.until-clock)/2)*8),size=Math.round(t.r*ZOOM),key=fade*1000+size;
+      let list=trailBuckets.get(key);if(!list)trailBuckets.set(key,list=[]);list.push(a.x,a.y,b.x,b.y);
+    }
+    for(const [color,width] of [['#9ebbc5',1.7],['#dce9e7',1.25]])for(const [key,list] of trailBuckets){
+      ctx.globalAlpha=Math.floor(key/1000)/8*.65;ctx.strokeStyle=gritMaterial(color);ctx.lineWidth=key%1000*width;ctx.beginPath();
+      for(let i=0;i<list.length;i+=4){ctx.moveTo(list[i],list[i+1]);ctx.lineTo(list[i+2],list[i+3]);}
+      ctx.stroke();
     }
     ctx.restore();
     if(state.zone.kind==='start'){
