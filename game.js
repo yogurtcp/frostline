@@ -666,8 +666,10 @@ window.FROSTLINE_READY = (async () => {
       for(let i=0;i<count;i++){const y=mix(a.y,b.y,i/count);if(y>=from&&y<to)tree(mix(a.x,b.x,i/count),y,'bank');}
     }
     const mouth=exit=>{
-      for(let row=0;row<3;row++)for(let x=root.x-e.band+(row%2)*spacing/2;x<=root.x+e.band;x+=spacing){
-        const wing=Math.min(90*e.scale,Math.abs(x-root.x)/e.band*90*e.scale);
+      // Challenge areas are walled corridors: their entry/exit rows only need to span what can be seen around the corridor.
+      const span=e.level?Math.min(e.band,e.half+W/ZOOM/2+200):e.band;
+      for(let row=0;row<3;row++)for(let x=root.x-span+(row%2)*spacing/2;x<=root.x+span;x+=spacing){
+        const wing=Math.min(90*e.scale,Math.abs(x-root.x)/span*90*e.scale);
         const y=exit?e.endY-(130+row*32)*e.scale+wing:e.startY+(130+row*32)*e.scale-wing;
         tree(x,y,exit?'exit':'entry');
       }
@@ -878,7 +880,9 @@ window.FROSTLINE_READY = (async () => {
       const trees=rate('trees')*P.forest;
       Object.assign(itemRates,{pine:trees,fir:trees*.6,spruceTree:trees*.25,smallPine:trees*.3,skier:rate('skiers'),fastSkier:rate('fastSkiers'),smallHill:rate('jumps'),largeHill:rate('jumps')*.35,rainbow:rate('jumps')*.25});
       const section={id:'endless',endlessRoot:root,endlessScale:scale,block:root.block,x:root.x,startY,endY,finishHalf:0,arcade:{knobs:[1,1,1,1,1],trees:true,specialLayout:'none',gates:{count:0,swordGateCount:0,icePercent:0,openingWidthMetres:mix(...E.gates.openingMetres,P.t)},spacing:E.gates.spacingMetres*PX_PER_M*scale,pace:E.playerSpeedKmh*scale/(S.physics.speedMultiplier*S.physics.hudKmhPerSpeed),itemSpreadMetres:E.itemSpreadMetres*scale,itemRates,tierRates:{slightlyRare:0,veryRare:0},endTrafficMultiplier:1}};
+      holdLevelExit(a,endY,scale);
       while(a.nextEncounterY<endY+1200*scale){const e=planEndlessEncounter(section,a.nextEncounterY);a.nextEncounterY=e.endY+range(...(E.regions.enabled?E.regions.gapMetres:E.encounters.gapMetres))*PX_PER_M*e.scale;}
+      holdLevelExit(a,endY,scale);
       for(const e of a.encounters)if(e.startY<endY&&e.endY>startY)populateEndlessEncounter(e,section,endY);
       while(a.nextGateY<endY){
         const encounter=endlessEncounterAt(a.nextGateY);
@@ -2402,7 +2406,8 @@ window.FROSTLINE_READY = (async () => {
       populateEndlessFlanks(state.chunks.get(key),key);
       if(random()<S.world.lakeChance){const x=(tx+.5)*size,y=(ty+.5)*size;if(!endlessEncounterAt(y)&&!insideTown(x,y)&&!safeApproach(x,y)&&!classicArea(x,y,360)&&!museumArea(x,y,400)&&!state.safeTrails.some(r=>r.arcade&&y>r.startY-360&&y<r.endY+360&&Math.abs(x-centerAt(y,r))<S.world.safeCourseHalfWidth+360)&&y>S.world.lakeMinY&&!state.objects.some(o=>o.type==='gate'&&Math.hypot(o.x-x,o.y-y)<260||o.collectible&&Math.hypot(o.x-x,o.y-y)<360))entity('ice',x,y,{worldChunk:key,rx:range(...S.world.lakeRadiusX),ry:range(...S.world.lakeRadiusY),width:330,r:0});}
     }
-    for(const [key,t] of state.chunks)if(Math.abs(t.ty*size-state.p.y) >S.world.chunkRetention||Math.abs(t.tx*size-state.p.x) >S.world.chunkRetention){state.chunks.delete(key);state.objects=state.objects.filter(o=>o.worldChunk!==key);}
+    // You only ever ski downhill (lifts reset to the summit), so chunks well behind you are dropped sooner than ones ahead or to the side.
+    for(const [key,t] of state.chunks)if(Math.abs(t.ty*size-state.p.y) >S.world.chunkRetention||(t.ty+1)*size<state.p.y-S.world.chunkRetentionBehind||Math.abs(t.tx*size-state.p.x) >S.world.chunkRetention){state.chunks.delete(key);state.objects=state.objects.filter(o=>o.worldChunk!==key);}
     // Only keep streamed flank props near the generation window; authored routes stay intact.
     const expired=new Set();
     for(const [key,chunk] of state.chunks)if(chunk.themes?.size&&(chunk.tx*size+size<b.left-S.world.chunkMarginX-size||chunk.tx*size>b.right+S.world.chunkMarginX+size||chunk.ty*size+size<b.top-S.world.chunkMarginAbove-size||chunk.ty*size>b.bottom+S.world.chunkMarginBelow+size)){expired.add(key);chunk.themes.clear();}
@@ -3725,10 +3730,12 @@ window.FROSTLINE_READY = (async () => {
     str=String(str).toUpperCase().replaceAll('…','...').replaceAll('’',"'");if(!str.length)return;
     const scale=size>=14?2:1,width=(str.length*6-1)*scale,key=str+'|'+scale+'|'+color+'|'+weight;
     let tile=textTiles.get(key);
-    if(!tile){
+    // Least-recently-used: a label drawn every frame stays cached however many one-off strings pass through.
+    if(tile){textTiles.delete(key);textTiles.set(key,tile);}
+    else{
       tile=document.createElement('canvas');tile.width=width+(weight>=1?1:0);tile.height=7*scale+(weight>=2?1:0);const paint=tile.getContext('2d');paint.fillStyle=gritMaterial(color);
       let left=0;for(const char of str){const rows=glyphs[char];if(rows)for(let row=0;row<7;row++)for(let col=0;col<5;col++)if(rows[row][col]==='1')paint.fillRect(left+col*scale,row*scale,scale+(weight>=1?1:0),scale+(weight>=2?1:0));left+=6*scale;}
-      if(textTiles.size>=256)textTiles.delete(textTiles.keys().next().value);textTiles.set(key,tile);
+      if(textTiles.size>=512)textTiles.delete(textTiles.keys().next().value);textTiles.set(key,tile);
     }
     ctx.drawImage(tile,Math.round(x-(align==='center'?width/2:align==='right'?width:0)),Math.round(y-3.5*scale));
   }

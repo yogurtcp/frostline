@@ -1579,3 +1579,15 @@ User: set the Yetis to 90.5 km/h, barely enough to catch up; colour does not mat
 ## 143. Fallen-tree collision matches the sprite (2026-11-04)
 
 User: a fallen tree's collision box is slightly larger than its drawing. Measured with an overlay. The capsule (base→tip segment, radius `fallenRadiusMetres` 3 m, plus the 1.1 m player radius) stuck out about 3 m past both the root and the tip, and was wider than the tapering branches. Now `obstacleClearance` pulls a falling or fallen tree's segment in by its radius at both ends, so the rounded ends finish at the sprite's ends, and `fallenRadiusMetres` is 2.2. Standing and warning trees are unchanged. NPC avoidance still uses the full segment. Trace: 192 checkpoints, no errors.
+
+## 144. Pied Piper holds its exit while Yetis chase; leaner world behind and beside level corridors (2026-11-04)
+
+User: Y ended before they got rid of all the Yetis; it should continue as long as they are chasing. Also, Y's performance is not great.
+
+- Exit hold restored for the new design: `holdLevelExit` is called from `extendEndless` before planning and before populating. While a Pied Piper area is not `released` it keeps `endY` 260 m (2600 × scale) plus 60 m beyond the planning horizon. It pushes `nextEncounterY`, extends the path, and clears world-chunk scenery in the new stretch. `piedPiperChasing(e)` counts the area's chasers that are alive and not leaving within `endless.yetis.nearbyMetres` (180 m) behind you; eaten, gone or far behind counts as lost. `updateLevelAreas` sets `released` once the pack is out and the count hits 0, announcing YOU LOST THEM if you are near the end. `e.baseEndY` keeps the original length: side-charging ambush Yetis only spawn before it (and before release), otherwise the area could never end. HUD: NO WAY OUT UNTIL YOU LOSE THEM past the base length. Bot: the area extends while the counter is above 0, then closes (ended at 1280 m after the counter hit 0 at 15 s).
+- Performance:
+  - Profiling Y showed per-step cost scaling with object count (step loop, `snapshotSolids`, endless pruning), with most objects being trees off-screen. The region entry/exit rows (`populateForestBoundary` mouth) spanned the whole region band (about 270 trees); for level areas they now span `e.half + W/ZOOM/2 + 200`.
+  - Scenery and region bookkeeping behind you: `world.sceneryRetentionBehind` 6500 → 2500, and new `world.chunkRetentionBehind` (2500) drops forest chunks well uphill (you never ski back up). Sideways and ahead are unchanged.
+  - The text tile cache is now least-recently-used, with 512 entries (was first-in-first-out, 256).
+  - Result: Y holds 573 objects instead of 779; step median 1.7 → 1.3 ms and p95 4.1 → 2.9 ms; Boulder step median 1.6 → 0.7 ms. Headless render p99 spikes (about 30 ms) are unchanged.
+- Checked: checkpoint taken at a real endless run's town station, skied 400 m past (the station object is now dropped), died, and resumed at the checkpoint with no errors. Trace: 192 checkpoints, no errors.

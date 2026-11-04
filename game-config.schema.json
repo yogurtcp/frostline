@@ -3893,7 +3893,8 @@
         "animalVisitorChance",
         "humanPredatorChance",
         "wildPredatorChance",
-        "wolfShareOfPredators"
+        "wolfShareOfPredators",
+        "chunkRetentionBehind"
       ],
       "properties": {
         "seed": {
@@ -3929,6 +3930,11 @@
         "chunkRetention": {
           "type": "number",
           "minimum": 0
+        },
+        "chunkRetentionBehind": {
+          "type": "number",
+          "minimum": 0,
+          "description": "World units: forest chunks this far uphill of the skier are dropped (you never ski back up)."
         },
         "sceneryRetentionBehind": {
           "type": "number",
