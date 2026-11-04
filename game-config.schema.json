@@ -10293,7 +10293,7 @@
                       },
                       "minItems": 2,
                       "maxItems": 2,
-                      "description": "[easy, hard] average speed: grey (slow) Yetis like early endless ones"
+                      "description": "[easy, hard] average speed; 78 km/h matches free-ski grey Yetis (87% of top speed), kept within 72-80"
                     },
                     "chaserSpeedSpreadKmh": {
                       "type": "array",

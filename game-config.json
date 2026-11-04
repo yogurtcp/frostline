@@ -376,12 +376,12 @@
             10
           ],
           "chaserSpeedKmh": [
-            68,
+            78,
             78
           ],
           "chaserSpeedSpreadKmh": [
-            4,
-            4
+            1,
+            1
           ],
           "skiersPer100Metres": [
             1.6,

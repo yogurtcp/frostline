@@ -1562,3 +1562,12 @@ Verification:
 ## 140. Pied Piper Yetis slowed to grey-Yeti pace (2026-11-04)
 
 User: the Y Yetis still catch you in a second, unlike the grey Yetis that barely catch up. Causes: released chasers sprinted after 0.2–0.6 s (ordinary Yetis take `endless.yetis.wakeSeconds`, 2.5 s, to get up); they spawned 20–55 m back; and the debug key's preview visit count grows with replays, pushing the [68, 94] range toward 94. Now `chaserSpeedKmh` is [68, 78] ± 4 (grey tier), `wakeUntil` is 1.5–2.5 s and spawns are 35–70 m back. Note the HUD km/h vs world metres: 90 HUD km/h is about 45 world m/s. Bot: visit 1 is never caught (2 crashes); visit 3 is caught by a grey Yeti only after its fifth crash. Trace clean.
+
+## 141. Pied Piper uses the grey Yeti; hunters step over fallen trunks (2026-11-04)
+
+User: Y's Yetis are the wrong ones; they want the grey Yetis that are barely faster than the player. Also, Yetis ignore you when you are close to a fallen tree.
+
+- Yeti look comes from `yetiAppearance`: `arcadeTier` first, then speed. White (rank 0) below 72 km/h or tier `slow`; grey "Avalanche" (rank 1) for tier `fast` at 72–80; purple Stalker at 80+. `levelChaser` had tagged everything ≤78 as `slow`, so Y's pack was white. It now derives the tier like free-ski Yetis (≥90 special, ≥80 elite, ≥72 fast, else slow; kind `fast` unless slow). The pack runs at 78 ± 1 km/h, which is the free-ski grey Yeti (`topSpeed × wildlife.yetiWildSpeedRatio`, 0.87 × 90), clamped to 72.5–79.5 so it always draws grey. Release keeps the 1.5–2.5 s get-up and the 35–70 m start.
+- Fallen trees: a chasing hunter's `travel` treated a fallen trunk as a solid segment. With the skier beside the trunk, every straight line counted as blocked, and the two-corner detour flipped sides each time the Yeti crossed the trunk's extended line near its root end, hovering about 14 m away indefinitely (reproduced). Hunters (`chasing`) now ignore `fallingTree` with `fallState === 'fallen'`, both in `nearTree` and in the detour blocker scan; it is a trunk lying in the snow. They now catch a stationary skier beside a fallen trunk in 0.7 s. Standing and falling trees are unchanged. A tried "lunge over trees within 6 m" was reverted: it pinned Yetis against standing pines.
+- Open: in a contrived test, a skier placed exactly against the downhill side of a standing pine was not reached; the Yeti hovered 3.8 m away. Not reported by the user; worth a look if hiding behind trees shows up in play.
+- Trace: 192 checkpoints, no errors. Y bot on visits 1 and 3 reaches the end with 2–3 meals.

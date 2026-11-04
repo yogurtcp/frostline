@@ -96,14 +96,16 @@ function updateAmbushes(e,L){
 }
 // A Yeti that is already running when you arrive, a little uphill of you.
 function levelChaser(e,x,y,kmh){
-  const c={kind:kmh>78?'fast':'slow',arcadeTier:kmh>90?'special':kmh>78?'fast':'slow',encounter:e,chaseRun:e.section,endlessBaseKmh:kmh,x,y,speed:kmh/S.physics.hudKmhPerSpeed,
+  // Same look-by-speed as free-ski Yetis: grey from 72 km/h, purple from 80.
+  const tier=kmh>=90?'special':kmh>=80?'elite':kmh>=72?'fast':'slow';
+  const c={kind:tier==='slow'?'slow':'fast',arcadeTier:tier,encounter:e,chaseRun:e.section,endlessBaseKmh:kmh,x,y,speed:kmh/S.physics.hudKmhPerSpeed,
     wakeUntil:clock+range(1.5,2.5),phase:range(0,6),expires:Infinity,leaving:false,talkAt:clock+range(3,8)};
   state.chasers.push(c);return c;
 }
-function releaseLevelChasers(e,count,kmh,spread,lines){
+function releaseLevelChasers(e,count,kmh,spread,lines,lo=0,hi=Infinity){
   const p=state.p,s=e.scale;
   const [near,far]=e.kind==='avalanche'?[45,90]:[35,70]; // like ordinary Yetis: they get up slowly, well behind you
-  for(let i=0;i<count;i++){const c=levelChaser(e,p.x+range(-220,220)*s,p.y-range(near,far)*PX_PER_M*s,kmh+range(-spread,spread));if(i<2)say(pick(lines),c,1.8);}
+  for(let i=0;i<count;i++){const c=levelChaser(e,p.x+range(-220,220)*s,p.y-range(near,far)*PX_PER_M*s,clamp(kmh+range(-spread,spread),lo,hi));if(i<2)say(pick(lines),c,1.8);}
 }
 function updateLevelAreas(dt){
   const p=state.p,e=state.endless?endlessEncounterAt(p.y):null;
@@ -112,7 +114,8 @@ function updateLevelAreas(dt){
   // The pack is let loose once you are properly under way and 70 m in, so it starts on open slope inside the area.
   if(!e.chasersReleased&&(e.kind==='piedPiper'||e.kind==='avalanche')&&p.y>e.startY+700*s&&!p.fall&&!p.awaitingInput&&Math.hypot(p.vx,p.vy)*S.physics.hudKmhPerSpeed>=50){
     e.chasersReleased=true;const count=Math.round(levelValue(e,L.chasingYetis));
-    releaseLevelChasers(e,count,levelValue(e,L.chaserSpeedKmh),levelValue(e,L.chaserSpeedSpreadKmh??0),['THERE! GET HIM!','BREAKFAST IS LEAVING!','RUN, LITTLE SKIER!']);
+    // Pied Piper's pack are all grey Yetis (72-80 km/h): just quick enough to punish every mistake.
+    releaseLevelChasers(e,count,levelValue(e,L.chaserSpeedKmh),levelValue(e,L.chaserSpeedSpreadKmh??0),['THERE! GET HIM!','BREAKFAST IS LEAVING!','RUN, LITTLE SKIER!'],...(e.kind==='piedPiper'?[72.5,79.5]:[]));
     if(e.kind==='piedPiper')announce(count+' YETIS ARE RIGHT BEHIND YOU','FLAGS ARM YOU - ICE SPEEDS YOU AWAY',C.red,3);
   }
   if(e.kind==='piedPiper'||e.kind==='avalanche')updateAmbushes(e,L);

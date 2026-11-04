@@ -3220,6 +3220,7 @@ window.FROSTLINE_READY = (async () => {
         for(let iy=gy-1;iy<=gy+1;iy++){const a=col.get(iy);if(!a)continue;
           for(const t of a){
             if(solidOnly&&!t.solidWall)continue;
+            if(chasing&&t.type==='fallingTree'&&t.fallState==='fallen')continue; // a hunter steps over a trunk lying in the snow
             if(t.type==='wideLog'||t.type==='fallingTree'||t.type==='cemeteryFence'||t.type==='areaBarrier'){const [ax,ay,bx,by]=obstacleSegment(t);if(obstacleSegmentDistance(x,y,ax,ay,bx,by)<t.r+rm)return true;}
             else if(Math.hypot(x-t.x,y-t.y)<(t.r||12)+rm)return true;
           }}}
@@ -3256,7 +3257,7 @@ window.FROSTLINE_READY = (async () => {
         const gx0=Math.floor((o.x-reach)/TREE_CELL),gx1=Math.floor((o.x+reach)/TREE_CELL),gy0=Math.floor((o.y-reach)/TREE_CELL),gy1=Math.floor((o.y+reach)/TREE_CELL);
         for(let gx=gx0;gx<=gx1;gx++){const col=treeGrid.get(gx);if(!col)continue;
           for(let gy=gy0;gy<=gy1;gy++)for(const t of col.get(gy)||[]){
-            if(seen.has(t)||t.dead||t.eaten||(t.type!=='wideLog'&&t.type!=='fallingTree'&&t.type!=='cemeteryFence'&&t.type!=='areaBarrier'))continue;seen.add(t);
+            if(seen.has(t)||t.dead||t.eaten||(t.type!=='wideLog'&&t.type!=='fallingTree'&&t.type!=='cemeteryFence'&&t.type!=='areaBarrier')||chasing&&t.type==='fallingTree'&&t.fallState==='fallen')continue;seen.add(t);
             const g=geometry(t);if(!g)continue;
             const distance=obstacleSegmentDistance(o.x,o.y,g.ax,g.ay,g.bx,g.by);
             if(distance>reach||distance>=best||obstacleSegmentSeparation(o.x,o.y,target.x,target.y,g.ax,g.ay,g.bx,g.by)>=t.r+rm)continue;
