@@ -3725,10 +3725,24 @@ window.FROSTLINE_READY = (async () => {
     '0':['01110','10001','10011','10101','11001','10001','01110'],'1':['00100','01100','00100','00100','00100','00100','01110'],'2':['01110','10001','00001','00010','00100','01000','11111'],'3':['11110','00001','00001','01110','00001','00001','11110'],'4':['00010','00110','01010','10010','11111','00010','00010'],'5':['11111','10000','10000','11110','00001','00001','11110'],'6':['01110','10000','10000','11110','10001','10001','01110'],'7':['11111','00001','00010','00100','01000','01000','01000'],'8':['01110','10001','10001','01110','10001','10001','01110'],'9':['01110','10001','10001','01111','00001','00001','01110'],
     '.':['00000','00000','00000','00000','00000','00100','00100'],',':['00000','00000','00000','00000','00100','00100','01000'],':':['00000','00100','00100','00000','00100','00100','00000'],'!':['00100','00100','00100','00100','00100','00000','00100'],'?':['01110','10001','00001','00010','00100','00000','00100'],"'":['00100','00100','01000','00000','00000','00000','00000'],'-':['00000','00000','00000','11111','00000','00000','00000'],'+':['00000','00100','00100','11111','00100','00100','00000'],'/':['00001','00001','00010','00100','01000','10000','10000'],'·':['00000','00000','00000','00100','00000','00000','00000'],'↑':['00100','01110','10101','00100','00100','00100','00100'],'↓':['00100','00100','00100','00100','10101','01110','00100'],'←':['00000','00100','01000','11111','01000','00100','00000'],'→':['00000','00100','00010','11111','00010','00100','00000'],'×':['00000','10001','01010','00100','01010','10001','00000'],'#':['01010','01010','11111','01010','11111','01010','01010'],'@':['01110','10001','10111','10101','10111','10000','01111'],'%':['11000','11010','00010','00100','01000','01011','00011'],'(':['00010','00100','01000','01000','01000','00100','00010'],')':['01000','00100','00010','00010','00010','00100','01000'],'|':['00100','00100','00100','00100','00100','00100','00100']
   };
-  const textTiles=new Map();
+  const textTiles=new Map(),glyphTiles=new Map();
+  function glyphTile(char,scale,color,weight){
+    const key=char+'|'+scale+'|'+color+'|'+weight;let tile=glyphTiles.get(key);if(tile!==undefined)return tile;
+    const rows=glyphs[char];if(!rows){glyphTiles.set(key,null);return null;}
+    tile=document.createElement('canvas');tile.width=5*scale+(weight>=1?1:0);tile.height=7*scale+(weight>=2?1:0);const paint=tile.getContext('2d');paint.fillStyle=gritMaterial(color);
+    for(let row=0;row<7;row++)for(let col=0;col<5;col++)if(rows[row][col]==='1')paint.fillRect(col*scale,row*scale,scale+(weight>=1?1:0),scale+(weight>=2?1:0));
+    glyphTiles.set(key,tile);return tile;
+  }
   function text(str,x,y,size=11,color=C.ink,align='center',weight=0) {
     str=String(str).toUpperCase().replaceAll('…','...').replaceAll('’',"'");if(!str.length)return;
     const scale=size>=14?2:1,width=(str.length*6-1)*scale,key=str+'|'+scale+'|'+color+'|'+weight;
+    // Labels with numbers change constantly (distances, speeds): draw them from cached single characters,
+    // so a new number never builds a new image.
+    if(/[0-9]/.test(str)){
+      const left0=Math.round(x-(align==='center'?width/2:align==='right'?width:0)),top=Math.round(y-3.5*scale);
+      let left=left0;for(const char of str){if(char!==' '){const g=glyphTile(char,scale,color,weight);if(g)ctx.drawImage(g,left,top);}left+=6*scale;}
+      return;
+    }
     let tile=textTiles.get(key);
     // Least-recently-used: a label drawn every frame stays cached however many one-off strings pass through.
     if(tile){textTiles.delete(key);textTiles.set(key,tile);}
@@ -3792,10 +3806,11 @@ window.FROSTLINE_READY = (async () => {
   function shadow(x,y,rx=15,ry=4,alpha=.11){
     const w=Math.max(3,Math.round(rx*ZOOM)),h=Math.max(2,Math.round(ry*ZOOM)),key=w+':'+h;
     let tile=shadowTiles.get(key);
-    if(!tile){
+    if(tile){shadowTiles.delete(key);shadowTiles.set(key,tile);} // least-recently-used, like text tiles
+    else{
       tile=document.createElement('canvas');tile.width=(w+h)*2;tile.height=h*2+1;const t=tile.getContext('2d');t.fillStyle='#758bb4';
       for(let row=-h;row<=h;row++){const half=Math.max(1,w-Math.round(Math.abs(row)*w/(h+2)));t.fillRect(w+h-half+row,h+row,half*2,1);}
-      if(shadowTiles.size>=64)shadowTiles.delete(shadowTiles.keys().next().value);shadowTiles.set(key,tile);
+      if(shadowTiles.size>=192)shadowTiles.delete(shadowTiles.keys().next().value);shadowTiles.set(key,tile);
     }
     const before=ctx.globalAlpha;ctx.globalAlpha=before*Math.min(.5,alpha*2);
     ctx.drawImage(tile,Math.round(x)-w-h,Math.round(y)-h);ctx.globalAlpha=before;
@@ -4727,7 +4742,7 @@ window.FROSTLINE_READY = (async () => {
       let list=trailBuckets.get(key);if(!list)trailBuckets.set(key,list=[]);list.push(a.x,a.y,b.x,b.y);
     }
     for(const [color,width] of [['#9ebbc5',1.7],['#dce9e7',1.25]])for(const [key,list] of trailBuckets){
-      ctx.globalAlpha=Math.floor(key/1000)/8*.65;ctx.strokeStyle=heavy?color:gritMaterial(color);ctx.lineWidth=key%1000*width;ctx.beginPath();
+      ctx.globalAlpha=Math.floor(key/1000)/8*.65;ctx.strokeStyle=heavy||key%1000>8?color:gritMaterial(color);ctx.lineWidth=key%1000*width;ctx.beginPath();
       for(let i=0;i<list.length;i+=4){ctx.moveTo(list[i],list[i+1]);ctx.lineTo(list[i+2],list[i+3]);}
       ctx.stroke();
     }

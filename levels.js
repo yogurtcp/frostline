@@ -216,9 +216,9 @@ function levelPlayerScreenY(){const e=state.endless?endlessEncounterAt(state.p.y
 function updateBoulderArea(e,L,dt){
   const p=state.p,s=e.scale;
   if(!e.boulder){
-    if(e.boulderDone||p.y<e.startY+600*s||p.fall||p.awaitingInput||Math.hypot(p.vx,p.vy)*S.physics.hudKmhPerSpeed<50)return;
+    if(e.boulderDone||clock<(e.nextBoulderAt||0)||p.y<e.startY+600*s||p.y>e.endY-400*s||p.fall||p.awaitingInput||!e.nextBoulderAt&&Math.hypot(p.vx,p.vy)*S.physics.hudKmhPerSpeed<50)return;
     const r=levelValue(e,L.radiusMetres)*PX_PER_M;
-    e.boulder=entity('boulder',p.x,p.y-levelValue(e,L.startBehindMetres)*PX_PER_M*s,{arcadeRun:e.section,encounter:e,r:0,width:r*2,radius:r,speed:levelValue(e,L.startKmh)/S.physics.hudKmhPerSpeed,spin:0,travelled:0,trailX:p.x,trailY:p.y});
+    e.boulder=entity('boulder',p.x,p.y-levelValue(e,L.startBehindMetres)*PX_PER_M*s,{arcadeRun:e.section,encounter:e,r:0,width:r*2,radius:r,speed:e.nextBoulderAt?topSpeed()*levelValue(e,L.topSpeedRatio):levelValue(e,L.startKmh)/S.physics.hudKmhPerSpeed,spin:0,travelled:0,trailX:p.x,trailY:p.y});
     e.boulder.trailY=e.boulder.y;state.screenShake=Math.max(state.screenShake,.6);beep(70,.5,'sawtooth',.03);
     announce('RUMBLE...','A GIANT SNOWBALL IS COMING - GO!',C.red,2.5);return;
   }
@@ -230,7 +230,8 @@ function updateBoulder(e,L,dt){
   const cruise=topSpeed()*levelValue(e,L.topSpeedRatio),keep=levelValue(e,L.catchUpMetres)*PX_PER_M*s;
   const want=cruise*(1+Math.max(0,gap-keep)/(PX_PER_M*s)*levelValue(e,L.catchUpPerMetre));
   b.speed=Math.min(want,b.speed+levelValue(e,L.accelerationKmhPerSecond)/S.physics.hudKmhPerSpeed*dt);
-  const lateral=clamp((p.x-b.x)*1.5,-b.speed*.3,b.speed*.3);
+  // It leans harder toward you the closer it gets, so a last-second sidestep is hard.
+  const lean=gap<20*PX_PER_M*s?.6:.3,lateral=clamp((p.x-b.x)*2,-b.speed*lean,b.speed*lean);
   const ox=b.x,oy=b.y;b.x+=lateral*dt;b.y+=b.speed*dt;
   const moved=Math.hypot(b.x-ox,b.y-oy);b.travelled+=moved;b.spin+=moved/Math.max(10,b.radius);
   // It grows as it rolls, up to a limit.
@@ -238,16 +239,20 @@ function updateBoulder(e,L,dt){
   if(Math.hypot(b.x-b.trailX,b.y-b.trailY)>=b.radius*.5){state.snowballTrails.push({ax:b.trailX,ay:b.trailY,bx:b.x,by:b.y,r:b.radius*.8,until:clock+2});b.trailX=b.x;b.trailY=b.y;}
   // Everything in its way is flattened: trees, rocks, creatures, skiers, Yetis.
   const reach=b.radius*.9;let smashed=0;
-  filterObjects(o=>{
-    if(o===b||o.type==='ice'||o.type==='rugged'||o.type==='entrance'||Math.abs(o.y-b.y)>reach+40||Math.hypot(o.x-b.x,o.y-b.y)>reach+(o.r||0))return true;
-    if(o.r<=0&&!['ramp','mogul','smallHill','largeHill','bush'].includes(o.type))return true;
+  const flattens=o=>o!==b&&o.type!=='ice'&&o.type!=='rugged'&&o.type!=='entrance'&&Math.abs(o.y-b.y)<=reach+40&&Math.hypot(o.x-b.x,o.y-b.y)<=reach+(o.r||0)&&(o.r>0||['ramp','mogul','smallHill','largeHill','bush'].includes(o.type));
+  // Look first, rebuild the object list only when something is actually in its way.
+  if(state.objects.some(flattens))filterObjects(o=>{
+    if(!flattens(o))return true;
     burst(o.x,o.y,'#ffffff',10);smashed++;
     if(['skier','boarder','bear','wolf','lurker'].includes(o.type)&&random()<.5)say(pick(['WHOAAA!','NOT AGAIN!','AAAH!']),{x:o.x,y:o.y-30},1);
     return false;
   });
-  state.chasers=state.chasers.filter(c=>{if(Math.hypot(c.x-b.x,c.y-b.y)>reach+20)return true;burst(c.x,c.y,'#ffffff',16);smashed++;return false;});
-  if(smashed){state.screenShake=Math.max(state.screenShake,.35);beep(90,.12,'triangle',.02);}
+  if(state.chasers.some(c=>Math.hypot(c.x-b.x,c.y-b.y)<=reach+20))state.chasers=state.chasers.filter(c=>{if(Math.hypot(c.x-b.x,c.y-b.y)>reach+20)return true;burst(c.x,c.y,'#ffffff',16);smashed++;return false;});
+  if(smashed){state.screenShake=Math.max(state.screenShake,.35);if(clock>(b.nextCrunch||0)){beep(90,.12,'triangle',.02);b.nextCrunch=clock+.15;}}
   if(gap<keep*.6)state.screenShake=Math.max(state.screenShake,.08+.25*(1-gap/(keep*.6)));
+  // Dodge it and it rolls past you, shatters, and the next one comes down behind you: no hiding in its cleared lane.
+  if(b.y>p.y+b.radius+20*s){burst(b.x,b.y,'#ffffff',50);state.screenShake=.5;filterObjects(o=>o!==b);e.boulder=null;e.nextBoulderAt=clock+levelValue(e,L.nextBoulderSeconds);
+    announce('IT SHATTERED...','...AND HERE COMES ANOTHER ONE!',C.red,2);return;}
   // At the bottom it hits the trees and bursts.
   if(b.y>e.endY-200*s){burst(b.x,b.y,'#ffffff',60);state.screenShake=.8;filterObjects(o=>o!==b);e.boulder=null;e.boulderDone=true;announce('THE BOULDER BURST','YOU OUTRAN IT',C.teal,2.5);return;}
   if(!state.deathTimer&&Math.hypot(p.x-b.x,p.y-b.y)<b.radius*.85+S.physics.playerRadius)die('BOULDER');
@@ -268,8 +273,9 @@ function drawLevelMarks(){
 }
 function drawLevelProp(o,s){
   if(o.type!=='boulder')return false;
-  const r=o.radius*ZOOM;shadow(s.x,s.y,o.radius*1.05,o.radius*.32,.2);
-  sprite('rollingSnowball',s.x,s.y-r,o.radius*2,{rotate:o.spin,center:true});
+  // Drawn in size steps: every new pixel width would build a fresh sprite image while it grows.
+  const size=Math.max(16,Math.round(o.radius*2/16)*16),r=size/2*ZOOM;shadow(s.x,s.y,size*.52,size*.16,.2);
+  sprite('rollingSnowball',s.x,s.y-r,size,{rotate:o.spin,center:true});
   return true;
 }
 

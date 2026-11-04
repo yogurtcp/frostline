@@ -580,6 +580,10 @@
           "playerScreenY": [
             0.5,
             0.5
+          ],
+          "nextBoulderSeconds": [
+            1.2,
+            0.9
           ]
         }
       }

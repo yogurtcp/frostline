@@ -10811,6 +10811,16 @@
                       "minItems": 2,
                       "maxItems": 2,
                       "description": "[easy, hard] where you sit on screen (0 top, 1 bottom) while the boulder rolls, so it stays in view"
+                    },
+                    "nextBoulderSeconds": {
+                      "type": "array",
+                      "items": {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      "minItems": 2,
+                      "maxItems": 2,
+                      "description": "[easy, hard] seconds after a boulder rolls past you before the next one starts behind you"
                     }
                   }
                 }

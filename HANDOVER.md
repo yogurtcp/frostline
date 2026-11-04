@@ -1595,3 +1595,12 @@ User: Y ended before they got rid of all the Yetis; it should continue as long a
 ## 145. Pied Piper counter only goes down (2026-11-04)
 
 User: the YETIS ON YOUR TAIL count went up; Yetis no longer following should be removed and never reappear. Causes: the count included Yetis within 180 m, so one that fell back and caught up again was counted again, and side-charging ambush Yetis added to it. `piedPiperChasing` now removes the area's chasers once they are more than `endless.yetis.nearbyMetres` behind (lost for good), then counts the rest. Pied Piper ambushes no longer spawn Yetis (bears and wolf packs only); Avalanche ambushes are unchanged. Bot: the counter went 10→7→2→0 and 10→8→7→1→0. Trace clean.
+
+## 146. The Boulder can't be dodged into a free lane; rendering churn cut (2026-11-04)
+
+User: in O it is easy to get behind the ball; performance is not amazing.
+
+- Boulder: within 20 m it may steer sideways at up to 60% of its speed (was 30%), with lateral gain 2. If it rolls more than its radius + 2 m past you, it shatters and `e.nextBoulderAt` = now + `nextBoulderSeconds` (1.2→0.9). The next boulder spawns `startBehindMetres` back, already at cruising speed (`topSpeed × topSpeedRatio`). Respawns stop 40 m before the end. Flattening now scans first and only rebuilds the object or chaser list when something is in reach; the crunch sound is throttled to every 0.15 s. The drawn size is quantized to 16-unit steps.
+- Rendering churn, measured by hooking `document.createElement('canvas')` during a Boulder run: 582 text tiles were created in about 13 s, because every changing number (distance, km/h, boulder gap, Yeti pointer) built a new string tile. `text()` now draws any string containing a digit from per-character `glyphTile`s (cached forever, pixel-identical). Other strings use an LRU cache. Sprite tiles are cached per pixel width with no limit, which is why the boulder is quantized. Shadow tiles are now LRU with 192 entries (was first-in-first-out, 64). Result: about 40 canvases created instead of about 700 in the same run.
+- Measurement note: headless software canvas defers rasterization, so un-flushed render timings show big random spikes. With a 1-pixel `getImageData` flush after each render, both old and new builds draw in about 2 ms median and about 6 ms p99 (Boulder, Pied Piper). Step medians are 0.9–1.2 ms.
+- Trace: 192 checkpoints, no errors; 188 sim+pixel identical to the previous build (the 4 differences are in the Boulder area).
