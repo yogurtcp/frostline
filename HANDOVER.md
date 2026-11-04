@@ -1539,3 +1539,22 @@ User feedback: in Y the Yetis just chase the people; don't limit a Yeti to one m
 - Avalanche: `ballSeconds` 2.2→1.4, volley every 5th→4th; lurkers 1.4→2, bears 0.9→1.3, wolf packs 0.6→0.9 per 100 m; 3→5 chasers released 45–90 m back; ambushes every 9→6 s.
 - Burrow field: `rushFieldBurrower` re-aims every frame toward your extrapolated position, but its target moves at most `aimFollowMetresPerSecond` (22→32), and it stops re-aiming (`committed`) once less than `commitSeconds` (0.4→0.3) remain. The initial ±25-unit jitter is gone.
 - Verification: a basic line-following bot (it ignores flags) is caught in Y at 311–509 m. A bot holding its line in I dies at 154 m; the dodge bot clears visit 3 (95 attacks) and reaches 1440 m on visit 1. The U bot dies on falling trees and creatures it does not avoid; screenshots of Y and U inspected (flags, clutter and beasts readable). All-area trace: 192 checkpoints, no errors. Headless p95 frame 3–11 ms.
+
+## 139. The Boulder replaces Sleeping Giants; Yetis eat fallen skiers; Pied Piper Yetis at normal speed (2026-11-04)
+
+User feedback: O (Sleeping Giants) was not fun, and the user picked "The Boulder" from three concepts. In Y the Yetis ran straight over skiers lying in the snow without stopping, and seemed faster than normal Yetis.
+
+- `sleepingGiants` is removed everywhere: config keys, schema enums, `ENDLESS_DEBUG_AREAS`/`WIDE_REGIONS`, README debug key O, and REGIONS. The new kind is `boulder` ("The Boulder"). `updateBoulderArea` spawns an entity of type `boulder` (r 0, drawn by `drawLevelProp` as a scaled `rollingSnowball` sprite with a shadow) once you are 60 m in and moving at 50+ km/h. `updateBoulder` handles:
+  - speed: builds at `accelerationKmhPerSecond` toward `topSpeed() × topSpeedRatio`, scaled up by `catchUpPerMetre` for each metre beyond `catchUpMetres`;
+  - steering and size: drifts sideways toward you (up to 30% of its speed), grows by `growthMetresPer100Metres` up to `maxRadiusMetres`, and lays wide snowball-trail segments;
+  - flattening: removes every object it overlaps (except ice, rugged ground and entrances) and any chaser, with bursts, shake and the odd yelp;
+  - death: kills the skier on contact (`die('BOULDER')`, which now announces "FLATTENED BY THE BOULDER.");
+  - the end: bursts 20 m before the area ends.
+  Shared hooks remain as no-ops (`levelWakeOverride`, `levelSpeedWarning`, `drawLevelGround`). A new hook, `levelPlayerScreenY`, moves the camera so you sit at `playerScreenY` (0.5) while the boulder rolls; otherwise it is hidden under the HUD 35+ m back. A distance label is drawn above it, or at the top edge as "↑ BOULDER n m". Content: obstacles 14→18 per 100 m (trees, rocks, stumps, bushes, sleds), jumps 1.2→1, ice 0.5→0.4, skiers 1→1.4, bears 0.2→0.3.
+- Yetis and fallen skiers (all areas): Yetis steer around skiers as obstacles, so the 2.3 m capture distance never touched a skier lying in the snow. Chaser meals now use `max(captureDistance, predators.mealReachMetres)` (4 m). A skier lying in the snow within `predators.helplessNoticeMetres` (15 m) is a valid divert target, and is never dropped, even off the hunter's route to the player (`helplessPrey`, used in `nearestPrey` and `updatePreyTarget`). config.js gives both settings defaults.
+- Pied Piper `chaserSpeedKmh` = [68, 94] (the normal `endless.yetis.speedKmh` range) ± 6, down from 100→104 ± 8.
+
+Verification:
+- Boulder bot (gap logged): with a clean line the gap holds at about 35–60 m, and the radius grows 4→11 m. A crash lets it catch the skier within about a second (visits 3 and 6). Visits 1 and 3 clear when the bot does not crash. Screenshots show it looming in the upper half.
+- Y on visit 1: 3 Yeti meals counted (were 0 before the reach fix), and the bot reaches the end.
+- All-area trace: 192 checkpoints, no errors. Headless p95: 10–23 ms.

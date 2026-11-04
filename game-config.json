@@ -124,7 +124,7 @@
         "avalanche",
         "cemetery",
         "denseForest",
-        "sleepingGiants",
+        "boulder",
         "scramble",
         "quiet",
         "christmas",
@@ -195,9 +195,9 @@
           2400,
           3000
         ],
-        "sleepingGiants": [
-          900,
-          1100
+        "boulder": [
+          1100,
+          1400
         ]
       },
       "beginnerPeople": [
@@ -376,12 +376,12 @@
             10
           ],
           "chaserSpeedKmh": [
-            100,
-            104
+            68,
+            94
           ],
           "chaserSpeedSpreadKmh": [
-            8,
-            8
+            6,
+            6
           ],
           "skiersPer100Metres": [
             1.6,
@@ -516,46 +516,70 @@
             0.3
           ]
         },
-        "sleepingGiants": {
-          "fieldHalfMetres": [
-            38,
-            42
+        "boulder": {
+          "startBehindMetres": [
+            45,
+            38
           ],
-          "sleeperSpacingMetres": [
+          "startKmh": [
+            60,
+            65
+          ],
+          "accelerationKmhPerSecond": [
+            8,
+            10
+          ],
+          "topSpeedRatio": [
+            0.9,
+            0.95
+          ],
+          "catchUpMetres": [
             34,
-            30
+            28
           ],
-          "bearShare": [
-            0.15,
-            0.15
+          "catchUpPerMetre": [
+            0.03,
+            0.04
           ],
-          "quietKmh": [
-            40,
-            40
+          "radiusMetres": [
+            4,
+            4
           ],
-          "baseRadiusMetres": [
-            3,
-            3
+          "growthMetresPer100Metres": [
+            0.7,
+            0.9
           ],
-          "metresPerKmh": [
-            0.18,
-            0.22
+          "maxRadiusMetres": [
+            11,
+            13
           ],
-          "stirSeconds": [
-            0.25,
-            0.2
+          "obstaclesPer100Metres": [
+            14,
+            18
           ],
-          "treesPer100Metres": [
+          "jumpsPer100Metres": [
+            1.2,
+            1
+          ],
+          "icePer100Metres": [
+            0.5,
+            0.4
+          ],
+          "skiersPer100Metres": [
+            1,
+            1.4
+          ],
+          "bearsPer100Metres": [
+            0.2,
+            0.3
+          ],
+          "sideTreesPer100Metres": [
             5,
             5
           ],
-          "yetiSpeedKmh": [
-            98,
-            104
-          ],
-          "chargeSeconds": [
-            2.5,
-            3.5
+          "playerScreenY": [
+            0.5,
+            0.5
           ]
         }
       }
@@ -2609,7 +2633,9 @@
     "divertReleaseWidthMetres": 16,
     "divertPathAngleDegrees": 45,
     "divertReleaseAngleDegrees": 60,
-    "offDownhillSpeedRatio": 0.5
+    "offDownhillSpeedRatio": 0.5,
+    "mealReachMetres": 4,
+    "helplessNoticeMetres": 15
   },
   "skiers": {
     "crashSeconds": [

@@ -223,7 +223,7 @@ For quick Arcade debugging, press a number or Q/W/E from the summit or during an
 | Y | Pied Piper's Parade |
 | U | Avalanche! |
 | I | The Floor Is Burrowers |
-| O | Sleeping Giants |
+| O | The Boulder |
 
 R/T add actors in place during Arcade; from the summit they open a forest preview first. Press repeatedly to add more: manual spawns bypass random rolls, intro distances, area exclusions and normal nearby/cooldown limits. R uses the normal zigzag/pause/pop behavior; if the game is paused, start skiing to activate its approach. T places a visible person at a clear spot in the lower screen; approach closely to trigger the ordinary transformation before you arrive. Manual spawning saves the legitimate distance already reached, then marks the run DEBUG / NO RECORD without teleporting an active run. Held repeats, modifiers, focused inputs/dialogs and other courses do not spawn actors. Scene-card dismissal consumes its key as usual.
 

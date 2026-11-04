@@ -17,8 +17,8 @@ window.FROSTLINE_READY = (async () => {
   const range = (a,b) => a + random()*(b-a);
   const C = S.colors, stages = S.courses;
   const MONSTER_KINDS=new Set(['wolf','bear','lurker','zombie','fast','slow','burrower']);
-  const ENDLESS_DEBUG_AREAS=['forest','trees','town','crowd','quiet','cemetery','lake','denseForest','scramble','rivalRace','christmas','halloween','piedPiper','avalanche','burrowField','sleepingGiants'];
-  const WIDE_REGIONS=new Set(['town','christmas','halloween','trees','cemetery','denseForest','scramble','crowd','beginner','piedPiper','avalanche','burrowField','sleepingGiants']);
+  const ENDLESS_DEBUG_AREAS=['forest','trees','town','crowd','quiet','cemetery','lake','denseForest','scramble','rivalRace','christmas','halloween','piedPiper','avalanche','burrowField','boulder'];
+  const WIDE_REGIONS=new Set(['town','christmas','halloween','trees','cemetery','denseForest','scramble','crowd','beginner','piedPiper','avalanche','burrowField','boulder']);
   // __SPECIAL_AREAS_CODE__
   // __SEASONAL_AREAS_CODE__
   // __ENCOUNTER_ENEMIES_CODE__
@@ -1352,7 +1352,7 @@ window.FROSTLINE_READY = (async () => {
     state.p.fall=2;state.p.speed=0;state.p.vx=state.p.vy=0;state.p.draft=0;state.p.draftTarget=null;state.input={left:false,right:false,up:false,down:false,pointer:null,jump:false};
     if(state.arcade)state.arcade.endReason='CAUGHT BY '+cause;
     if(state.endless)recordEndless('CAUGHT BY '+cause);
-    announce(cause==='BURROWER'?'THE SNOW HAD TEETH.':cause==='WEREWOLF'?'A VERY HAIRY VILLAGER.':cause==='BEAR'?'THE BEAR CAUGHT YOU.':cause==='WOLF'?'THE PACK CAUGHT YOU.':cause==='ZOMBIE'?'THE DEAD CAUGHT YOU.':'THE YETI GOT YOU.',scene?.detail||`Your ${state.bank} coins are safe.`,C.red,3);
+    announce(cause==='BURROWER'?'THE SNOW HAD TEETH.':cause==='WEREWOLF'?'A VERY HAIRY VILLAGER.':cause==='BEAR'?'THE BEAR CAUGHT YOU.':cause==='WOLF'?'THE PACK CAUGHT YOU.':cause==='ZOMBIE'?'THE DEAD CAUGHT YOU.':cause==='BOULDER'?'FLATTENED BY THE BOULDER.':'THE YETI GOT YOU.',scene?.detail||`Your ${state.bank} coins are safe.`,C.red,3);
     beep(110,.3,'triangle');save();
     if(animated){
       const actor=attacker||(cause==='YETI'?state.chasers.find(c=>!c.dead&&['fast','slow'].includes(c.kind)):null)||{kind:cause==='YETI'?'fast':cause.toLowerCase(),type:cause.toLowerCase(),zombieRole:'wanderer',zombieStyle:0,width:34,phase:0};
@@ -2046,16 +2046,18 @@ window.FROSTLINE_READY = (async () => {
       if(!ediblePrey(o))continue;
       const d=Math.hypot(dx,dy);
       if(d>=bestD||humanArea(o.x,o.y)&&!courseCreature(hunter,o.x,o.y))continue;
-      if(!preyOnPlayerPath(hunter,o))continue;
+      if(!preyOnPlayerPath(hunter,o)&&!helplessPrey(hunter,o))continue;
       bestD=d;best=o;
     }
     return best;
   }
+  // A skier lying in the snow nearby is too easy to pass up, even off the hunter's route to you.
+  function helplessPrey(hunter,o){return o.npcFallUntil>clock&&Math.hypot(o.x-hunter.x,o.y-hunter.y)<S.predators.helplessNoticeMetres*PX_PER_M;}
   function updatePreyTarget(hunter){
     const P=S.predators,prey=hunter.divert;
     if(prey){
       if(!ediblePrey(prey)||humanArea(prey.x,prey.y)&&!courseCreature(hunter,prey.x,prey.y))hunter.divert=null;
-      else if(!preyOnPlayerPath(hunter,prey,true)){
+      else if(!preyOnPlayerPath(hunter,prey,true)&&!helplessPrey(hunter,prey)){
         hunter.divert=null;hunter.divertOrigin=null;
         hunter.avoidUntil=0;hunter.obstacleDetour=null;
         // Return to the player immediately, rather than choosing another NPC this frame.
@@ -3020,7 +3022,7 @@ window.FROSTLINE_READY = (async () => {
     filterObjects(o=>!o.eaten&&!o.collected&&o.type!=='awakened'&&(!o.dead||clock<o.fadeUntil)&&(o.dogCompanion||o.dogRetreat||o.worldChunk||o.grandMausoleum&&o.triggerAt!==undefined&&o.released<o.waveSize||(o.type==='wolf'&&o.linkedChase||o.type==='zombie'&&(o.awake||o.graveWakeAt!==undefined)&&o.zombieState!=='spent')&&activeCourseOwner(o)||o.y>p.y-S.world.sceneryRetentionBehind));
     state.snowballTrails=state.snowballTrails.filter(t=>t.until>clock&&t.by>p.y-S.world.sceneryRetentionBehind);
     updateFeedback(dt);
-    state.cam.x=ease(state.cam.x,p.x,S.render.cameraXFollow,dt);state.cam.y=ease(state.cam.y,p.y-H*S.render.playerScreenY/ZOOM,S.render.cameraYFollow,dt);
+    state.cam.x=ease(state.cam.x,p.x,S.render.cameraXFollow,dt);state.cam.y=ease(state.cam.y,p.y-H*(levelPlayerScreenY()??S.render.playerScreenY)/ZOOM,S.render.cameraYFollow,dt);
   }
   const PED_SOLIDS=new Set(['pine','fir','rock','pebble','lodge','rental','lift','bench','lamp','snowman','stump','breadStand','skiRack','grave','mausoleum','cemeteryFence','areaBarrier','cemeteryPillar','christmasTree']),PED_FLAGS=new Set(['gate','entrance','finish']);
   const PEOPLE_VIEW=objectView(o=>o.type.startsWith('person')),PED_SOLID_VIEW=objectView(o=>PED_SOLIDS.has(o.type)),PED_FLAG_VIEW=objectView(o=>PED_FLAGS.has(o.type));
@@ -3693,7 +3695,7 @@ window.FROSTLINE_READY = (async () => {
       if(c.harmlessDog&&contactDistance>S.chasers.captureDistance*2)c.harmlessDog=false;
       if(resolveEnemyContact(c,{ramOnly:true}))continue;
       if(c.kind==='dog'||c.kind==='patrol')contacts.index=null;
-      const meal=lethal&&!feeding?(c.ravager?ravagerContact(c,previous):contactPrey(c,previous,S.chasers.captureDistance,contacts.index??=preyContactIndex())):null;
+      const meal=lethal&&!feeding?(c.ravager?ravagerContact(c,previous):contactPrey(c,previous,Math.max(S.chasers.captureDistance,S.predators.mealReachMetres*PX_PER_M),contacts.index??=preyContactIndex())):null;
       if(meal){if(c.ravager)eatRavagerPrey(c,meal,previous);else eatChaserPrey(c,meal,previous);continue;}
       if(lethal){resolveEnemyContact(c);if(state.deathTimer)break;continue;}
       if(monsterContact(c)&&p.shield<=0&&p.air<=0){

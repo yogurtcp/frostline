@@ -2,9 +2,9 @@
    Pied Piper's Parade, Avalanche!, The Floor Is Burrowers and Sleeping Giants.
    Planning/population hook into planEndlessRegion/populateEndlessRegion; per-step rules live in updateLevelAreas.
    Tuning is in game-config.json endless.regions.levels. */
-const LEVEL_KINDS=new Set(['piedPiper','avalanche','burrowField','sleepingGiants']);
-const LEVEL_NAMES={piedPiper:"Pied Piper's Parade",avalanche:'Avalanche!',burrowField:'The Floor Is Burrowers',sleepingGiants:'Sleeping Giants'};
-const LEVEL_HINTS={piedPiper:'TEN YETIS ARE AFTER YOU - GRAB FLAGS, USE THE ICE, WATCH FOR AMBUSHES',avalanche:'EYES UP AND DOWN - SNOWBALLS FROM ABOVE, BEASTS BELOW',burrowField:'THEY COME FROM THE SIDES - TURN, JUMP OR FIND ICE',sleepingGiants:'WEAVE BETWEEN THE SLEEPERS - THE FASTER YOU GO, THE MORE YOU WAKE'};
+const LEVEL_KINDS=new Set(['piedPiper','avalanche','burrowField','boulder']);
+const LEVEL_NAMES={piedPiper:"Pied Piper's Parade",avalanche:'Avalanche!',burrowField:'The Floor Is Burrowers',boulder:'The Boulder'};
+const LEVEL_HINTS={piedPiper:'TEN YETIS ARE AFTER YOU - GRAB FLAGS, USE THE ICE, WATCH FOR AMBUSHES',avalanche:'EYES UP AND DOWN - SNOWBALLS FROM ABOVE, BEASTS BELOW',burrowField:'THEY COME FROM THE SIDES - TURN, JUMP OR FIND ICE',boulder:'A GIANT SNOWBALL IS RIGHT BEHIND YOU - KEEP A CLEAN, FAST LINE'};
 function levelConfig(e){return S.endless.regions.levels[e.kind];}
 function levelValue(e,range){return Array.isArray(range)?mix(range[0],range[1],e.difficulty):range;}
 function levelRows(e,from,to,step,offset,callback){
@@ -19,7 +19,7 @@ function planLevelArea(e,section){
   if(e.kind==='piedPiper'){e.half=280*s;e.paths=[zig(250,120)];}
   else if(e.kind==='avalanche'){e.half=300*s;e.paths=[zig(280,110)];}
   else if(e.kind==='burrowField'){e.half=160*s;e.paths=[zig(320,90)];}
-  else {e.half=levelValue(e,levelConfig(e).fieldHalfMetres)*PX_PER_M*s;e.paths=[zig(300,60)];}
+  else {e.half=260*s;e.paths=[zig(220,120)];}
   e.paths[0].linear=true;
   e.band=Math.max(e.half+320*s,S.endless.regions.minimumWidthMetres*PX_PER_M*s/2);
 }
@@ -61,19 +61,13 @@ function populateLevelArea(e,section,from,to){
       const item=createArcadeItem(kinds[row%kinds.length],at(y),y,section);item.encounter=e;
     });
   }else{
-    sideTrees(L.treesPer100Metres,e.half+30*s,e.half+190*s);
-    if(from===e.startY)entity('shhhSign',at(e.startY+40*s)+75*s,e.startY+40*s,{...own,r:0,width:40});
-    // A wide field of sleepers on a loose staggered grid: there is always a gap, but at full speed your noise reaches into it.
-    const gap=levelValue(e,L.sleeperSpacingMetres)*PX_PER_M*s,rowGap=gap*.8;
-    levelRows(e,from,to,rowGap,600*s,(y,row)=>{ // a 60 m runway past the sign to settle your speed
-      if(y>e.endY-80*s)return;
-      const line=at(y),shift=row%2?gap/2:0;
-      for(let x=line-e.half+shift+gap*range(.1,.3);x<line+e.half;x+=gap){
-        const px=x+range(-.08,.08)*gap,py=y+range(-.1,.1)*rowGap;
-        if(random()<levelValue(e,L.bearShare))entity('bear',px,py,{...ARCADE_ITEMS.bear,...own,ai:'idle',roam:0,nextAI:Infinity,sleeper:true});
-        else levelYeti(e,section,px,py).sleeper=true;
-      }
-    });
+    // The Boulder: a busy slope where every hit costs you speed, with a few jumps and ice pools to win some back.
+    sideTrees(L.sideTreesPer100Metres,e.half+20*s,e.half+220*s);
+    per(L.obstaclesPer100Metres,90,y=>{const o=createArcadeItem(pick(['pine','fir','smallPine','rock','rock','stump','bush','bush','sled']),at(y)+range(-1,1)*e.half,y,section);o.encounter=e;});
+    per(L.jumpsPer100Metres,200,y=>{const o=createArcadeItem(pick(['ramp','mogul','smallHill']),at(y)+range(-.5,.5)*e.half,y,section);o.encounter=e;});
+    per(L.icePer100Metres,330,y=>{const rx=range(55,85)*s;entity('ice',at(y)+range(-.5,.5)*e.half,y,{...own,rx,ry:rx*range(1.1,1.4),width:rx*2,r:0,arcadeFeature:true});});
+    skiers(L.skiersPer100Metres);
+    per(L.bearsPer100Metres,450,y=>entity('bear',at(y)+pick([-1,1])*range(.3,.9)*e.half,y,{...ARCADE_ITEMS.bear,...own,nextAI:clock+range(1,4)}));
   }
 }
 function levelYeti(e,section,x,y,kmh){
@@ -125,7 +119,7 @@ function updateLevelAreas(dt){
   if(e.kind==='piedPiper')e.onTail=state.chasers.filter(c=>c.encounter===e&&!c.dead&&!c.eaten&&!c.leaving&&c.y>p.y-S.endless.yetis.nearbyMetres*PX_PER_M*s).length;
   else if(e.kind==='avalanche')updateAvalanche(e,L,dt);
   else if(e.kind==='burrowField')updateBurrowField(e,L);
-  else if(e.kind==='sleepingGiants')updateSleepingGiants(e,L,dt);
+  else if(e.kind==='boulder')updateBoulderArea(e,L,dt);
 }
 function updateAvalanche(e,L,dt){
   const p=state.p,b=viewBounds(),s=e.scale;
@@ -189,60 +183,67 @@ function rushFieldBurrower(o,dt){
   o.motionVx=(o.x-o.motionFromX)/dt;o.motionVy=(o.y-o.motionFromY)/dt;o.travelSpeed=o.rushSpeed;o.travelStamp=clock;
   if(clock>=(o.nextTrailAt||0)){o.burrowTrail.push({x:o.x,y:o.y,until:clock+.8});if(o.burrowTrail.length>28)o.burrowTrail.shift();o.nextTrailAt=clock+.03;}
 }
-function levelNoiseRadius(e,L){
-  const p=state.p,kmh=Math.hypot(p.vx,p.vy)*S.physics.hudKmhPerSpeed;
-  return (levelValue(e,L.baseRadiusMetres)+Math.max(0,kmh-levelValue(e,L.quietKmh))*levelValue(e,L.metresPerKmh))*PX_PER_M;
-}
-function updateSleepingGiants(e,L,dt){
-  const p=state.p,radius=p.fall||p.awaitingInput?levelValue(e,L.baseRadiusMetres)*PX_PER_M:levelNoiseRadius(e,L);
-  for(const o of state.objects){
-    if(!o.sleeper||o.encounter!==e||o.giantAwake||o.dead||o.eaten||(o.type!=='lurker'&&o.type!=='bear'))continue;
-    const inside=Math.hypot(o.x-p.x,o.y-p.y)<radius;
-    o.stir=Math.max(0,(o.stir||0)+(inside?dt:-dt*.5));
-    if(o.stir>=levelValue(e,L.stirSeconds)){o.giantAwake=true;say(o.type==='bear'?'GRRR!':pick(['WHO WOKE ME?!','ROAAAR!','FOOD?!']),o,1.4);}
+// Hooks the game calls for every level (kept for future levels): no level overrides wake rules or the speed readout now.
+function levelWakeOverride(o){return null;}
+function levelSpeedWarning(){return false;}
+function drawLevelGround(){}
+// With the boulder rolling, the camera sits you lower on the screen so you can see it coming.
+function levelPlayerScreenY(){const e=state.endless?endlessEncounterAt(state.p.y):null;return e?.kind==='boulder'&&e.boulder?levelValue(e,levelConfig(e).playerScreenY):null;}
+// The Boulder: a giant snowball rolls after you from just inside the area, growing as it goes and flattening everything.
+function updateBoulderArea(e,L,dt){
+  const p=state.p,s=e.scale;
+  if(!e.boulder){
+    if(e.boulderDone||p.y<e.startY+600*s||p.fall||p.awaitingInput||Math.hypot(p.vx,p.vy)*S.physics.hudKmhPerSpeed<50)return;
+    const r=levelValue(e,L.radiusMetres)*PX_PER_M;
+    e.boulder=entity('boulder',p.x,p.y-levelValue(e,L.startBehindMetres)*PX_PER_M*s,{arcadeRun:e.section,encounter:e,r:0,width:r*2,radius:r,speed:levelValue(e,L.startKmh)/S.physics.hudKmhPerSpeed,spin:0,travelled:0,trailX:p.x,trailY:p.y});
+    e.boulder.trailY=e.boulder.y;state.screenShake=Math.max(state.screenShake,.6);beep(70,.5,'sawtooth',.03);
+    announce('RUMBLE...','A GIANT SNOWBALL IS COMING - GO!',C.red,2.5);return;
   }
-  // A woken giant charges hard, but only for a few seconds: then it is too sleepy to care and wanders off to lie down.
-  // Waking one ahead of you is deadly; waking one behind costs nothing if you keep your speed.
-  for(const c of state.chasers){
-    if(c.encounter!==e||c.leaving||c.dead||c.eaten)continue;
-    c.chargeUntil??=clock+levelValue(e,L.chargeSeconds);
-    if(clock>c.chargeUntil){c.leaving=true;say(pick(['Zzz... too sleepy.','Ugh. Not worth it.','*YAWN* Back to bed.']),c,1.8);}
-  }
+  updateBoulder(e,L,dt);
 }
-// Sleeping Giants overrides: sleepers wake only when your noise has stirred them long enough.
-function levelWakeOverride(o){
-  if(o.sleeper&&o.encounter?.kind==='sleepingGiants')return o.giantAwake?Infinity:-1;
-  return null;
-}
-function levelSpeedWarning(){
-  const e=state.endless?endlessEncounterAt(state.p.y):null;if(e?.kind!=='sleepingGiants')return false;
-  return Math.hypot(state.p.vx,state.p.vy)*S.physics.hudKmhPerSpeed>levelValue(e,levelConfig(e).quietKmh);
-}
-function drawLevelGround(){
-  const e=state.endless?endlessEncounterAt(state.p.y):null;if(e?.kind!=='sleepingGiants'||!state.started)return;
-  const L=levelConfig(e),r=levelNoiseRadius(e,L)*ZOOM,s=screen(state.p.x,state.p.y),loud=levelSpeedWarning();
-  ctx.save();ctx.globalAlpha=loud?.55:.3;ctx.strokeStyle=loud?C.red:C.teal;ctx.lineWidth=2;ctx.setLineDash([4,5]);
-  ctx.beginPath();ctx.ellipse(s.x,s.y,r,r*.8,0,0,TAU);ctx.stroke();ctx.restore();
+function updateBoulder(e,L,dt){
+  const b=e.boulder,p=state.p,s=e.scale,gap=p.y-b.y;
+  // It builds to just below your top speed, so a clean line slowly pulls away; fall far ahead and it speeds up to keep the pressure on.
+  const cruise=topSpeed()*levelValue(e,L.topSpeedRatio),keep=levelValue(e,L.catchUpMetres)*PX_PER_M*s;
+  const want=cruise*(1+Math.max(0,gap-keep)/(PX_PER_M*s)*levelValue(e,L.catchUpPerMetre));
+  b.speed=Math.min(want,b.speed+levelValue(e,L.accelerationKmhPerSecond)/S.physics.hudKmhPerSpeed*dt);
+  const lateral=clamp((p.x-b.x)*1.5,-b.speed*.3,b.speed*.3);
+  const ox=b.x,oy=b.y;b.x+=lateral*dt;b.y+=b.speed*dt;
+  const moved=Math.hypot(b.x-ox,b.y-oy);b.travelled+=moved;b.spin+=moved/Math.max(10,b.radius);
+  // It grows as it rolls, up to a limit.
+  b.radius=Math.min(levelValue(e,L.maxRadiusMetres)*PX_PER_M,b.radius+moved*levelValue(e,L.growthMetresPer100Metres)/100);b.width=b.radius*2;
+  if(Math.hypot(b.x-b.trailX,b.y-b.trailY)>=b.radius*.5){state.snowballTrails.push({ax:b.trailX,ay:b.trailY,bx:b.x,by:b.y,r:b.radius*.8,until:clock+2});b.trailX=b.x;b.trailY=b.y;}
+  // Everything in its way is flattened: trees, rocks, creatures, skiers, Yetis.
+  const reach=b.radius*.9;let smashed=0;
+  filterObjects(o=>{
+    if(o===b||o.type==='ice'||o.type==='rugged'||o.type==='entrance'||Math.abs(o.y-b.y)>reach+40||Math.hypot(o.x-b.x,o.y-b.y)>reach+(o.r||0))return true;
+    if(o.r<=0&&!['ramp','mogul','smallHill','largeHill','bush'].includes(o.type))return true;
+    burst(o.x,o.y,'#ffffff',10);smashed++;
+    if(['skier','boarder','bear','wolf','lurker'].includes(o.type)&&random()<.5)say(pick(['WHOAAA!','NOT AGAIN!','AAAH!']),{x:o.x,y:o.y-30},1);
+    return false;
+  });
+  state.chasers=state.chasers.filter(c=>{if(Math.hypot(c.x-b.x,c.y-b.y)>reach+20)return true;burst(c.x,c.y,'#ffffff',16);smashed++;return false;});
+  if(smashed){state.screenShake=Math.max(state.screenShake,.35);beep(90,.12,'triangle',.02);}
+  if(gap<keep*.6)state.screenShake=Math.max(state.screenShake,.08+.25*(1-gap/(keep*.6)));
+  // At the bottom it hits the trees and bursts.
+  if(b.y>e.endY-200*s){burst(b.x,b.y,'#ffffff',60);state.screenShake=.8;filterObjects(o=>o!==b);e.boulder=null;e.boulderDone=true;announce('THE BOULDER BURST','YOU OUTRAN IT',C.teal,2.5);return;}
+  if(!state.deathTimer&&Math.hypot(p.x-b.x,p.y-b.y)<b.radius*.85+S.physics.playerRadius)die('BOULDER');
 }
 function drawLevelMarks(){
   drawAvalancheWarnings();
   const e=state.endless?endlessEncounterAt(state.p.y):null;
   if(e?.kind==='piedPiper'&&e.chasersReleased&&state.started)text('YETIS ON YOUR TAIL: '+e.onTail,W/2,84,10,e.onTail?C.red:C.teal,'center',1);
-  if(e?.kind!=='sleepingGiants')return;
-  const L=levelConfig(e);
-  for(const o of state.objects){
-    if(!o.sleeper||o.encounter!==e||o.dead||o.eaten||o.giantAwake||(o.type!=='lurker'&&o.type!=='bear'))continue;
-    const s=screen(o.x,o.y);if(s.y<-40||s.y>H+40||s.x<-40||s.x>W+40)continue;
-    const t=(o.stir||0)/levelValue(e,L.stirSeconds),top=s.y-(o.width||50)*ZOOM-6;
-    if(t>.65)text('!',s.x,top,12,C.red,'center',1);
-    else if(t>.15)text('?',s.x,top,11,C.gold,'center',1);
-    else{const k=(clock*.6+o.phase)%1;ctx.save();ctx.globalAlpha=.8*Math.sin(k*Math.PI);text('Z',s.x+6+k*6,top-k*10,8,C.muted);ctx.restore();}
-  }
+  // The Boulder: how far behind it is, pinned to the top edge while it is above the screen.
+  const b=e?.kind==='boulder'?e.boulder:null;if(!b||!state.started)return;
+  const s=screen(b.x,b.y),gap=Math.max(0,(state.p.y-b.y)/(PX_PER_M*e.scale)-b.radius/PX_PER_M);
+  const close=gap<20,x=clamp(s.x,30,W-30);
+  if(s.y+b.radius*ZOOM<80)text('↑ BOULDER '+Math.round(gap)+' m',x,84,10,close?C.red:C.ink,'center',1);
+  else text(Math.round(gap)+' m',x,Math.max(84,s.y-b.radius*2*ZOOM-8),9,close?C.red:C.ink,'center',1);
 }
 function drawLevelProp(o,s){
-  if(o.type!=='shhhSign')return false;
-  shadow(s.x,s.y,6,2);box(s.x-1,s.y-28,3,28,'#6b4f3c');box(s.x-24,s.y-40,48,14,'#e9d9b8');box(s.x-24,s.y-27,48,1,'#8e6a4e');
-  text('SHHH!',s.x,s.y-31,8,C.red,'center',1);text('SPEED IS NOISE',s.x,s.y-48,7,C.ink);
+  if(o.type!=='boulder')return false;
+  const r=o.radius*ZOOM;shadow(s.x,s.y,o.radius*1.05,o.radius*.32,.2);
+  sprite('rollingSnowball',s.x,s.y-r,o.radius*2,{rotate:o.spin,center:true});
   return true;
 }
 

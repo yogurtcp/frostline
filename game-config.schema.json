@@ -5843,6 +5843,16 @@
           "minimum": 0.1,
           "maximum": 1,
           "description": "Horizontal and uphill velocity multiplier for enemy pursuit (0.5 = half speed); positive downhill Y keeps its configured speed."
+        },
+        "mealReachMetres": {
+          "type": "number",
+          "minimum": 0,
+          "description": "A hunting Yeti eats edible prey within this distance (it would otherwise steer around them as obstacles)."
+        },
+        "helplessNoticeMetres": {
+          "type": "number",
+          "minimum": 0,
+          "description": "A hunter goes for a fallen skier within this distance even when it is off the route to the player."
         }
       }
     },
@@ -9564,7 +9574,7 @@
                   "piedPiper",
                   "avalanche",
                   "burrowField",
-                  "sleepingGiants"
+                  "boulder"
                 ]
               }
             },
@@ -9715,7 +9725,7 @@
                   "minItems": 2,
                   "maxItems": 2
                 },
-                "sleepingGiants": {
+                "boulder": {
                   "type": "array",
                   "items": {
                     "type": "number",
@@ -10283,7 +10293,7 @@
                       },
                       "minItems": 2,
                       "maxItems": 2,
-                      "description": "[easy, hard] their average speed"
+                      "description": "[easy, hard] average speed (matches normal endless Yetis: 68 → 94 km/h)"
                     },
                     "chaserSpeedSpreadKmh": {
                       "type": "array",
@@ -10631,12 +10641,12 @@
                     }
                   }
                 },
-                "sleepingGiants": {
+                "boulder": {
                   "type": "object",
+                  "description": "The Boulder: a growing giant snowball rolls after you and flattens everything; keep a clean, fast line.",
                   "additionalProperties": false,
-                  "description": "Weave through a wide field of sleepers; your speed sets how far your noise reaches.",
                   "properties": {
-                    "fieldHalfMetres": {
+                    "startBehindMetres": {
                       "type": "array",
                       "items": {
                         "type": "number",
@@ -10644,9 +10654,9 @@
                       },
                       "minItems": 2,
                       "maxItems": 2,
-                      "description": "[easy, hard] half width of the sleeper field"
+                      "description": "[easy, hard] where the boulder appears behind you"
                     },
-                    "sleeperSpacingMetres": {
+                    "startKmh": {
                       "type": "array",
                       "items": {
                         "type": "number",
@@ -10654,9 +10664,9 @@
                       },
                       "minItems": 2,
                       "maxItems": 2,
-                      "description": "[easy, hard] spacing of the staggered sleeper grid"
+                      "description": "[easy, hard] its speed when it appears"
                     },
-                    "bearShare": {
+                    "accelerationKmhPerSecond": {
                       "type": "array",
                       "items": {
                         "type": "number",
@@ -10664,9 +10674,9 @@
                       },
                       "minItems": 2,
                       "maxItems": 2,
-                      "description": "[easy, hard] share of sleepers that are bears"
+                      "description": "[easy, hard] how fast it builds speed"
                     },
-                    "quietKmh": {
+                    "topSpeedRatio": {
                       "type": "array",
                       "items": {
                         "type": "number",
@@ -10674,9 +10684,9 @@
                       },
                       "minItems": 2,
                       "maxItems": 2,
-                      "description": "[easy, hard] speed below which you make only base noise"
+                      "description": "[easy, hard] its cruising speed as a share of your top speed"
                     },
-                    "baseRadiusMetres": {
+                    "catchUpMetres": {
                       "type": "array",
                       "items": {
                         "type": "number",
@@ -10684,9 +10694,9 @@
                       },
                       "minItems": 2,
                       "maxItems": 2,
-                      "description": "[easy, hard] noise radius at quiet speed"
+                      "description": "[easy, hard] beyond this gap it speeds up to keep the pressure on"
                     },
-                    "metresPerKmh": {
+                    "catchUpPerMetre": {
                       "type": "array",
                       "items": {
                         "type": "number",
@@ -10694,9 +10704,9 @@
                       },
                       "minItems": 2,
                       "maxItems": 2,
-                      "description": "[easy, hard] extra noise radius per km/h above quiet"
+                      "description": "[easy, hard] extra speed fraction per metre beyond that gap"
                     },
-                    "stirSeconds": {
+                    "radiusMetres": {
                       "type": "array",
                       "items": {
                         "type": "number",
@@ -10704,9 +10714,9 @@
                       },
                       "minItems": 2,
                       "maxItems": 2,
-                      "description": "[easy, hard] seconds inside the noise radius before a sleeper wakes"
+                      "description": "[easy, hard] starting radius"
                     },
-                    "treesPer100Metres": {
+                    "growthMetresPer100Metres": {
                       "type": "array",
                       "items": {
                         "type": "number",
@@ -10714,9 +10724,9 @@
                       },
                       "minItems": 2,
                       "maxItems": 2,
-                      "description": "[easy, hard] trees beside the field"
+                      "description": "[easy, hard] radius gained per 100 m rolled"
                     },
-                    "yetiSpeedKmh": {
+                    "maxRadiusMetres": {
                       "type": "array",
                       "items": {
                         "type": "number",
@@ -10724,9 +10734,9 @@
                       },
                       "minItems": 2,
                       "maxItems": 2,
-                      "description": "[easy, hard] speed of a woken giant"
+                      "description": "[easy, hard] largest radius"
                     },
-                    "chargeSeconds": {
+                    "obstaclesPer100Metres": {
                       "type": "array",
                       "items": {
                         "type": "number",
@@ -10734,7 +10744,67 @@
                       },
                       "minItems": 2,
                       "maxItems": 2,
-                      "description": "[easy, hard] seconds a woken giant charges before it gives up and goes back to sleep"
+                      "description": "[easy, hard] trees, rocks, stumps, bushes and sleds on the slope"
+                    },
+                    "jumpsPer100Metres": {
+                      "type": "array",
+                      "items": {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      "minItems": 2,
+                      "maxItems": 2,
+                      "description": "[easy, hard] ramps, moguls and small hills"
+                    },
+                    "icePer100Metres": {
+                      "type": "array",
+                      "items": {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      "minItems": 2,
+                      "maxItems": 2,
+                      "description": "[easy, hard] black ice pools (speed)"
+                    },
+                    "skiersPer100Metres": {
+                      "type": "array",
+                      "items": {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      "minItems": 2,
+                      "maxItems": 2,
+                      "description": "[easy, hard] lone skiers and boarders"
+                    },
+                    "bearsPer100Metres": {
+                      "type": "array",
+                      "items": {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      "minItems": 2,
+                      "maxItems": 2,
+                      "description": "[easy, hard] bears on the slope"
+                    },
+                    "sideTreesPer100Metres": {
+                      "type": "array",
+                      "items": {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      "minItems": 2,
+                      "maxItems": 2,
+                      "description": "[easy, hard] trees beside the corridor"
+                    },
+                    "playerScreenY": {
+                      "type": "array",
+                      "items": {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      "minItems": 2,
+                      "maxItems": 2,
+                      "description": "[easy, hard] where you sit on screen (0 top, 1 bottom) while the boulder rolls, so it stays in view"
                     }
                   }
                 }
