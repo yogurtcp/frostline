@@ -97,12 +97,12 @@ function updateAmbushes(e,L){
 // A Yeti that is already running when you arrive, a little uphill of you.
 function levelChaser(e,x,y,kmh){
   const c={kind:kmh>78?'fast':'slow',arcadeTier:kmh>90?'special':kmh>78?'fast':'slow',encounter:e,chaseRun:e.section,endlessBaseKmh:kmh,x,y,speed:kmh/S.physics.hudKmhPerSpeed,
-    wakeUntil:clock+range(.2,.6),phase:range(0,6),expires:Infinity,leaving:false,talkAt:clock+range(3,8)};
+    wakeUntil:clock+range(1.5,2.5),phase:range(0,6),expires:Infinity,leaving:false,talkAt:clock+range(3,8)};
   state.chasers.push(c);return c;
 }
 function releaseLevelChasers(e,count,kmh,spread,lines){
   const p=state.p,s=e.scale;
-  const [near,far]=e.kind==='avalanche'?[45,90]:[20,55];
+  const [near,far]=e.kind==='avalanche'?[45,90]:[35,70]; // like ordinary Yetis: they get up slowly, well behind you
   for(let i=0;i<count;i++){const c=levelChaser(e,p.x+range(-220,220)*s,p.y-range(near,far)*PX_PER_M*s,kmh+range(-spread,spread));if(i<2)say(pick(lines),c,1.8);}
 }
 function updateLevelAreas(dt){

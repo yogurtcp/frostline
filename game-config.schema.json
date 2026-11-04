@@ -10293,7 +10293,7 @@
                       },
                       "minItems": 2,
                       "maxItems": 2,
-                      "description": "[easy, hard] average speed (matches normal endless Yetis: 68 → 94 km/h)"
+                      "description": "[easy, hard] average speed: grey (slow) Yetis like early endless ones"
                     },
                     "chaserSpeedSpreadKmh": {
                       "type": "array",

@@ -1558,3 +1558,7 @@ Verification:
 - Boulder bot (gap logged): with a clean line the gap holds at about 35–60 m, and the radius grows 4→11 m. A crash lets it catch the skier within about a second (visits 3 and 6). Visits 1 and 3 clear when the bot does not crash. Screenshots show it looming in the upper half.
 - Y on visit 1: 3 Yeti meals counted (were 0 before the reach fix), and the bot reaches the end.
 - All-area trace: 192 checkpoints, no errors. Headless p95: 10–23 ms.
+
+## 140. Pied Piper Yetis slowed to grey-Yeti pace (2026-11-04)
+
+User: the Y Yetis still catch you in a second, unlike the grey Yetis that barely catch up. Causes: released chasers sprinted after 0.2–0.6 s (ordinary Yetis take `endless.yetis.wakeSeconds`, 2.5 s, to get up); they spawned 20–55 m back; and the debug key's preview visit count grows with replays, pushing the [68, 94] range toward 94. Now `chaserSpeedKmh` is [68, 78] ± 4 (grey tier), `wakeUntil` is 1.5–2.5 s and spawns are 35–70 m back. Note the HUD km/h vs world metres: 90 HUD km/h is about 45 world m/s. Bot: visit 1 is never caught (2 crashes); visit 3 is caught by a grey Yeti only after its fifth crash. Trace clean.
