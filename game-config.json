@@ -118,16 +118,20 @@
         "trees",
         "lake",
         "quiet",
+        "burrowField",
         "rivalRace",
         "forest",
+        "avalanche",
         "cemetery",
         "denseForest",
+        "sleepingGiants",
         "scramble",
         "quiet",
         "christmas",
         "quiet",
         "halloween",
-        "quiet"
+        "quiet",
+        "piedPiper"
       ],
       "firstMetres": 450,
       "gapMetres": [
@@ -178,6 +182,22 @@
         "halloween": [
           900,
           1200
+        ],
+        "piedPiper": [
+          520,
+          680
+        ],
+        "avalanche": [
+          380,
+          520
+        ],
+        "burrowField": [
+          260,
+          360
+        ],
+        "sleepingGiants": [
+          200,
+          270
         ]
       },
       "beginnerPeople": [
@@ -348,6 +368,108 @@
         "shoreGapMetres": 8,
         "jumpSeconds": 2.4,
         "durationCap": 1.6
+      },
+      "levels": {
+        "piedPiper": {
+          "yetis": [
+            3,
+            6
+          ],
+          "crowds": [
+            6,
+            4
+          ],
+          "crowdPeople": [
+            12,
+            9
+          ],
+          "yetiSpeedKmh": [
+            65,
+            85
+          ],
+          "sideTreesPer100Metres": [
+            4,
+            4
+          ]
+        },
+        "avalanche": {
+          "ballSeconds": [
+            1.9,
+            0.9
+          ],
+          "ballSpeedRatio": [
+            1.02,
+            1.1
+          ],
+          "ballTravelMetres": [
+            600,
+            600
+          ],
+          "fallingTreesPer100Metres": [
+            0.8,
+            1.8
+          ],
+          "sideTreesPer100Metres": [
+            5,
+            5
+          ]
+        },
+        "burrowField": {
+          "jumpSpacingMetres": [
+            30,
+            24
+          ],
+          "icePatchEvery": [
+            3,
+            3
+          ],
+          "burrowerSpacingMetres": [
+            70,
+            45
+          ],
+          "maxActive": [
+            1,
+            2
+          ],
+          "cooldownSeconds": [
+            2.2,
+            1
+          ],
+          "sideTreesPer100Metres": [
+            6,
+            6
+          ]
+        },
+        "sleepingGiants": {
+          "sleepersPer100Metres": [
+            4,
+            7
+          ],
+          "bearShare": [
+            0.35,
+            0.35
+          ],
+          "quietKmh": [
+            50,
+            40
+          ],
+          "baseRadiusMetres": [
+            3,
+            3
+          ],
+          "metresPerKmh": [
+            1.1,
+            1.1
+          ],
+          "stirSeconds": [
+            1,
+            1
+          ],
+          "treesPer100Metres": [
+            14,
+            14
+          ]
+        }
       }
     },
     "wildlife": {

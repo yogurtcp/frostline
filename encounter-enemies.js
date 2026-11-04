@@ -120,8 +120,12 @@ function updateEncounterEnemies(dt){
     if(o.burrowState==='waiting'){
       // Manual stress spawns wait with the player until a real approach is possible.
       if(o.debugSpawn){o.x=p.x;o.y=p.y+200;}
-      if((o.debugSpawn||!active&&clock>=(state.endless.nextBurrowAt||0)&&surpriseAreaAllowed(endlessEncounterAt(p.y)))&&Math.hypot(o.x-p.x,o.y-p.y)<E.burrower.noticeMetres*PX_PER_M&&startBurrow(o)){
-        active=true;if(!o.debugSpawn)state.endless.nextBurrowAt=clock+E.burrower.cooldownSeconds;
+      // In The Floor Is Burrowers, several can hunt at once on a short cooldown.
+      const area=endlessEncounterAt(p.y),field=area?.kind==='burrowField'&&o.fieldBurrower,F=field?levelConfig(area):null;
+      const ready=field?objectGroups().burrowers.filter(q=>!q.dead&&!q.eaten&&['rushing','settled','open'].includes(q.burrowState)).length<Math.round(levelValue(area,F.maxActive))&&clock>=(state.endless.nextFieldBurrowAt||0)
+        :!active&&clock>=(state.endless.nextBurrowAt||0)&&surpriseAreaAllowed(area);
+      if((o.debugSpawn||ready)&&Math.hypot(o.x-p.x,o.y-p.y)<E.burrower.noticeMetres*PX_PER_M&&startBurrow(o)){
+        active=true;if(field)state.endless.nextFieldBurrowAt=clock+levelValue(area,F.cooldownSeconds)*range(.8,1.2);else if(!o.debugSpawn)state.endless.nextBurrowAt=clock+E.burrower.cooldownSeconds;
       }
       continue;
     }

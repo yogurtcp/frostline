@@ -17,12 +17,13 @@ window.FROSTLINE_READY = (async () => {
   const range = (a,b) => a + random()*(b-a);
   const C = S.colors, stages = S.courses;
   const MONSTER_KINDS=new Set(['wolf','bear','lurker','zombie','fast','slow','burrower']);
-  const ENDLESS_DEBUG_AREAS=['forest','trees','town','crowd','quiet','cemetery','lake','denseForest','scramble','rivalRace','christmas','halloween'];
-  const WIDE_REGIONS=new Set(['town','christmas','halloween','trees','cemetery','denseForest','scramble','crowd','beginner']);
+  const ENDLESS_DEBUG_AREAS=['forest','trees','town','crowd','quiet','cemetery','lake','denseForest','scramble','rivalRace','christmas','halloween','piedPiper','avalanche','burrowField','sleepingGiants'];
+  const WIDE_REGIONS=new Set(['town','christmas','halloween','trees','cemetery','denseForest','scramble','crowd','beginner','piedPiper','avalanche','burrowField','sleepingGiants']);
   // __SPECIAL_AREAS_CODE__
   // __SEASONAL_AREAS_CODE__
   // __ENCOUNTER_ENEMIES_CODE__
   // __MUSEUM_CODE__
+  // __LEVELS_CODE__
   // __ART_DIRECTION_CODE__
   // Source rectangles in the actual generated PNG atlases. No stand-in art.
   const atlas = S.atlas;
@@ -478,6 +479,7 @@ window.FROSTLINE_READY = (async () => {
     if(['crowd','beginner'].includes(e.kind)){e.centerX=e.kind==='crowd'?state.p.x:root.x;e.crowdWidthMetres=Math.max(e.kind==='crowd'?R.crowd.widthMetres:0,R.minimumWidthMetres);e.half=e.crowdWidthMetres*PX_PER_M*e.scale/2-60;e.band=e.half+200;e.paths=[[{x:e.centerX,y:e.startY},{x:e.centerX,y:e.endY}]];}
     const names={crowd:'Rush Hour Slope',beginner:'Rush Hour Slope',quiet:'Snowy Trail',lake:'Stillwater Lake',denseForest:'Close Pines',scramble:'Wild Patch',forest:'Open Pines',cemetery:'Frost Rest Cemetery'};e.title=names[e.kind];
     if(SPECIAL_KINDS.has(e.kind)){planSpecialArea(e,section);}
+    else if(LEVEL_KINDS.has(e.kind)){planLevelArea(e,section);}
     else if(e.kind==='cemetery'){
       const C=R.cemetery,length=e.endY-e.startY,side=pick([-1,1]);e.openCemetery=true;e.centerX=root.x;
       e.clusterSpacing=mix(...C.clusterSpacingMetres.slice().reverse(),e.difficulty)*PX_PER_M*e.scale;
@@ -542,6 +544,7 @@ window.FROSTLINE_READY = (async () => {
     if(from===e.startY)entity('encounterTitle',e.centerX??root.x,e.startY-60*scale,{...own,r:0,width:300});
     const rows=(step,callback,offset=0)=>{for(let row=Math.max(0,Math.ceil((from-e.startY-offset)/step));;row++){const y=e.startY+offset+row*step;if(y>=to||y>=e.endY)break;callback(y,row);}};
     if(e.specialArea){populateSpecialArea(e,section,from,to);return;}
+    if(LEVEL_KINDS.has(e.kind)){populateLevelArea(e,section,from,to);return;}
     if(e.kind==='beginner'||e.kind==='crowd'){
       const crowd=e.kind==='crowd',center=e.centerX??root.x;
       populateForestBoundary(e,section,from,to,{banks:crowd});
@@ -825,6 +828,7 @@ window.FROSTLINE_READY = (async () => {
     }
   }
   function yetiWakeDistance(o){
+    const level=levelWakeOverride(o);if(level!==null)return level;
     if(!state.endless||!activeCourseOwner(o))return S.wildlife.yetiWakeDistance*endlessSpeedScale(o);
     return Math.max(S.endless.yetis.wakeMetres*PX_PER_M*endlessSpeedScale(o),state.p.speed*((o.wakeSeconds||0)+.8));
   }
@@ -833,7 +837,7 @@ window.FROSTLINE_READY = (async () => {
     // Fast ice must not carry the skier past a hunter's entire wake animation.
     return Math.min(delay,Math.max(.35,(o.y-state.p.y)/state.p.vy-.7));
   }
-  function endlessAnimalNotice(o,base){return state.endless&&activeCourseOwner(o)?Math.max(S.endless.wildlife.noticeMetres*PX_PER_M*endlessSpeedScale(o),state.p.speed*.9):base;}
+  function endlessAnimalNotice(o,base){const level=levelWakeOverride(o);if(level!==null)return level;return state.endless&&activeCourseOwner(o)?Math.max(S.endless.wildlife.noticeMetres*PX_PER_M*endlessSpeedScale(o),state.p.speed*.9):base;}
   function spawnEndlessWildlife(section,endY,pressure){
     const a=state.endless,Wl=S.endless.wildlife,scale=section.endlessScale,root=section.endlessRoot;
     while(a.nextWildlifeY<endY){
@@ -943,7 +947,7 @@ window.FROSTLINE_READY = (async () => {
     a.furthestY=Math.max(a.furthestY,state.p.y);const distance=Math.max(0,(a.furthestY-a.startY)/PX_PER_M);
     if(distance>=a.savedMetres+250){a.savedMetres=distance;recordEndless('RUNNING');state.endlessResult=null;}
     const active=endlessEncounterAt(state.p.y);
-    if(active&&!active.entered&&!(state.specialResultUntil>clock)){active.entered=true;announce(active.festival?active.title.toUpperCase():active.town?active.town.name.toUpperCase():active.title.toUpperCase(),active.kind==='christmas'?'MIND THE SLEIGH - FIND THE MISTLETOE':active.kind==='halloween'?'SOME COSTUMES ARE NOT COSTUMES':active.town?'ENTRY / EXIT FLAGS - YETIS CAN FOLLOW':active.kind==='quiet'?'FOLLOW THE SNOW PATH - TAKE A BREATH':active.kind==='scramble'?'FIND A GAP':active.kind==='cemetery'?'PICK YOUR GAP - WATCH THE BONES':active.kind==='rivalRace'?'FOLLOW THE GATES - DRAFT TO OVERTAKE':['beginner','crowd'].includes(active.kind)?'SKI THROUGH THE CROWD':active.noFlags?'NO FLAGS - FOLLOW THE SLOPE':active.paths.length>1?'CHOOSE A BRANCH - EITHER GATE COUNTS':'WIND THROUGH THE PINES',C.teal,3);}
+    if(active&&!active.entered&&!(state.specialResultUntil>clock)){active.entered=true;announce(active.festival?active.title.toUpperCase():active.town?active.town.name.toUpperCase():active.title.toUpperCase(),LEVEL_HINTS[active.kind]?LEVEL_HINTS[active.kind]:active.kind==='christmas'?'MIND THE SLEIGH - FIND THE MISTLETOE':active.kind==='halloween'?'SOME COSTUMES ARE NOT COSTUMES':active.town?'ENTRY / EXIT FLAGS - YETIS CAN FOLLOW':active.kind==='quiet'?'FOLLOW THE SNOW PATH - TAKE A BREATH':active.kind==='scramble'?'FIND A GAP':active.kind==='cemetery'?'PICK YOUR GAP - WATCH THE BONES':active.kind==='rivalRace'?'FOLLOW THE GATES - DRAFT TO OVERTAKE':['beginner','crowd'].includes(active.kind)?'SKI THROUGH THE CROWD':active.noFlags?'NO FLAGS - FOLLOW THE SLOPE':active.paths.length>1?'CHOOSE A BRANCH - EITHER GATE COUNTS':'WIND THROUGH THE PINES',C.teal,3);}
     state.roads=state.roads.filter(r=>!r.endlessEncounter||(r.endlessEndY??r.endlessEncounter.endY)>state.p.y-S.world.sceneryRetentionBehind);
     state.villages=state.villages.filter(t=>!t.endlessRun||t.end>state.p.y-S.world.sceneryRetentionBehind);
     const view=viewBounds();
@@ -2107,7 +2111,7 @@ window.FROSTLINE_READY = (async () => {
     meal.eaten=true;meal.r=0;meal.walking=false;meal.socialUntil=meal.fearUntil=0;
     state.speech=state.speech.filter(q=>q.object!==meal);
     hunter.divert=null;hunter.divertOrigin=null;hunter.obstacleDetour=null;hunter.avoidUntil=0;
-    hunter.feedingUntil=clock+pause;hunter.nextDivertCheck=hunter.feedingUntil;
+    hunter.feedingUntil=clock+pause;hunter.nextDivertCheck=hunter.feedingUntil;levelSatedYeti(hunter);
     say('CHOMP!',hunter,1.2);burst(meal.x,meal.y,C.ice,9);
   }
   function consumeNearbyPrey(hunter,previous,pause=S.predators.mealPauseSeconds,radius=S.chasers.captureDistance,contacts=null){
@@ -2919,7 +2923,7 @@ window.FROSTLINE_READY = (async () => {
         if(obstacleSegmentDistance(0,0,previous.x-oldX,previous.y-oldY,p.x-o.x,p.y-o.y)<o.r+S.physics.playerRadius)hit(o);
         if(terrainHitsPredators(o,[oldX,oldY,o.x,o.y])){breakSnowball(o);continue;}
         if(clock>(o.nextPowder||0)){burst(o.x-o.vx*.04,o.y,C.ice,2);o.nextPowder=clock+.12;}
-        if(o.rollDistance>=f.travelMetres*PX_PER_M||insideTown(o.x,o.y)||safeApproach(o.x,o.y))breakSnowball(o);
+        if(o.rollDistance>=(o.travelLimit??f.travelMetres*PX_PER_M)||insideTown(o.x,o.y)||safeApproach(o.x,o.y))breakSnowball(o);
       }
     }
   }
@@ -2997,7 +3001,7 @@ window.FROSTLINE_READY = (async () => {
     else if(state.zone.kind==='start'&&p.y>S.world.autoCourseY)startCourse('free',{x:p.x,y:S.world.autoCourseY});
     else if(state.zone.kind==='village'&&p.y>state.zone.end){if(state.arcade){state.arcade.stage++;startCourse('arcade',{x:state.zone.x,y:p.y});}else startCourse('free',{x:p.x,y:p.y});}
     if(state.arcade)state.arcade.furthestY=Math.max(state.arcade.furthestY,p.y);
-    updateEndless();updateMuseum();updateDogCompanions(dt,previous);updateChasers(dt);if(state.sceneCard||state.deathTimer)return;
+    updateEndless();updateMuseum();updateLevelAreas(dt);updateDogCompanions(dt,previous);updateChasers(dt);if(state.sceneCard||state.deathTimer)return;
     // Confirm landing feedback after obstacles and chasers have resolved this step.
     if(p.landingFeedback){
       const landing=p.landingFeedback;p.landingFeedback=null;
@@ -4370,7 +4374,7 @@ window.FROSTLINE_READY = (async () => {
     if(s.x<-margin||s.x>W+margin||s.y<-80-vertical||s.y>H+230+vertical)return;
     // Ordinary bodies do not need the long-obstacle drawing margin. Keep harnesses and moving trunks broad.
     if(TIGHT_DRAW_TYPES.has(o.type)&&!o.santaSleigh){const half=(o.paradeSpanX?houseFootHalfWidth(o)*ZOOM:(o.width||40)*ZOOM*.75)+24+(GRIT_BUILDINGS.has(o.houseSprite||o.type)?12:0);if(s.x+half<0||s.x-half>W)return;}
-    if(drawEncounterEnemy(o,s,o.feedingUntil>clock)||drawSeasonalProp(o,s)||drawSpecialProp(o,s))return;
+    if(drawLevelProp(o,s)||drawEncounterEnemy(o,s,o.feedingUntil>clock)||drawSeasonalProp(o,s)||drawSpecialProp(o,s))return;
     if(o.villageDetail){drawVillageDetail(o,s);return;}
     if(o.type==='encounterTitle'){text(o.encounter.title.toUpperCase(),s.x,s.y,13,C.teal);return;}
     if(o.dead){ctx.save();ctx.globalAlpha=clamp((o.fadeUntil-clock)/(o.type==='wolf'?S.wildlife.wolfFadeSeconds:S.wildlife.predatorFadeSeconds),0,1);if(o.type==='wolf')sprite('wolf',s.x,s.y,o.width,{rotate:Math.PI/2});else drawKnockedOut(o,s,o.type);ctx.restore();return;}
@@ -4625,7 +4629,7 @@ window.FROSTLINE_READY = (async () => {
     if(run){
       const frac=run.endless?endlessPressure((state.endless.furthestY-run.startY)/PX_PER_M).t:clamp((p.y-run.startY)/(run.endY-run.startY),0,1);box(18,64,(W-36)*frac,2,stages[run.id].color);
       const objective=run.endless?`${run.cleared} FLAGS - ${run.missed} MISSED`:run.objective==='mushrooms'?`${run.collected}/${run.totalMushrooms} MUSHROOMS (NEED ${Math.ceil(run.totalMushrooms*S.mushroomHunt.minimumFraction)})`:run.totalGates?`${run.cleared}/${run.totalGates} FLAGS${run.arcade?'':' ('+Math.round(S.race.minimumGateFraction*100)+'% MIN)'}`:'';
-      text(`${run.arcade?'':run.points+' PTS  '}${objective}`,20,H-22,10,C.teal,'left');text(Math.round(Math.hypot(p.vx,p.vy)*S.physics.hudKmhPerSpeed)+' km/h',W-20,H-22,10,C.muted,'right');
+      text(`${run.arcade?'':run.points+' PTS  '}${objective}`,20,H-22,10,C.teal,'left');text(Math.round(Math.hypot(p.vx,p.vy)*S.physics.hudKmhPerSpeed)+' km/h',W-20,H-22,10,levelSpeedWarning()?C.red:C.muted,'right',levelSpeedWarning()?1:0);
     }
     else if(state.activeTime>15&&state.zone.kind!=='museum'){text(state.arcade?'NEXT STAGE AT THE END OF TOWN':'SKI THROUGH A GATE TO ENTER',W/2,H-23,9,C.muted);}
     if(run&&!run.arcade&&S.timing.enabled&&(run.totalGates||run.totalMushrooms)){const best=courseRecord(run.id)?.bestSeconds;text(`TIME ${formatTime(run.time)}${best?'  BEST '+formatTime(best):'  SET A BEST TIME'}`,20,H-40,10,C.ink,'left');}
@@ -4690,7 +4694,7 @@ window.FROSTLINE_READY = (async () => {
     if(state.sceneCard){drawSceneCard();return;}
     ctx.imageSmoothingEnabled=false;ctx.save();
     if(state.screenShake>0)ctx.translate(Math.sin(clock*71)*2,Math.cos(clock*67)*2);
-    snow();drawLift();drawMuseumNotes();
+    snow();drawLift();drawMuseumNotes();drawLevelGround();
     ctx.save();ctx.lineCap='round';
     for(const [color,width] of [['#9ebbc5',1.7],['#dce9e7',1.25]])for(const t of state.snowballTrails){
       const a=screen(t.ax,t.ay),b=screen(t.bx,t.by);if(Math.max(a.y,b.y)<0||Math.min(a.y,b.y)>H)continue;
@@ -4711,7 +4715,7 @@ window.FROSTLINE_READY = (async () => {
     for(const o of museumStatuesInView(top,bottom))layers.push(o);
     layers.push(state.p);layers.sort((a,b)=>a.y-b.y);for(const o of layers)if(o===state.p)drawPlayer();else if(o.type)drawObject(o);else drawChaser(o);
     for(const q of state.particles){const s=screen(q.x,q.y);ctx.globalAlpha=q.totalLife?clamp(q.life/q.totalLife,0,1):1;box(s.x,s.y,q.size||3,q.size||3,q.color);}ctx.globalAlpha=1;
-    drawDeathAnimation();drawSpecialEffects();drawGearEffect();drawNightLighting(layers.concat(groundLights));drawWerewolfWarnings();drawSpeech();ctx.restore();hud();touchControl();
+    drawDeathAnimation();drawSpecialEffects();drawGearEffect();drawNightLighting(layers.concat(groundLights));drawWerewolfWarnings();drawLevelMarks();drawSpeech();ctx.restore();hud();touchControl();
     if(state.deathTimer>0&&state.deathTimer<.5&&!state.deathAnimation){ctx.globalAlpha=1-state.deathTimer/.5;box(0,0,W,H,C.snow);ctx.globalAlpha=1;}
   }
   function resize() {
@@ -4736,7 +4740,7 @@ window.FROSTLINE_READY = (async () => {
   canvas.addEventListener('pointermove',e=>{if(state.input.pointer?.id!==e.pointerId)return;e.preventDefault();updateSwipe(e);});
   canvas.addEventListener('pointerup',e=>{activePointers.delete(e.pointerId);if(state.input.pointer?.id!==e.pointerId)return;e.preventDefault();updateSwipe(e);finishPointerTap(e);releasePointer();});const cancel=e=>{activePointers.delete(e.pointerId);if(state.input.pointer?.id===e.pointerId)releasePointer();};canvas.addEventListener('pointercancel',cancel);canvas.addEventListener('lostpointercapture',cancel);window.addEventListener('pointerup',e=>activePointers.delete(e.pointerId));window.addEventListener('pointercancel',e=>activePointers.delete(e.pointerId));
   const sceneHeldKeys=new Set();
-  window.addEventListener('keydown',e=>{if(state.deathAnimation){e.preventDefault();sceneHeldKeys.add(e.code);return;}if(state.sceneCard&&!e.target?.closest?.('dialog,#install-app')){e.preventDefault();sceneHeldKeys.add(e.code);if(!e.repeat&&!['Shift','Control','Alt','Meta'].includes(e.key))dismissSceneCard();return;}if(sceneHeldKeys.has(e.code)){e.preventDefault();return;}if(e.target?.closest?.('button,dialog,a,input,textarea,select,[contenteditable]'))return;const debugEnemy={KeyR:'burrower',KeyT:'werewolf'}[e.code]??{r:'burrower',t:'werewolf'}[e.key.toLowerCase()];if(debugEnemy&&!e.ctrlKey&&!e.metaKey&&!e.altKey&&!e.shiftKey){if(!e.repeat&&debugEncounterEnemy(debugEnemy))e.preventDefault();return;}if(e.code==='KeyP'&&!e.ctrlKey&&!e.metaKey&&!e.altKey){e.preventDefault();if(!e.repeat)toggleDayNight();return;}const difficultyStep=['[','-'].includes(e.key)?-1:[']','+','='].includes(e.key)?1:e.code==='BracketLeft'||e.code==='NumpadSubtract'?-1:e.code==='BracketRight'||e.code==='NumpadAdd'?1:0;if(difficultyStep&&!e.ctrlKey&&!e.metaKey&&!e.altKey&&(!e.shiftKey||['+','[',']'].includes(e.key))){if(!e.repeat&&debugEndlessDifficulty(difficultyStep)){e.preventDefault();return;}}const letter={q:10,w:11,e:12}[e.key.toLowerCase()]??{KeyQ:10,KeyW:11,KeyE:12}[e.code];if(letter&&!e.ctrlKey&&!e.metaKey&&!e.altKey&&!e.shiftKey){if(e.repeat&&(state.endless||!state.course&&state.zone.kind==='start')){e.preventDefault();return;}if(!e.repeat&&debugEndlessArea(letter)){e.preventDefault();return;}}const number=Number(e.key)||Number(e.code.match(/^(?:Digit|Numpad)([1-9])$/)?.[1]);if(number>=1&&number<=9&&!e.ctrlKey&&!e.metaKey&&!e.altKey&&!e.shiftKey){if(!e.repeat&&debugEndlessArea(number)){e.preventDefault();return;}}const key={ArrowLeft:'left',ArrowRight:'right',ArrowUp:'up',ArrowDown:'down',a:'left',d:'right',w:'up',s:'down'}[e.key];if(key){e.preventDefault();if((state.p.awaitingInput&&e.repeat)||!startMoving())return;state.input[key]=true;keyboardDirection(key,e.repeat);}if(e.code==='Space')e.preventDefault();if(e.key.toLowerCase()==='m'&&!e.repeat){state.muted=!state.muted;save();announce(state.muted?'SOUND OFF':'SOUND ON','',C.teal,1);}});
+  window.addEventListener('keydown',e=>{if(state.deathAnimation){e.preventDefault();sceneHeldKeys.add(e.code);return;}if(state.sceneCard&&!e.target?.closest?.('dialog,#install-app')){e.preventDefault();sceneHeldKeys.add(e.code);if(!e.repeat&&!['Shift','Control','Alt','Meta'].includes(e.key))dismissSceneCard();return;}if(sceneHeldKeys.has(e.code)){e.preventDefault();return;}if(e.target?.closest?.('button,dialog,a,input,textarea,select,[contenteditable]'))return;const debugEnemy={KeyR:'burrower',KeyT:'werewolf'}[e.code]??{r:'burrower',t:'werewolf'}[e.key.toLowerCase()];if(debugEnemy&&!e.ctrlKey&&!e.metaKey&&!e.altKey&&!e.shiftKey){if(!e.repeat&&debugEncounterEnemy(debugEnemy))e.preventDefault();return;}if(e.code==='KeyP'&&!e.ctrlKey&&!e.metaKey&&!e.altKey){e.preventDefault();if(!e.repeat)toggleDayNight();return;}const difficultyStep=['[','-'].includes(e.key)?-1:[']','+','='].includes(e.key)?1:e.code==='BracketLeft'||e.code==='NumpadSubtract'?-1:e.code==='BracketRight'||e.code==='NumpadAdd'?1:0;if(difficultyStep&&!e.ctrlKey&&!e.metaKey&&!e.altKey&&(!e.shiftKey||['+','[',']'].includes(e.key))){if(!e.repeat&&debugEndlessDifficulty(difficultyStep)){e.preventDefault();return;}}const letter={q:10,w:11,e:12,y:13,u:14,i:15,o:16}[e.key.toLowerCase()]??{KeyQ:10,KeyW:11,KeyE:12,KeyY:13,KeyU:14,KeyI:15,KeyO:16}[e.code];if(letter&&!e.ctrlKey&&!e.metaKey&&!e.altKey&&!e.shiftKey){if(e.repeat&&(state.endless||!state.course&&state.zone.kind==='start')){e.preventDefault();return;}if(!e.repeat&&debugEndlessArea(letter)){e.preventDefault();return;}}const number=Number(e.key)||Number(e.code.match(/^(?:Digit|Numpad)([1-9])$/)?.[1]);if(number>=1&&number<=9&&!e.ctrlKey&&!e.metaKey&&!e.altKey&&!e.shiftKey){if(!e.repeat&&debugEndlessArea(number)){e.preventDefault();return;}}const key={ArrowLeft:'left',ArrowRight:'right',ArrowUp:'up',ArrowDown:'down',a:'left',d:'right',w:'up',s:'down'}[e.key];if(key){e.preventDefault();if((state.p.awaitingInput&&e.repeat)||!startMoving())return;state.input[key]=true;keyboardDirection(key,e.repeat);}if(e.code==='Space')e.preventDefault();if(e.key.toLowerCase()==='m'&&!e.repeat){state.muted=!state.muted;save();announce(state.muted?'SOUND OFF':'SOUND ON','',C.teal,1);}});
   window.addEventListener('keyup',e=>{sceneHeldKeys.delete(e.code);const key={ArrowLeft:'left',ArrowRight:'right',ArrowUp:'up',ArrowDown:'down',a:'left',d:'right',w:'up',s:'down'}[e.key];if(key)state.input[key]=false;});
   window.addEventListener('blur',()=>{activePointers.clear();delete state.input.tap;sceneHeldKeys.clear();state.input.left=state.input.right=state.input.up=state.input.down=false;if(state.input.pointer)releasePointer();});
   window.addEventListener('resize',resize);
