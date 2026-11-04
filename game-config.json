@@ -1884,9 +1884,9 @@
     "playerWidth": 44,
     "fallWidth": 60,
     "speechSeconds": 2.5,
-    "speechTextSize": 14,
-    "speechWrapCharacters": 18,
-    "speechLineGap": 4,
+    "speechTextSize": 9,
+    "speechWrapCharacters": 27,
+    "speechLineGap": 3,
     "speechLimit": 5,
     "messageSeconds": 3.2,
     "messageLimit": 4,
@@ -2943,7 +2943,7 @@
       {
         "id": "rules",
         "title": "HOW CREATURES WORK",
-        "text": "Jump over anything. Ram one at full speed: it's out, but you fall. Sleeping or waking ones only knock you down. Awake hunters catch you, unless you carry a sword."
+        "text": "A jump off a ramp or hill clears any creature. Ram one at full speed: it's out, but you fall. Sleeping or waking ones only knock you down. Awake hunters catch you, unless you carry a sword."
       },
       {
         "id": "sleepingYeti",
@@ -2993,7 +2993,7 @@
       {
         "id": "burrower",
         "title": "SNOW BURROWER",
-        "text": "Tunnels in, stops just ahead of you, then pops open. Turn or jump during its pause. Can't be rammed."
+        "text": "Tunnels in, stops just ahead of you, then pops open. Turn away during its pause, or fly over it off a jump. Can't be rammed."
       },
       {
         "id": "dog",
@@ -3033,7 +3033,7 @@
       {
         "id": "trees",
         "title": "TREES",
-        "text": "Solid. Hit one fast and it snaps, and so do you. Jumps clear them."
+        "text": "Solid. Hit one fast and it snaps, and so do you. Flying off a jump clears them."
       },
       {
         "id": "rocks",
@@ -3088,7 +3088,7 @@
       {
         "id": "mushroom",
         "title": "MUSHROOM",
-        "text": "Bouncy! Throws you into the air with a boost."
+        "text": "A harmless puff of spores. In Spore Decisions you collect them."
       },
       {
         "id": "shieldGate",
