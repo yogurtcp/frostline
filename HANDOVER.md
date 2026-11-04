@@ -1591,3 +1591,7 @@ User: Y ended before they got rid of all the Yetis; it should continue as long a
   - The text tile cache is now least-recently-used, with 512 entries (was first-in-first-out, 256).
   - Result: Y holds 573 objects instead of 779; step median 1.7 → 1.3 ms and p95 4.1 → 2.9 ms; Boulder step median 1.6 → 0.7 ms. Headless render p99 spikes (about 30 ms) are unchanged.
 - Checked: checkpoint taken at a real endless run's town station, skied 400 m past (the station object is now dropped), died, and resumed at the checkpoint with no errors. Trace: 192 checkpoints, no errors.
+
+## 145. Pied Piper counter only goes down (2026-11-04)
+
+User: the YETIS ON YOUR TAIL count went up; Yetis no longer following should be removed and never reappear. Causes: the count included Yetis within 180 m, so one that fell back and caught up again was counted again, and side-charging ambush Yetis added to it. `piedPiperChasing` now removes the area's chasers once they are more than `endless.yetis.nearbyMetres` behind (lost for good), then counts the rest. Pied Piper ambushes no longer spawn Yetis (bears and wolf packs only); Avalanche ambushes are unchanged. Bot: the counter went 10→7→2→0 and 10→8→7→1→0. Trace clean.

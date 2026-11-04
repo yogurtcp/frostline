@@ -90,7 +90,7 @@ function updateAmbushes(e,L){
   if(clock<e.nextAmbush)return;
   e.nextAmbush=clock+every*range(.7,1.3);
   const b=viewBounds(),s=e.scale,line=encounterPathX(e.paths[0],p.y),roll=random();
-  const yetiOk=e.kind!=='piedPiper'||!e.released&&p.y<e.baseEndY;
+  const yetiOk=e.kind!=='piedPiper'; // Pied Piper is the ten from the start, nothing more
   if(roll<.45&&yetiOk){const side=pick([-1,1]),c=levelChaser(e,side<0?b.left-30:b.right+30,p.y+range(10,35)*PX_PER_M*s,levelValue(e,L.chaserSpeedKmh)-5);say(pick(['SURPRISE!','HELLO THERE!','THOUGHT YOU WERE SAFE?']),c,1.4);}
   else{const x=clamp(p.x+range(-160,160),line-e.half*.9,line+e.half*.9),y=b.bottom+60;
     if(roll<.75)entity('bear',x,y,{...ARCADE_ITEMS.bear,arcadeRun:e.section,encounter:e,nextAI:clock+range(.5,2)});else levelWolfPack(e,x,y);}
@@ -129,10 +129,11 @@ function updateLevelAreas(dt){
   else if(e.kind==='burrowField')updateBurrowField(e,L);
   else if(e.kind==='boulder')updateBoulderArea(e,L,dt);
 }
-// Pied Piper: Yetis from this area still on your tail (eaten, gone or more than 180 m back means lost).
+// Pied Piper: a Yeti that falls 180 m behind has lost you for good and is removed, so the count only ever goes down.
 function piedPiperChasing(e){
   const p=state.p,far=S.endless.yetis.nearbyMetres*PX_PER_M*e.scale;
-  return state.chasers.filter(c=>c.encounter===e&&!c.dead&&!c.eaten&&!c.leaving&&c.y>p.y-far).length;
+  state.chasers=state.chasers.filter(c=>c.encounter!==e||c.dead||c.eaten||c.leaving||c.y>p.y-far);
+  return state.chasers.filter(c=>c.encounter===e&&!c.dead&&!c.eaten&&!c.leaving).length;
 }
 // Called while planning ahead: while the pack is still on you, the area keeps stretching downhill, so the next area never starts.
 function holdLevelExit(a,horizon,scale){
