@@ -188,16 +188,16 @@
           680
         ],
         "avalanche": [
-          380,
-          520
+          700,
+          900
         ],
         "burrowField": [
-          260,
-          360
+          650,
+          850
         ],
         "sleepingGiants": [
-          200,
-          270
+          380,
+          480
         ]
       },
       "beginnerPeople": [
@@ -394,16 +394,12 @@
         },
         "avalanche": {
           "ballSeconds": [
-            1.9,
-            0.9
-          ],
-          "ballSpeedRatio": [
-            1.02,
-            1.1
+            1.4,
+            0.7
           ],
           "ballTravelMetres": [
-            600,
-            600
+            400,
+            400
           ],
           "fallingTreesPer100Metres": [
             0.8,
@@ -412,42 +408,62 @@
           "sideTreesPer100Metres": [
             5,
             5
+          ],
+          "ballExtraKmh": [
+            25,
+            40
+          ],
+          "trailSeconds": [
+            2.5,
+            2.5
           ]
         },
         "burrowField": {
           "jumpSpacingMetres": [
-            30,
-            24
+            60,
+            52
           ],
           "icePatchEvery": [
             3,
             3
           ],
           "burrowerSpacingMetres": [
-            70,
-            45
+            35,
+            22
           ],
           "maxActive": [
-            1,
-            2
+            2,
+            4
           ],
           "cooldownSeconds": [
-            2.2,
-            1
+            1.2,
+            0.6
           ],
           "sideTreesPer100Metres": [
             6,
             6
+          ],
+          "huntSpeed": [
+            1.15,
+            1.3
+          ],
+          "strikePause": [
+            0.4,
+            0.3
+          ],
+          "huntSeconds": [
+            6,
+            8
           ]
         },
         "sleepingGiants": {
           "sleepersPer100Metres": [
-            4,
-            7
+            10,
+            15
           ],
           "bearShare": [
-            0.35,
-            0.35
+            0.15,
+            0.15
           ],
           "quietKmh": [
             50,
@@ -466,8 +482,12 @@
             1
           ],
           "treesPer100Metres": [
-            14,
-            14
+            18,
+            22
+          ],
+          "yetiSpeedKmh": [
+            95,
+            105
           ]
         }
       }

@@ -2860,6 +2860,7 @@ window.FROSTLINE_READY = (async () => {
     // Sample the short swept step using each object's actual footprint (including houses and trunks).
     const samples=Math.max(1,Math.ceil(Math.hypot(o.x-oldX,o.y-oldY)/Math.max(1,o.r*.35)));
     for(const other of state.objects){
+      if(o.avalancheBall&&(other.type!=='fallingTree'||other.fallState==='standing'||other.fallState==='warning'))continue; // only toppled trunks stop the avalanche
       if(other===o||other.r<=0||other.eaten||other.dead||other.collected||['logBump','ramp','mogul','smallHill','largeHill','mushroom','rainbow','ice','rugged'].includes(other.type))continue;
       const extent=other.treeLength||other.width||other.r;
       if(Math.abs(other.x-o.x)>extent+o.r+Math.abs(o.x-oldX)||Math.abs(other.y-o.y)>extent+o.r+Math.abs(o.y-oldY))continue;
@@ -2917,7 +2918,7 @@ window.FROSTLINE_READY = (async () => {
         const move=Math.hypot(o.x-oldX,o.y-oldY);o.rollDistance+=move;o.rollAngle+=move/o.r*o.rollSide;
         o.r=Math.min(f.maxRadiusMetres*PX_PER_M,f.radiusMetres*PX_PER_M+o.rollDistance*f.radiusGrowthPerMetre);o.width=o.r*2;
         if(Math.hypot(o.x-o.trailX,o.y-o.trailY)>=Math.max(3,o.r*.3)){
-          state.snowballTrails.push({ax:o.trailX,ay:o.trailY,bx:o.x,by:o.y,r:o.r,until:clock+f.trailSeconds});o.trailX=o.x;o.trailY=o.y;
+          state.snowballTrails.push({ax:o.trailX,ay:o.trailY,bx:o.x,by:o.y,r:o.r,until:clock+(o.trailSeconds??f.trailSeconds)});o.trailX=o.x;o.trailY=o.y;
         }
         if(snowballHitsScenery(o,oldX,oldY))continue;
         if(obstacleSegmentDistance(0,0,previous.x-oldX,previous.y-oldY,p.x-o.x,p.y-o.y)<o.r+S.physics.playerRadius)hit(o);

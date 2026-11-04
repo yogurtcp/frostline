@@ -10327,16 +10327,6 @@
                       "maxItems": 2,
                       "description": "[easy, hard]"
                     },
-                    "ballSpeedRatio": {
-                      "type": "array",
-                      "items": {
-                        "type": "number",
-                        "minimum": 0
-                      },
-                      "minItems": 2,
-                      "maxItems": 2,
-                      "description": "[easy, hard]"
-                    },
                     "ballTravelMetres": {
                       "type": "array",
                       "items": {
@@ -10358,6 +10348,26 @@
                       "description": "[easy, hard]"
                     },
                     "sideTreesPer100Metres": {
+                      "type": "array",
+                      "items": {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      "minItems": 2,
+                      "maxItems": 2,
+                      "description": "[easy, hard]"
+                    },
+                    "ballExtraKmh": {
+                      "type": "array",
+                      "items": {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      "minItems": 2,
+                      "maxItems": 2,
+                      "description": "[easy, hard]"
+                    },
+                    "trailSeconds": {
                       "type": "array",
                       "items": {
                         "type": "number",
@@ -10425,6 +10435,36 @@
                       "description": "[easy, hard]"
                     },
                     "sideTreesPer100Metres": {
+                      "type": "array",
+                      "items": {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      "minItems": 2,
+                      "maxItems": 2,
+                      "description": "[easy, hard]"
+                    },
+                    "huntSpeed": {
+                      "type": "array",
+                      "items": {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      "minItems": 2,
+                      "maxItems": 2,
+                      "description": "[easy, hard]"
+                    },
+                    "strikePause": {
+                      "type": "array",
+                      "items": {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      "minItems": 2,
+                      "maxItems": 2,
+                      "description": "[easy, hard]"
+                    },
+                    "huntSeconds": {
                       "type": "array",
                       "items": {
                         "type": "number",
@@ -10510,6 +10550,16 @@
                       "minItems": 2,
                       "maxItems": 2,
                       "description": "[easy, hard]"
+                    },
+                    "yetiSpeedKmh": {
+                      "type": "array",
+                      "items": {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      "minItems": 2,
+                      "maxItems": 2,
+                      "description": "[easy, hard] chase speed once woken"
                     }
                   }
                 }
