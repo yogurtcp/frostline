@@ -3783,6 +3783,11 @@
           "type": "number",
           "minimum": 0
         },
+        "speechSpacingSeconds": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Minimum seconds between two different speakers starting a line; a speaker already talking can still change their line."
+        },
         "messageSeconds": {
           "type": "number",
           "minimum": 0,
@@ -10258,9 +10263,9 @@
                 "piedPiper": {
                   "type": "object",
                   "additionalProperties": false,
-                  "description": "Yetis wake as you pass; lead each into a crowd and, once fed, it goes home.",
+                  "description": "Ten Yetis chase you from the start; skiers feed them, ice speeds you away.",
                   "properties": {
-                    "yetis": {
+                    "chasingYetis": {
                       "type": "array",
                       "items": {
                         "type": "number",
@@ -10268,9 +10273,9 @@
                       },
                       "minItems": 2,
                       "maxItems": 2,
-                      "description": "[easy, hard]"
+                      "description": "[easy, hard] Yetis let loose behind you as you enter"
                     },
-                    "crowdSpacingMetres": {
+                    "chaserSpeedKmh": {
                       "type": "array",
                       "items": {
                         "type": "number",
@@ -10278,9 +10283,9 @@
                       },
                       "minItems": 2,
                       "maxItems": 2,
-                      "description": "[easy, hard] metres between waiting crowds; crowds continue while the exit is held"
+                      "description": "[easy, hard] their average speed"
                     },
-                    "crowdPeople": {
+                    "chaserSpeedSpreadKmh": {
                       "type": "array",
                       "items": {
                         "type": "number",
@@ -10288,9 +10293,9 @@
                       },
                       "minItems": 2,
                       "maxItems": 2,
-                      "description": "[easy, hard]"
+                      "description": "[easy, hard] ± spread of individual speeds"
                     },
-                    "yetiSpeedKmh": {
+                    "skiersPer100Metres": {
                       "type": "array",
                       "items": {
                         "type": "number",
@@ -10298,7 +10303,17 @@
                       },
                       "minItems": 2,
                       "maxItems": 2,
-                      "description": "[easy, hard]"
+                      "description": "[easy, hard] lone skiers and boarders on the slope"
+                    },
+                    "icePer100Metres": {
+                      "type": "array",
+                      "items": {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      "minItems": 2,
+                      "maxItems": 2,
+                      "description": "[easy, hard] black ice pools on the line"
                     },
                     "sideTreesPer100Metres": {
                       "type": "array",
@@ -10308,17 +10323,7 @@
                       },
                       "minItems": 2,
                       "maxItems": 2,
-                      "description": "[easy, hard]"
-                    },
-                    "catchUpBoost": {
-                      "type": "array",
-                      "items": {
-                        "type": "number",
-                        "minimum": 0
-                      },
-                      "minItems": 2,
-                      "maxItems": 2,
-                      "description": "[easy, hard] extra speed fraction for a hungry Yeti that has fallen far behind"
+                      "description": "[easy, hard] trees beside the line"
                     }
                   }
                 },
@@ -10396,13 +10401,93 @@
                       "minItems": 2,
                       "maxItems": 2,
                       "description": "[easy, hard] every Nth spawn is a volley of three balls across the corridor"
+                    },
+                    "skiersPer100Metres": {
+                      "type": "array",
+                      "items": {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      "minItems": 2,
+                      "maxItems": 2,
+                      "description": "[easy, hard] lone skiers and boarders on the slope"
+                    },
+                    "chasingYetis": {
+                      "type": "array",
+                      "items": {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      "minItems": 2,
+                      "maxItems": 2,
+                      "description": "[easy, hard] Yetis let loose behind you as you enter"
+                    },
+                    "chaserSpeedKmh": {
+                      "type": "array",
+                      "items": {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      "minItems": 2,
+                      "maxItems": 2,
+                      "description": "[easy, hard] their average speed"
+                    },
+                    "chaserSpeedSpreadKmh": {
+                      "type": "array",
+                      "items": {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      "minItems": 2,
+                      "maxItems": 2,
+                      "description": "[easy, hard] ± spread of individual speeds"
+                    },
+                    "lurkersPer100Metres": {
+                      "type": "array",
+                      "items": {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      "minItems": 2,
+                      "maxItems": 2,
+                      "description": "[easy, hard] slow sleeping Yetis on the slope"
+                    },
+                    "lurkerSpeedKmh": {
+                      "type": "array",
+                      "items": {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      "minItems": 2,
+                      "maxItems": 2,
+                      "description": "[easy, hard] their speed once awake"
+                    },
+                    "bearsPer100Metres": {
+                      "type": "array",
+                      "items": {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      "minItems": 2,
+                      "maxItems": 2,
+                      "description": "[easy, hard] bears on the slope"
+                    },
+                    "wolfPacksPer100Metres": {
+                      "type": "array",
+                      "items": {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      "minItems": 2,
+                      "maxItems": 2,
+                      "description": "[easy, hard] wolf packs on the slope"
                     }
                   }
                 },
                 "burrowField": {
                   "type": "object",
                   "additionalProperties": false,
-                  "description": "Burrowers hunt anything on the snow; chain terrain jumps and land on ice.",
+                  "description": "Burrowers streak in from the screen edges toward where you will be.",
                   "properties": {
                     "jumpSpacingMetres": {
                       "type": "array",
@@ -10412,7 +10497,7 @@
                       },
                       "minItems": 2,
                       "maxItems": 2,
-                      "description": "[easy, hard]"
+                      "description": "[easy, hard] metres between jumps on the line"
                     },
                     "icePatchEvery": {
                       "type": "array",
@@ -10422,9 +10507,9 @@
                       },
                       "minItems": 2,
                       "maxItems": 2,
-                      "description": "[easy, hard]"
+                      "description": "[easy, hard] every Nth jump slot is a small ice pool"
                     },
-                    "burrowerSpacingMetres": {
+                    "spawnSeconds": {
                       "type": "array",
                       "items": {
                         "type": "number",
@@ -10432,9 +10517,9 @@
                       },
                       "minItems": 2,
                       "maxItems": 2,
-                      "description": "[easy, hard]"
+                      "description": "[easy, hard] seconds between burrower attacks"
                     },
-                    "maxActive": {
+                    "pincerChance": {
                       "type": "array",
                       "items": {
                         "type": "number",
@@ -10442,9 +10527,9 @@
                       },
                       "minItems": 2,
                       "maxItems": 2,
-                      "description": "[easy, hard]"
+                      "description": "[easy, hard] chance an attack comes from both sides"
                     },
-                    "cooldownSeconds": {
+                    "arriveSeconds": {
                       "type": "array",
                       "items": {
                         "type": "number",
@@ -10452,27 +10537,7 @@
                       },
                       "minItems": 2,
                       "maxItems": 2,
-                      "description": "[easy, hard]"
-                    },
-                    "sideTreesPer100Metres": {
-                      "type": "array",
-                      "items": {
-                        "type": "number",
-                        "minimum": 0
-                      },
-                      "minItems": 2,
-                      "maxItems": 2,
-                      "description": "[easy, hard]"
-                    },
-                    "huntSpeed": {
-                      "type": "array",
-                      "items": {
-                        "type": "number",
-                        "minimum": 0
-                      },
-                      "minItems": 2,
-                      "maxItems": 2,
-                      "description": "[easy, hard]"
+                      "description": "[easy, hard] seconds from the screen edge to the strike point"
                     },
                     "strikePause": {
                       "type": "array",
@@ -10482,9 +10547,9 @@
                       },
                       "minItems": 2,
                       "maxItems": 2,
-                      "description": "[easy, hard]"
+                      "description": "[easy, hard] seconds a burrower trembles before it bursts out"
                     },
-                    "huntSeconds": {
+                    "sideTreesPer100Metres": {
                       "type": "array",
                       "items": {
                         "type": "number",
@@ -10492,16 +10557,16 @@
                       },
                       "minItems": 2,
                       "maxItems": 2,
-                      "description": "[easy, hard]"
+                      "description": "[easy, hard] trees beside the line"
                     }
                   }
                 },
                 "sleepingGiants": {
                   "type": "object",
                   "additionalProperties": false,
-                  "description": "Speed is noise: a ring on the snow shows how far it reaches; sleepers inside stir and then wake.",
+                  "description": "Weave through a wide field of sleepers; your speed sets how far your noise reaches.",
                   "properties": {
-                    "sleepersPer100Metres": {
+                    "fieldHalfMetres": {
                       "type": "array",
                       "items": {
                         "type": "number",
@@ -10509,7 +10574,17 @@
                       },
                       "minItems": 2,
                       "maxItems": 2,
-                      "description": "[easy, hard]"
+                      "description": "[easy, hard] half width of the sleeper field"
+                    },
+                    "sleeperSpacingMetres": {
+                      "type": "array",
+                      "items": {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      "minItems": 2,
+                      "maxItems": 2,
+                      "description": "[easy, hard] spacing of the staggered sleeper grid"
                     },
                     "bearShare": {
                       "type": "array",
@@ -10519,7 +10594,7 @@
                       },
                       "minItems": 2,
                       "maxItems": 2,
-                      "description": "[easy, hard]"
+                      "description": "[easy, hard] share of sleepers that are bears"
                     },
                     "quietKmh": {
                       "type": "array",
@@ -10529,7 +10604,7 @@
                       },
                       "minItems": 2,
                       "maxItems": 2,
-                      "description": "[easy, hard]"
+                      "description": "[easy, hard] speed below which you make only base noise"
                     },
                     "baseRadiusMetres": {
                       "type": "array",
@@ -10539,7 +10614,7 @@
                       },
                       "minItems": 2,
                       "maxItems": 2,
-                      "description": "[easy, hard]"
+                      "description": "[easy, hard] noise radius at quiet speed"
                     },
                     "metresPerKmh": {
                       "type": "array",
@@ -10549,7 +10624,7 @@
                       },
                       "minItems": 2,
                       "maxItems": 2,
-                      "description": "[easy, hard]"
+                      "description": "[easy, hard] extra noise radius per km/h above quiet"
                     },
                     "stirSeconds": {
                       "type": "array",
@@ -10559,7 +10634,7 @@
                       },
                       "minItems": 2,
                       "maxItems": 2,
-                      "description": "[easy, hard]"
+                      "description": "[easy, hard] seconds inside the noise radius before a sleeper wakes"
                     },
                     "treesPer100Metres": {
                       "type": "array",
@@ -10569,7 +10644,7 @@
                       },
                       "minItems": 2,
                       "maxItems": 2,
-                      "description": "[easy, hard]"
+                      "description": "[easy, hard] trees beside the field"
                     },
                     "yetiSpeedKmh": {
                       "type": "array",
@@ -10579,9 +10654,9 @@
                       },
                       "minItems": 2,
                       "maxItems": 2,
-                      "description": "[easy, hard] chase speed once woken"
+                      "description": "[easy, hard] speed of a woken giant"
                     },
-                    "stirFasterPerKmh": {
+                    "chargeSeconds": {
                       "type": "array",
                       "items": {
                         "type": "number",
@@ -10589,27 +10664,7 @@
                       },
                       "minItems": 2,
                       "maxItems": 2,
-                      "description": "[easy, hard] stir rate gained per km/h above quiet speed"
-                    },
-                    "roarRadiusMetres": {
-                      "type": "array",
-                      "items": {
-                        "type": "number",
-                        "minimum": 0
-                      },
-                      "minItems": 2,
-                      "maxItems": 2,
-                      "description": "[easy, hard] a giant you woke roars and wakes sleepers within this radius"
-                    },
-                    "catchUpBoost": {
-                      "type": "array",
-                      "items": {
-                        "type": "number",
-                        "minimum": 0
-                      },
-                      "minItems": 2,
-                      "maxItems": 2,
-                      "description": "[easy, hard] extra speed fraction for a woken giant that has fallen far behind"
+                      "description": "[easy, hard] seconds a woken giant charges before it gives up and goes back to sleep"
                     }
                   }
                 }

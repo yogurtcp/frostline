@@ -118,19 +118,15 @@ function updateEncounterEnemies(dt){
   for(const o of objectGroups().burrowers){
     if(o.dead||o.eaten||!activeCourseOwner(o))continue;
     if(o.burrowState==='waiting'){
-      if(o.fieldBurrower)prowlFieldBurrower(o);
       // Manual stress spawns wait with the player until a real approach is possible.
       if(o.debugSpawn){o.x=p.x;o.y=p.y+200;}
-      // In The Floor Is Burrowers, several can hunt at once on a short cooldown.
-      const area=endlessEncounterAt(p.y),field=area?.kind==='burrowField'&&o.fieldBurrower,F=field?levelConfig(area):null;
-      const ready=field?objectGroups().burrowers.filter(q=>!q.dead&&!q.eaten&&['rushing','settled','open'].includes(q.burrowState)).length<Math.round(levelValue(area,F.maxActive))&&clock>=(state.endless.nextFieldBurrowAt||0)
-        :!active&&clock>=(state.endless.nextBurrowAt||0)&&surpriseAreaAllowed(area);
-      if((o.debugSpawn||ready)&&Math.hypot(o.x-p.x,o.y-p.y)<E.burrower.noticeMetres*PX_PER_M&&(field?startFieldHunt(o):startBurrow(o))){
-        active=true;if(field)state.endless.nextFieldBurrowAt=clock+levelValue(area,F.cooldownSeconds)*range(.8,1.2);else if(!o.debugSpawn)state.endless.nextBurrowAt=clock+E.burrower.cooldownSeconds;
+      const area=endlessEncounterAt(p.y),ready=!active&&clock>=(state.endless.nextBurrowAt||0)&&surpriseAreaAllowed(area);
+      if((o.debugSpawn||ready)&&Math.hypot(o.x-p.x,o.y-p.y)<E.burrower.noticeMetres*PX_PER_M&&startBurrow(o)){
+        active=true;if(!o.debugSpawn)state.endless.nextBurrowAt=clock+E.burrower.cooldownSeconds;
       }
       continue;
     }
-    if(o.burrowState==='rushing'&&o.fieldBurrower){if(huntFieldBurrower(o,dt))return;continue;}
+    if(o.burrowState==='rushing'&&o.fieldBurrower){rushFieldBurrower(o,dt);continue;}
     if(o.burrowState==='rushing'){
       const B=E.burrower,target=burrowIntercept(o)||o.rushTarget;o.rushTarget=target;
       const dx=target.x-o.x,dy=target.y-o.y,distance=Math.hypot(dx,dy),speed=topSpeed()*B.speedMultiplier,step=speed*dt;
@@ -256,7 +252,7 @@ function burrowerTile(open=true,chew=0){
 }
 function drawEncounterEnemy(o,s,feeding=false){
   if(o.type==='burrower'){
-    if(o.burrowState==='waiting'){if(o.fieldBurrower)drawProwlingBurrower(o,s);return true;}
+    if(o.burrowState==='waiting')return true;
     const trail=o.burrowTrail||[];
     for(let i=1;i<trail.length;i++)if(trail[i-1].until>clock){const a=screen(trail[i-1].x,trail[i-1].y),b=screen(trail[i].x,trail[i].y);ctx.save();ctx.globalAlpha=clamp((trail[i-1].until-clock)/.8,0,.6);line(a.x,a.y,b.x,b.y,'#a7bdcb',4);line(a.x,a.y-2,b.x,b.y-2,'#eef4ed',2);ctx.restore();}
     if(o.burrowState==='rushing'||o.burrowState==='settled'){

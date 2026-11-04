@@ -66,7 +66,15 @@ window.FROSTLINE_READY = (async () => {
     try { audio ||= new (window.AudioContext || window.webkitAudioContext)(); const o=audio.createOscillator(),g=audio.createGain();o.type=type;o.frequency.value=freq;g.gain.setValueAtTime(gain,audio.currentTime);g.gain.exponentialRampToValueAtTime(.001,audio.currentTime+duration);o.connect(g);g.connect(audio.destination);o.start();o.stop(audio.currentTime+duration); } catch {}
   }
   function announce(title,detail='',color=C.teal,duration=S.render.messageSeconds) { state.messages.push({title,detail,color,until:clock+duration,start:clock});if(state.messages.length>S.render.messageLimit)state.messages.shift(); }
-  function say(text,o,time=S.render.speechSeconds) { state.speech.push({text,object:o,until:clock+time}); if(state.speech.length>S.render.speechLimit)state.speech.shift(); }
+  // Speech is throttled so the slope never turns into a wall of chatter: a new speaker waits for a short gap after the
+  // last line, and only a few bubbles show at once. Someone already talking may still change what they are saying.
+  function say(text,o,time=S.render.speechSeconds) {
+    const current=state.speech.findIndex(s=>s.object===o&&s.until>clock);
+    if(current<0&&clock<(state.nextSpeechAt||0))return;
+    if(current>=0)state.speech.splice(current,1);
+    state.speech.push({text,object:o,until:clock+time});state.nextSpeechAt=clock+S.render.speechSpacingSeconds;
+    if(state.speech.length>S.render.speechLimit)state.speech.shift();
+  }
   function burst(x,y,color,n=12) { for(let i=0;i<n;i++)state.particles.push({x,y,vx:range(-50,50),vy:range(-65,30),life:range(.25,.75),color}); }
   function filterObjects(keep){
     const source=state.objects;let result=null;
@@ -870,10 +878,8 @@ window.FROSTLINE_READY = (async () => {
       const trees=rate('trees')*P.forest;
       Object.assign(itemRates,{pine:trees,fir:trees*.6,spruceTree:trees*.25,smallPine:trees*.3,skier:rate('skiers'),fastSkier:rate('fastSkiers'),smallHill:rate('jumps'),largeHill:rate('jumps')*.35,rainbow:rate('jumps')*.25});
       const section={id:'endless',endlessRoot:root,endlessScale:scale,block:root.block,x:root.x,startY,endY,finishHalf:0,arcade:{knobs:[1,1,1,1,1],trees:true,specialLayout:'none',gates:{count:0,swordGateCount:0,icePercent:0,openingWidthMetres:mix(...E.gates.openingMetres,P.t)},spacing:E.gates.spacingMetres*PX_PER_M*scale,pace:E.playerSpeedKmh*scale/(S.physics.speedMultiplier*S.physics.hudKmhPerSpeed),itemSpreadMetres:E.itemSpreadMetres*scale,itemRates,tierRates:{slightlyRare:0,veryRare:0},endTrafficMultiplier:1}};
-      holdLevelExit(a,endY,scale);
       while(a.nextEncounterY<endY+1200*scale){const e=planEndlessEncounter(section,a.nextEncounterY);a.nextEncounterY=e.endY+range(...(E.regions.enabled?E.regions.gapMetres:E.encounters.gapMetres))*PX_PER_M*e.scale;}
       for(const e of a.encounters)if(e.startY<endY&&e.endY>startY)populateEndlessEncounter(e,section,endY);
-      holdLevelExit(a,endY,scale);
       while(a.nextGateY<endY){
         const encounter=endlessEncounterAt(a.nextGateY);
         if(encounter?.noFlags){a.nextGateY=encounter.endY+1;continue;}
@@ -2007,7 +2013,7 @@ window.FROSTLINE_READY = (async () => {
     const angle=(committed?P.divertReleaseAngleDegrees:P.divertPathAngleDegrees)*Math.PI/180;
     // Finish a nearby committed catch even if a stopped/fallen target slips just behind us.
     if(committed&&Math.hypot(prey.x-hunter.x,prey.y-hunter.y)<S.chasers.captureDistance*2)return true;
-    if(committed&&hunter.encounter?.kind==='piedPiper')return true; // a Pied Piper Yeti that turns for a crowd sees it through
+    if(committed&&hunter.encounter?.level)return true; // a challenge-area Yeti that turns for a snack sees it through
     const route=endlessPursuitRoute(hunter,p),e=route?.encounter;
     if(route?.cemetery){const h=cemeteryProjection(e,hunter.x,hunter.y),q=cemeteryProjection(e,prey.x,prey.y),goal=cemeteryProjection(e,p.x,p.y),direction=Math.sign(goal.along-h.along)||1,along=(q.along-h.along)*direction;return q.distance<=width&&(!committed||h.distance<=width)&&along>0&&along<=Math.abs(goal.along-h.along)+width;}
     const path=e&&!route.cemetery&&hunter.y>=e.startY&&prey.y>=e.startY&&prey.y<=e.endY?e.paths[route.index]:null;
@@ -3644,7 +3650,7 @@ window.FROSTLINE_READY = (async () => {
       if(c.patrolPass){updatePatrolPass(c,dt);contacts.index=null;continue;}
       if(c.dead||c.eaten)continue;
       if(state.endless&&!c.chaseRun&&['fast','slow','bear'].includes(c.kind)&&!c.leaving){c.chaseRun=state.course;c.expires=Infinity;}
-      if(c.endlessBaseKmh!==undefined&&activeCourseOwner(c))c.speed=c.endlessBaseKmh*endlessSpeedScale(c)*levelChaserBoost(c)/S.physics.hudKmhPerSpeed;
+      if(c.endlessBaseKmh!==undefined&&activeCourseOwner(c))c.speed=c.endlessBaseKmh*endlessSpeedScale(c)/S.physics.hudKmhPerSpeed;
       // Owned pursuers share linked runs; protected towns stop them, but Endless course towns do not.
       if(c.leaving||c.chaseRun&&!activeCourseOwner(c)){c.leaving=true;c.y-=c.speed*dt;continue;}
       const pursuit=!!c.chaseRun&&activeCourseOwner(c);
@@ -4701,14 +4707,15 @@ window.FROSTLINE_READY = (async () => {
     snow();drawLift();drawMuseumNotes();drawLevelGround();
     ctx.save();ctx.lineCap='round';
     // Batched: segments sharing a fade step and a width go into one path, so an avalanche of tracks stays cheap to draw.
-    const trailBuckets=new Map();
+    // Textured strokes are costly; an avalanche's worth of tracks is drawn in plain colour instead.
+    const trailBuckets=new Map(),heavy=state.snowballTrails.length>150;
     for(const t of state.snowballTrails){
       const a=screen(t.ax,t.ay),b=screen(t.bx,t.by);if(Math.max(a.y,b.y)<0||Math.min(a.y,b.y)>H)continue;
       const fade=Math.ceil(Math.min(1,(t.until-clock)/2)*8),size=Math.round(t.r*ZOOM),key=fade*1000+size;
       let list=trailBuckets.get(key);if(!list)trailBuckets.set(key,list=[]);list.push(a.x,a.y,b.x,b.y);
     }
     for(const [color,width] of [['#9ebbc5',1.7],['#dce9e7',1.25]])for(const [key,list] of trailBuckets){
-      ctx.globalAlpha=Math.floor(key/1000)/8*.65;ctx.strokeStyle=gritMaterial(color);ctx.lineWidth=key%1000*width;ctx.beginPath();
+      ctx.globalAlpha=Math.floor(key/1000)/8*.65;ctx.strokeStyle=heavy?color:gritMaterial(color);ctx.lineWidth=key%1000*width;ctx.beginPath();
       for(let i=0;i<list.length;i+=4){ctx.moveTo(list[i],list[i+1]);ctx.lineTo(list[i+2],list[i+3]);}
       ctx.stroke();
     }

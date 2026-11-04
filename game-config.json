@@ -184,20 +184,20 @@
           1200
         ],
         "piedPiper": [
-          900,
-          1200
+          1000,
+          1300
         ],
         "avalanche": [
-          2800,
-          3600
+          2400,
+          3000
         ],
         "burrowField": [
-          2600,
-          3400
+          2400,
+          3000
         ],
         "sleepingGiants": [
-          1500,
-          1900
+          900,
+          1100
         ]
       },
       "beginnerPeople": [
@@ -371,29 +371,29 @@
       },
       "levels": {
         "piedPiper": {
-          "yetis": [
-            6,
+          "chasingYetis": [
+            10,
             10
           ],
-          "crowdSpacingMetres": [
-            120,
-            150
+          "chaserSpeedKmh": [
+            103,
+            107
           ],
-          "crowdPeople": [
-            10,
+          "chaserSpeedSpreadKmh": [
+            8,
             8
           ],
-          "yetiSpeedKmh": [
-            65,
-            85
+          "skiersPer100Metres": [
+            1.6,
+            1.2
+          ],
+          "icePer100Metres": [
+            0.25,
+            0.2
           ],
           "sideTreesPer100Metres": [
             4,
             4
-          ],
-          "catchUpBoost": [
-            0.7,
-            0.6
           ]
         },
         "avalanche": {
@@ -418,12 +418,44 @@
             45
           ],
           "trailSeconds": [
-            2.5,
-            2.5
+            1.6,
+            1.6
           ],
           "volleyEvery": [
             6,
             4
+          ],
+          "skiersPer100Metres": [
+            2,
+            2.5
+          ],
+          "chasingYetis": [
+            2,
+            3
+          ],
+          "chaserSpeedKmh": [
+            80,
+            86
+          ],
+          "chaserSpeedSpreadKmh": [
+            4,
+            4
+          ],
+          "lurkersPer100Metres": [
+            0.6,
+            0.9
+          ],
+          "lurkerSpeedKmh": [
+            62,
+            70
+          ],
+          "bearsPer100Metres": [
+            0.4,
+            0.6
+          ],
+          "wolfPacksPer100Metres": [
+            0.25,
+            0.4
           ]
         },
         "burrowField": {
@@ -435,46 +467,42 @@
             3,
             3
           ],
-          "burrowerSpacingMetres": [
-            7,
-            4.5
+          "spawnSeconds": [
+            0.9,
+            0.45
           ],
-          "maxActive": [
-            4,
-            7
+          "pincerChance": [
+            0.2,
+            0.4
           ],
-          "cooldownSeconds": [
-            0.7,
-            0.35
+          "arriveSeconds": [
+            1.3,
+            1.0
+          ],
+          "strikePause": [
+            0.2,
+            0.15
           ],
           "sideTreesPer100Metres": [
             6,
             6
-          ],
-          "huntSpeed": [
-            1.15,
-            1.3
-          ],
-          "strikePause": [
-            0.4,
-            0.3
-          ],
-          "huntSeconds": [
-            6,
-            8
           ]
         },
         "sleepingGiants": {
-          "sleepersPer100Metres": [
-            10,
-            15
+          "fieldHalfMetres": [
+            38,
+            42
+          ],
+          "sleeperSpacingMetres": [
+            34,
+            30
           ],
           "bearShare": [
             0.15,
             0.15
           ],
           "quietKmh": [
-            50,
+            40,
             40
           ],
           "baseRadiusMetres": [
@@ -482,32 +510,24 @@
             3
           ],
           "metresPerKmh": [
-            1.1,
-            1.1
+            0.18,
+            0.22
           ],
           "stirSeconds": [
-            1,
-            1
+            0.25,
+            0.2
           ],
           "treesPer100Metres": [
-            18,
-            22
+            5,
+            5
           ],
           "yetiSpeedKmh": [
-            95,
-            105
+            98,
+            104
           ],
-          "stirFasterPerKmh": [
-            0.12,
-            0.15
-          ],
-          "roarRadiusMetres": [
-            25,
-            35
-          ],
-          "catchUpBoost": [
-            0.3,
-            0.35
+          "chargeSeconds": [
+            2.5,
+            3.5
           ]
         }
       }
@@ -2055,7 +2075,8 @@
     "speechTextSize": 9,
     "speechWrapCharacters": 27,
     "speechLineGap": 3,
-    "speechLimit": 5,
+    "speechLimit": 3,
+    "speechSpacingSeconds": 1.2,
     "messageSeconds": 3.2,
     "messageLimit": 4,
     "resultSeconds": 18,
@@ -2453,7 +2474,7 @@
     "npcFearDistance": 310,
     "npcFleeSpeed": 290,
     "npcFleeLateralSpeed": 200,
-    "npcSpeechCooldown": 4,
+    "npcSpeechCooldown": 8,
     "npcWolfFallSeconds": 3,
     "wolfKillKmh": 30,
     "ramSpeedFraction": 0.85,
@@ -2506,7 +2527,7 @@
     "captureDistance": 23,
     "knockoutDistance": 30,
     "patrolFallSeconds": 1.4,
-    "slowTalkSeconds": 7,
+    "slowTalkSeconds": 12,
     "dogContactSpeed": 130,
     "dogContactChaseDistance": 1700,
     "patrolWaves": {
