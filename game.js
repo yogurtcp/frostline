@@ -709,18 +709,26 @@ window.FROSTLINE_READY = (async () => {
     state.endlessRecord={version:S.endless.recordVersion,distance:best,previousVersion:state.endlessRecord.previousVersion||null,last:{distance,cleared:state.course?.cleared||0,missed:state.course?.missed||0,reason}};
     state.endlessResult={distance,best,reason,until:clock+6};save();
   }
+  // The town's chairlift station is its checkpoint. A small signpost on each route through town points the way.
   function addTownCheckpoint(e,section,resume){
-    const town=e.town,entryY=town.route[0].y,title=state.objects.find(o=>o.type==='villageTitle'&&o.town===town);
-    // Just above the town's name, on the shared approach before the main street and back road split.
-    const y=Math.min(entryY-70,(title?.y??e.startY)-130),x=encounterPathX(e.paths[0],y);
+    const town=e.town,lift=town.arcadeLift;if(!lift)return;
     const taken=!!state.endless.resumeCheckpoint;delete state.endless.resumeCheckpoint;
-    entity('checkpoint',x,y,{r:0,half:S.endless.checkpoint.halfWidthMetres*PX_PER_M,width:S.endless.checkpoint.halfWidthMetres*PX_PER_M*2,arcadeRun:section,encounter:e,town,resume,taken});
+    Object.assign(lift,{checkpoint:true,resume,taken,takenAt:taken?-9:undefined});
+    const C=S.endless.checkpoint,signY=Math.max(town.route[0].y+120,lift.y-C.signAheadMetres*PX_PER_M);
+    for(const path of e.paths){
+      const roadX=encounterPathX(path,signY),side=Math.sign(lift.x-roadX)||1;
+      entity('checkpointSign',roadX+side*(town.mainRoadWidth/2+26),signY,{r:0,width:40,side,arcadeRun:section,encounter:e,town,lift});
+    }
+  }
+  function nearCheckpointStation(o,p){
+    const pad=S.endless.checkpoint.grabPaddingMetres*PX_PER_M;
+    return Math.abs(p.x-o.x)<o.half+pad&&p.y>o.y-70-pad&&p.y<o.y+40+pad;
   }
   function takeCheckpoint(o){
     const a=state.endless;if(!a||a.debug||o.taken)return;
     o.taken=true;o.takenAt=clock;
     state.checkpoint={...o.resume,shields:a.shields||0,swords:a.swords||0};a.checkpoint=state.checkpoint;save();
-    burst(o.x,o.y,C.gold,14);beep(880,.09);beep(1175,.12);
+    burst(o.x,o.y-30,C.gold,16);beep(880,.09);beep(1175,.12);say('SEE YOU BACK HERE!',o,2);
     announce('CHECKPOINT - '+o.resume.townName.toUpperCase(),'IF YOU ARE CAUGHT, YOU RESTART HERE',C.gold,3);
   }
   function resumeArcade(gate=null,checkpoint=state.checkpoint){
@@ -758,10 +766,10 @@ window.FROSTLINE_READY = (async () => {
       state.cam={x:p.x,y:p.y-H*S.render.playerScreenY/ZOOM};a.furthestY=p.y;e.entered=true;
       extendEndless();ensureWorld();announce('DEBUG - '+e.title.toUpperCase(),'VISIT '+debugVisit+'/'+E.encounters.difficultyVisits+' - ARROWS TO SKI',C.teal,4);
     }else if(resume){
-      const a=state.endless,e=a.encounters[0],cp=state.objects.find(o=>o.type==='checkpoint'&&o.encounter===e),y=(cp?.y??e.startY)-140;
+      const a=state.endless,e=a.encounters[0],cp=e.town?.arcadeLift,y=cp?cp.y+70:e.startY+20;
       Object.assign(p,{x:cp?.x??encounterPathX(e.paths[0],y),y,heading:0,desiredHeading:0,mode:'slide',speed:0,vx:0,vy:0});
       state.cam={x:p.x,y:p.y-H*S.render.playerScreenY/ZOOM};a.furthestY=p.y;
-      extendEndless();ensureWorld();announce('BACK IN '+resume.townName.toUpperCase(),Math.round(resume.metres)+' M - ARROWS TO SKI',C.gold,4);
+      extendEndless();ensureWorld();announce('BACK DOWN THE LIFT IN '+resume.townName.toUpperCase(),'ARROWS TO SKI ON',C.gold,4);
     }else announce('ARCADE','GATES FOR GEAR - HOW FAR CAN YOU GO?',stages.endless.color,5);
     state.transitions.push({kind:'start',id:'endless',y:p.y,paid:true});return true;
   }
@@ -2973,7 +2981,7 @@ window.FROSTLINE_READY = (async () => {
       if(state.started&&!(o.stunnedUntil>clock)&&!o.retiring&&o.type==='lurker'&&(courseCreature(o,p.x,p.y)||!humanArea(o.x,o.y)&&!humanArea(p.x,p.y))&&(Math.hypot(o.x-p.x,o.y-p.y)<yetiWakeDistance(o)||o.shoreLake&&state.objects.some(q=>['skier','boarder'].includes(q.type)&&!q.eaten&&!q.dead&&q.r>0&&Math.hypot(q.x-o.x,q.y-o.y)<S.wildlife.yetiWakeDistance*endlessSpeedScale(o)&&!patchAt(q.x,q.y)))){retype(o,'awakened');o.r=0;const hunter={kind:o.arcadeTier==='slow'?'slow':'fast',arcadeTier:o.arcadeTier,ravager:o.ravager,ravagerIntroPrey:o.ravagerIntroPrey,encounter:o.encounter,chaseRun:o.arcadeRun,shoreLake:o.shoreLake,endlessBaseKmh:o.endlessBaseKmh,x:o.x,y:o.y,speed:o.arcadeRun?o.yetiSpeedKmh/S.physics.hudKmhPerSpeed:topSpeed()*S.wildlife.yetiWildSpeedRatio,wakeUntil:clock+yetiWakeDelay(o),phase:o.phase,expires:p.y+S.wildlife.yetiWildChaseDistance,talkAt:clock+6};if(hunter.ravagerIntroPrey)hunter.ravagerIntroPrey.ravagerIntroFor=hunter;state.chasers.push(hunter);say('Oh. Breakfast.',o);}
       if(o.type==='gate'&&o.run===state.course&&!o.checked&&previous.y<o.y&&p.y>=o.y)crossCourseGate(o,previous,p);
       if(o.type==='entrance'&&!state.course&&state.zone.kind!=='museum'&&previous.y<o.y&&p.y>=o.y&&Math.abs(p.x-o.x)<o.half){startCourse(o.stage,o);break;}
-      if(o.type==='checkpoint'&&!o.taken&&previous.y<o.y&&p.y>=o.y&&Math.abs(mix(previous.x,p.x,(o.y-previous.y)/(p.y-previous.y||1))-o.x)<o.half)takeCheckpoint(o);
+      if(o.type==='lift'&&o.checkpoint&&!o.taken&&state.endless&&!p.awaitingInput&&nearCheckpointStation(o,p))takeCheckpoint(o);
       if(!state.arcade&&!state.endless&&o.type==='lift'&&!o.used&&previous.y<o.y&&p.y>=o.y&&Math.abs(p.x-o.x)<o.half){o.used=true;state.liftTimer=S.lift.rideSeconds;p.speed=0;announce('UP WE GO','Next stop: the summit.',C.teal,3);}
       if(!creature&&o.r>0&&Math.abs(o.y-p.y)<Math.max(130,o.width,o.depth||0,(o.treeLength||0)+o.r+S.physics.playerRadius)&&Math.abs(p.x-o.x)<Math.max(130+o.r,o.width,(o.treeLength||0)+o.r+S.physics.playerRadius)){const d=Math.hypot(p.x-o.x,(p.y-o.y)*.85);if(obstacleClearance(o,p.x,p.y)<S.physics.playerRadius)hit(o);else if(o.type.startsWith('person')&&!o.greeted&&d<85){o.greeted=true;say(pick(S.dialogue.greetings),o);}}
     }
@@ -4069,14 +4077,14 @@ window.FROSTLINE_READY = (async () => {
     const flutter=Math.sin(clock*5+x)*2;
     ctx.fillStyle=good?'#77a581':color;ctx.beginPath();ctx.moveTo(x+side*2,y-33);ctx.lineTo(x+side*19,y-30+flutter);ctx.lineTo(x+side*18,y-18+flutter);ctx.lineTo(x+side*2,y-21);ctx.closePath();ctx.fill();box(x-3,y,7,2,'#b6cfcf');ctx.restore();
   }
-  function drawCheckpoint(o,s){
-    const half=o.half*ZOOM,taken=o.taken,glow=taken?C.gold:'#ffd18b',pulse=taken&&clock-(o.takenAt??-9)<.6?Math.sin((clock-o.takenAt)*30)*2:0;
-    for(const side of [-1,1]){const x=s.x+side*half;shadow(x,s.y,5,2);box(x-1,s.y-40,3,40,'#5b4a3f');box(x-4,s.y-46,8,7,'#3f3a44');box(x-2,s.y-44,4,4,glow);}
-    // Banner strung between the lantern posts; it turns gold once grabbed.
-    line(s.x-half,s.y-38,s.x+half,s.y-38,'#6d5a4c',1);
-    box(s.x-34,s.y-44-pulse,68,13,taken?C.gold:'#f4ead7');box(s.x-34,s.y-32-pulse,68,1,'#8e6a4e');
-    text(taken?'SAVED':'CHECKPOINT',s.x,s.y-35-pulse,7,taken?'#3b2f2a':C.ink);
-    if(!taken&&Math.abs(o.y-state.p.y)<260)text('SKI THROUGH TO SAVE',s.x,s.y+12,7,C.muted);
+  function drawCheckpointSign(o,s){
+    const lift=o.lift,taken=lift?.taken,dir=o.side,board=taken?C.gold:'#e9d9b8';
+    shadow(s.x,s.y,6,2);box(s.x-1,s.y-26,3,26,'#6b4f3c');
+    // A small wooden arrow board pointing toward the station.
+    box(s.x-20,s.y-34,40,11,board);box(s.x-20,s.y-24,40,1,'#8e6a4e');
+    for(let i=0;i<4;i++)box(s.x+dir*(20+i),s.y-33+i,1,9-i*2,board);
+    text(taken?'SAVED':'CHECKPOINT',s.x-dir*1,s.y-26,6,taken?'#3b2f2a':C.ink);
+    text(dir>0?'→ LIFT':'LIFT ←',s.x,s.y-40,7,taken?C.gold:C.teal);
   }
   function drawEntrance(o,s) {
     if(o.stage==='museum'){
@@ -4391,7 +4399,7 @@ window.FROSTLINE_READY = (async () => {
     if(o.type==='pine'&&o.smallPine){sprite('smallPine',s.x,s.y,o.width);return;}
     if((o.type==='pine'||o.type==='fir')&&o.treeVariant&&o.treeVariant!=='classic'){drawTree(o,s);return;}
     if(o.type==='entrance'){drawEntrance(o,s);return;}
-    if(o.type==='checkpoint'){drawCheckpoint(o,s);return;}
+    if(o.type==='checkpointSign'){drawCheckpointSign(o,s);return;}
     if(o.type==='lodge'||o.type==='rental'){drawHouse(o,s);return;}
     if(['lamp','bunting','bench','snowman'].includes(o.type)){drawTownDetail(o,s);return;}
     if(o.type==='cemeteryFence'){drawCemeteryFence(o);return;}
@@ -4426,6 +4434,11 @@ window.FROSTLINE_READY = (async () => {
       text('FINISH',s.x,s.y-31,20,C.teal);text('BETWEEN THE FLAGS',s.x,s.y+26,9,C.muted);return;
     }
     if(o.type==='villageTitle'){text(o.town.name.toUpperCase().split('').join(' '),s.x,s.y,22,C.teal);text(o.town.endlessRun?'COURSE TOWN - YETIS CAN FOLLOW':'VILLAGE  ·  PLEASE DISTURB THE PEACE QUIETLY',s.x,s.y+23,8,C.muted);return;}
+    if(o.type==='liftLabel'&&o.town?.arcadeLift?.checkpoint){
+      const lift=o.town.arcadeLift,glow=lift.taken?1:.65+.35*Math.sin(clock*4);
+      ctx.save();ctx.globalAlpha=glow;text(lift.taken?'CHECKPOINT SAVED':'CHECKPOINT',s.x,s.y,10,C.gold);ctx.restore();
+      text(lift.taken?'YOU RESTART HERE':'SKI INTO THE LIFT TO SAVE',s.x,s.y+15,8,C.muted);return;
+    }
     if(o.type==='liftLabel'&&o.town?.endlessRun){text('CHAIRLIFT',s.x,s.y,10,C.ink);return;}
     if(o.type==='liftLabel'){text('SUMMIT LIFT',s.x,s.y,10,C.ink);text(state.arcade?'ARCADE: KEEP SKIING DOWN':'SKI IN TO RIDE',s.x,s.y+15,8,C.muted);return;}
     const wiggle=o.roam?Math.sin(clock*6+o.phase)*1.2:0;

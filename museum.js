@@ -36,7 +36,8 @@ const MUSEUM_STAGERS={
   mushroom:(x,y)=>museumItem('mushroom',x,y,ARCADE_ITEMS.mushroom),
   shieldGate:(x,y)=>museumItem('gate',x,y,{half:55,width:110,r:0,number:1,color:C.red,gear:'shield',checked:false}),
   swordGate:(x,y)=>museumItem('gate',x,y,{half:55,width:110,r:0,number:2,color:C.blue,gear:'sword',checked:false}),
-  checkpoint:(x,y)=>museumItem('checkpoint',x,y,{r:0,half:100,width:200,taken:false,resume:{townName:'Museum'}}),
+  checkpoint:(x,y)=>{const town={},lift=museumItem('lift',x+40,y,{width:174,r:0,half:73,used:false,checkpoint:true,taken:false,town});town.arcadeLift=lift;town.endlessRun=true;
+    museumItem('liftLabel',x+40,y+55,{r:0,width:160,town});museumItem('checkpointSign',x-110,y-20,{r:0,width:40,side:1,lift});},
   chairlift:(x,y)=>{museumItem('lift',x,y,{width:174,r:0,half:73,used:false});state.liftRoutes.push({x0:x,x1:x,y0:y-420,y1:y,museum:true});}
 };
 let museumStatues=null;

@@ -382,7 +382,7 @@ function drawSeasonalProp(o,s){
 }
 // Static light is cached in world coordinates. Moving bodies are lit every render.
 const NIGHT_TILE_SIZE=256,NIGHT_LIGHT_RESOLUTION=4,NIGHT_TILE_LIMIT=96;
-const NIGHT_STATIC_TYPES=new Set(['checkpoint','lamp','lodge','rental','mausoleum','iceBlock','ruinWall','gate','entrance','finish','courseStart','raceRail','christmasTree','paradeGarland','jackLantern','mistletoe','spring','ramp','rainbow','lift','liftLabel','trailChoices']);
+const NIGHT_STATIC_TYPES=new Set(['checkpointSign','lamp','lodge','rental','mausoleum','iceBlock','ruinWall','gate','entrance','finish','courseStart','raceRail','christmasTree','paradeGarland','jackLantern','mistletoe','spring','ramp','rainbow','lift','liftLabel','trailChoices']);
 const nightMask=document.createElement('canvas'),nightMaskCtx=nightMask.getContext('2d'),nightGlow=document.createElement('canvas'),nightGlowCtx=nightGlow.getContext('2d');
 const nightTileGlow=document.createElement('canvas'),nightTileGlowCtx=nightTileGlow.getContext('2d');
 const NIGHT_STATIC_VIEW=objectView(o=>NIGHT_STATIC_TYPES.has(o.type));
@@ -428,7 +428,7 @@ function appendNightLights(o,lights){
   }else if(o.type==='jackLantern')add(x,y-6,44,'#ffab5b',1,true);
   else if(o.type==='mistletoe')add(x,y-24,60,'#eeb0b3');
   else if(['spring','ramp','rainbow','lift','liftLabel','trailChoices'].includes(o.type))add(x,y-10,40,'#e8c18d',1,true);
-  else if(o.type==='checkpoint')for(const side of [-1,1])add(x+side*o.half*ZOOM,y-21,46,'#ffd18b',1,true);
+  else if(o.type==='checkpointSign')add(x,y-18,30,'#ffd18b',.8,true);
 }
 function nightLights(layers){
   const lights=[];appendNightLights(state.p,lights);for(const o of layers)if(o!==state.p)appendNightLights(o,lights);

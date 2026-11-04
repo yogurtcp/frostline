@@ -10409,12 +10409,19 @@
         "checkpoint": {
           "type": "object",
           "additionalProperties": false,
+          "description": "Every Arcade town's chairlift station is its checkpoint: ski into it to save; after being caught you restart there, and the summit shows a CONTINUE gate.",
           "properties": {
-            "halfWidthMetres": {
+            "signAheadMetres": {
               "type": "number",
-              "minimum": 3,
-              "maximum": 40,
-              "description": "Half the width of each Arcade town's checkpoint banner. Ski through it to save; after being caught you restart from the last one, and the summit shows a CONTINUE gate."
+              "minimum": 5,
+              "maximum": 300,
+              "description": "How far before the station the signposts stand on each route through town."
+            },
+            "grabPaddingMetres": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 20,
+              "description": "Extra reach around the station that still counts as skiing into it."
             }
           }
         }

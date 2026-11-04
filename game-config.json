@@ -3,7 +3,8 @@
   "version": 1,
   "endless": {
     "checkpoint": {
-      "halfWidthMetres": 11
+      "signAheadMetres": 50,
+      "grabPaddingMetres": 3
     },
     "autoStart": false,
     "recordVersion": 4,
@@ -3016,7 +3017,7 @@
       {
         "id": "checkpoint",
         "title": "CHECKPOINT",
-        "text": "At every Arcade town. Ski through it: if you're caught, you restart there. Continue later from the summit."
+        "text": "Every Arcade town's chairlift station. Follow the sign and ski into it: if you're caught, you ride back down here. Continue later from the summit."
       },
       {
         "id": "chairlift",
