@@ -1416,6 +1416,8 @@ window.FROSTLINE_READY = (async () => {
   function obstacleClearance(o,x,y){
     if(o.type==='lodge'||o.type==='rental'||o.type==='mausoleum')return houseClearance(o,x,y);
     if(o.type==='iceBlock'||o.type==='ruinWall'){const dx=Math.abs(x-o.x)-o.width/2,dy=Math.abs(y-o.y)-o.depth/2;return Math.hypot(Math.max(dx,0),Math.max(dy,0))+Math.min(Math.max(dx,dy),0);}
+    // A fallen tree's collision stops where the sprite does: the rounded ends are pulled in by the radius, so they don't stick out past the root and tip.
+    if(o.type==='fallingTree'&&o.fallState!=='standing'&&o.fallState!=='warning'){const [ax,ay,bx,by]=obstacleSegment(o),len=Math.hypot(bx-ax,by-ay)||1,ux=(bx-ax)/len,uy=(by-ay)/len,i=Math.min(o.r,len/2);return obstacleSegmentDistance(x,y,ax+ux*i,ay+uy*i,bx-ux*i,by-uy*i)-o.r;}
     if(o.type==='wideLog'||o.type==='logBump'||o.type==='fallingTree'||o.type==='cemeteryFence'||o.type==='areaBarrier'){const [ax,ay,bx,by]=obstacleSegment(o);return obstacleSegmentDistance(x,y,ax,ay,bx,by)-o.r;}
     return Math.hypot(x-o.x,(y-o.y)*S.physics.collisionYScale)-o.r;
   }

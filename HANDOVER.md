@@ -1575,3 +1575,7 @@ User: Y's Yetis are the wrong ones; they want the grey Yetis that are barely fas
 ## 142. Pied Piper pack at 90.5 km/h (2026-11-04)
 
 User: set the Yetis to 90.5 km/h, barely enough to catch up; colour does not matter. `piedPiper.chaserSpeedKmh` is [90.5, 90.5] with spread 0, and the grey clamp is removed (so they draw as the 90+ tier). Get-up is still 1.5–2.5 s from 35–70 m back. Bot runs on visits 1 and 3 are caught by wolves after crashes at 920 m and 813 m. Trace: 192 checkpoints, no errors.
+
+## 143. Fallen-tree collision matches the sprite (2026-11-04)
+
+User: a fallen tree's collision box is slightly larger than its drawing. Measured with an overlay. The capsule (base→tip segment, radius `fallenRadiusMetres` 3 m, plus the 1.1 m player radius) stuck out about 3 m past both the root and the tip, and was wider than the tapering branches. Now `obstacleClearance` pulls a falling or fallen tree's segment in by its radius at both ends, so the rounded ends finish at the sprite's ends, and `fallenRadiusMetres` is 2.2. Standing and warning trees are unchanged. NPC avoidance still uses the full segment. Trace: 192 checkpoints, no errors.

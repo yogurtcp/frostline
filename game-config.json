@@ -3130,7 +3130,7 @@
       "triggerRadiusMetres": 60,
       "warningSeconds": 0.55,
       "fallSeconds": 0.3,
-      "fallenRadiusMetres": 3
+      "fallenRadiusMetres": 2.2
     },
     "logJump": {
       "widthMetres": 100,
