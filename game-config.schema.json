@@ -10476,36 +10476,13 @@
     "museum": {
       "type": "object",
       "additionalProperties": false,
-      "description": "The summit MUSEUM: a slow sideways glide past exhibits, each with a note written on the snow.",
+      "description": "The summit MUSEUM gate leads onto a marked trail below it that zigzags across the slope past statues of everything in the game, each with a note written on the snow.",
       "properties": {
-        "glideMetresPerSecond": {
-          "type": "number",
-          "minimum": 2,
-          "maximum": 40,
-          "description": "Gliding pace through the gallery."
-        },
-        "hurryMultiplier": {
-          "type": "number",
-          "minimum": 1,
-          "maximum": 8,
-          "description": "Pace multiplier while holding Down (or tapping the bottom of the screen)."
-        },
-        "exhibitsPerRow": {
-          "type": "integer",
-          "minimum": 2,
-          "maximum": 12
-        },
-        "spacing": {
-          "type": "number",
-          "minimum": 150,
-          "maximum": 1000,
-          "description": "World units between exhibits along a row."
-        },
         "exhibitDrop": {
           "type": "number",
           "minimum": 60,
           "maximum": 400,
-          "description": "How far below the glide line each exhibit stands."
+          "description": "How far below the trail each exhibit stands."
         },
         "textOffset": {
           "type": "number",
@@ -10545,6 +10522,36 @@
               }
             }
           }
+        },
+        "exhibitsPerLeg": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 10,
+          "description": "Exhibits along each switchback of the trail."
+        },
+        "legWidth": {
+          "type": "number",
+          "minimum": 400,
+          "maximum": 4000,
+          "description": "Sideways length of each switchback (world units)."
+        },
+        "legDrop": {
+          "type": "number",
+          "minimum": 100,
+          "maximum": 3000,
+          "description": "How far each switchback descends. Width/drop sets how sideways the trail runs."
+        },
+        "trailWidth": {
+          "type": "number",
+          "minimum": 20,
+          "maximum": 300,
+          "description": "Width of the marked snow trail."
+        },
+        "clearanceWidth": {
+          "type": "number",
+          "minimum": 150,
+          "maximum": 1200,
+          "description": "Distance from the trail kept clear of random scenery and predators."
         }
       }
     }

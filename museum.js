@@ -1,8 +1,9 @@
-/* Museum: a slow, sideways glide past everything on the mountain, each with a note written in the snow.
-   Exhibits are built with the game's own constructors and nothing is simulated while you visit, so they stand still.
-   Wording lives in game-config.json `museum.exhibits`; this file only decides how each exhibit is staged. */
-const MUSEUM_ORIGIN_Y=-30000,MUSEUM_ROW_GAP=600;
-// Each stager places objects around (x,y), the exhibit's ground point. Ids without a stager become text-only plaques.
+/* Museum: a marked trail on the ordinary slope below the summit MUSEUM gate. It zigzags across the hill at a
+   shallow angle, so you ski mostly sideways past every exhibit and can read the note written on the snow under it.
+   You ski it normally. Exhibits are statues: built with the game's own constructors so they look exactly like the
+   real thing, then kept out of the simulation, so nothing moves, hunts or collides. Wording lives in
+   game-config.json `museum.exhibits`; this file only decides how each exhibit is staged. */
+// Each stager places objects around (x,y), the exhibit's ground point. Ids without a stager become text-only notes.
 const MUSEUM_STAGERS={
   sleepingYeti:(x,y)=>museumItem('lurker',x,y,{width:55,r:18,yetiSpeedKmh:45,arcadeTier:'slow'}),
   yeti:(x,y)=>museumChaser({kind:'slow',arcadeTier:'slow',speed:120},x,y),
@@ -36,62 +37,57 @@ const MUSEUM_STAGERS={
   shieldGate:(x,y)=>museumItem('gate',x,y,{half:55,width:110,r:0,number:1,color:C.red,gear:'shield',checked:false}),
   swordGate:(x,y)=>museumItem('gate',x,y,{half:55,width:110,r:0,number:2,color:C.blue,gear:'sword',checked:false}),
   checkpoint:(x,y)=>museumItem('checkpoint',x,y,{r:0,half:100,width:200,taken:false,resume:{townName:'Museum'}}),
-  chairlift:(x,y)=>{museumItem('lift',x,y,{width:174,r:0,half:73,used:false});state.liftRoutes.push({x0:x,x1:x,y0:y-420,y1:y});}
+  chairlift:(x,y)=>{museumItem('lift',x,y,{width:174,r:0,half:73,used:false});state.liftRoutes.push({x0:x,x1:x,y0:y-420,y1:y,museum:true});}
 };
+let museumStatues=null;
 function museumItem(type,x,y,extra={}){const spec={...extra};delete spec.type;return entity(type,x,y,{...spec,museum:true});}
-function museumChaser(c,x,y){const o={x,y,phase:0,talkAt:Infinity,expires:Infinity,gaitDistance:0,travelSpeed:0,...c,museum:true};state.chasers.push(o);return o;}
+function museumChaser(c,x,y){const o={x,y,phase:0,talkAt:Infinity,expires:Infinity,gaitDistance:0,travelSpeed:0,...c,museum:true};museumStatues.push(o);return o;}
 function museumLines(str,max){
   const words=String(str).split(/\s+/),lines=[''];
   for(const word of words){const i=lines.length-1;if(lines[i]&&(lines[i]+' '+word).length>max)lines.push(word);else lines[i]+=(lines[i]?' ':'')+word;}
   return lines;
 }
+// The trail: shallow switchbacks starting below the gate, away from the summit trail row.
+function museumTrail(gate){
+  const M=S.museum,list=M.exhibits,legs=Math.ceil(list.length/M.exhibitsPerLeg),points=[{x:gate.x,y:gate.y+40}];
+  let dir=-1;for(let i=0;i<legs;i++){const last=points.at(-1);points.push({x:last.x+dir*M.legWidth,y:last.y+M.legDrop});dir=-dir;}
+  return points;
+}
+function museumArea(x,y,pad=0){
+  const m=state.museum;if(!m||y<m.top-200-pad||y>m.bottom+600+pad)return false;
+  for(let i=1;i<m.trail.length;i++)if(segmentDistance(x,y,m.trail[i-1],m.trail[i])<S.museum.clearanceWidth+pad)return true;
+  return false;
+}
 function startMuseum(gate){
   if(state.course||state.endless||state.arcade||state.museum)return false;
-  const M=S.museum,perRow=M.exhibitsPerRow,spacing=M.spacing,width=(perRow-1)*spacing,list=M.exhibits;
-  state.objects=state.objects.filter(o=>o.type==='entrance');state.chasers=[];state.speech=[];
-  const exhibits=[],path=[];
-  list.forEach((entry,i)=>{
-    const row=Math.floor(i/perRow),col=i%perRow,dir=row%2?-1:1,x=dir*(col*spacing-width/2),rowY=MUSEUM_ORIGIN_Y+row*MUSEUM_ROW_GAP;
-    const ground=rowY+M.exhibitDrop;MUSEUM_STAGERS[entry.id]?.(x,ground);
-    exhibits.push({...entry,x,y:ground,lines:museumLines(entry.text,M.wrapCharacters)});
+  const M=S.museum,trail=museumTrail(gate),exhibits=[];
+  const keep=new Set(state.objects);museumStatues=[];
+  M.exhibits.forEach((entry,i)=>{
+    const leg=Math.floor(i/M.exhibitsPerLeg),slot=i%M.exhibitsPerLeg,a=trail[leg],b=trail[leg+1],t=(slot+.6)/(M.exhibitsPerLeg+.2);
+    const x=mix(a.x,b.x,t),y=mix(a.y,b.y,t)+M.exhibitDrop;MUSEUM_STAGERS[entry.id]?.(x,y);
+    exhibits.push({...entry,x,y,lines:museumLines(entry.text,M.wrapCharacters)});
   });
-  const rows=Math.ceil(list.length/perRow),edge=width/2+spacing*.6;
-  for(let row=0;row<rows;row++){
-    const dir=row%2?-1:1,y=MUSEUM_ORIGIN_Y+row*MUSEUM_ROW_GAP;
-    path.push({x:-dir*edge,y},{x:dir*edge,y});
-  }
-  // Arc-length table so the glide keeps a steady, readable pace around the switchbacks.
-  let total=0;const marks=[0];for(let i=1;i<path.length;i++){total+=Math.hypot(path[i].x-path[i-1].x,path[i].y-path[i-1].y);marks.push(total);}
-  state.museum={exhibits,path,marks,total,distance:0};
-  state.zone={kind:'museum',origin:MUSEUM_ORIGIN_Y};
+  // Exhibits leave the simulation entirely: drawn like the real thing, but they never move, hunt or collide.
+  for(const o of state.objects)if(!keep.has(o))museumStatues.push(o);
+  state.objects=state.objects.filter(o=>keep.has(o));
+  state.museum={exhibits,statues:museumStatues,trail,top:trail[0].y,bottom:trail.at(-1).y,road:{surface:'snow',width:M.trailWidth,points:trail.map(p=>({...p})),museum:true}};
+  museumStatues=null;state.roads.push(state.museum.road);
+  // Keep the trail clear of the summit forest and anything already standing in it.
+  state.objects=state.objects.filter(o=>o.type==='entrance'||!museumArea(o.x,o.y,o.type==='ice'?Math.max(o.rx||0,o.ry||0):0));
+  state.zone={kind:'museum',origin:gate.y};
   for(const o of state.objects)if(o.type==='entrance')o.selected=o===gate;
-  const p=state.p;Object.assign(p,{x:path[0].x,y:path[0].y,heading:Math.PI/2,desiredHeading:Math.PI/2,mode:'traverse',speed:0,vx:0,vy:0,air:0,fall:0,awaitingInput:false});
-  state.cam={x:p.x,y:p.y-H*S.render.playerScreenY/ZOOM};state.started=true;
-  announce('THE FROSTLINE MUSEUM','GLIDE PAST EVERYTHING - HOLD DOWN TO HURRY, UP TO LEAVE',C.teal,5);
+  announce('THE FROSTLINE MUSEUM','FOLLOW THE TRAIL ACROSS THE SLOPE',C.teal,4);
   return true;
 }
-function museumPoint(d){
-  const m=state.museum,path=m.path;let i=1;while(i<path.length-1&&m.marks[i]<d)i++;
-  const a=path[i-1],b=path[i],t=clamp((d-m.marks[i-1])/(m.marks[i]-m.marks[i-1]||1),0,1);
-  return {x:mix(a.x,b.x,t),y:mix(a.y,b.y,t),dx:b.x-a.x,dy:b.y-a.y};
-}
-function updateMuseum(dt){
-  const m=state.museum,p=state.p,M=S.museum;
-  if(state.input.up){state.input.up=false;resetSummit();announce('THANKS FOR VISITING','THE MOUNTAIN IS BACK THIS WAY',C.teal,3);return;}
-  const speed=M.glideMetresPerSecond*PX_PER_M*(state.input.down?M.hurryMultiplier:1);
-  m.distance=Math.min(m.total,m.distance+speed*dt);
-  const at=museumPoint(m.distance),len=Math.hypot(at.dx,at.dy)||1;
-  p.vx=at.dx/len*speed;p.vy=at.dy/len*speed;p.x=at.x;p.y=at.y;p.speed=speed;
-  p.heading=p.desiredHeading=Math.atan2(at.dx/len,at.dy/len);p.mode=Math.abs(at.dx)>Math.abs(at.dy)?'traverse':'slide';
-  updateFeedback(dt);
-  state.cam.x=ease(state.cam.x,p.x,S.render.cameraXFollow,dt);state.cam.y=ease(state.cam.y,p.y-H*S.render.playerScreenY/ZOOM,S.render.cameraYFollow,dt);
-  if(m.distance>=m.total){resetSummit();announce('THANKS FOR VISITING','NOW GO MEET THEM FOR REAL',C.teal,3);}
+function updateMuseum(){
+  const m=state.museum,p=state.p;if(!m||state.zone.kind!=='museum')return;
+  // Ski past the last exhibit and the mountain carries on as ordinary free skiing.
+  if(p.y>m.bottom+250){state.zone={kind:'start',origin:0};announce('MUSEUM EXIT','THE MOUNTAIN IS ALL YOURS',C.teal,3);}
 }
 function museumProgress(){
-  const m=state.museum,passed=m.exhibits.filter(e=>Math.abs(e.y-state.p.y)<MUSEUM_ROW_GAP&&museumPassed(e)||e.y<state.p.y-MUSEUM_ROW_GAP/2).length;
-  return Math.min(m.exhibits.length,passed)+' / '+m.exhibits.length+' EXHIBITS';
+  const m=state.museum;return m.exhibits.filter(e=>e.y-S.museum.exhibitDrop<state.p.y+40).length+' / '+m.exhibits.length+' EXHIBITS';
 }
-function museumPassed(e){const row=Math.round((e.y-S.museum.exhibitDrop-MUSEUM_ORIGIN_Y)/MUSEUM_ROW_GAP),dir=row%2?-1:1;return (state.p.x-e.x)*dir>=0;}
+function museumStatuesInView(top,bottom){return state.museum?state.museum.statues.filter(o=>o.y>top&&o.y<bottom&&Math.abs(o.x-state.cam.x)<W/(2*ZOOM)+300):[];}
 function drawMuseumNotes(){
   const m=state.museum;if(!m)return;
   for(const e of m.exhibits){

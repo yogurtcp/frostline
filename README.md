@@ -20,7 +20,7 @@ The body stays upright while standing and climbing. Fast and slow diagonal skiin
 
 ## Museum
 
-Ski through **MUSEUM** at the left of the summit clearing for a slow, automatic glide past everything on the mountain: every creature, villager, obstacle, jump, hazard and pickup, each standing still with a short note written on the snow. You travel sideways along rows of exhibits, switching back at each end, so the notes are easy to read. Hold Down (or tap the bottom of the screen) to hurry; press Up to leave. The tour returns you to the summit. Exhibit wording is in `game-config.json` under `museum.exhibits`.
+Ski through **MUSEUM** at the left of the summit clearing and a marked snow trail opens on the slope below it. The trail zigzags across the hill at a shallow angle, so you ski mostly sideways past every creature, villager, obstacle, jump, hazard and pickup on the mountain. Each one stands as a harmless statue with a short note written on the snow beneath it. You ski it normally; there is no teleport and nothing in it moves or collides. The trail is kept clear of random scenery and lakes, is protected from wild predators, and has no fast-skier traffic. Past the last exhibit the mountain carries on as ordinary free skiing. Exhibit wording is in `game-config.json` under `museum.exhibits`.
 
 ## Creature rules
 

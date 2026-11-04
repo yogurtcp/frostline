@@ -2844,10 +2844,11 @@
     "lightReachMultiplier": 3.2
   },
   "museum": {
-    "glideMetresPerSecond": 10,
-    "hurryMultiplier": 3,
-    "exhibitsPerRow": 6,
-    "spacing": 520,
+    "exhibitsPerLeg": 4,
+    "legWidth": 1700,
+    "legDrop": 980,
+    "trailWidth": 70,
+    "clearanceWidth": 460,
     "exhibitDrop": 150,
     "textOffset": 55,
     "wrapCharacters": 27,
