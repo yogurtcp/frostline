@@ -900,7 +900,7 @@ window.FROSTLINE_READY = (async () => {
         const gearWeight=landmark?encounter.chamberLength/(E.gates.spacingMetres*PX_PER_M*gateScale)*2*(gear==='sword'?1/E.gates.swordEvery:1-1/E.gates.swordEvery):1;
         const forest=encounter?.kind==='trees';
         const half=forest?encounter.half*mix(.28,.24,t):encounter?.kind==='cemetery'?encounter.half-8*gateScale:Math.min(mix(...E.gates.openingMetres,t)*PX_PER_M*gateScale/2,encounter?encounterHalf(encounter,a.nextGateY)-22*encounter.scale:Infinity);
-        const offset=forest?(number%2?-1:1)*Math.max(0,encounter.half-half-14*gateScale):['beginner','crowd','forest'].includes(encounter?.kind)?(number%2?-1:1)*mix(...E.gates.swingMetres,t)*PX_PER_M*gateScale:0;
+        const offset=forest?(number%2?-1:1)*Math.max(0,encounter.half-half-14*gateScale):['beginner','crowd','forest','piedPiper'].includes(encounter?.kind)?(number%2?-1:1)*mix(...E.gates.swingMetres,t)*PX_PER_M*gateScale:0;
         const raw=encounter?encounter.paths.map(path=>(encounter.specialArea?specialGateX(encounter,a.nextGateY,number,path):encounterPathX(path,a.nextGateY))+offset):[root.x+(number%2?-1:1)*mix(...E.gates.swingMetres,t)*PX_PER_M*gateScale];
         const spread=Math.max(...raw)-Math.min(...raw),merged=raw.length>1&&spread<half*2.3;
         const positions=merged?[raw.reduce((a,b)=>a+b,0)/raw.length]:raw,opening=merged&&!forest?half+spread*.3:half;
@@ -909,6 +909,7 @@ window.FROSTLINE_READY = (async () => {
           const gate=entity('gate',x,a.nextGateY,{half:opening,width:opening*2,r:0,number,color:number%2?C.red:C.blue,checked:false,run:root,gateGroup:group,gear,gearWeight,encounter});group.members.push(gate);
           if(encounter?.kind==='rivalRace'&&gate.y>=encounter.startY+800*encounter.scale&&gate.y<=encounter.endY-180*encounter.scale)encounter.raceGates.push(gate);
         }
+        if(encounter?.level)clearLevelGate(group);
         section.arcade.gates.count++;root.totalGates++;a.nextGateY+=E.gates.spacingMetres*PX_PER_M*gateScale;
       }
       while(a.nextLakeY<endY){
@@ -2009,11 +2010,10 @@ window.FROSTLINE_READY = (async () => {
     // Any edible NPC is fair game along a hunter's route toward the player.
     if(!['fast','slow','bear'].includes(hunter?.kind)&&hunter?.type!=='wolf'&&hunter?.type!=='zombie')return true;
     const p=state.p,P=S.predators;
-    const width=(committed?P.divertReleaseWidthMetres:P.divertPathWidthMetres)*PX_PER_M*endlessSpeedScale(hunter)*levelDivertWidth(hunter);
+    const width=(committed?P.divertReleaseWidthMetres:P.divertPathWidthMetres)*PX_PER_M*endlessSpeedScale(hunter);
     const angle=(committed?P.divertReleaseAngleDegrees:P.divertPathAngleDegrees)*Math.PI/180;
     // Finish a nearby committed catch even if a stopped/fallen target slips just behind us.
     if(committed&&Math.hypot(prey.x-hunter.x,prey.y-hunter.y)<S.chasers.captureDistance*2)return true;
-    if(committed&&hunter.encounter?.level)return true; // a challenge-area Yeti that turns for a snack sees it through
     const route=endlessPursuitRoute(hunter,p),e=route?.encounter;
     if(route?.cemetery){const h=cemeteryProjection(e,hunter.x,hunter.y),q=cemeteryProjection(e,prey.x,prey.y),goal=cemeteryProjection(e,p.x,p.y),direction=Math.sign(goal.along-h.along)||1,along=(q.along-h.along)*direction;return q.distance<=width&&(!committed||h.distance<=width)&&along>0&&along<=Math.abs(goal.along-h.along)+width;}
     const path=e&&!route.cemetery&&hunter.y>=e.startY&&prey.y>=e.startY&&prey.y<=e.endY?e.paths[route.index]:null;
@@ -2120,7 +2120,7 @@ window.FROSTLINE_READY = (async () => {
     meal.eaten=true;meal.r=0;meal.walking=false;meal.socialUntil=meal.fearUntil=0;
     state.speech=state.speech.filter(q=>q.object!==meal);
     hunter.divert=null;hunter.divertOrigin=null;hunter.obstacleDetour=null;hunter.avoidUntil=0;
-    hunter.feedingUntil=clock+pause;hunter.nextDivertCheck=hunter.feedingUntil;levelSatedYeti(hunter);
+    hunter.feedingUntil=clock+pause;hunter.nextDivertCheck=hunter.feedingUntil;
     say('CHOMP!',hunter,1.2);burst(meal.x,meal.y,C.ice,9);
   }
   function consumeNearbyPrey(hunter,previous,pause=S.predators.mealPauseSeconds,radius=S.chasers.captureDistance,contacts=null){

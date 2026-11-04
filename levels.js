@@ -4,7 +4,7 @@
    Tuning is in game-config.json endless.regions.levels. */
 const LEVEL_KINDS=new Set(['piedPiper','avalanche','burrowField','sleepingGiants']);
 const LEVEL_NAMES={piedPiper:"Pied Piper's Parade",avalanche:'Avalanche!',burrowField:'The Floor Is Burrowers',sleepingGiants:'Sleeping Giants'};
-const LEVEL_HINTS={piedPiper:'TEN YETIS ARE AFTER YOU - SKIERS MAKE A SNACK, ICE MAKES YOU FAST',avalanche:'EYES UP AND DOWN - SNOWBALLS FROM ABOVE, BEASTS BELOW',burrowField:'THEY COME FROM THE SIDES - TURN, JUMP OR FIND ICE',sleepingGiants:'WEAVE BETWEEN THE SLEEPERS - THE FASTER YOU GO, THE MORE YOU WAKE'};
+const LEVEL_HINTS={piedPiper:'TEN YETIS ARE AFTER YOU - GRAB FLAGS, USE THE ICE, WATCH FOR AMBUSHES',avalanche:'EYES UP AND DOWN - SNOWBALLS FROM ABOVE, BEASTS BELOW',burrowField:'THEY COME FROM THE SIDES - TURN, JUMP OR FIND ICE',sleepingGiants:'WEAVE BETWEEN THE SLEEPERS - THE FASTER YOU GO, THE MORE YOU WAKE'};
 function levelConfig(e){return S.endless.regions.levels[e.kind];}
 function levelValue(e,range){return Array.isArray(range)?mix(range[0],range[1],e.difficulty):range;}
 function levelRows(e,from,to,step,offset,callback){
@@ -13,10 +13,10 @@ function levelRows(e,from,to,step,offset,callback){
 function planLevelArea(e,section){
   const root=section.endlessRoot,s=e.scale,length=e.endY-e.startY,side=pick([-1,1]);
   const point=(t,x=0)=>({x:root.x+x*s,y:e.startY+t*length});
-  e.noFlags=true;e.noNewPredators=true;e.level=true;e.section=section;e.title=LEVEL_NAMES[e.kind];e.centerX=root.x;
+  e.noFlags=e.kind!=='piedPiper';e.noNewPredators=true;e.level=true;e.section=section;e.title=LEVEL_NAMES[e.kind];e.centerX=root.x;
   // A gentle zigzag with bends a fixed distance apart, however long the area is.
   const zig=(metres,amp)=>{const n=Math.max(2,Math.round(length/(metres*PX_PER_M*s)));return Array.from({length:n+1},(_,i)=>point(i/n,i===0||i===n?0:(i%2?side:-side)*amp));};
-  if(e.kind==='piedPiper'){e.half=300*s;e.paths=[zig(250,150)];}
+  if(e.kind==='piedPiper'){e.half=280*s;e.paths=[zig(250,120)];}
   else if(e.kind==='avalanche'){e.half=300*s;e.paths=[zig(280,110)];}
   else if(e.kind==='burrowField'){e.half=160*s;e.paths=[zig(320,90)];}
   else {e.half=levelValue(e,levelConfig(e).fieldHalfMetres)*PX_PER_M*s;e.paths=[zig(300,60)];}
@@ -33,6 +33,12 @@ function populateLevelArea(e,section,from,to){
   if(e.kind==='piedPiper'){
     sideTrees(L.sideTreesPer100Metres,e.half+40*s,e.half+260*s);
     skiers(L.skiersPer100Metres);
+    // A real course: rocks, stumps and trees all over the slope (cleared out of each flag's opening once flags are placed).
+    per(L.obstaclesPer100Metres,70,y=>{const x=at(y)+range(-1,1)*e.half,k=pick(['pine','fir','rock','rock','stump','smallPine']);const o=createArcadeItem(k,x,y,section);o.encounter=e;o.levelObstacle=true;});
+    // Bears and wolf packs already on the slope; more turn up as you go (ambushes).
+    const spot=y=>at(y)+pick([-1,1])*range(.2,.9)*e.half;
+    per(L.bearsPer100Metres,330,y=>entity('bear',spot(y),y,{...ARCADE_ITEMS.bear,...own,nextAI:clock+range(1,4)}));
+    per(L.wolfPacksPer100Metres,470,y=>levelWolfPack(e,spot(y),y));
     // Sparse black ice: no steering, but it speeds you downhill, away from the pack.
     per(L.icePer100Metres,260,y=>{const rx=range(50,80)*s;entity('ice',at(y)+range(-80,80)*s,y,{...own,rx,ry:rx*range(1.2,1.5),width:rx*2,r:0,arcadeFeature:true});});
   }else if(e.kind==='avalanche'){
@@ -44,8 +50,7 @@ function populateLevelArea(e,section,from,to){
     const spot=y=>at(y)+pick([-1,1])*range(.25,.9)*e.half;
     per(L.lurkersPer100Metres,200,y=>levelYeti(e,section,spot(y),y,levelValue(e,L.lurkerSpeedKmh)));
     per(L.bearsPer100Metres,330,y=>entity('bear',spot(y),y,{...ARCADE_ITEMS.bear,...own,nextAI:clock+range(1,4)}));
-    per(L.wolfPacksPer100Metres,470,y=>{const x=spot(y),packId=random(),count=Math.floor(range(S.wildlife.packMin,S.wildlife.packMax+1));
-      for(let i=0;i<count;i++)entity('wolf',x+(i%2?1:-1)*i*18,y+Math.floor(i/2)*25,{...ARCADE_ITEMS.wolf,...own,packId,packIndex:i,nextAI:clock+range(1,4)});});
+    per(L.wolfPacksPer100Metres,470,y=>levelWolfPack(e,spot(y),y));
   }else if(e.kind==='burrowField'){
     sideTrees(L.sideTreesPer100Metres,e.half+20*s,e.half+200*s);
     // A sparse line of jumps and small frozen pools: places to be safe for a moment. Burrowers cannot strike through ice or the air.
@@ -75,6 +80,26 @@ function levelYeti(e,section,x,y,kmh){
   const speed=kmh??levelValue(e,levelConfig(e).yetiSpeedKmh??S.endless.yetis.speedKmh);
   return entity('lurker',x,y,{arcadeRun:section,encounter:e,width:55,r:18,arcadeTier:speed>90?'special':speed>78?'fast':'slow',yetiSpeedKmh:speed,endlessBaseKmh:speed});
 }
+function levelWolfPack(e,x,y){
+  const packId=random(),count=Math.floor(range(S.wildlife.packMin,S.wildlife.packMax+1));
+  for(let i=0;i<count;i++)entity('wolf',x+(i%2?1:-1)*i*18,y+Math.floor(i/2)*25,{...ARCADE_ITEMS.wolf,arcadeRun:e.section,encounter:e,packId,packIndex:i,nextAI:clock+range(1,4)});
+}
+// Flags go on the line after the slope is populated: clear any obstacle out of the opening.
+function clearLevelGate(group){
+  const pad=50;
+  filterObjects(o=>!o.levelObstacle||!group.members.some(g=>Math.abs(o.y-g.y)<70&&Math.abs(o.x-g.x)<g.half+pad));
+}
+// Surprise enemies: a Yeti bursting in from the side, or a bear or wolf pack just below the screen.
+function updateAmbushes(e,L){
+  const p=state.p,every=levelValue(e,L.ambushSeconds??0);if(!every||p.fall||p.awaitingInput||p.y>e.endY-150*e.scale)return;
+  if(!e.nextAmbush){e.nextAmbush=clock+every*range(.5,1);return;}
+  if(clock<e.nextAmbush)return;
+  e.nextAmbush=clock+every*range(.7,1.3);
+  const b=viewBounds(),s=e.scale,line=encounterPathX(e.paths[0],p.y),roll=random();
+  if(roll<.45){const side=pick([-1,1]),c=levelChaser(e,side<0?b.left-30:b.right+30,p.y+range(10,35)*PX_PER_M*s,levelValue(e,L.chaserSpeedKmh)-5);say(pick(['SURPRISE!','HELLO THERE!','THOUGHT YOU WERE SAFE?']),c,1.4);}
+  else{const x=clamp(p.x+range(-160,160),line-e.half*.9,line+e.half*.9),y=b.bottom+60;
+    if(roll<.75)entity('bear',x,y,{...ARCADE_ITEMS.bear,arcadeRun:e.section,encounter:e,nextAI:clock+range(.5,2)});else levelWolfPack(e,x,y);}
+}
 // A Yeti that is already running when you arrive, a little uphill of you.
 function levelChaser(e,x,y,kmh){
   const c={kind:kmh>78?'fast':'slow',arcadeTier:kmh>90?'special':kmh>78?'fast':'slow',encounter:e,chaseRun:e.section,endlessBaseKmh:kmh,x,y,speed:kmh/S.physics.hudKmhPerSpeed,
@@ -83,31 +108,25 @@ function levelChaser(e,x,y,kmh){
 }
 function releaseLevelChasers(e,count,kmh,spread,lines){
   const p=state.p,s=e.scale;
-  for(let i=0;i<count;i++){const c=levelChaser(e,p.x+range(-220,220)*s,p.y-range(20,55)*PX_PER_M*s,kmh+range(-spread,spread));if(i<2)say(pick(lines),c,1.8);}
-}
-// A Yeti from a challenge area that has eaten goes home, satisfied.
-function levelSatedYeti(hunter){
-  if(!hunter.encounter?.level||hunter.satedLeave)return;
-  hunter.satedLeave=true;
+  const [near,far]=e.kind==='avalanche'?[45,90]:[20,55];
+  for(let i=0;i<count;i++){const c=levelChaser(e,p.x+range(-220,220)*s,p.y-range(near,far)*PX_PER_M*s,kmh+range(-spread,spread));if(i<2)say(pick(lines),c,1.8);}
 }
 function updateLevelAreas(dt){
   const p=state.p,e=state.endless?endlessEncounterAt(p.y):null;
-  for(const c of state.chasers)if(c.satedLeave&&!c.leaving&&!(c.feedingUntil>clock)){c.leaving=true;say(pick(['*BURP* Lovely. I am off home.','That hit the spot. Bye!','Full! See you never!']),c,2.2);}
   if(!e?.level||!state.started)return;
   const L=levelConfig(e),s=e.scale;
   // The pack is let loose once you are properly under way and 70 m in, so it starts on open slope inside the area.
   if(!e.chasersReleased&&(e.kind==='piedPiper'||e.kind==='avalanche')&&p.y>e.startY+700*s&&!p.fall&&!p.awaitingInput&&Math.hypot(p.vx,p.vy)*S.physics.hudKmhPerSpeed>=50){
     e.chasersReleased=true;const count=Math.round(levelValue(e,L.chasingYetis));
     releaseLevelChasers(e,count,levelValue(e,L.chaserSpeedKmh),levelValue(e,L.chaserSpeedSpreadKmh??0),['THERE! GET HIM!','BREAKFAST IS LEAVING!','RUN, LITTLE SKIER!']);
-    if(e.kind==='piedPiper')announce(count+' YETIS ARE RIGHT BEHIND YOU','LOSE THEM: SKIERS ARE TASTIER THAN YOU',C.red,3);
+    if(e.kind==='piedPiper')announce(count+' YETIS ARE RIGHT BEHIND YOU','FLAGS ARM YOU - ICE SPEEDS YOU AWAY',C.red,3);
   }
-  if(e.kind==='piedPiper')e.onTail=state.chasers.filter(c=>c.encounter===e&&!c.dead&&!c.eaten&&!c.leaving&&!c.satedLeave&&c.y>p.y-S.endless.yetis.nearbyMetres*PX_PER_M*s).length;
+  if(e.kind==='piedPiper'||e.kind==='avalanche')updateAmbushes(e,L);
+  if(e.kind==='piedPiper')e.onTail=state.chasers.filter(c=>c.encounter===e&&!c.dead&&!c.eaten&&!c.leaving&&c.y>p.y-S.endless.yetis.nearbyMetres*PX_PER_M*s).length;
   else if(e.kind==='avalanche')updateAvalanche(e,L,dt);
   else if(e.kind==='burrowField')updateBurrowField(e,L);
   else if(e.kind==='sleepingGiants')updateSleepingGiants(e,L,dt);
 }
-// Pied Piper Yetis are greedy: a skier well off their route still draws them in.
-function levelDivertWidth(hunter){return hunter?.encounter?.level?2:1;}
 function updateAvalanche(e,L,dt){
   const p=state.p,b=viewBounds(),s=e.scale;
   // Balls that have rolled well past you are done; no tracks scrolling in from below.
@@ -143,13 +162,21 @@ function updateBurrowField(e,L){
 }
 function spawnFieldBurrower(e,L,side){
   const p=state.p,b=viewBounds(),travel=levelValue(e,L.arriveSeconds)*range(.85,1.15),pause=levelValue(e,L.strikePause),ahead=travel+pause;
-  const tx=clamp(p.x+p.vx*ahead+range(-25,25),b.left+40,b.right-40),ty=p.y+p.vy*ahead,sx=side<0?b.left-40:b.right+40,sy=ty+range(-80,30);
+  const tx=clamp(p.x+p.vx*ahead,b.left+40,b.right-40),ty=p.y+p.vy*ahead,sx=side<0?b.left-40:b.right+40,sy=ty+range(-80,30);
   entity('burrower',sx,sy,{arcadeRun:e.section,encounter:e,r:0,width:42,fieldBurrower:true,burrowState:'rushing',rushAt:clock,burrowTrail:[],
-    targetX:tx,targetY:ty,rushSpeed:Math.hypot(tx-sx,ty-sy)/travel,strikePause:pause});
+    targetX:tx,targetY:ty,rushSpeed:Math.hypot(tx-sx,ty-sy)/travel,strikePause:pause,aimFollow:levelValue(e,L.aimFollowMetresPerSecond)*PX_PER_M,commitSeconds:levelValue(e,L.commitSeconds)});
   beep(side<0?140:160,.06,'triangle',.012);
 }
-// It runs straight for the spot it chose: steer off your line, take a jump or reach ice and it misses.
+// It keeps re-aiming at where you will be, but its aim only shifts so fast, and in the last moment it commits:
+// a late, sharp change of line makes it miss, as does a jump or ice.
 function rushFieldBurrower(o,dt){
+  const p=state.p;
+  if(!o.committed){
+    const left=Math.hypot(o.targetX-o.x,o.targetY-o.y)/o.rushSpeed;
+    if(left<o.commitSeconds)o.committed=true;
+    else{const t=left+o.strikePause,ax=p.x+p.vx*t,ay=p.y+p.vy*t,mx=ax-o.targetX,my=ay-o.targetY,shift=Math.hypot(mx,my),max=o.aimFollow*dt;
+      if(shift>0){const k=Math.min(1,max/shift);o.targetX+=mx*k;o.targetY+=my*k;}}
+  }
   const dx=o.targetX-o.x,dy=o.targetY-o.y,dist=Math.hypot(dx,dy),step=o.rushSpeed*dt;
   o.motionFromX=o.x;o.motionFromY=o.y;o.motionFromStamp=clock;
   if(dist<=step){

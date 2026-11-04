@@ -1529,3 +1529,13 @@ Verification (browser bots, deterministic seed):
 - U: on visit 1 a non-dodging bot reaches the end with 9 Yetis fed; on visit 3 a bear catches it at 202 m.
 - All-area trace: 192 checkpoints, no page errors. Headless p95 frame: Y 4.5 ms, U 23 ms (creatures plus about 1,000 track segments), I 5.9 ms, O 4.9 ms.
 - Note: landings still show "+30 POINTS" popups (pre-existing), despite the user's dislike of points.
+
+## 138. Pied Piper becomes a flagged gauntlet; Avalanche gets more beasts; burrowers home in (2026-11-04)
+
+User feedback: in Y the Yetis just chase the people; don't limit a Yeti to one meal, let them behave normally. Y needs a more interesting area than a wide free slope (flags, more obstacles, random enemies appearing). U: more enemies, fewer snowballs. I: burrowers seem to go to random spots rather than intercept. O: still not fun; needs a new idea (open, see below).
+
+- Removed the level-specific Yeti rules: no `levelSatedYeti`/`satedLeave` (Yetis eat, pause and carry on as normal), no `levelDivertWidth`, and no committed-snack rule in `preyOnPlayerPath`.
+- Pied Piper: flags enabled (`e.noFlags` false), with gates swinging like forest gates (`piedPiper` added to the swing list in `extendEndless`). `obstaclesPer100Metres` (12→16) scatters trees, rocks and stumps (`levelObstacle`) across the corridor, and `clearLevelGate(group)` (called after each level gate is placed) removes any in a flag's opening. Bears (0.3→0.5) and wolf packs (0.2→0.35) wait on the slope. `updateAmbushes` (Pied Piper and Avalanche, every `ambushSeconds`): 45% a Yeti bursts in from a screen edge 10–35 m ahead; otherwise a bear or wolf pack (`levelWolfPack`) appears just below the screen. The pack runs at 100→104 km/h ± 8 and is released 20–55 m back.
+- Avalanche: `ballSeconds` 2.2→1.4, volley every 5th→4th; lurkers 1.4→2, bears 0.9→1.3, wolf packs 0.6→0.9 per 100 m; 3→5 chasers released 45–90 m back; ambushes every 9→6 s.
+- Burrow field: `rushFieldBurrower` re-aims every frame toward your extrapolated position, but its target moves at most `aimFollowMetresPerSecond` (22→32), and it stops re-aiming (`committed`) once less than `commitSeconds` (0.4→0.3) remain. The initial ±25-unit jitter is gone.
+- Verification: a basic line-following bot (it ignores flags) is caught in Y at 311–509 m. A bot holding its line in I dies at 154 m; the dodge bot clears visit 3 (95 attacks) and reaches 1440 m on visit 1. The U bot dies on falling trees and creatures it does not avoid; screenshots of Y and U inspected (flags, clutter and beasts readable). All-area trace: 192 checkpoints, no errors. Headless p95 frame 3–11 ms.

@@ -10263,7 +10263,7 @@
                 "piedPiper": {
                   "type": "object",
                   "additionalProperties": false,
-                  "description": "Ten Yetis chase you from the start; skiers feed them, ice speeds you away.",
+                  "description": "Ten Yetis chase you through a flagged, cluttered course with ambushes and sparse ice.",
                   "properties": {
                     "chasingYetis": {
                       "type": "array",
@@ -10324,6 +10324,46 @@
                       "minItems": 2,
                       "maxItems": 2,
                       "description": "[easy, hard] trees beside the line"
+                    },
+                    "obstaclesPer100Metres": {
+                      "type": "array",
+                      "items": {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      "minItems": 2,
+                      "maxItems": 2,
+                      "description": "[easy, hard] trees, rocks and stumps scattered over the course"
+                    },
+                    "bearsPer100Metres": {
+                      "type": "array",
+                      "items": {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      "minItems": 2,
+                      "maxItems": 2,
+                      "description": "[easy, hard] bears on the slope"
+                    },
+                    "wolfPacksPer100Metres": {
+                      "type": "array",
+                      "items": {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      "minItems": 2,
+                      "maxItems": 2,
+                      "description": "[easy, hard] wolf packs on the slope"
+                    },
+                    "ambushSeconds": {
+                      "type": "array",
+                      "items": {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      "minItems": 2,
+                      "maxItems": 2,
+                      "description": "[easy, hard] seconds between surprise enemies (side-charging Yeti, or a bear or wolf pack just below the screen)"
                     }
                   }
                 },
@@ -10481,6 +10521,16 @@
                       "minItems": 2,
                       "maxItems": 2,
                       "description": "[easy, hard] wolf packs on the slope"
+                    },
+                    "ambushSeconds": {
+                      "type": "array",
+                      "items": {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      "minItems": 2,
+                      "maxItems": 2,
+                      "description": "[easy, hard] seconds between surprise enemies"
                     }
                   }
                 },
@@ -10558,6 +10608,26 @@
                       "minItems": 2,
                       "maxItems": 2,
                       "description": "[easy, hard] trees beside the line"
+                    },
+                    "aimFollowMetresPerSecond": {
+                      "type": "array",
+                      "items": {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      "minItems": 2,
+                      "maxItems": 2,
+                      "description": "[easy, hard] how fast a rushing burrower can shift its aim point to follow you"
+                    },
+                    "commitSeconds": {
+                      "type": "array",
+                      "items": {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      "minItems": 2,
+                      "maxItems": 2,
+                      "description": "[easy, hard] it stops re-aiming this long before it arrives"
                     }
                   }
                 },

@@ -376,8 +376,8 @@
             10
           ],
           "chaserSpeedKmh": [
-            103,
-            107
+            100,
+            104
           ],
           "chaserSpeedSpreadKmh": [
             8,
@@ -394,12 +394,28 @@
           "sideTreesPer100Metres": [
             4,
             4
+          ],
+          "obstaclesPer100Metres": [
+            12,
+            16
+          ],
+          "bearsPer100Metres": [
+            0.3,
+            0.5
+          ],
+          "wolfPacksPer100Metres": [
+            0.2,
+            0.35
+          ],
+          "ambushSeconds": [
+            8,
+            5
           ]
         },
         "avalanche": {
           "ballSeconds": [
-            1.1,
-            0.55
+            2.2,
+            1.4
           ],
           "ballTravelMetres": [
             600,
@@ -422,7 +438,7 @@
             1.6
           ],
           "volleyEvery": [
-            6,
+            5,
             4
           ],
           "skiersPer100Metres": [
@@ -430,8 +446,8 @@
             2.5
           ],
           "chasingYetis": [
-            2,
-            3
+            3,
+            5
           ],
           "chaserSpeedKmh": [
             80,
@@ -442,20 +458,24 @@
             4
           ],
           "lurkersPer100Metres": [
-            0.6,
-            0.9
+            1.4,
+            2
           ],
           "lurkerSpeedKmh": [
             62,
             70
           ],
           "bearsPer100Metres": [
-            0.4,
-            0.6
+            0.9,
+            1.3
           ],
           "wolfPacksPer100Metres": [
-            0.25,
-            0.4
+            0.6,
+            0.9
+          ],
+          "ambushSeconds": [
+            9,
+            6
           ]
         },
         "burrowField": {
@@ -486,6 +506,14 @@
           "sideTreesPer100Metres": [
             6,
             6
+          ],
+          "aimFollowMetresPerSecond": [
+            22,
+            32
+          ],
+          "commitSeconds": [
+            0.4,
+            0.3
           ]
         },
         "sleepingGiants": {
