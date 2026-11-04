@@ -2286,7 +2286,7 @@ window.FROSTLINE_READY = (async () => {
       }
       const down=p.fall>0||p.awaitingInput&&!!p.crashObstacle;
       if(down){
-        if(!o.dogConcerned){o.dogConcerned=true;delete o.dogReplyAt;say('Whine...',o,1.2);o.avoidUntil=0;o.obstacleDetour=null;}
+        if(!o.dogConcerned){o.dogConcerned=true;delete o.dogReplyAt;o.avoidUntil=0;o.obstacleDetour=null;}
         const {row,side}=slot(o),goal=dogGoal(o,p.x+side*(20+row*14),p.y+8+row*10),d=Math.hypot(goal.x-o.x,goal.y-o.y);
         if(d>8){o.dogMood='comfort';moveDog(o,goal,cruise*1.4,dt);}
         else{o.dogMood='lick';stopDog(o);if(clock>=(o.nextLickSound||0)){say('Slurp!',o,1.2);o.nextLickSound=clock+4;}}continue;
@@ -4579,10 +4579,27 @@ window.FROSTLINE_READY = (async () => {
     else drawYeti(c,s,'run',c.kind==='slow'?52:59);
   }
   function drawSpeech() {
+    // Double-size pixel font with a full outline, so speech reads clearly over snow, houses and night.
+    const R=S.render,size=R.speechTextSize,scale=size>=14?2:1,charW=6*scale,lineH=7*scale+R.speechLineGap,max=R.speechWrapCharacters;
+    const dark=state.nightBlend>.5,ink=dark?'#f6e7c4':C.ink,edge=dark?'#13202f':'#fbf8ec';
+    const boxes=[];
     for(const q of state.speech){const s=screen(q.object.x,q.object.y);if(s.y<-20||s.y>H+80)continue;
-      const words=q.text.split(' '),lines=[''];for(const word of words){let n=lines.length-1;if((lines[n]+word).length>27)lines.push(word+' ');else lines[n]+=word+' ';}
-      const width=Math.max(...lines.map(l=>l.trim().length))*6+14,height=lines.length*12+12,x=clamp(s.x-width/2,8,W-width-8),y=s.y-(q.object.width||50)*1.13*ZOOM-height-8;
-      const dark=state.nightBlend>.5;ctx.globalAlpha=clamp((q.until-clock)*3,0,1);lines.forEach((l,i)=>{text(l.trim(),x+width/2+1,y+13+i*12,9,dark?'#172b3c':'#f7f3df');text(l.trim(),x+width/2,y+12+i*12,9,dark?'#efdfbb':C.ink);});ctx.globalAlpha=1;
+      const words=q.text.split(' '),lines=[''];for(const word of words){const n=lines.length-1;if(lines[n]&&(lines[n]+' '+word).length>max)lines.push(word);else lines[n]+=(lines[n]?' ':'')+word;}
+      const width=Math.max(...lines.map(l=>l.length))*charW+10,height=lines.length*lineH+4;
+      boxes.push({q,lines,width,height,x:clamp(s.x-width/2,8,W-width-8),y:s.y-(q.object.width||50)*1.13*ZOOM-height-8});
+    }
+    // Neighbours talking at once stack upward instead of drawing over each other.
+    boxes.sort((a,b)=>b.y-a.y);const placed=[];
+    for(const b of boxes){
+      for(let tries=0;tries<8;tries++){const hit=placed.find(o=>b.x<o.x+o.width&&b.x+b.width>o.x&&b.y<o.y+o.height&&b.y+b.height>o.y);if(!hit)break;b.y=hit.y-b.height-2;}
+      placed.push(b);
+    }
+    for(const b of placed){
+      ctx.globalAlpha=clamp((b.q.until-clock)*3,0,1);
+      b.lines.forEach((l,i)=>{const cx=b.x+b.width/2,cy=b.y+lineH*(i+1)-R.speechLineGap;
+        for(const [dx,dy] of [[-1,0],[1,0],[0,-1],[0,1],[-1,-1],[1,-1],[-1,1],[1,1]])text(l,cx+dx,cy+dy,size,edge);
+        text(l,cx,cy,size,ink,'center',scale>1?0:1);});
+      ctx.globalAlpha=1;
     }
   }
   // Picks the chaser named by the offscreen warning: among pursuers above the view,

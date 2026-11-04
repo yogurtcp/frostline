@@ -1884,6 +1884,9 @@
     "playerWidth": 44,
     "fallWidth": 60,
     "speechSeconds": 2.5,
+    "speechTextSize": 14,
+    "speechWrapCharacters": 18,
+    "speechLineGap": 4,
     "speechLimit": 5,
     "messageSeconds": 3.2,
     "messageLimit": 4,
@@ -2533,78 +2536,158 @@
       "Move over, snow snail!",
       "Your grandma skis faster!",
       "Coming through, amateur!",
-      "Try to keep up!"
+      "Try to keep up!",
+      "Out of the way, pal!",
+      "Is that a pizza or a parking brake?",
+      "I've seen glaciers move faster!",
+      "Beep beep! Fast lane!",
+      "Nice form. For a fridge.",
+      "You call that a tuck?",
+      "See you at the bottom. Eventually!",
+      "Blink and you'll miss me!"
     ],
     "fastBumps": [
       "You were in MY way!",
       "That counts as overtaking.",
-      "Learn to ski, speed bump!"
+      "Learn to ski, speed bump!",
+      "Watch it, slowpoke!",
+      "My skis! My beautiful skis!",
+      "Did you get my autograph?",
+      "Next time, use your mirrors!",
+      "You owe me a new pole!"
     ],
     "terrified": [
       "WOLVES! HELP!",
       "NOT MY SKIS! RUN!",
       "HELP! THEY ARE GAINING!",
-      "PLEASE EAT THE OTHER GUY!"
+      "PLEASE EAT THE OTHER GUY!",
+      "WHY IS IT ALWAYS WOLVES?!",
+      "I KNEW I SHOULD HAVE STAYED IN BED!",
+      "TELL MY SKIS I LOVED THEM!",
+      "SOMEBODY! ANYBODY!",
+      "DON'T LOOK BACK! JUST SKI!",
+      "I TASTE TERRIBLE, I PROMISE!"
     ],
     "bearTerrified": [
       "BEAR! KEEP SKIING!",
       "HELP! A BEAR!",
-      "PLEASE EAT THE OTHER GUY!"
+      "PLEASE EAT THE OTHER GUY!",
+      "THE BEAR! THE BEAR!",
+      "I ONLY WANTED A PICNIC!",
+      "BEARS CAN'T SKI! RIGHT?!",
+      "NICE BEAR! GOOD BEAR!",
+      "IT'S GOT MY SANDWICH!"
     ],
     "yetiTerrified": [
       "YETI! RUN!",
       "HELP! IT IS GAINING!",
-      "PLEASE EAT THE OTHER GUY!"
+      "PLEASE EAT THE OTHER GUY!",
+      "IT'S REAL! IT'S REALLY REAL!",
+      "I DIDN'T BELIEVE IN YOU, SORRY!",
+      "NOT TODAY, SNOW MONSTER!",
+      "IT'S SO FLUFFY AND SO HUNGRY!",
+      "SKI! SKI! SKI!",
+      "I'M MOSTLY BONES! AND SCARF!"
     ],
     "rescued": [
       "You saved me! Thank you!",
       "My hero! I owe you cocoa!",
       "THANK YOU! That was close!",
-      "Best skier on this mountain!"
+      "Best skier on this mountain!",
+      "I'll name my next dog after you!",
+      "You're braver than you look!",
+      "Free cocoa for life! Probably.",
+      "I'm never skiing alone again!",
+      "Did you see that?! You saved me!"
     ],
     "wolfCaught": [
       "AAAH! MY TROUSERS!",
-      "BAD DOG! BAD DOG!"
+      "BAD DOG! BAD DOG!",
+      "NOT THE GOOD JACKET!",
+      "SIT! STAY! PLEASE STAY!",
+      "WHO'S A GOOD BOY? NOT YOU!",
+      "I'M ALLERGIC TO BEING EATEN!"
     ],
     "cheers": [
       "PERFECT RUN!",
       "EVERY SINGLE FLAG!",
       "BRAVO!",
       "WHAT A LEGEND!",
-      "TEN OUT OF TEN!"
+      "TEN OUT OF TEN!",
+      "INCREDIBLE!",
+      "DID YOU SEE THAT?!",
+      "SOMEONE FILM THIS!",
+      "SKI GOD!",
+      "ENCORE! ENCORE!",
+      "FLAWLESS!",
+      "I'M TELLING MY GRANDKIDS!"
     ],
     "skierBumps": [
       "I had right of way!",
       "Excellent parking.",
-      "That was my good knee!"
+      "That was my good knee!",
+      "Hey! Personal space!",
+      "You ski like you drive.",
+      "I'm suing! Probably.",
+      "Ow! My dignity!",
+      "Brakes exist, you know!",
+      "Was that a hug or a crash?"
     ],
     "personBumps": [
       "Bloody tourists!",
       "#@! MY COCOA!",
       "Oi! These are NEW boots!",
-      "You absolute snowplough!"
+      "You absolute snowplough!",
+      "Watch where you're going!",
+      "My knitting! Three weeks of knitting!",
+      "Ski lane's over there, genius!",
+      "I was just standing here!",
+      "You nearly flattened my hat!",
+      "There are perfectly good roads!",
+      "Do I look like a slalom flag?!"
     ],
     "greetings": [
       "Looking sharp!",
       "Lovely day for poor decisions.",
       "Save some snow for us.",
-      "The cocoa is mostly cocoa."
+      "The cocoa is mostly cocoa.",
+      "Morning! Mind the yetis.",
+      "Nice hat! Mine's warmer.",
+      "Heard there's cocoa in the next town.",
+      "Careful, the bears are cranky today.",
+      "Ski safe! Or at least ski fast.",
+      "Don't feed the yetis. Seriously.",
+      "Fresh powder! Best day ever!",
+      "My dog likes you. That's rare."
     ],
     "catAnnoyed": [
       "You scared the cat!",
       "Oi! We were having a moment.",
-      "Slow down, you monster!"
+      "Slow down, you monster!",
+      "She was purring! PURRING!",
+      "Now she'll be up that tree all day!",
+      "Who raised you, a snowplough?",
+      "That cat has a lawyer, you know."
     ],
     "politeYeti": [
       "Sorry! Just a little nibble?",
       "I can wait.",
-      "Lovely scarf!"
+      "Lovely scarf!",
+      "Pardon me, coming through!",
+      "Just one bite? A small one?",
+      "No hard feelings, I hope!",
+      "You look delicious. I mean lovely!",
+      "Mind if I join you for lunch?"
     ],
     "mushroomCheers": [
       "FULL BASKET!",
       "EVERY SINGLE MUSHROOM!",
       "SOUP FOR EVERYONE!",
-      "MASTER FORAGER!"
+      "MASTER FORAGER!",
+      "THE MUSHROOM WHISPERER!",
+      "RISOTTO TONIGHT!",
+      "NOT A SINGLE ONE MISSED!",
+      "FUNGI FANTASTIC!"
     ],
     "patrolTaunts": [
       "Pay for the course, cheapskate!",
@@ -2616,7 +2699,10 @@
       "Nice skis. Shame about the budget.",
       "Pay up, penny pincher!",
       "We take coins, not excuses!",
-      "Cheapskate coming through!"
+      "Cheapskate coming through!",
+      "Tickets, please! Oh wait, you don't have one!",
+      "Even the yetis paid for this run!",
+      "Free ride's over, mate!"
     ]
   },
   "simulation": {

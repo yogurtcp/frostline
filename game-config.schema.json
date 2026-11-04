@@ -3830,6 +3830,24 @@
           },
           "minItems": 3,
           "maxItems": 3
+        },
+        "speechTextSize": {
+          "type": "number",
+          "minimum": 7,
+          "maximum": 28,
+          "description": "Speech text size. 14 or more uses the double-size pixel font."
+        },
+        "speechWrapCharacters": {
+          "type": "integer",
+          "minimum": 8,
+          "maximum": 40,
+          "description": "Characters per speech line before wrapping."
+        },
+        "speechLineGap": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 12,
+          "description": "Extra pixels between speech lines."
         }
       }
     },
