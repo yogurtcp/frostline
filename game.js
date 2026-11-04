@@ -2173,7 +2173,7 @@ window.FROSTLINE_READY = (async () => {
     const distance=segmentDistance(o.x,o.y,previous,p);
     if(distance<=(o.r||10)+S.physics.playerRadius+3||distance>D.feedMetres*PX_PER_M)return false;
     const friend=objectGroups().dogs.find(q=>q!==o&&q.dogCompanion&&!q.eaten&&!q.dead),side=friend?-(friend.dogSide||((friend.id||0)>.5?1:-1)):((o.id||0)>.5?1:-1);
-    Object.assign(o,{dogFed:true,dogCompanion:true,dogRetreat:false,dogMood:'follow',dogScaresUsed:{},dogScaredEnemies:new WeakSet(),dogSide:side,roam:0,vx:0,vy:0,socialUntil:0,visitUntil:0,hopUntil:clock+1.2,arcadeRun:state.course,dogTreatAt:clock,dogTreatFrom:{x:p.x,y:p.y-16},dogReplyAt:clock+1.9});
+    Object.assign(o,{dogFed:true,dogCompanion:true,dogRetreat:false,dogMood:'follow',dogScaresUsed:{},dogScaredEnemies:new WeakSet(),dogSide:side,dogOrder:state.dogOrder=(state.dogOrder||0)+1,roam:0,vx:0,vy:0,socialUntil:0,visitUntil:0,hopUntil:clock+1.2,arcadeRun:state.course,dogTreatAt:clock,dogTreatFrom:{x:p.x,y:p.y-16},dogReplyAt:clock+1.9});
     delete o.worldChunk;o.socialPartner=null;
     for(const n of state.objects)if(n.socialAnimal===o){n.socialAnimal=null;n.socialUntil=0;}
     say("Here's a snack. Come along!",p,1.8);burst(o.x,o.y,C.gold,5);return true;
@@ -2254,9 +2254,13 @@ window.FROSTLINE_READY = (async () => {
   function updateDogCompanions(dt,previous){
     const p=state.p,D=S.chasers.dogCompanion,dogs=objectGroups().dogs,playerSpeed=Math.hypot(p.vx,p.vy);
     let following=0;for(const o of dogs)if(o.dogCompanion&&!o.dead&&!o.eaten)following++;
+    // A growing pack: the first two keep their left/right spots; later dogs fill rows further back and wider.
+    const pack=dogs.filter(o=>o.dogCompanion&&!o.dogRetreat&&!o.dead&&!o.eaten).sort((a,b)=>(a.dogOrder||0)-(b.dogOrder||0));
+    const lead=pack[0]?.dogSide||((pack[0]?.id||0)>.5?1:-1);
+    const slot=o=>{const rank=pack.indexOf(o),row=Math.max(0,Math.floor(rank/2));return {row,side:rank<2?o.dogSide||((o.id||0)>.5?1:-1):(rank%2?-lead:lead)};};
     for(const o of dogs){
       if(o.eaten||o.dead)continue;
-      if(!o.dogCompanion&&!o.dogRetreat&&following<D.maxFollowing&&feedDog(o,previous))following++;
+      if(!o.dogCompanion&&!o.dogRetreat&&(!D.maxFollowing||following<D.maxFollowing)&&feedDog(o,previous))following++;
       if(!o.dogCompanion&&!o.dogRetreat)continue;
       if(o.dogReplyAt!==undefined&&clock>=o.dogReplyAt){say('WOOF!',o,2.2);delete o.dogReplyAt;}
       const scale=endlessSpeedScale(o),cruise=D.cruiseSpeedKmh/S.physics.hudKmhPerSpeed*scale;
@@ -2275,15 +2279,15 @@ window.FROSTLINE_READY = (async () => {
       const down=p.fall>0||p.awaitingInput&&!!p.crashObstacle;
       if(down){
         if(!o.dogConcerned){o.dogConcerned=true;delete o.dogReplyAt;say('Whine...',o,1.2);o.avoidUntil=0;o.obstacleDetour=null;}
-        const side=o.dogSide||((o.id||0)>.5?1:-1),goal=dogGoal(o,p.x+side*20,p.y+8),d=Math.hypot(goal.x-o.x,goal.y-o.y);
+        const {row,side}=slot(o),goal=dogGoal(o,p.x+side*(20+row*14),p.y+8+row*10),d=Math.hypot(goal.x-o.x,goal.y-o.y);
         if(d>8){o.dogMood='comfort';moveDog(o,goal,cruise*1.4,dt);}
         else{o.dogMood='lick';stopDog(o);if(clock>=(o.nextLickSound||0)){say('Slurp!',o,1.2);o.nextLickSound=clock+4;}}continue;
       }
       o.dogConcerned=false;
       if(playerSpeed>cruise*.65){
         const heading=Math.atan2(p.vy,p.vx),old=o.dogHeading??heading,delta=Math.atan2(Math.sin(heading-old),Math.cos(heading-old));o.dogHeading=old+delta*(1-Math.exp(-10*dt));
-        const dx=Math.cos(o.dogHeading),dy=Math.sin(o.dogHeading),side=o.dogSide||((o.id||0)>.5?1:-1),distance=D.followDistanceMetres*PX_PER_M+(side>0?8:0);
-        const goal=dogGoal(o,p.x-dx*distance-dy*side*12,p.y-dy*distance+dx*side*12);
+        const dx=Math.cos(o.dogHeading),dy=Math.sin(o.dogHeading),{row,side}=slot(o),distance=D.followDistanceMetres*PX_PER_M+(side>0?8:0)+row*28,spread=12+row*7;
+        const goal=dogGoal(o,p.x-dx*distance-dy*side*spread,p.y-dy*distance+dx*side*spread);
         o.dogMood='follow';o.dogPlayGoal=null;
         moveDog(o,goal,playerSpeed+D.catchUpSpeedKmh/S.physics.hudKmhPerSpeed*scale,dt,{vx:p.vx,vy:p.vy});
       }else{
