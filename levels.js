@@ -29,10 +29,10 @@ function populateLevelArea(e,section,from,to){
     sideTrees(levelValue(e,L.sideTreesPer100Metres),e.half+40*s,e.half+260*s);
     // A Yeti waits right beside the entrance, so the parade starts as soon as you arrive.
     // It stands just uphill of the entrance, so it wakes as you pass and starts right behind you.
-    if(from===e.startY)levelYeti(e,section,at(e.startY)+pick([-1,1])*90*s,e.startY-40*s);
+    if(from===e.startY)levelYeti(e,section,at(e.startY)+pick([-1,1])*90*s,e.startY-60*s).opener=true;
     const yetis=Math.round(levelValue(e,L.yetis)),crowds=Math.round(levelValue(e,L.crowds)),length=e.endY-e.startY;
     // Crowds stand just beside your line, still on the way for a Yeti chasing you down it.
-    for(let i=0;i<crowds;i++){const y=e.startY+length*(i+.35)/crowds;if(y>=from&&y<to)levelCrowd(e,section,at(y)+(i%2?-1:1)*95*s,y,Math.round(levelValue(e,L.crowdPeople)));}
+    for(let i=0;i<crowds;i++){const y=e.startY+length*(i+.35)/crowds;if(y>=from&&y<to)levelCrowd(e,section,at(y)+(i%2?-1:1)*120*s,y,Math.round(levelValue(e,L.crowdPeople)));}
     for(let i=0;i<yetis;i++){const y=e.startY+length*(i+.45)/(yetis+.5);if(y>=from&&y<to)levelYeti(e,section,at(y)+(i%2?-1:1)*range(110,190)*s,y);}
   }else if(e.kind==='avalanche'){
     sideTrees(levelValue(e,L.sideTreesPer100Metres),e.half+30*s,e.half+240*s);
@@ -70,7 +70,8 @@ function levelCrowd(e,section,cx,cy,count){
   for(let i=0;i<count;i++){
     const angle=i*2.4,radius=(14+i*6)*s,x=cx+Math.cos(angle)*radius*.8,y=cy+Math.sin(angle)*radius*1.8;
     if(i%3===0)entity(pick(['personRed','personGreen','personYellow']),x,y,{...own,width:30,r:10});
-    else{const base=range(...S.skiers.slowSpeed)*.5;entity(i%4===1?'boarder':'skier',x,y,{...own,width:42,r:12,vy:base*s,vx:0,endlessBaseVy:base});}
+    // Standing around chatting until a Yeti turns up; then they scatter like anyone else.
+    else entity(i%4===1?'boarder':'skier',x,y,{...own,width:42,r:12,vy:0,vx:0,endlessBaseVy:0});
   }
 }
 // Pied Piper: a Yeti from this area that has eaten goes home, satisfied.
@@ -117,7 +118,12 @@ function updateSleepingGiants(e,L,dt){
 function levelWakeOverride(o){
   if(o.sleeper&&o.encounter?.kind==='sleepingGiants')return o.giantAwake?Infinity:-1;
   // Pied Piper: Yetis wake as you pass them, so the parade always forms behind you.
-  if(o.type==='lurker'&&o.encounter?.kind==='piedPiper')return state.p.y>=o.y-30&&Math.abs(state.p.x-o.x)<700?Infinity:-1;
+  if(o.type==='lurker'&&o.encounter?.kind==='piedPiper'){
+    const p=state.p;
+    // The first Yeti waits until you are properly under way, so you always get a head start, even from a standstill.
+    if(o.opener)return p.y>=o.encounter.startY+150*o.encounter.scale&&Math.hypot(p.vx,p.vy)*S.physics.hudKmhPerSpeed>=60?Infinity:-1;
+    return p.y>=o.y-30&&Math.abs(p.x-o.x)<700?Infinity:-1;
+  }
   return null;
 }
 function levelSpeedWarning(){
