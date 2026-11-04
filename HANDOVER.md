@@ -1571,3 +1571,7 @@ User: Y's Yetis are the wrong ones; they want the grey Yetis that are barely fas
 - Fallen trees: a chasing hunter's `travel` treated a fallen trunk as a solid segment. With the skier beside the trunk, every straight line counted as blocked, and the two-corner detour flipped sides each time the Yeti crossed the trunk's extended line near its root end, hovering about 14 m away indefinitely (reproduced). Hunters (`chasing`) now ignore `fallingTree` with `fallState === 'fallen'`, both in `nearTree` and in the detour blocker scan; it is a trunk lying in the snow. They now catch a stationary skier beside a fallen trunk in 0.7 s. Standing and falling trees are unchanged. A tried "lunge over trees within 6 m" was reverted: it pinned Yetis against standing pines.
 - Open: in a contrived test, a skier placed exactly against the downhill side of a standing pine was not reached; the Yeti hovered 3.8 m away. Not reported by the user; worth a look if hiding behind trees shows up in play.
 - Trace: 192 checkpoints, no errors. Y bot on visits 1 and 3 reaches the end with 2–3 meals.
+
+## 142. Pied Piper pack at 90.5 km/h (2026-11-04)
+
+User: set the Yetis to 90.5 km/h, barely enough to catch up; colour does not matter. `piedPiper.chaserSpeedKmh` is [90.5, 90.5] with spread 0, and the grey clamp is removed (so they draw as the 90+ tier). Get-up is still 1.5–2.5 s from 35–70 m back. Bot runs on visits 1 and 3 are caught by wolves after crashes at 920 m and 813 m. Trace: 192 checkpoints, no errors.

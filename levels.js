@@ -102,10 +102,11 @@ function levelChaser(e,x,y,kmh){
     wakeUntil:clock+range(1.5,2.5),phase:range(0,6),expires:Infinity,leaving:false,talkAt:clock+range(3,8)};
   state.chasers.push(c);return c;
 }
-function releaseLevelChasers(e,count,kmh,spread,lines,lo=0,hi=Infinity){
-  const p=state.p,s=e.scale;
+function releaseLevelChasers(e,count,kmh,spread,lines){
+  const p=state.p,s=e.scale,pack=[];
   const [near,far]=e.kind==='avalanche'?[45,90]:[35,70]; // like ordinary Yetis: they get up slowly, well behind you
-  for(let i=0;i<count;i++){const c=levelChaser(e,p.x+range(-220,220)*s,p.y-range(near,far)*PX_PER_M*s,clamp(kmh+range(-spread,spread),lo,hi));if(i<2)say(pick(lines),c,1.8);}
+  for(let i=0;i<count;i++){const c=levelChaser(e,p.x+range(-220,220)*s,p.y-range(near,far)*PX_PER_M*s,kmh+range(-spread,spread));pack.push(c);if(i<2)say(pick(lines),c,1.8);}
+  return pack;
 }
 function updateLevelAreas(dt){
   const p=state.p,e=state.endless?endlessEncounterAt(p.y):null;
@@ -114,8 +115,8 @@ function updateLevelAreas(dt){
   // The pack is let loose once you are properly under way and 70 m in, so it starts on open slope inside the area.
   if(!e.chasersReleased&&(e.kind==='piedPiper'||e.kind==='avalanche')&&p.y>e.startY+700*s&&!p.fall&&!p.awaitingInput&&Math.hypot(p.vx,p.vy)*S.physics.hudKmhPerSpeed>=50){
     e.chasersReleased=true;const count=Math.round(levelValue(e,L.chasingYetis));
-    // Pied Piper's pack are all grey Yetis (72-80 km/h): just quick enough to punish every mistake.
-    releaseLevelChasers(e,count,levelValue(e,L.chaserSpeedKmh),levelValue(e,L.chaserSpeedSpreadKmh??0),['THERE! GET HIM!','BREAKFAST IS LEAVING!','RUN, LITTLE SKIER!'],...(e.kind==='piedPiper'?[72.5,79.5]:[]));
+    // Pied Piper's pack runs at 90.5 km/h: barely enough to catch up, so every mistake counts.
+    releaseLevelChasers(e,count,levelValue(e,L.chaserSpeedKmh),levelValue(e,L.chaserSpeedSpreadKmh??0),['THERE! GET HIM!','BREAKFAST IS LEAVING!','RUN, LITTLE SKIER!']);
     if(e.kind==='piedPiper')announce(count+' YETIS ARE RIGHT BEHIND YOU','FLAGS ARM YOU - ICE SPEEDS YOU AWAY',C.red,3);
   }
   if(e.kind==='piedPiper'||e.kind==='avalanche')updateAmbushes(e,L);
