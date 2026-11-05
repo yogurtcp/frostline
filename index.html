@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#f1f6ff">
-<meta name="frostline-build" content="6b7fcb8d1af309f3">
+<meta name="frostline-build" content="4a88bcf2fea43f89">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="manifest" href="manifest.webmanifest">
@@ -22,7 +22,7 @@ body{padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bot
 <dialog id="install-help" aria-labelledby="install-title"><h2 id="install-title">Install Frostline</h2><p id="install-instructions"></p><p>Once saved, Frostline plays offline. Online startups check for updates. Installing this same site keeps your scores and settings. A downloaded file or a different browser uses a separate save.</p><p><a href="https://yogurtcp.github.io/frostline/">Open published game</a></p><button id="close-install-help">Done</button></dialog>
 <script>/* Install/offline support. Updates are checked once, before the game starts. */
 (() => {
-  const BUILD = '6b7fcb8d1af309f3';
+  const BUILD = '4a88bcf2fea43f89';
   window.FROSTLINE_DEV = new URL(location.href).searchParams.has('dev');
   let prompt = null, playing = false;
   const standalone = () => window.matchMedia('(display-mode: standalone)').matches || navigator.standalone;
@@ -3433,8 +3433,7 @@ function drawPerson(o,s){
     town.route=main.points;town.plazaRows=plazaRows;
     if(town.festival){const row=Math.floor(V.rows*.45);town.festivalPlaza={x:centers[row],y:rowYs[row]+50};}
     const station={x:town.stationX,y:town.stationY};
-    const nearest=main.points.reduce((a,b)=>Math.hypot(a.x-station.x,a.y-station.y)<Math.hypot(b.x-station.x,b.y-station.y)?a:b);
-    const branch={surface:V.mainRoadSurface,width:V.mainRoadWidth,points:[nearest,{x:station.x,y:nearest.y},station]},roads=[main,branch],houses=[];
+    const branch=liftLoopRoad(y=>roadXAt(main.points,y),station,V.mainRoadSurface,V.mainRoadWidth,town.roadEndY),roads=[main,branch],houses=[];
     const houseRows=new Map();
     const overlapsHouse=(x,y,hw,hh,margin,exact=false)=>{
       for(let row=Math.floor((y-2*hh-margin)/128);row<=Math.floor((y+margin)/128);row++)for(const h of houseRows.get(row)||[]){
@@ -3732,13 +3731,29 @@ function drawPerson(o,s){
       }
     }
   }
+  // An optional loop to the lift station: it peels off the road above the station, curves out to it, and curves back
+  // to rejoin the road below, so grabbing the checkpoint feels like a natural side trip rather than a sharp turn.
+  function liftLoopRoad(roadX,station,surface,width,lowestY=Infinity){
+    const reach=Math.max(260,Math.abs(station.x-roadX(station.y))*.9),leaveY=station.y-reach,backY=Math.min(station.y+reach,lowestY);
+    const a={x:roadX(leaveY),y:leaveY},b={x:roadX(backY),y:backY},points=[];
+    const bezier=(p0,c1,c2,p3)=>{for(let i=1;i<=10;i++){const t=i/10,u=1-t;points.push({x:u*u*u*p0.x+3*u*u*t*c1.x+3*u*t*t*c2.x+t*t*t*p3.x,y:u*u*u*p0.y+3*u*u*t*c1.y+3*u*t*t*c2.y+t*t*t*p3.y});}};
+    points.push(a);
+    bezier(a,{x:a.x,y:a.y+reach*.45},{x:station.x,y:station.y-reach*.55},station);
+    bezier(station,{x:station.x,y:station.y+(backY-station.y)*.55},{x:b.x,y:b.y-(backY-station.y)*.45},b);
+    return {surface,width,points,liftLoop:true};
+  }
+  function roadXAt(points,y){
+    if(y<=points[0].y)return points[0].x;
+    for(let i=1;i<points.length;i++)if(y<=points[i].y){const p=points[i-1],q=points[i],t=(y-p.y)/Math.max(1,q.y-p.y);return p.x+(q.x-p.x)*t;}
+    return points.at(-1).x;
+  }
   function addEndlessLift(town,section,e){
     if(town.arcadeLift)return;
     const a=state.endless,root=section.endlessRoot||state.course;
     if(town.parade){
       const side=town.layoutSeed%2?1:-1;
       town.stationX=town.x+side*(e.half+300);town.stationY=town.liftGapY;
-      const road={surface:'snow',width:36,points:[{x:town.x,y:town.stationY},{x:town.stationX,y:town.stationY}],town,endlessEncounter:e,endlessEndY:e.endY};
+      const road=Object.assign(liftLoopRoad(()=>town.x,{x:town.stationX,y:town.stationY},'snow',36),{town,endlessEncounter:e,endlessEndY:e.endY});
       state.roads.push(road);
     }
     const own={town,arcadeRun:section,encounter:e};
