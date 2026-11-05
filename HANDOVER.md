@@ -1633,3 +1633,11 @@ Now everything follows `endlessStage(metres)` (see CONFIG.md "Endless stages"):
 - HUD: right label "STAGE n  1234 m"; the coloured bar shows progress through the current stage. `updateEndlessSpeed` announces each new stage (not in debug).
 
 Real-run fast-forward: town at stage 1 (ease 0.5), Burrowers at stage 3 (difficulty 0.11, 1.24× width), Halloween stage 6, Avalanche 6, Boulder 9, Christmas 10, Pied Piper 12. Stage 20 (full) is about 30 km in, early in the second cycle. Trace: 192 checkpoints, no errors; the checkpoint resume test passes.
+
+## 152. A chill first lap; threats introduced gradually (2026-11-05)
+
+User: introduce burrowers and werewolves later, after seeing some Yetis; the beginning should be chill, getting down to business after the first cycle.
+- `stageDifficulty` is piecewise: 0 → `chillDifficulty` (0.15) over `chillStages` (9), then → 1.0 at `rampStages` (28), continuing to `maxStage` (38). `ravagerStage` is 14.
+- `stages.introduce` (burrower 10, werewolf 12) gates `spawnEncounterEnemies` (not in debug runs).
+- `nextEndlessRegionKind` skips kinds whose `regions.firstCycle` (burrowField 2, avalanche 2) is later than the current lap (`floor(index/order.length) + 1`), trying up to one lap; debug runs are exempt.
+- Fast-forward of a real run: lap 1 covers stages 1–9 (about 13.6 km: Yetis, towns, cemetery, Boulder at stage 5, Pied Piper at stage 9, no Burrowers/Avalanche); Burrowers at stage 12 and Avalanche at 15 in lap 2; full difficulty at stage 28 (about 40 km). Trace: 192 checkpoints, no errors; the checkpoint test passes.

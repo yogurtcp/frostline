@@ -339,7 +339,12 @@ window.FROSTLINE_READY = (async () => {
   // Stages: every `endless.stages.metres` of a run is one stage. Stage 1 is gentle, stage `rampStages` matches the old
   // hardest settings, and it keeps climbing past that until `maxStage`, where values would stop making sense.
   function endlessStage(metres){return 1+Math.floor(Math.max(0,metres)/S.endless.stages.metres);}
-  function stageDifficulty(stage){const G=S.endless.stages;return (Math.min(stage,G.maxStage)-1)/(G.rampStages-1);}
+  // The first `chillStages` stay near the easy end (up to `chillDifficulty`); the real ramp follows, reaching the old
+  // hardest (1.0) at `rampStages` and still rising until `maxStage`.
+  function stageDifficulty(stage){
+    const G=S.endless.stages,s=Math.min(stage,G.maxStage);
+    return s<=G.chillStages?G.chillDifficulty*(s-1)/Math.max(1,G.chillStages-1):G.chillDifficulty+(1-G.chillDifficulty)*(s-G.chillStages)/Math.max(1,G.rampStages-G.chillStages);
+  }
   // The first few stages are extra gentle: fewer things on the slope and wider corridors, easing to normal.
   function stageEase(stage){const G=S.endless.stages,k=clamp((stage-1)/G.easeStages,0,1);return {density:mix(G.easeDensity,1,k),width:mix(G.easeWidth,1,k)};}
   function endlessPressure(metres){
@@ -438,8 +443,13 @@ window.FROSTLINE_READY = (async () => {
     const last=a.lastCrowdEndY,elapsed=last===undefined?metres:(startY-last)/PX_PER_M;
     const eligible=C.chance>0&&metres>=C.firstMetres&&(last===undefined||elapsed>=C.minimumGapMetres)&&['quiet','forest'].includes(a.lastEncounterKind);
     if(eligible&&(elapsed>=C.maximumGapMetres||random()<C.chance))return 'crowd';
-    const index=a.regionOrderIndex||0;a.regionOrderIndex=index+1;
-    return R.order[index%R.order.length];
+    // Some areas wait for a later cycle of the playlist (`regions.firstCycle`): the first lap is a gentle introduction.
+    for(let tries=0;tries<R.order.length;tries++){
+      const index=a.regionOrderIndex||0;a.regionOrderIndex=index+1;
+      const kind=R.order[index%R.order.length],cycle=Math.floor(index/R.order.length)+1;
+      if(a.debug||cycle>=(R.firstCycle?.[kind]??1))return kind;
+    }
+    return 'quiet';
   }
   function planEndlessEncounter(section,startY){
     const a=state.endless,Cf=S.endless.encounters,root=section.endlessRoot;

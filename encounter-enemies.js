@@ -5,6 +5,8 @@ function spawnEncounterEnemies(section,endY){
   const root=section.endlessRoot,E=S.endless.encounterEnemies;
   const spawn=(kind,C)=>{
     const from=Math.max(section.startY,root.startY+C.firstMetres*PX_PER_M);
+    // New threats are introduced gradually: none of this kind before its stage.
+    if(!state.endless?.debug&&endlessStage((endY-root.startY)/PX_PER_M)<(S.endless.stages.introduce?.[kind]??1))return;
     if(endY-from<180||random()>=C.chancePerSection)return;
     for(let attempt=0;attempt<8;attempt++){
       const y=range(from+60,endY-100),e=endlessEncounterAt(y);if(!surpriseAreaAllowed(e))continue;

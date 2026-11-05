@@ -284,7 +284,8 @@ Speech text: `render.speechTextSize` (14; 14 or more uses the double-size pixel 
 ## Endless stages (difficulty pacing)
 
 `endless.stages` drives all Endless difficulty from one number, the stage: one stage per `metres` (1500) of the run, shown on the HUD with a STAGE n announcement.
-- Difficulty is (stage − 1) / (`rampStages` − 1): 0 at stage 1, 1.0 (the old hardest settings) at `rampStages` (20, about 30 km). It keeps rising after that until `maxStage` (30, about 1.53).
+- Difficulty rises gently over the first `chillStages` (9, about the first lap) to `chillDifficulty` (0.15). From there it ramps to 1.0 (the old hardest settings) at `rampStages` (28, about 40 km) and keeps rising until `maxStage` (38, about 1.47).
+- New threats arrive gradually. `stages.introduce` gives the first stage for random surprise enemies (burrower 10, werewolf 12); Stalker ravagers come from `ravagerStage` (14). `regions.firstCycle` keeps areas out of earlier laps of `regions.order` (burrowField and avalanche from lap 2).
 - Each area's layout difficulty is the stage you reach it at (no longer per-theme visit counts; debug previews still use their chosen visit). Non-challenge areas cap at 1.0; challenge areas (levels.js `levelValue`) keep scaling past it, never below 0.
 - Pressure (`endlessPressure`) follows the stage too: item rates, Yeti spacing and wildlife spacing keep scaling. Yeti speed, gate openings and the nearby-Yeti count (1 → `yetis.maxNearbyHunters`) top out at 1.0. Stalker ravagers start at `ravagerStage` (6), with chance × difficulty.
 - The first `easeStages` (5) are extra gentle. Densities (section items, Yetis, wildlife, level placements, burrow/snowball/ambush timers, chasing-Yeti counts) start at `easeDensity` (0.5), and corridor widths start at `easeWidth` (1.3×), easing to 1.

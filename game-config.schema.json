@@ -9152,6 +9152,16 @@
               "minimum": 1,
               "description": "Metres per stage"
             },
+            "chillStages": {
+              "type": "number",
+              "minimum": 1,
+              "description": "Opening stages that stay near the easy end (the first lap)"
+            },
+            "chillDifficulty": {
+              "type": "number",
+              "minimum": 0,
+              "description": "Difficulty reached at the end of the chill stages"
+            },
             "rampStages": {
               "type": "number",
               "minimum": 2,
@@ -9181,6 +9191,16 @@
               "type": "number",
               "minimum": 1,
               "description": "First stage where Stalker Yetis (ravagers) can appear"
+            },
+            "introduce": {
+              "type": "object",
+              "description": "First stage at which each surprise enemy kind can appear (burrower, werewolf)",
+              "additionalProperties": {
+                "type": "number",
+                "minimum": 1,
+                "description": "First stage"
+              },
+              "properties": {}
             }
           }
         },
@@ -9626,6 +9646,16 @@
                   "boulder"
                 ]
               }
+            },
+            "firstCycle": {
+              "type": "object",
+              "description": "Area kinds that only join the playlist from this cycle (lap) onward; earlier laps skip them",
+              "additionalProperties": {
+                "type": "number",
+                "minimum": 1,
+                "description": "First cycle"
+              },
+              "properties": {}
             },
             "firstMetres": {
               "type": "number",
