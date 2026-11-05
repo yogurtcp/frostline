@@ -588,6 +588,14 @@
           "nextBoulderSeconds": [
             1.2,
             0.9
+          ],
+          "gateGapMetres": [
+            8,
+            6.5
+          ],
+          "gateFunnelMetres": [
+            50,
+            50
           ]
         }
       }

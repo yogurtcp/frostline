@@ -63,11 +63,21 @@ function populateLevelArea(e,section,from,to){
   }else{
     // The Boulder: a busy slope where every hit costs you speed, with a few jumps and ice pools to win some back.
     sideTrees(L.sideTreesPer100Metres,e.half+20*s,e.half+220*s);
-    per(L.obstaclesPer100Metres,90,y=>{const o=createArcadeItem(pick(['pine','fir','smallPine','rock','rock','stump','bush','bush','sled']),at(y)+range(-1,1)*e.half,y,section);o.encounter=e;});
-    per(L.jumpsPer100Metres,200,y=>{const o=createArcadeItem(pick(['ramp','mogul','smallHill']),at(y)+range(-.5,.5)*e.half,y,section);o.encounter=e;});
-    per(L.icePer100Metres,330,y=>{const rx=range(55,85)*s;entity('ice',at(y)+range(-.5,.5)*e.half,y,{...own,rx,ry:rx*range(1.1,1.4),width:rx*2,r:0,arcadeFeature:true});});
-    skiers(L.skiersPer100Metres);
-    per(L.bearsPer100Metres,450,y=>entity('bear',at(y)+pick([-1,1])*range(.3,.9)*e.half,y,{...ARCADE_ITEMS.bear,...own,nextAI:clock+range(1,4)}));
+    // At the end, a funnel of trees narrows to a gap too small for the boulder: it crashes, you squeeze through.
+    const G=boulderGate(e),approach=G.y-(G.funnel+60*PX_PER_M)*s;
+    const gateTree=(x,y)=>{if(y>=from&&y<to)entity(random()<.35?'fir':'pine',x,y,{...own,width:range(70,86),r:22,boulderStop:true});};
+    if(G.y-G.funnel*s<to&&G.y+80*s>=from){
+      const span=e.half+W/ZOOM/2+200,line=at(G.y);
+      for(const [row,shift] of [[0,0],[30,20]])for(let dx=-span+shift;dx<=span;dx+=40*s)if(Math.abs(dx)>G.half+22)gateTree(line+dx,G.y+row*s);
+      const steps=Math.ceil(G.funnel*s/(45*s));
+      for(let k=1;k<=steps;k++){const y=G.y-k*45*s,open=G.half+22+(e.half*.95-G.half-22)*k/steps;for(const side of [-1,1])gateTree(at(y)+side*open,y);}
+    }
+    const clear=y=>y<approach;
+    per(L.obstaclesPer100Metres,90,y=>{if(!clear(y))return;const o=createArcadeItem(pick(['pine','fir','smallPine','rock','rock','stump','bush','bush','sled']),at(y)+range(-1,1)*e.half,y,section);o.encounter=e;});
+    per(L.jumpsPer100Metres,200,y=>{if(!clear(y))return;const o=createArcadeItem(pick(['ramp','mogul','smallHill']),at(y)+range(-.5,.5)*e.half,y,section);o.encounter=e;});
+    per(L.icePer100Metres,330,y=>{if(!clear(y))return;const rx=range(55,85)*s;entity('ice',at(y)+range(-.5,.5)*e.half,y,{...own,rx,ry:rx*range(1.1,1.4),width:rx*2,r:0,arcadeFeature:true});});
+    per(L.skiersPer100Metres,120,y=>{if(!clear(y))return;const item=createArcadeItem(pick(['skier','skier','boarder']),at(y)+range(-.9,.9)*e.half,y,section);item.encounter=e;});
+    per(L.bearsPer100Metres,450,y=>clear(y)&&entity('bear',at(y)+pick([-1,1])*range(.3,.9)*e.half,y,{...ARCADE_ITEMS.bear,...own,nextAI:clock+range(1,4)}));
   }
 }
 function levelYeti(e,section,x,y,kmh){
@@ -214,10 +224,12 @@ function drawLevelGround(){}
 // With the boulder rolling, or the pack on your tail, the camera sits you lower on the screen so you can see it coming.
 function levelPlayerScreenY(){const e=state.endless?endlessEncounterAt(state.p.y):null;return e?.kind==='boulder'&&e.boulder||e?.kind==='piedPiper'&&e.chasersReleased&&e.onTail>0?levelValue(e,levelConfig(e).playerScreenY):null;}
 // The Boulder: a giant snowball rolls after you from just inside the area, growing as it goes and flattening everything.
+// The narrow gap at the end of The Boulder: where it sits, how wide, and how long the funnel is (metres).
+function boulderGate(e){const L=levelConfig(e);return {y:e.endY-250*e.scale,half:levelValue(e,L.gateGapMetres)/2*PX_PER_M*e.scale,funnel:levelValue(e,L.gateFunnelMetres)*PX_PER_M};}
 function updateBoulderArea(e,L,dt){
   const p=state.p,s=e.scale;
   if(!e.boulder){
-    if(e.boulderDone||clock<(e.nextBoulderAt||0)||p.y<e.startY+600*s||p.y>e.endY-400*s||p.fall||p.awaitingInput||!e.nextBoulderAt&&Math.hypot(p.vx,p.vy)*S.physics.hudKmhPerSpeed<50)return;
+    if(e.boulderDone||clock<(e.nextBoulderAt||0)||p.y<e.startY+600*s||p.y>boulderGate(e).y-(levelValue(e,L.gateFunnelMetres)*PX_PER_M+150)*s||p.fall||p.awaitingInput||!e.nextBoulderAt&&Math.hypot(p.vx,p.vy)*S.physics.hudKmhPerSpeed<50)return;
     const r=levelValue(e,L.radiusMetres)*PX_PER_M;
     e.boulder=entity('boulder',p.x,p.y-levelValue(e,L.startBehindMetres)*PX_PER_M*s,{arcadeRun:e.section,encounter:e,r:0,width:r*2,radius:r,speed:e.nextBoulderAt?topSpeed()*levelValue(e,L.topSpeedRatio):levelValue(e,L.startKmh)/S.physics.hudKmhPerSpeed,spin:0,travelled:0,trailX:p.x,trailY:p.y});
     e.boulder.trailY=e.boulder.y;state.screenShake=Math.max(state.screenShake,.6);beep(70,.5,'sawtooth',.03);
@@ -240,7 +252,13 @@ function updateBoulder(e,L,dt){
   if(Math.hypot(b.x-b.trailX,b.y-b.trailY)>=b.radius*.5){state.snowballTrails.push({ax:b.trailX,ay:b.trailY,bx:b.x,by:b.y,r:b.radius*.8,until:clock+2});b.trailX=b.x;b.trailY=b.y;}
   // Everything in its way is flattened: trees, rocks, creatures, skiers, Yetis.
   const reach=b.radius*.9;let smashed=0;
-  const flattens=o=>o!==b&&o.type!=='ice'&&o.type!=='rugged'&&o.type!=='entrance'&&Math.abs(o.y-b.y)<=reach+40&&Math.hypot(o.x-b.x,o.y-b.y)<=reach+(o.r||0)&&(o.r>0||['ramp','mogul','smallHill','largeHill','bush'].includes(o.type));
+  if(!e.gateWarned&&p.y>boulderGate(e).y-(levelValue(e,L.gateFunnelMetres)*PX_PER_M+250)*s){e.gateWarned=true;announce('SQUEEZE THROUGH THE GAP!','IT WILL NEVER FIT',C.red,2.5);}
+  // The gate trees are too big and too close together: it smashes into them and bursts.
+  if(state.objects.some(o=>o.boulderStop&&Math.abs(o.y-b.y)<reach+30&&Math.hypot(o.x-b.x,o.y-b.y)<reach+o.r)){
+    burst(b.x,b.y,'#ffffff',80);state.screenShake=1;beep(60,.6,'sawtooth',.04);filterObjects(o=>o!==b);e.boulder=null;e.boulderDone=true;
+    announce('CRASH!','THE BOULDER HIT THE TREES',C.teal,3);return;
+  }
+  const flattens=o=>o!==b&&!o.boulderStop&&o.type!=='ice'&&o.type!=='rugged'&&o.type!=='entrance'&&Math.abs(o.y-b.y)<=reach+40&&Math.hypot(o.x-b.x,o.y-b.y)<=reach+(o.r||0)&&(o.r>0||['ramp','mogul','smallHill','largeHill','bush'].includes(o.type));
   // Look first, rebuild the object list only when something is actually in its way.
   if(state.objects.some(flattens))filterObjects(o=>{
     if(!flattens(o))return true;
