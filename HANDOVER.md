@@ -1651,3 +1651,7 @@ User: all levels should exist in the first lap, with decreased difficulty. `regi
 - Pied Piper: stage 12, ease 0.96
 - Next town: stage 13; Burrowers again at stage 15, full strength at difficulty 0.28
 Trace clean.
+
+## 154. Long Glide: a fixed runout after the lake jump (2026-11-05)
+
+User: the giant lake and its crazy jump are fun, but the exit speed is too high for what follows; add a long, mostly empty area that ends about when speed is back to normal, the same every time. Measured: the lake exits at about 255–259 km/h, the springs carry you about 440–495 m, you land at about 230–259 km/h, and the over-speed slowdown (`overSpeedDeceleration` 90 → about 18 HUD km/h per second) takes about 790 m more. The new region kind `runout` ("Long Glide") replaces the `quiet` after `lake` in `regions.order`, with `lengthMetres.runout` [1350, 1350]. It is in the noFlags/noNewPredators lists (so no flags, lurkers, wildlife or surprise enemies; it is excluded in `surpriseAreaAllowed`) and has the default width. Population is only trees at 33–56 m off the line (`regions.runoutTreesPer100Metres` 4). Not in the debug area list, so the trace is unchanged. Real-run test: takeoff 259, landing 495 m in, back to 100 km/h at 1284 m (of 1300 then; 1350 now gives a margin for longer lakes). Trace clean.

@@ -500,12 +500,12 @@ window.FROSTLINE_READY = (async () => {
   }
   function planEndlessRegion(e,section){
     const root=section.endlessRoot,R=S.endless.regions,point=(t,x=0)=>({x:root.x+x,y:e.startY+t*(e.endY-e.startY)});
-    e.noFlags=['quiet','lake','denseForest','scramble'].includes(e.kind);
-    e.noNewPredators=['quiet','lake','denseForest','scramble','cemetery'].includes(e.kind);
+    e.noFlags=['quiet','lake','denseForest','scramble','runout'].includes(e.kind);
+    e.noNewPredators=['quiet','lake','denseForest','scramble','cemetery','runout'].includes(e.kind);
     e.half=e.kind==='cemetery'?mix(...R.cemeteryOpeningMetres.slice().reverse(),e.difficulty)*PX_PER_M*e.scale/2:e.kind==='denseForest'?mix(55,35,e.difficulty)*e.scale:550*e.scale;
     e.band=1000*e.scale;e.paths=[[point(0),point(1)]];
     if(['crowd','beginner'].includes(e.kind)){e.centerX=e.kind==='crowd'?state.p.x:root.x;e.crowdWidthMetres=Math.max(e.kind==='crowd'?R.crowd.widthMetres:0,R.minimumWidthMetres);e.half=e.crowdWidthMetres*PX_PER_M*e.scale/2-60;e.band=e.half+200;e.paths=[[{x:e.centerX,y:e.startY},{x:e.centerX,y:e.endY}]];}
-    const names={crowd:'Rush Hour Slope',beginner:'Rush Hour Slope',quiet:'Snowy Trail',lake:'Stillwater Lake',denseForest:'Close Pines',scramble:'Wild Patch',forest:'Open Pines',cemetery:'Frost Rest Cemetery'};e.title=names[e.kind];
+    const names={crowd:'Rush Hour Slope',beginner:'Rush Hour Slope',quiet:'Snowy Trail',lake:'Stillwater Lake',runout:'Long Glide',denseForest:'Close Pines',scramble:'Wild Patch',forest:'Open Pines',cemetery:'Frost Rest Cemetery'};e.title=names[e.kind];
     if(SPECIAL_KINDS.has(e.kind)){planSpecialArea(e,section);}
     else if(LEVEL_KINDS.has(e.kind)){planLevelArea(e,section);}
     else if(e.kind==='cemetery'){
@@ -584,6 +584,11 @@ window.FROSTLINE_READY = (async () => {
       const y=e.startY+Math.min(length*.55,180*PX_PER_M*scale);
       if(!e.introYeti&&to>y){e.introYeti=true;const live=state.chasers.filter(c=>activeCourseOwner(c)&&!c.ravager&&!c.dead&&!c.leaving&&Math.abs(c.y-state.p.y)<S.endless.yetis.nearbyMetres*PX_PER_M*scale).length;
         if(live<S.endless.yetis.maxNearbyHunters){const speed=crowd?mix(...S.endless.yetis.speedKmh,Math.min(1,endlessPressure((e.startY-state.endless.startY)/PX_PER_M).t)):S.endless.yetis.speedKmh[0];entity('lurker',center+pick([-1,1])*170*scale,y,{...own,width:55,r:18,arcadeTier:speed>90?'special':speed>78?'fast':'slow',yetiSpeedKmh:speed*scale,endlessBaseKmh:speed,wakeSeconds:S.endless.yetis.wakeSeconds});}}
+    }else if(e.kind==='runout'){
+      // Long Glide: after the lake's big jump you land here far too fast. Nothing in the way, just a few trees well
+      // off to the sides, and it is long enough to bleed back down to normal speed. Same every time.
+      const path=e.paths[0];
+      rows(100*PX_PER_M*scale/Math.max(.01,R.runoutTreesPer100Metres),(y,row)=>entity(row%3?'pine':'fir',encounterPathX(path,y)+(row%2?-1:1)*range(330,560)*scale,y,{...own,width:range(58,82),r:17}));
     }else if(e.kind==='quiet'){
       const path=e.paths[0];
       if(R.quietTreesPer100Metres>0)rows(100*PX_PER_M*scale/Math.max(.01,R.quietTreesPer100Metres),(y,row)=>entity(row%3?'pine':'fir',encounterPathX(path,y)+(row%2?-1:1)*range(110,310),y,{...own,width:range(58,78),r:17}));

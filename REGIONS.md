@@ -10,6 +10,7 @@ The first **450 metres use the original gentle opening**. Then the normal sequen
 | `quiet` | 180–250 m | Snowy Trail: continues the actual town-exit snow road, with scattered nearby trees, a few walkers, slow skiers, a bench/lamp and snowman. Sparse woods continue off the path. | None |
 | `trees` | 900–1,200 m | Existing long bends, forks, alternating gates and dense tree banks. | Weaving gates |
 | `lake` | 240–330 m | Huge clear ice: set a heading, coast, then regain control on the quiet snow afterward. | None |
+| `runout` | 1350 m (fixed) | Long Glide: always right after Stillwater Lake. You land here from the exit springs at about 230–260 km/h; it is wide and empty (a few trees 33–56 m off the line, `runoutTreesPer100Metres` 4; no flags, Yetis, wildlife or surprise enemies), and long enough for the over-speed slowdown (about 18 km/h per second) to bring you back to normal speed about when it ends. | None |
 | `town` | 900–1,200 m | Actual Arcade-style village, narrowing street, pedestrians and back route. | Entry/exit only |
 | `cemetery` | 650–850 m | Open graveyard slalom between irregular grave/crypt clusters. Several gaps stay available; resting zombies stir by graves, while extra walkers already patrol the gaps. Skeletons rattle, rise and leap once. Downhill movement is 70% of normal. | Entry/exit only |
 | `denseForest` | 110–160 m | A short thick stand of trees with a narrow winding passage. Concentrate on threading through or jumping. | None |

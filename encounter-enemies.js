@@ -1,6 +1,6 @@
 /* Sparse course encounters. Native pixel tiles stay bounded; no extra actor-wide AI scans. */
 const WEREWOLF_NAMES=['Jim','Nora','Oscar','Mia','Hugo','Elsie'];
-function surpriseAreaAllowed(e){return !e||!e.noNewPredators&&!['quiet','lake','beginner'].includes(e.kind);}
+function surpriseAreaAllowed(e){return !e||!e.noNewPredators&&!['quiet','lake','beginner','runout'].includes(e.kind);}
 function spawnEncounterEnemies(section,endY){
   const root=section.endlessRoot,E=S.endless.encounterEnemies;
   const spawn=(kind,C)=>{

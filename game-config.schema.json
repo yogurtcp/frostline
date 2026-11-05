@@ -9643,7 +9643,8 @@
                   "piedPiper",
                   "avalanche",
                   "burrowField",
-                  "boulder"
+                  "boulder",
+                  "runout"
                 ]
               }
             },
@@ -9693,6 +9694,15 @@
                   "maxItems": 2
                 },
                 "lake": {
+                  "type": "array",
+                  "items": {
+                    "type": "number",
+                    "minimum": 20
+                  },
+                  "minItems": 2,
+                  "maxItems": 2
+                },
+                "runout": {
                   "type": "array",
                   "items": {
                     "type": "number",
@@ -9820,7 +9830,8 @@
                 "lake",
                 "denseForest",
                 "forest",
-                "cemetery"
+                "cemetery",
+                "runout"
               ]
             },
             "beginnerPeople": {
@@ -9836,6 +9847,11 @@
             "quietTreesPer100Metres": {
               "type": "number",
               "minimum": 0
+            },
+            "runoutTreesPer100Metres": {
+              "type": "number",
+              "minimum": 0,
+              "description": "Trees per 100 m in Long Glide (the runout after the lake jump), kept well off to the sides"
             },
             "forestTreesPer100Metres": {
               "type": "array",
