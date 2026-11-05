@@ -14,17 +14,17 @@
     "difficultyRampMetres": 1200,
     "stages": {
       "metres": 1500,
-      "chillStages": 9,
+      "chillStages": 12,
       "chillDifficulty": 0.15,
-      "rampStages": 28,
-      "maxStage": 38,
+      "rampStages": 31,
+      "maxStage": 41,
       "easeStages": 5,
       "easeDensity": 0.5,
       "easeWidth": 1.3,
-      "ravagerStage": 14,
+      "ravagerStage": 17,
       "introduce": {
-        "burrower": 10,
-        "werewolf": 12
+        "burrower": 13,
+        "werewolf": 15
       }
     },
     "waveMetres": 650,
@@ -149,10 +149,7 @@
         "quiet",
         "piedPiper"
       ],
-      "firstCycle": {
-        "burrowField": 2,
-        "avalanche": 2
-      },
+      "firstCycle": {},
       "firstMetres": 450,
       "gapMetres": [
         0,

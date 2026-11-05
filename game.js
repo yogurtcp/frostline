@@ -457,7 +457,7 @@ window.FROSTLINE_READY = (async () => {
     const kind=forcedKind??(R.enabled?nextEndlessRegionKind(a,startY):a.encounterCount?(a.lastEncounterKind==='town'?'trees':'town'):'town');
     const visit=a.themeVisits[kind]=(a.themeVisits[kind]||0)+1,P0=endlessPressure((startY-a.startY)/PX_PER_M);
     // Debug previews pick a visit; real runs take the stage you reach the area at.
-    const levelDifficulty=a.debug?clamp((visit-1)/(Cf.difficultyVisits-1),0,1):P0.t,difficulty=Math.min(1,levelDifficulty),ease=a.debug?{density:1,width:1}:P0.ease;
+    const levelDifficulty=a.debug?clamp((visit-1)/(Cf.difficultyVisits-1),0,1):P0.t,difficulty=Math.min(1,levelDifficulty),ease=a.debug?{density:1,width:1}:{...P0.ease,level:mix(S.endless.stages.easeDensity,1,clamp((P0.stage-1)/S.endless.stages.chillStages,0,1))};
     const scale=endlessScaleAt((startY-a.startY)/PX_PER_M),length=range(...((R.enabled||forcedKind)&&(R.lengthMetres[kind]||(kind==='crowd'?R.lengthMetres.beginner:null))||Cf.lengthMetres))*PX_PER_M*scale*(kind==='christmas'?R.festivals.christmasParade.lengthMultiplier:1);
     const townKind=kind==='town'||FESTIVAL_KINDS.has(kind),widths=townKind?Cf.townStreetWidthMetres:Cf.corridorWidthMetres;
     const streetWidths=kind==='christmas'?R.festivals.christmasParade.streetWidthMetres:widths;

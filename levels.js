@@ -7,6 +7,8 @@ const LEVEL_NAMES={piedPiper:"Pied Piper's Parade",avalanche:'Avalanche!',burrow
 const LEVEL_HINTS={piedPiper:'TEN YETIS ARE AFTER YOU - GRAB FLAGS, USE THE ICE, WATCH FOR AMBUSHES',avalanche:'EYES UP AND DOWN - SNOWBALLS FROM ABOVE, BEASTS BELOW',burrowField:'THEY COME FROM THE SIDES - TURN, JUMP OR FIND ICE',boulder:'A GIANT SNOWBALL IS RIGHT BEHIND YOU - KEEP A CLEAN, FAST LINE'};
 function levelConfig(e){return S.endless.regions.levels[e.kind];}
 // Challenge areas keep scaling past the old hardest on later stages (levelDifficulty can exceed 1), never below zero.
+// Challenge areas stay softened through the whole first lap (`ease.level`), not just the first few stages.
+function levelEase(e){return Math.min(e.ease?.density??1,e.ease?.level??1);}
 function levelValue(e,range){return Array.isArray(range)?Math.max(0,mix(range[0],range[1],e.levelDifficulty??e.difficulty)):range;}
 function levelRows(e,from,to,step,offset,callback){
   for(let row=Math.max(0,Math.ceil((from-e.startY-offset)/step));;row++){const y=e.startY+offset+row*step;if(y>=to||y>=e.endY)break;callback(y,row);}
@@ -28,7 +30,7 @@ function planLevelArea(e,section){
 function populateLevelArea(e,section,from,to){
   const L=levelConfig(e),s=e.scale,path=e.paths[0],own={arcadeRun:section,encounter:e},at=y=>encounterPathX(path,y);
   populateForestBoundary(e,section,from,to,{banks:false});
-  const per=(value,offset,callback)=>{const n=levelValue(e,value)*(e.ease?.density??1);if(n>0)levelRows(e,from,to,100*PX_PER_M*s/n,offset*s,(y,row)=>{if(y<e.endY-60*s)callback(y,row);});};
+  const per=(value,offset,callback)=>{const n=levelValue(e,value)*levelEase(e);if(n>0)levelRows(e,from,to,100*PX_PER_M*s/n,offset*s,(y,row)=>{if(y<e.endY-60*s)callback(y,row);});};
   const sideTrees=(per100,inner,outer)=>per(per100,40,(y,row)=>{const x=at(y)+(row%2?-1:1)*range(inner,outer);entity(row%3?'pine':'fir',x,y,{...own,width:range(58,82),r:17});});
   // Lone skiers and boarders going about their day: obstacles to you, a snack to anything chasing you.
   const skiers=(per100)=>per(per100,120,y=>{const item=createArcadeItem(pick(['skier','skier','boarder']),at(y)+range(-.9,.9)*e.half,y,section);item.encounter=e;});
@@ -100,7 +102,7 @@ function updateAmbushes(e,L){
   const p=state.p,every=levelValue(e,L.ambushSeconds??0);if(!every||p.fall||p.awaitingInput||p.y>e.endY-150*e.scale)return;
   if(!e.nextAmbush){e.nextAmbush=clock+every*range(.5,1);return;}
   if(clock<e.nextAmbush)return;
-  e.nextAmbush=clock+every/(e.ease?.density??1)*range(.7,1.3);
+  e.nextAmbush=clock+every/levelEase(e)*range(.7,1.3);
   const b=viewBounds(),s=e.scale,line=encounterPathX(e.paths[0],p.y),roll=random();
   const yetiOk=e.kind!=='piedPiper'; // Pied Piper is the ten from the start, nothing more
   if(roll<.45&&yetiOk){const side=pick([-1,1]),c=levelChaser(e,side<0?b.left-30:b.right+30,p.y+range(10,35)*PX_PER_M*s,levelValue(e,L.chaserSpeedKmh)-5);say(pick(['SURPRISE!','HELLO THERE!','THOUGHT YOU WERE SAFE?']),c,1.4);}
@@ -128,7 +130,7 @@ function updateLevelAreas(dt){
   const L=levelConfig(e),s=e.scale;
   // The pack is let loose once you are properly under way and 70 m in, so it starts on open slope inside the area.
   if(!e.chasersReleased&&(e.kind==='piedPiper'||e.kind==='avalanche')&&p.y>e.startY+700*s&&!p.fall&&!p.awaitingInput&&Math.hypot(p.vx,p.vy)*S.physics.hudKmhPerSpeed>=50){
-    e.chasersReleased=true;const count=Math.max(1,Math.round(levelValue(e,L.chasingYetis)*(e.ease?.density??1)));
+    e.chasersReleased=true;const count=Math.max(1,Math.round(levelValue(e,L.chasingYetis)*levelEase(e)));
     // Pied Piper's pack runs at 90.5 km/h: barely enough to catch up, so every mistake counts.
     releaseLevelChasers(e,count,levelValue(e,L.chaserSpeedKmh),levelValue(e,L.chaserSpeedSpreadKmh??0),['THERE! GET HIM!','BREAKFAST IS LEAVING!','RUN, LITTLE SKIER!']);
     if(e.kind==='piedPiper')announce(count+' YETIS ARE RIGHT BEHIND YOU','FLAGS ARM YOU - ICE SPEEDS YOU AWAY',C.red,3);
@@ -164,7 +166,7 @@ function updateAvalanche(e,L,dt){
   if(p.y>e.endY-80*s||p.y<e.startY+60*s){return;}
   if(!e.nextBall){e.nextBall=clock+.8;state.screenShake=.4;announce('RUMBLE...','THE MOUNTAIN IS LETTING GO',C.red,2);}
   if(clock<e.nextBall)return;
-  e.nextBall=clock+levelValue(e,L.ballSeconds)/(e.ease?.density??1)*range(.75,1.25);
+  e.nextBall=clock+levelValue(e,L.ballSeconds)/levelEase(e)*range(.75,1.25);
   // Balls roll in over the top of the screen, clearly faster than you, and curve across your line as they pass.
   // Every few balls, a volley of three sweeps the whole corridor.
   const line=encounterPathX(e.paths[0],p.y);e.balls=(e.balls||0)+1;
@@ -187,7 +189,7 @@ function updateBurrowField(e,L){
   if(p.y<e.startY+80*s||p.y>e.endY-120*s||p.fall||p.awaitingInput)return;
   if(!e.nextBurrow){e.nextBurrow=clock+1.2;announce('THE GROUND IS MOVING','WATCH BOTH SIDES',C.red,2);return;}
   if(clock<e.nextBurrow)return;
-  e.nextBurrow=clock+levelValue(e,L.spawnSeconds)/(e.ease?.density??1)*range(.7,1.3);
+  e.nextBurrow=clock+levelValue(e,L.spawnSeconds)/levelEase(e)*range(.7,1.3);
   for(const side of random()<levelValue(e,L.pincerChance)?[-1,1]:[pick([-1,1])])spawnFieldBurrower(e,L,side);
 }
 function spawnFieldBurrower(e,L,side){

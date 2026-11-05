@@ -1641,3 +1641,13 @@ User: introduce burrowers and werewolves later, after seeing some Yetis; the beg
 - `stages.introduce` (burrower 10, werewolf 12) gates `spawnEncounterEnemies` (not in debug runs).
 - `nextEndlessRegionKind` skips kinds whose `regions.firstCycle` (burrowField 2, avalanche 2) is later than the current lap (`floor(index/order.length) + 1`), trying up to one lap; debug runs are exempt.
 - Fast-forward of a real run: lap 1 covers stages 1–9 (about 13.6 km: Yetis, towns, cemetery, Boulder at stage 5, Pied Piper at stage 9, no Burrowers/Avalanche); Burrowers at stage 12 and Avalanche at 15 in lap 2; full difficulty at stage 28 (about 40 km). Trace: 192 checkpoints, no errors; the checkpoint test passes.
+
+## 153. Every level in lap 1, just softer (2026-11-05)
+
+User: all levels should exist in the first lap, with decreased difficulty. `regions.firstCycle` is now empty (the feature stays available). Challenge areas get `e.ease.level` = mix(`easeDensity`, 1, (stage − 1)/`chillStages`), and `levelEase(e)` = min(ease.density, ease.level) replaces the plain density factor in levels.js (per() counts, burrow/ball/ambush timers, chasing-Yeti count). With every level back, lap 1 is about 18 km, so the stages are retuned: `chillStages` 12, `rampStages` 31, `maxStage` 41, `ravagerStage` 17, introduce burrower 13 / werewolf 15. Real-run fast-forward:
+- Burrowers: stage 3, difficulty 0.03, level ease 0.58, 1.2× width
+- Avalanche: stage 7, difficulty 0.08, ease 0.75
+- Boulder: stage 9, ease 0.83
+- Pied Piper: stage 12, ease 0.96
+- Next town: stage 13; Burrowers again at stage 15, full strength at difficulty 0.28
+Trace clean.
