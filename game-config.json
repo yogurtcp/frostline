@@ -121,6 +121,9 @@
         "burrowField",
         "rivalRace",
         "forest",
+        "quiet",
+        "halloween",
+        "quiet",
         "avalanche",
         "cemetery",
         "denseForest",
@@ -128,8 +131,6 @@
         "scramble",
         "quiet",
         "christmas",
-        "quiet",
-        "halloween",
         "quiet",
         "piedPiper"
       ],
