@@ -1620,3 +1620,16 @@ User: the lift is the checkpoint, so the road should go to it more naturally, cu
 ## 150. Halloween moved to mid-cycle so checkpoints are spread out (2026-11-05)
 
 User: don't add more regular towns; use the Halloween town in the middle. The `town`, `christmas` and `halloween` kinds are all towns (`townKind`) with a lift checkpoint (`addTownCheckpoint`). The old order put 13 areas (about 10 km, including Burrowers, Avalanche and Boulder) between town and Christmas, then Christmas→Halloween 1 area and Halloween→town 2. New `regions.order`: town, quiet, trees, lake, quiet, burrowField, rivalRace, forest, quiet, **halloween**, quiet, avalanche, cemetery, denseForest, boulder, scramble, quiet, christmas, quiet, piedPiper. Verified on a real run by fast-forwarding planning: town→Halloween about 6.4 km, Halloween→Christmas about 5.7 km, Christmas→town about 1.7 km plus any Pied Piper extension (random crowds included). Halloween's lift is a checkpoint. Trace clean.
+
+## 151. Endless stages: a long, gentle-to-relentless ramp (2026-11-05)
+
+User: the game gets too hard too fast; with checkpoints it can start gently (fewer monsters and obstacles, wider paths) and keep getting harder without a real limit, maybe 20 stages. Before: `endlessPressure` was 1 − e^(−m/1200), about 63% at 1.2 km and nearly maxed by 4–5 km. It drove Yeti speed (68→94), spacing, count (max 4 by about 2.4 km), item rates and Stalkers from 1.2 km. Area layouts used per-theme visit counts, maxing at the 6th appearance.
+
+Now everything follows `endlessStage(metres)` (see CONFIG.md "Endless stages"):
+- `stageDifficulty` and `stageEase`; `endlessPressure` returns `{t, stage, ease, …}`.
+- `planEndlessEncounter` sets `e.difficulty` = min(1, t), `e.levelDifficulty` = t (up to about 1.53) and `e.ease`, and widens non-town `e.half` by `ease.width`. Debug previews keep visit-based difficulty and no ease, so the trace is unaffected.
+- `levelValue` uses `levelDifficulty`, clamped ≥ 0. Level `per()` counts, burrow/ball/ambush intervals and chasing-Yeti counts are scaled by `ease.density`, and `planLevelArea` widens `e.half`.
+- Section `rate()` × `ease.density`. Yeti and wildlife intervals are divided by `ease.density` (with a floor of 60% of the old hardest interval). Yeti speed, gate opening and the desired Yeti count use min(1, t). Ravagers need `stage ≥ ravagerStage`, with chance × min(1, t).
+- HUD: right label "STAGE n  1234 m"; the coloured bar shows progress through the current stage. `updateEndlessSpeed` announces each new stage (not in debug).
+
+Real-run fast-forward: town at stage 1 (ease 0.5), Burrowers at stage 3 (difficulty 0.11, 1.24× width), Halloween stage 6, Avalanche 6, Boulder 9, Christmas 10, Pied Piper 12. Stage 20 (full) is about 30 km in, early in the second cycle. Trace: 192 checkpoints, no errors; the checkpoint resume test passes.

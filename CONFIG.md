@@ -280,3 +280,13 @@ Arcade checkpoints: each Arcade town's chairlift station is its checkpoint. `end
 Museum: `museum.exhibitsPerLeg` (4) exhibits per switchback; `legWidth` (1700) and `legDrop` (980) set each switchback's size and how sideways it runs (about 30° below horizontal by default); `trailWidth` (70) is the marked snow path; `clearanceWidth` (460) keeps random scenery, lakes and predators away from it; `exhibitDrop`, `textOffset` and `wrapCharacters` place the statues and notes. `museum.exhibits` is the ordered list of `{id,title,text}`; the id picks how `museum.js` stages it, and an unknown id is shown as a note on its own.
 
 Speech text: `render.speechTextSize` (14; 14 or more uses the double-size pixel font), `speechWrapCharacters` (18) and `speechLineGap` (4). Dialogue pools are under `dialogue`; add or edit lines freely.
+
+## Endless stages (difficulty pacing)
+
+`endless.stages` drives all Endless difficulty from one number, the stage: one stage per `metres` (1500) of the run, shown on the HUD with a STAGE n announcement.
+- Difficulty is (stage − 1) / (`rampStages` − 1): 0 at stage 1, 1.0 (the old hardest settings) at `rampStages` (20, about 30 km). It keeps rising after that until `maxStage` (30, about 1.53).
+- Each area's layout difficulty is the stage you reach it at (no longer per-theme visit counts; debug previews still use their chosen visit). Non-challenge areas cap at 1.0; challenge areas (levels.js `levelValue`) keep scaling past it, never below 0.
+- Pressure (`endlessPressure`) follows the stage too: item rates, Yeti spacing and wildlife spacing keep scaling. Yeti speed, gate openings and the nearby-Yeti count (1 → `yetis.maxNearbyHunters`) top out at 1.0. Stalker ravagers start at `ravagerStage` (6), with chance × difficulty.
+- The first `easeStages` (5) are extra gentle. Densities (section items, Yetis, wildlife, level placements, burrow/snowball/ambush timers, chasing-Yeti counts) start at `easeDensity` (0.5), and corridor widths start at `easeWidth` (1.3×), easing to 1.
+- Checkpoints keep the stage (resume restores the run distance). `difficultyRampMetres` and `encounters.difficultyVisits` now only affect debug previews.
+

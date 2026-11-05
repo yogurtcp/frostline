@@ -9139,7 +9139,50 @@
         },
         "difficultyRampMetres": {
           "type": "number",
-          "minimum": 500
+          "minimum": 500,
+          "description": " (unused since stages)"
+        },
+        "stages": {
+          "type": "object",
+          "description": "Endless difficulty by stage: one stage per `metres`; stage 1 is gentle, `rampStages` equals the old hardest, it keeps rising until `maxStage`.",
+          "additionalProperties": false,
+          "properties": {
+            "metres": {
+              "type": "number",
+              "minimum": 1,
+              "description": "Metres per stage"
+            },
+            "rampStages": {
+              "type": "number",
+              "minimum": 2,
+              "description": "Stage at which difficulty reaches the old hardest (1.0)"
+            },
+            "maxStage": {
+              "type": "number",
+              "minimum": 1,
+              "description": "Difficulty stops rising after this stage"
+            },
+            "easeStages": {
+              "type": "number",
+              "minimum": 0,
+              "description": "Number of opening stages that are extra gentle"
+            },
+            "easeDensity": {
+              "type": "number",
+              "minimum": 0,
+              "description": "Density multiplier for obstacles and creatures at stage 1 (eases to 1)"
+            },
+            "easeWidth": {
+              "type": "number",
+              "minimum": 0,
+              "description": "Corridor width multiplier at stage 1 (eases to 1)"
+            },
+            "ravagerStage": {
+              "type": "number",
+              "minimum": 1,
+              "description": "First stage where Stalker Yetis (ravagers) can appear"
+            }
+          }
         },
         "waveMetres": {
           "type": "number",

@@ -12,6 +12,15 @@
     "sectionMetres": 240,
     "lookAheadMetres": 180,
     "difficultyRampMetres": 1200,
+    "stages": {
+      "metres": 1500,
+      "rampStages": 20,
+      "maxStage": 30,
+      "easeStages": 5,
+      "easeDensity": 0.5,
+      "easeWidth": 1.3,
+      "ravagerStage": 6
+    },
     "waveMetres": 650,
     "itemSpreadMetres": 55,
     "gates": {

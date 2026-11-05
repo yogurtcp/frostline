@@ -82,7 +82,7 @@ window.loadFrostlineConfig = async function () {
   config.predators.divertReleaseWidthMetres ??= 16;
   config.predators.divertPathAngleDegrees ??= 45;
   config.predators.divertReleaseAngleDegrees ??= 60;
-  config.predators.mealPauseSeconds ??= 2;config.render.speechTextSize ??= 9;config.render.speechWrapCharacters ??= 27;config.render.speechLineGap ??= 3;config.render.speechSpacingSeconds ??= 1.2;config.predators.mealReachMetres ??= 4;config.predators.helplessNoticeMetres ??= 15;config.world.chunkRetentionBehind ??= 2500;config.endless.checkpoint ??= {};config.endless.checkpoint.signAheadMetres ??= 50;config.endless.checkpoint.grabPaddingMetres ??= 3;config.lift.courseSideOffset ??= 460;config.lift.gateClearance ??= 140;
+  config.predators.mealPauseSeconds ??= 2;config.render.speechTextSize ??= 9;config.render.speechWrapCharacters ??= 27;config.render.speechLineGap ??= 3;config.render.speechSpacingSeconds ??= 1.2;config.predators.mealReachMetres ??= 4;config.predators.helplessNoticeMetres ??= 15;config.world.chunkRetentionBehind ??= 2500;config.endless.stages ??= {metres:1500,rampStages:20,maxStage:30,easeStages:5,easeDensity:0.5,easeWidth:1.3,ravagerStage:6};config.endless.checkpoint ??= {};config.endless.checkpoint.signAheadMetres ??= 50;config.endless.checkpoint.grabPaddingMetres ??= 3;config.lift.courseSideOffset ??= 460;config.lift.gateClearance ??= 140;
   config.night ??= {};
   for(const [key,value] of Object.entries({"enabled":true,"dayNightRounds":true,"playerRadiusMetres":14,"skierRadiusMetres":5,"lampRadiusMetres":24,"lampSpacingMetres":20,"lampSetbackMetres":7,"lightReachMultiplier":3.2,"ambientOpacity":0.97,"transitionSeconds":1.8}))config.night[key] ??= value;
   config.endless.regions.festivals ??= {};

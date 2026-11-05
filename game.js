@@ -336,16 +336,24 @@ window.FROSTLINE_READY = (async () => {
     const run=o?.arcadeRun||o?.chaseRun,current=state.course;
     return !!run&&!!current&&(run===current||!!run.block&&run.block===current.block);
   }
+  // Stages: every `endless.stages.metres` of a run is one stage. Stage 1 is gentle, stage `rampStages` matches the old
+  // hardest settings, and it keeps climbing past that until `maxStage`, where values would stop making sense.
+  function endlessStage(metres){return 1+Math.floor(Math.max(0,metres)/S.endless.stages.metres);}
+  function stageDifficulty(stage){const G=S.endless.stages;return (Math.min(stage,G.maxStage)-1)/(G.rampStages-1);}
+  // The first few stages are extra gentle: fewer things on the slope and wider corridors, easing to normal.
+  function stageEase(stage){const G=S.endless.stages,k=clamp((stage-1)/G.easeStages,0,1);return {density:mix(G.easeDensity,1,k),width:mix(G.easeWidth,1,k)};}
   function endlessPressure(metres){
-    const E=S.endless,t=1-Math.exp(-Math.max(0,metres)/E.difficultyRampMetres),phase=Math.max(0,metres)/E.waveMetres;
+    const E=S.endless,stage=endlessStage(metres),t=stageDifficulty(stage),phase=Math.max(0,metres)/E.waveMetres;
     const wave=.82+.18*Math.sin(phase*TAU-Math.PI/2),forest=.75+.45*(.5+.5*Math.sin(phase*2.1)),lakes=.65+.85*(.5+.5*Math.sin(phase*1.7+1.3));
-    return {t,wave,forest,lakes};
+    return {t,stage,ease:stageEase(stage),wave,forest,lakes};
   }
   // Difficulty progresses through layouts and populations; downhill pace stays at its starting value.
   function endlessScaleAt(){return 1;}
   function endlessSpeedScale(o=null){return state.endless&&(!o||activeCourseOwner(o))?state.endless.speedScale:1;}
   function updateEndlessSpeed(){
     const a=state.endless;if(!a)return;
+    const stage=endlessStage((Math.max(a.furthestY,state.p.y)-a.startY)/PX_PER_M);
+    if(!a.debug&&stage>(a.stageShown||0)){if(a.stageShown!==undefined)announce('STAGE '+stage,stage>S.endless.stages.rampStages?'BEYOND THE HARDEST - IT KEEPS CLIMBING':stage===S.endless.stages.rampStages?'FULL DIFFICULTY':'IT GETS A LITTLE HARDER',C.teal,2.2);a.stageShown=stage;}
     a.speedScale=endlessScaleAt((Math.max(a.furthestY,state.p.y)-a.startY)/PX_PER_M);
     stages.endless.pace=S.endless.playerSpeedKmh*a.speedScale/(S.physics.speedMultiplier*S.physics.hudKmhPerSpeed);
   }
@@ -437,12 +445,14 @@ window.FROSTLINE_READY = (async () => {
     const a=state.endless,Cf=S.endless.encounters,root=section.endlessRoot;
     const R=S.endless.regions,forcedKind=a.debugNextKind;delete a.debugNextKind;
     const kind=forcedKind??(R.enabled?nextEndlessRegionKind(a,startY):a.encounterCount?(a.lastEncounterKind==='town'?'trees':'town'):'town');
-    const visit=a.themeVisits[kind]=(a.themeVisits[kind]||0)+1,difficulty=clamp((visit-1)/(Cf.difficultyVisits-1),0,1);
+    const visit=a.themeVisits[kind]=(a.themeVisits[kind]||0)+1,P0=endlessPressure((startY-a.startY)/PX_PER_M);
+    // Debug previews pick a visit; real runs take the stage you reach the area at.
+    const levelDifficulty=a.debug?clamp((visit-1)/(Cf.difficultyVisits-1),0,1):P0.t,difficulty=Math.min(1,levelDifficulty),ease=a.debug?{density:1,width:1}:P0.ease;
     const scale=endlessScaleAt((startY-a.startY)/PX_PER_M),length=range(...((R.enabled||forcedKind)&&(R.lengthMetres[kind]||(kind==='crowd'?R.lengthMetres.beginner:null))||Cf.lengthMetres))*PX_PER_M*scale*(kind==='christmas'?R.festivals.christmasParade.lengthMultiplier:1);
     const townKind=kind==='town'||FESTIVAL_KINDS.has(kind),widths=townKind?Cf.townStreetWidthMetres:Cf.corridorWidthMetres;
     const streetWidths=kind==='christmas'?R.festivals.christmasParade.streetWidthMetres:widths;
     const half=mix(streetWidths[1],streetWidths[0],difficulty)*PX_PER_M*(townKind?1:scale)/2;
-    const variant=Math.floor(random()*3),cycles=5+Math.round(difficulty),e={id:++a.encounterCount,kind,visit,difficulty,variant,scale,startY,endY:startY+length,half,paths:[],band:1000,chamberLength:length/cycles,generatedY:startY};
+    const variant=Math.floor(random()*3),cycles=5+Math.round(difficulty),e={id:++a.encounterCount,kind,visit,difficulty,levelDifficulty,ease,stage:P0.stage,variant,scale,startY,endY:startY+length,half:half*(townKind?1:ease.width),paths:[],band:1000,chamberLength:length/cycles,generatedY:startY};
     e.night=!!(Math.floor(Math.max(0,(a.regionOrderIndex||1)-1)/R.order.length)%2);
     a.previousEncounterKind=a.lastEncounterKind;a.encounters.push(e);a.lastEncounterKind=kind;if(kind==='crowd')a.lastCrowdEndY=e.endY;
     if(townKind){
@@ -563,7 +573,7 @@ window.FROSTLINE_READY = (async () => {
         entity(type,x,y,{...own,width:type.startsWith('person')?30:42,r:10,vy:type.startsWith('person')?0:base*scale,vx:0,endlessBaseVy:type.startsWith('person')?undefined:base});},200*scale);
       const y=e.startY+Math.min(length*.55,180*PX_PER_M*scale);
       if(!e.introYeti&&to>y){e.introYeti=true;const live=state.chasers.filter(c=>activeCourseOwner(c)&&!c.ravager&&!c.dead&&!c.leaving&&Math.abs(c.y-state.p.y)<S.endless.yetis.nearbyMetres*PX_PER_M*scale).length;
-        if(live<S.endless.yetis.maxNearbyHunters){const speed=crowd?mix(...S.endless.yetis.speedKmh,endlessPressure((e.startY-state.endless.startY)/PX_PER_M).t):S.endless.yetis.speedKmh[0];entity('lurker',center+pick([-1,1])*170*scale,y,{...own,width:55,r:18,arcadeTier:speed>90?'special':speed>78?'fast':'slow',yetiSpeedKmh:speed*scale,endlessBaseKmh:speed,wakeSeconds:S.endless.yetis.wakeSeconds});}}
+        if(live<S.endless.yetis.maxNearbyHunters){const speed=crowd?mix(...S.endless.yetis.speedKmh,Math.min(1,endlessPressure((e.startY-state.endless.startY)/PX_PER_M).t)):S.endless.yetis.speedKmh[0];entity('lurker',center+pick([-1,1])*170*scale,y,{...own,width:55,r:18,arcadeTier:speed>90?'special':speed>78?'fast':'slow',yetiSpeedKmh:speed*scale,endlessBaseKmh:speed,wakeSeconds:S.endless.yetis.wakeSeconds});}}
     }else if(e.kind==='quiet'){
       const path=e.paths[0];
       if(R.quietTreesPer100Metres>0)rows(100*PX_PER_M*scale/Math.max(.01,R.quietTreesPer100Metres),(y,row)=>entity(row%3?'pine':'fir',encounterPathX(path,y)+(row%2?-1:1)*range(110,310),y,{...own,width:range(58,78),r:17}));
@@ -820,7 +830,8 @@ window.FROSTLINE_READY = (async () => {
   function spawnEndlessRavager(section,endY){
     const a=state.endless,R=S.endless.yetis.ravager,scale=section.endlessScale;
     const from=Math.max(section.startY,a.startY+R.firstMetres*PX_PER_M);
-    if(endY-from<180*scale||random()>=R.chancePerSection)return;
+    const P=endlessPressure((endY-a.startY)/PX_PER_M);
+    if(endY-from<180*scale||P.stage<S.endless.stages.ravagerStage||random()>=R.chancePerSection*Math.min(1,P.t))return;
     for(let attempt=0;attempt<10;attempt++){
       const y=range(from+80*scale,endY-100*scale),e=endlessEncounterAt(y);
       if(e?.town||e?.noNewPredators||['quiet','lake','beginner'].includes(e?.kind))continue;
@@ -867,7 +878,7 @@ window.FROSTLINE_READY = (async () => {
           a.wildlifeNumber++;break;
         }
       }
-      a.nextWildlifeY=Math.max(a.nextWildlifeY,section.startY)+mix(...Wl.intervalMetres,pressure.t)*PX_PER_M*scale;
+      a.nextWildlifeY=Math.max(a.nextWildlifeY,section.startY)+Math.max(Wl.intervalMetres[1]*.6,mix(...Wl.intervalMetres,pressure.t))/pressure.ease.density*PX_PER_M*scale;
     }
   }
   function extendEndless(){
@@ -875,11 +886,11 @@ window.FROSTLINE_READY = (async () => {
     const horizon=Math.max(viewBounds().bottom,state.p.y+H*(1-S.render.playerScreenY)/ZOOM)+E.lookAheadMetres*PX_PER_M*a.speedScale;
     while(a.plannedY<horizon){
       const startY=a.plannedY,distance=(startY-root.startY)/PX_PER_M,scale=endlessScaleAt(distance),endY=startY+E.sectionMetres*PX_PER_M*scale;
-      const P=endlessPressure(distance),rate=key=>mix(...E.rates[key],P.t)*P.wave/(scale*scale);
+      const P=endlessPressure(distance),rate=key=>mix(...E.rates[key],P.t)*P.wave*P.ease.density/(scale*scale);
       const itemRates=Object.fromEntries(Object.keys(ARCADE_ITEMS).map(key=>[key,0]));
       const trees=rate('trees')*P.forest;
       Object.assign(itemRates,{pine:trees,fir:trees*.6,spruceTree:trees*.25,smallPine:trees*.3,skier:rate('skiers'),fastSkier:rate('fastSkiers'),smallHill:rate('jumps'),largeHill:rate('jumps')*.35,rainbow:rate('jumps')*.25});
-      const section={id:'endless',endlessRoot:root,endlessScale:scale,block:root.block,x:root.x,startY,endY,finishHalf:0,arcade:{knobs:[1,1,1,1,1],trees:true,specialLayout:'none',gates:{count:0,swordGateCount:0,icePercent:0,openingWidthMetres:mix(...E.gates.openingMetres,P.t)},spacing:E.gates.spacingMetres*PX_PER_M*scale,pace:E.playerSpeedKmh*scale/(S.physics.speedMultiplier*S.physics.hudKmhPerSpeed),itemSpreadMetres:E.itemSpreadMetres*scale,itemRates,tierRates:{slightlyRare:0,veryRare:0},endTrafficMultiplier:1}};
+      const section={id:'endless',endlessRoot:root,endlessScale:scale,block:root.block,x:root.x,startY,endY,finishHalf:0,arcade:{knobs:[1,1,1,1,1],trees:true,specialLayout:'none',gates:{count:0,swordGateCount:0,icePercent:0,openingWidthMetres:mix(...E.gates.openingMetres,Math.min(1,P.t))},spacing:E.gates.spacingMetres*PX_PER_M*scale,pace:E.playerSpeedKmh*scale/(S.physics.speedMultiplier*S.physics.hudKmhPerSpeed),itemSpreadMetres:E.itemSpreadMetres*scale,itemRates,tierRates:{slightlyRare:0,veryRare:0},endTrafficMultiplier:1}};
       holdLevelExit(a,endY,scale);
       while(a.nextEncounterY<endY+1200*scale){const e=planEndlessEncounter(section,a.nextEncounterY);a.nextEncounterY=e.endY+range(...(E.regions.enabled?E.regions.gapMetres:E.encounters.gapMetres))*PX_PER_M*e.scale;}
       holdLevelExit(a,endY,scale);
@@ -929,7 +940,7 @@ window.FROSTLINE_READY = (async () => {
       }
       prepareArcadeTerrain(section);
       const live=state.chasers.filter(c=>activeCourseOwner(c)&&!c.ravager&&!c.dead&&!c.leaving&&c.y>state.p.y-E.yetis.nearbyMetres*PX_PER_M*scale).length+state.objects.filter(o=>o.type==='lurker'&&!o.ravager&&activeCourseOwner(o)&&!o.dead&&!o.eaten).length;
-      const desired=Math.min(E.yetis.maxNearbyHunters,1+Math.floor(Math.max(0,distance-E.yetis.firstMetres)/E.yetis.additionalEveryMetres));
+      const desired=distance<E.yetis.firstMetres?0:Math.min(E.yetis.maxNearbyHunters,1+Math.floor(Math.min(1,P.t)*(E.yetis.maxNearbyHunters-1)+.0001));
       if(a.nextYetiY<endY){
         const scheduledRegion=endlessEncounterAt(a.nextYetiY);
         if(live<desired&&!scheduledRegion?.town&&!scheduledRegion?.noNewPredators&&!['beginner','crowd'].includes(scheduledRegion?.kind)){
@@ -940,10 +951,10 @@ window.FROSTLINE_READY = (async () => {
           for(let i=0;i<8&&(patchAt(x,at)||state.objects.some(o=>o.r>0&&obstacleClearance(o,x,at)<40||o.type==='gate'&&Math.abs(o.x-x)<o.half+45&&Math.abs(o.y-at)<80));i++){
             at+=25*scale;x=path?encounterPathX(path,at)+side*corridor.half*(i%2?.68:-.68):x+side*35*scale;
           }
-          const speed=mix(...E.yetis.speedKmh,P.t);
+          const speed=mix(...E.yetis.speedKmh,Math.min(1,P.t)); // speed tops out at the old hardest; later stages bring more, not faster
           if(!endlessTownAt(x,at)&&!patchAt(x,at)&&!state.objects.some(o=>o.r>0&&obstacleClearance(o,x,at)<40))entity('lurker',x,at,{width:55,r:18,arcadeRun:section,arcadeTier:speed>90?'special':speed>78?'fast':'slow',yetiSpeedKmh:speed*scale,endlessBaseKmh:speed,shoreLake:near,wakeSeconds:E.yetis.wakeSeconds});
         }
-        a.nextYetiY=Math.max(a.nextYetiY,endY)+mix(...E.yetis.intervalMetres,P.t)*PX_PER_M*scale;
+        a.nextYetiY=Math.max(a.nextYetiY,endY)+Math.max(E.yetis.intervalMetres[1]*.6,mix(...E.yetis.intervalMetres,P.t))/P.ease.density*PX_PER_M*scale;
       }
       spawnEndlessWildlife(section,endY,P);spawnEndlessRavager(section,endY);spawnEncounterEnemies(section,endY);clearLakeExitSpringApproaches();
       a.sections.push(section);a.plannedY=endY;
@@ -4676,10 +4687,10 @@ window.FROSTLINE_READY = (async () => {
     const region=run?.endless?endlessEncounterAt(p.y):null;
     const name=region?(region.festival?region.title+' / '+region.town.name:region.town?.name||region.title):run?stages[run.id].name+(p.y<run.startY?' · approach':''):state.zone.kind==='village'?state.zone.name+' Village':state.zone.kind==='museum'?'The Frostline Museum':'Choose your first trail';
     text(name,20,48,10,C.teal,'left');
-    const right=state.museum&&state.zone.kind==='museum'?museumProgress():run?.endless?Math.max(0,Math.floor((state.endless.furthestY-run.startY)/PX_PER_M))+' m':run?`${Math.max(0,Math.floor((p.y-run.startY)/PX_PER_M))} / ${Math.round(stages[run.id].length)} m`:`${Math.round(S.world.summitAltitude+state.elevated-p.y/PX_PER_M)} m altitude`;
+    const right=state.museum&&state.zone.kind==='museum'?museumProgress():run?.endless?'STAGE '+endlessStage((state.endless.furthestY-run.startY)/PX_PER_M)+'  '+Math.max(0,Math.floor((state.endless.furthestY-run.startY)/PX_PER_M))+' m':run?`${Math.max(0,Math.floor((p.y-run.startY)/PX_PER_M))} / ${Math.round(stages[run.id].length)} m`:`${Math.round(S.world.summitAltitude+state.elevated-p.y/PX_PER_M)} m altitude`;
     text(right,W-20,48,10,C.muted,'right','normal');
     if(run){
-      const frac=run.endless?endlessPressure((state.endless.furthestY-run.startY)/PX_PER_M).t:clamp((p.y-run.startY)/(run.endY-run.startY),0,1);box(18,64,(W-36)*frac,2,stages[run.id].color);
+      const frac=run.endless?((state.endless.furthestY-run.startY)/PX_PER_M%S.endless.stages.metres)/S.endless.stages.metres:clamp((p.y-run.startY)/(run.endY-run.startY),0,1);box(18,64,(W-36)*frac,2,stages[run.id].color);
       const objective=run.endless?`${run.cleared} FLAGS - ${run.missed} MISSED`:run.objective==='mushrooms'?`${run.collected}/${run.totalMushrooms} MUSHROOMS (NEED ${Math.ceil(run.totalMushrooms*S.mushroomHunt.minimumFraction)})`:run.totalGates?`${run.cleared}/${run.totalGates} FLAGS${run.arcade?'':' ('+Math.round(S.race.minimumGateFraction*100)+'% MIN)'}`:'';
       text(`${run.arcade?'':run.points+' PTS  '}${objective}`,20,H-22,10,C.teal,'left');text(Math.round(Math.hypot(p.vx,p.vy)*S.physics.hudKmhPerSpeed)+' km/h',W-20,H-22,10,levelSpeedWarning()?C.red:C.muted,'right',levelSpeedWarning()?1:0);
     }
