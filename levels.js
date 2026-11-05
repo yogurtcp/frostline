@@ -96,17 +96,18 @@ function updateAmbushes(e,L){
     if(roll<.75)entity('bear',x,y,{...ARCADE_ITEMS.bear,arcadeRun:e.section,encounter:e,nextAI:clock+range(.5,2)});else levelWolfPack(e,x,y);}
 }
 // A Yeti that is already running when you arrive, a little uphill of you.
-function levelChaser(e,x,y,kmh){
+function levelChaser(e,x,y,kmh,wake=[1.5,2.5]){
   // Same look-by-speed as free-ski Yetis: grey from 72 km/h, purple from 80.
   const tier=kmh>=90?'special':kmh>=80?'elite':kmh>=72?'fast':'slow';
   const c={kind:tier==='slow'?'slow':'fast',arcadeTier:tier,encounter:e,chaseRun:e.section,endlessBaseKmh:kmh,x,y,speed:kmh/S.physics.hudKmhPerSpeed,
-    wakeUntil:clock+range(1.5,2.5),phase:range(0,6),expires:Infinity,leaving:false,talkAt:clock+range(3,8)};
+    wakeUntil:clock+range(wake[0],wake[1]),phase:range(0,6),expires:Infinity,leaving:false,talkAt:clock+range(3,8)};
   state.chasers.push(c);return c;
 }
 function releaseLevelChasers(e,count,kmh,spread,lines){
   const p=state.p,s=e.scale,pack=[];
-  const [near,far]=e.kind==='avalanche'?[45,90]:[35,70]; // like ordinary Yetis: they get up slowly, well behind you
-  for(let i=0;i<count;i++){const c=levelChaser(e,p.x+range(-220,220)*s,p.y-range(near,far)*PX_PER_M*s,kmh+range(-spread,spread));pack.push(c);if(i<2)say(pick(lines),c,1.8);}
+  // Pied Piper is a pursuit: the pack starts on screen right behind you and is running almost at once.
+  const [near,far]=e.kind==='avalanche'?[45,90]:[15,35],wake=e.kind==='piedPiper'?[.3,.7]:[1.5,2.5];
+  for(let i=0;i<count;i++){const c=levelChaser(e,p.x+range(-220,220)*s,p.y-range(near,far)*PX_PER_M*s,kmh+range(-spread,spread),wake);pack.push(c);if(i<2)say(pick(lines),c,1.8);}
   return pack;
 }
 function updateLevelAreas(dt){
@@ -210,8 +211,8 @@ function rushFieldBurrower(o,dt){
 function levelWakeOverride(o){return null;}
 function levelSpeedWarning(){return false;}
 function drawLevelGround(){}
-// With the boulder rolling, the camera sits you lower on the screen so you can see it coming.
-function levelPlayerScreenY(){const e=state.endless?endlessEncounterAt(state.p.y):null;return e?.kind==='boulder'&&e.boulder?levelValue(e,levelConfig(e).playerScreenY):null;}
+// With the boulder rolling, or the pack on your tail, the camera sits you lower on the screen so you can see it coming.
+function levelPlayerScreenY(){const e=state.endless?endlessEncounterAt(state.p.y):null;return e?.kind==='boulder'&&e.boulder||e?.kind==='piedPiper'&&e.chasersReleased&&e.onTail>0?levelValue(e,levelConfig(e).playerScreenY):null;}
 // The Boulder: a giant snowball rolls after you from just inside the area, growing as it goes and flattening everything.
 function updateBoulderArea(e,L,dt){
   const p=state.p,s=e.scale;

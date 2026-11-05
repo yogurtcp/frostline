@@ -410,6 +410,10 @@
           "ambushSeconds": [
             8,
             5
+          ],
+          "playerScreenY": [
+            0.45,
+            0.45
           ]
         },
         "avalanche": {

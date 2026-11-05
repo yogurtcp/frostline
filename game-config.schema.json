@@ -10380,6 +10380,16 @@
                       "minItems": 2,
                       "maxItems": 2,
                       "description": "[easy, hard] seconds between surprise enemies (side-charging Yeti, or a bear or wolf pack just below the screen)"
+                    },
+                    "playerScreenY": {
+                      "type": "array",
+                      "items": {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      "minItems": 2,
+                      "maxItems": 2,
+                      "description": "[easy, hard] where you sit on screen (0 top, 1 bottom) while Yetis are on your tail, so the pack stays in view"
                     }
                   }
                 },
