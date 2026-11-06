@@ -14,17 +14,17 @@
     "difficultyRampMetres": 1200,
     "stages": {
       "metres": 1500,
-      "chillStages": 12,
+      "chillStages": 26,
       "chillDifficulty": 0.15,
-      "rampStages": 31,
-      "maxStage": 41,
+      "rampStages": 45,
+      "maxStage": 55,
       "easeStages": 5,
       "easeDensity": 0.5,
       "easeWidth": 1.3,
-      "ravagerStage": 17,
+      "ravagerStage": 31,
       "introduce": {
-        "burrower": 13,
-        "werewolf": 15
+        "burrower": 27,
+        "werewolf": 29
       }
     },
     "waveMetres": 650,

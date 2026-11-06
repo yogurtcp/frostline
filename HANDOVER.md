@@ -1672,3 +1672,7 @@ User: the Halloween town should only appear after the first graveyard; on the fi
 - `regions.order`: … forest, **cemetery**, quiet, **halloween**, quiet, avalanche, denseForest, boulder, scramble, quiet, christmas, quiet, piedPiper (the cemetery moved ahead of Halloween; checkpoint spacing stays balanced).
 - Festival monster counts: easy ends lowered (zombies 20→10, skeletons 8→4, Yetis 2→1, wolves 4→2; hard ends unchanged). The Halloween mausoleum wave has its own `festivals.halloweenMausoleumCount` [3, 10] (it used the cemetery's [6, 10]). All are multiplied by `festivalEase(e)` (min of `ease.density` and `ease.level`, i.e. first-lap softening; 1 in debug).
 - Real-run fast-forward: Halloween at stage 6 (level ease 0.71) has 9 zombies, 3 skeletons, 1 Yeti, 2 wolves and a wave of 2 (was about 21 / 8 / 2 / 4 / 6). Trace clean.
+
+## 158. Chill through the first day lap and the first night lap (2026-11-06)
+
+User: raise the difficulty only after a day lap and a night lap. Laps alternate day/night (`e.night` from the lap index). Fast-forward: lap 2 (night) starts at stage 13 (about 19 km), lap 3 at stage 26 (about 39 km). `stages.chillStages` 12 → 26 (difficulty ≤ 0.15 through both laps; level/festival ease spans them too), `rampStages` 31 → 45 (same 19-stage ramp), `maxStage` 41 → 55, introduce burrower 27 / werewolf 29, `ravagerStage` 31.
