@@ -1,5 +1,7 @@
 /* Holiday towns and shared day/night lighting. Embedded by build.py. */
 const FESTIVAL_KINDS=new Set(['christmas','halloween']);
+// Festival monsters are softened through the first lap, like the challenge areas (see endless.stages).
+function festivalEase(e){return Math.min(e.ease?.density??1,e.ease?.level??1);}
 function isNight(){
   if(!S.night.enabled)return false;
   if(state.nightOverride!==null)return state.nightOverride;
@@ -187,14 +189,14 @@ function decorateFestival(e,section){
   }else{
     const points=e.paths[0],lengths=[0];for(let i=1;i<points.length;i++)lengths.push(lengths.at(-1)+Math.hypot(points[i].x-points[i-1].x,points[i].y-points[i-1].y));e.cemeteryRoute={points,lengths,length:lengths.at(-1)};
     const width=town.mausoleumWidth;
-    e.mausoleum=entity('mausoleum',plaza.x,plaza.y,{...own,width,r:width*S.village.houseFootWidthRatio,grandMausoleum:true,waveSize:Math.round(mix(...S.endless.regions.cemetery.mausoleum.count,e.difficulty)),released:0});
+    e.mausoleum=entity('mausoleum',plaza.x,plaza.y,{...own,width,r:width*S.village.houseFootWidthRatio,grandMausoleum:true,waveSize:Math.max(1,Math.round(mix(...F.halloweenMausoleumCount,e.difficulty)*festivalEase(e))),released:0});
     for(let i=0,n=Math.round(mix(12,20,e.difficulty));i<n;i++){
       const angle=i*2.399963,p={x:plaza.x+Math.cos(angle)*(180+i%3*30),y:plaza.y+180+Math.sin(angle)*65};
       if(!clearFestivalSpot(e,p,14))continue;
       festivalGuest(town,p,i,{...own,walker:true,path:[p,{x:p.x+Math.cos(angle+.5)*45,y:p.y+35}],pathIndex:1,pathDir:1,walkSpeed:range(8,15)});
     }
     // Ordinary cemetery roles, including visibly resting skeleton jumpers and grave wake waves.
-    for(const [role,n] of [['wanderer',Math.round(mix(...F.zombies,e.difficulty))],['ambusher',Math.round(mix(...F.skeletons,e.difficulty))]])for(let i=0;i<n;i++){
+    for(const [role,n] of [['wanderer',Math.round(mix(...F.zombies,e.difficulty)*festivalEase(e))],['ambusher',Math.round(mix(...F.skeletons,e.difficulty)*festivalEase(e))]])for(let i=0;i<n;i++){
       let p;
       for(let j=0;j<9;j++){p=festivalPoint(e,(i+.5)/n,Math.sin(i*2.4)*.9,i%4===0?1:0);p.y+=(j-4)*28;if(clearFestivalSpot(e,p,40)&&!mausoleumForecourt(e,p.x,p.y,30))break;p=null;}
       if(!p)continue;
@@ -204,7 +206,7 @@ function decorateFestival(e,section){
     }
   }
   // A finite authored cast in these towns; ordinary safe towns remain protected from new spawns.
-  for(const [kind,n] of [['lurker',Math.round(mix(...F.yetis,e.difficulty))],['wolf',Math.round(mix(...F.wolves,e.difficulty))]])for(let i=0;i<n;i++){
+  for(const [kind,n] of [['lurker',Math.round(mix(...F.yetis,e.difficulty)*festivalEase(e))],['wolf',Math.round(mix(...F.wolves,e.difficulty)*festivalEase(e))]])for(let i=0;i<n;i++){
     let p;
     for(let j=0;j<12;j++){p=festivalPoint(e,(i+.65)/(n+.3),(i%2?1:-1)*(.45+j*.035));p.y+=j*26;if(clearFestivalSpot(e,p,30))break;p=null;}
     if(!p)continue;

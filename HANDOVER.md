@@ -1665,3 +1665,10 @@ User: the first burrower level is not chill; halve them. `levels.burrowField.spa
 User: make the burrowers stage half as long; make the area after the lake look like the road after a town (a road with some people and a few obstacles).
 - `lengthMetres.burrowField` [2400, 3000] → [1200, 1500].
 - `runout` now plans its own snow road (gentle three-bend path like the quiet trail, `S.village.mainRoadWidth`, `clearSnowRoadTrees`) and populates through the quiet branch (walkers, slow skiers, benches/snowmen, lamps via `addRouteLamps`, trail trees). The quiet special cases (world forest kept beyond 410 units of the path, the restart filter, and `forestOutside`) include `runout`. Hint: "LET THE SPEED BLEED OFF - MIND THE WALKERS". `regions.runoutTreesPer100Metres` is removed. Still noFlags/noNewPredators, fixed 1350 m. Test: landing at 237 km/h 458 m in, back to 100 km/h at 1101 m. Screenshot inspected; trace clean.
+
+## 157. Halloween after the first cemetery, and calmer on the first lap (2026-11-06)
+
+User: the Halloween town should only appear after the first graveyard; on the first run it is too hard, so reduce the monsters.
+- `regions.order`: … forest, **cemetery**, quiet, **halloween**, quiet, avalanche, denseForest, boulder, scramble, quiet, christmas, quiet, piedPiper (the cemetery moved ahead of Halloween; checkpoint spacing stays balanced).
+- Festival monster counts: easy ends lowered (zombies 20→10, skeletons 8→4, Yetis 2→1, wolves 4→2; hard ends unchanged). The Halloween mausoleum wave has its own `festivals.halloweenMausoleumCount` [3, 10] (it used the cemetery's [6, 10]). All are multiplied by `festivalEase(e)` (min of `ease.density` and `ease.level`, i.e. first-lap softening; 1 in debug).
+- Real-run fast-forward: Halloween at stage 6 (level ease 0.71) has 9 zombies, 3 skeletons, 1 Yeti, 2 wolves and a wave of 2 (was about 21 / 8 / 2 / 4 / 6). Trace clean.

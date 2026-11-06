@@ -136,11 +136,11 @@
         "burrowField",
         "rivalRace",
         "forest",
+        "cemetery",
         "quiet",
         "halloween",
         "quiet",
         "avalanche",
-        "cemetery",
         "denseForest",
         "boulder",
         "scramble",
@@ -342,19 +342,19 @@
         "sleighEveryMetres": 280,
         "reindeerPairs": 3,
         "yetis": [
-          2,
+          1,
           4
         ],
         "wolves": [
-          4,
+          2,
           8
         ],
         "zombies": [
-          20,
+          10,
           40
         ],
         "skeletons": [
-          8,
+          4,
           14
         ],
         "christmasParade": {
@@ -381,7 +381,11 @@
             "slowSpeedKmh": 68,
             "fastSpeedKmh": 94
           }
-        }
+        },
+        "halloweenMausoleumCount": [
+          3,
+          10
+        ]
       },
       "lakeExitSprings": {
         "spacingMetres": 10,
