@@ -213,8 +213,8 @@
           3000
         ],
         "burrowField": [
-          2400,
-          3000
+          1200,
+          1500
         ],
         "boulder": [
           1100,
@@ -226,7 +226,6 @@
         140
       ],
       "quietTreesPer100Metres": 8,
-      "runoutTreesPer100Metres": 4,
       "forestTreesPer100Metres": [
         12,
         26

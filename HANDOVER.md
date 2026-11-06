@@ -1659,3 +1659,9 @@ User: the giant lake and its crazy jump are fun, but the exit speed is too high 
 ## 155. Fewer burrowers on the first Burrowers visit (2026-11-05)
 
 User: the first burrower level is not chill; halve them. `levels.burrowField.spawnSeconds` easy end 0.9 → 1.8 (hard end 0.45 unchanged). At the first visit (stage 3, difficulty about 0.03, level ease about 0.58) attacks come about every 3.0 s instead of 1.5 s; in lap 2 (difficulty about 0.28) about every 1.4 s instead of 0.8 s; full difficulty is unchanged.
+
+## 156. Shorter Burrowers; Long Glide restyled as a trail (2026-11-06)
+
+User: make the burrowers stage half as long; make the area after the lake look like the road after a town (a road with some people and a few obstacles).
+- `lengthMetres.burrowField` [2400, 3000] → [1200, 1500].
+- `runout` now plans its own snow road (gentle three-bend path like the quiet trail, `S.village.mainRoadWidth`, `clearSnowRoadTrees`) and populates through the quiet branch (walkers, slow skiers, benches/snowmen, lamps via `addRouteLamps`, trail trees). The quiet special cases (world forest kept beyond 410 units of the path, the restart filter, and `forestOutside`) include `runout`. Hint: "LET THE SPEED BLEED OFF - MIND THE WALKERS". `regions.runoutTreesPer100Metres` is removed. Still noFlags/noNewPredators, fixed 1350 m. Test: landing at 237 km/h 458 m in, back to 100 km/h at 1101 m. Screenshot inspected; trace clean.

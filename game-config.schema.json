@@ -9848,11 +9848,6 @@
               "type": "number",
               "minimum": 0
             },
-            "runoutTreesPer100Metres": {
-              "type": "number",
-              "minimum": 0,
-              "description": "Trees per 100 m in Long Glide (the runout after the lake jump), kept well off to the sides"
-            },
             "forestTreesPer100Metres": {
               "type": "array",
               "items": {
