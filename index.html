@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#f1f6ff">
-<meta name="frostline-build" content="f00401b7d744a370">
+<meta name="frostline-build" content="36cf24b9afe2b42c">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="manifest" href="manifest.webmanifest">
@@ -22,7 +22,7 @@ body{padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bot
 <dialog id="install-help" aria-labelledby="install-title"><h2 id="install-title">Install Frostline</h2><p id="install-instructions"></p><p>Once saved, Frostline plays offline. Online startups check for updates. Installing this same site keeps your scores and settings. A downloaded file or a different browser uses a separate save.</p><p><a href="https://yogurtcp.github.io/frostline/">Open published game</a></p><button id="close-install-help">Done</button></dialog>
 <script>/* Install/offline support. Updates are checked once, before the game starts. */
 (() => {
-  const BUILD = 'f00401b7d744a370';
+  const BUILD = '36cf24b9afe2b42c';
   window.FROSTLINE_DEV = new URL(location.href).searchParams.has('dev');
   let prompt = null, playing = false;
   const standalone = () => window.matchMedia('(display-mode: standalone)').matches || navigator.standalone;
@@ -3787,9 +3787,9 @@ function drawPerson(o,s){
     const a=state.endless,root=section.endlessRoot||state.course;
     if(town.parade){
       const side=town.layoutSeed%2?1:-1;
-      town.stationX=town.x+side*(e.half+300);town.stationY=town.liftGapY;
-      const road=Object.assign(liftLoopRoad(()=>town.x,{x:town.stationX,y:town.stationY},'snow',36),{town,endlessEncounter:e,endlessEndY:e.endY});
-      state.roads.push(road);
+      // The parade street is wide: the station stands on it near one edge, in the gap between house rows, so you
+      // can't miss it and need no side road.
+      town.stationX=town.x+side*Math.max(0,e.half-90*e.scale);town.stationY=town.liftGapY;
     }
     const own={town,arcadeRun:section,encounter:e};
     town.arcadeLift=entity('lift',town.stationX,town.stationY,{...own,width:174,r:0,half:73,used:false});

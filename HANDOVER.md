@@ -1680,3 +1680,7 @@ User: raise the difficulty only after a day lap and a night lap. Laps alternate 
 ## 159. Christmas first, then cemetery and Halloween; even checkpoint spacing (2026-11-07)
 
 User: Christmas should come before the cemetery and Halloween; Christmas (18) and the next town (21) were far too close; make the distances about the same. New `regions.order`: town, quiet, trees, lake, runout, burrowField, quiet, **christmas**, quiet, avalanche, cemetery, **halloween**, quiet, rivalRace, forest, quiet, denseForest, boulder, scramble, quiet, piedPiper. The cemetery now leads straight into the Halloween town. Measured over 6–7 laps (real-run fast-forward, random crowds included): town→Christmas 6.2 km average (5.9–6.4), Christmas→Halloween 6.5 km (5.8–7.2), Halloween→town 6.2 km (5.7–6.7). Lap length is about 19 km (stage boundaries unchanged). Trace clean.
+
+## 160. Christmas checkpoint on the parade street (2026-11-06)
+
+User: the Christmas town's save point, if it exists, is not on the road. In parade towns `addEndlessLift` put the station at `town.x ± (e.half + 300)`, about 50 m out from the street centre, behind the side house rows, and its 36-unit snow loop road was hidden under the houses. The station now stands on the wide parade street near one edge (`town.x ± max(0, e.half − 90 × scale)`, about 11 m from the centre) in the gap between house rows (`town.liftGapY`), with no side road. Non-parade towns (village, Halloween) keep the curved loop road. Screenshots of Christmas and Halloween inspected; trace and the checkpoint resume test pass.

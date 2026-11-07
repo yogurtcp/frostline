@@ -1850,9 +1850,9 @@ window.FROSTLINE_READY = (async () => {
     const a=state.endless,root=section.endlessRoot||state.course;
     if(town.parade){
       const side=town.layoutSeed%2?1:-1;
-      town.stationX=town.x+side*(e.half+300);town.stationY=town.liftGapY;
-      const road=Object.assign(liftLoopRoad(()=>town.x,{x:town.stationX,y:town.stationY},'snow',36),{town,endlessEncounter:e,endlessEndY:e.endY});
-      state.roads.push(road);
+      // The parade street is wide: the station stands on it near one edge, in the gap between house rows, so you
+      // can't miss it and need no side road.
+      town.stationX=town.x+side*Math.max(0,e.half-90*e.scale);town.stationY=town.liftGapY;
     }
     const own={town,arcadeRun:section,encounter:e};
     town.arcadeLift=entity('lift',town.stationX,town.stationY,{...own,width:174,r:0,half:73,used:false});
