@@ -1676,3 +1676,7 @@ User: the Halloween town should only appear after the first graveyard; on the fi
 ## 158. Chill through the first day lap and the first night lap (2026-11-06)
 
 User: raise the difficulty only after a day lap and a night lap. Laps alternate day/night (`e.night` from the lap index). Fast-forward: lap 2 (night) starts at stage 13 (about 19 km), lap 3 at stage 26 (about 39 km). `stages.chillStages` 12 → 26 (difficulty ≤ 0.15 through both laps; level/festival ease spans them too), `rampStages` 31 → 45 (same 19-stage ramp), `maxStage` 41 → 55, introduce burrower 27 / werewolf 29, `ravagerStage` 31.
+
+## 159. Christmas first, then cemetery and Halloween; even checkpoint spacing (2026-11-07)
+
+User: Christmas should come before the cemetery and Halloween; Christmas (18) and the next town (21) were far too close; make the distances about the same. New `regions.order`: town, quiet, trees, lake, runout, burrowField, quiet, **christmas**, quiet, avalanche, cemetery, **halloween**, quiet, rivalRace, forest, quiet, denseForest, boulder, scramble, quiet, piedPiper. The cemetery now leads straight into the Halloween town. Measured over 6–7 laps (real-run fast-forward, random crowds included): town→Christmas 6.2 km average (5.9–6.4), Christmas→Halloween 6.5 km (5.8–7.2), Halloween→town 6.2 km (5.7–6.7). Lap length is about 19 km (stage boundaries unchanged). Trace clean.
