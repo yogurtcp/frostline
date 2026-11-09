@@ -145,7 +145,7 @@ function updateEncounterEnemies(dt){
     }else if(o.burrowState==='closing'&&clock-o.closeAt>.28)o.eaten=true;
   }
   for(const o of objectGroups().werewolves){
-    if(o.dead||o.eaten||!activeCourseOwner(o)||o.werewolfState==='wolf')continue;
+    if(o.dead||o.eaten||o.npcFallUntil||!activeCourseOwner(o)||o.werewolfState==='wolf')continue;
     const W=E.werewolf,speed2=p.vx*p.vx+p.vy*p.vy;
     if(o.werewolfState==='disguised'){
       if(p.fall||p.awaitingInput||speed2<900)continue;
@@ -256,7 +256,7 @@ function drawEncounterEnemy(o,s,feeding=false){
 
 function drawWerewolfWarnings(){
   for(const o of objectGroups().werewolves){
-    if(o.dead||o.eaten||!['warning','transforming'].includes(o.werewolfState))continue;
+    if(o.dead||o.eaten||o.npcFallUntil>clock||!['warning','transforming'].includes(o.werewolfState))continue;
     const s=screen(o.x,o.y);if(s.x<-30||s.x>W+30||s.y<90||s.y>H-45)continue;
     // A steady warm marker remains readable after night shading; no flashing or speech box.
     const head=s.y-27;line(s.x-18,head-4,s.x-13,head-1,C.gold,2);line(s.x+13,head-1,s.x+18,head-4,C.gold,2);line(s.x-14,head-12,s.x-10,head-7,'#f6dea6',2);line(s.x+10,head-7,s.x+14,head-12,'#f6dea6',2);

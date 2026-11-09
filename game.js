@@ -1591,7 +1591,7 @@ window.FROSTLINE_READY = (async () => {
   }
   function updateVillageLife(dt){
     state.villageLifeElapsed=(state.villageLifeElapsed||0)+dt;if(state.villageLifeElapsed<.05-1e-8)return;dt=state.villageLifeElapsed;state.villageLifeElapsed=0;
-    const p=state.p,L=S.villageLife,near=state.objects.filter(o=>!o.dead&&!o.eaten&&Math.hypot(o.x-p.x,o.y-p.y)<S.pedestrians.activeRadius);
+    const p=state.p,L=S.villageLife,near=state.objects.filter(o=>!o.dead&&!o.eaten&&!(o.npcFallUntil>clock)&&Math.hypot(o.x-p.x,o.y-p.y)<S.pedestrians.activeRadius);
     const animals=near.filter(o=>['rabbit','fox','cat','dog'].includes(o.type)&&!o.dogCompanion&&!o.dogRetreat);
     for(const o of animals)if(o.type==='dog'&&o.socialUntil>clock&&o.socialPartner&&Math.hypot(o.x-o.socialPartner.x,o.y-o.socialPartner.y)>30)travel(o,Math.atan2(o.socialPartner.y-o.y,o.socialPartner.x-o.x),L.npcAnimalApproachSpeed,dt);
     for(const o of near)if(o.type==='pigeons'&&Math.hypot(o.x-p.x,o.y-p.y)<65&&state.started)touchVillageProp(o);
@@ -2461,7 +2461,7 @@ window.FROSTLINE_READY = (async () => {
     return Math.hypot(v[0],v[1])*S.physics.hudKmhPerSpeed<=S.physics.minimumCollisionKmh;
   }
   function hit(o) {
-    if(o.dogCompanion||o.dogRetreat)return;
+    if(o.dogCompanion||o.dogRetreat||o.type?.startsWith('person')&&o.npcFallUntil>clock)return;
     if(o.mischief||o.type==='snowman'){if(!state.p.fall&&state.p.air<=0)touchVillageProp(o);return;}
     if(o.collectible){collectMushroom(o);return;}
     const p=state.p;if(o.dead||o.stunnedUntil>clock&&!['wolf','bear','lurker','zombie','burrower'].includes(o.type))return;
@@ -2545,8 +2545,9 @@ window.FROSTLINE_READY = (async () => {
     else if(o.type==='lodge'||o.type==='rental')say(uphill?'The door still works from the front.':'This is a HOUSE.',o);
     else if(uphill){say('A face full of snow. Naturally.',o);burst(p.x,p.y,'#bed9df',22);}
     else if(o.type==='rock'&&fast){say('The rock wins.',o);p.vx+=80*Math.sign(p.vx||1);}
-    if((o.type==='skier'||o.type==='boarder')&&crash(o))crashSkier(o,null);
-    else if(o.type!=='skier'&&o.type!=='boarder')crash(o);
+    if(o.type==='skier'||o.type==='boarder'){if(crash(o))crashSkier(o,null);}
+    else if(o.type.startsWith('person')){if(crash(o))crashPedestrian(o,p);}
+    else crash(o);
   }
   function constrainCemeteryMotion(p,from){
     const radius=S.physics.playerRadius;
@@ -2822,7 +2823,7 @@ window.FROSTLINE_READY = (async () => {
       if(o.type==='mistletoe'&&tryMistletoe(o)||o.cocoaShop&&tryCocoaShop(o))return;
       if(o.type!=='skier'&&o.type!=='boarder'&&o.type!=='rollingSnowball'&&!o.animal&&(o.vx||o.vy)){o.motionFromX=o.x;o.motionFromY=o.y;o.motionFromStamp=clock;o.motionVx=o.vx||0;o.motionVy=(o.vy||0)*cemeteryYScale(o.x,o.y);o.x+=o.motionVx*dt;o.y+=o.motionVy*dt;o.travelSpeed=Math.hypot(o.motionVx,o.motionVy);o.travelStamp=clock;if(NPC_STATIC_SOLIDS.has(o.type))invalidateSolidGrids();}
       if(o.cheerUntil>clock&&clock>=(o.nextCheer||0)&&Math.hypot(o.x-p.x,o.y-p.y)<650){say(pick(o.cheerRun?.objective==='mushrooms'?S.dialogue.mushroomCheers:S.dialogue.cheers),o,2.2);o.nextCheer=clock+3.4+o.phase*.2;}
-      if(o.roam&&!o.dogCompanion&&!o.dogRetreat&&!(o.socialUntil>clock))o.x+=Math.cos(clock*.8+o.phase)*o.roam*dt*.3;
+      if(o.roam&&!(o.npcFallUntil>clock)&&!o.dogCompanion&&!o.dogRetreat&&!(o.socialUntil>clock))o.x+=Math.cos(clock*.8+o.phase)*o.roam*dt*.3;
 
       if(o.type==='arcadeOvertaker'&&o.arcadeRun===state.course&&p.y>=o.y&&!o.collected){
         o.collected=true;entity('skier',p.x+pick([-1,1])*range(...S.skiers.fastSpawnOffsetX),viewBounds().top-S.skiers.fastSpawnAbove,{width:44,r:12,fast:true,vy:topSpeed()*S.skiers.fastSpeedRatio,vx:range(-13,13),arcadeRun:o.arcadeRun});
@@ -2835,7 +2836,7 @@ window.FROSTLINE_READY = (async () => {
       if(o.type==='gate'&&o.run===state.course&&!o.checked&&previous.y<o.y&&p.y>=o.y)crossCourseGate(o,previous,p);
       if(o.type==='entrance'&&!state.course&&previous.y<o.y&&p.y>=o.y&&Math.abs(p.x-o.x)<o.half){startCourse(o.stage,o);break;}
       if(!state.arcade&&!state.endless&&o.type==='lift'&&!o.used&&previous.y<o.y&&p.y>=o.y&&Math.abs(p.x-o.x)<o.half){o.used=true;state.liftTimer=S.lift.rideSeconds;p.speed=0;announce('UP WE GO','Next stop: the summit.',C.teal,3);}
-      if(!creature&&o.r>0&&Math.abs(o.y-p.y)<Math.max(130,o.width,o.depth||0,(o.treeLength||0)+o.r+S.physics.playerRadius)&&Math.abs(p.x-o.x)<Math.max(130+o.r,o.width,(o.treeLength||0)+o.r+S.physics.playerRadius)){const d=Math.hypot(p.x-o.x,(p.y-o.y)*.85);if(obstacleClearance(o,p.x,p.y)<S.physics.playerRadius)hit(o);else if(o.type.startsWith('person')&&!o.greeted&&d<85){o.greeted=true;say(pick(S.dialogue.greetings),o);}}
+      if(!creature&&o.r>0&&Math.abs(o.y-p.y)<Math.max(130,o.width,o.depth||0,(o.treeLength||0)+o.r+S.physics.playerRadius)&&Math.abs(p.x-o.x)<Math.max(130+o.r,o.width,(o.treeLength||0)+o.r+S.physics.playerRadius)){const d=Math.hypot(p.x-o.x,(p.y-o.y)*.85);if(obstacleClearance(o,p.x,p.y)<S.physics.playerRadius)hit(o);else if(o.type.startsWith('person')&&!(o.npcFallUntil>clock)&&!o.greeted&&d<85){o.greeted=true;say(pick(S.dialogue.greetings),o);}}
     }
     if(state.course){const off=!state.endless&&Math.abs(p.x-centerAt(p.y))>S.race.offPisteDistance;if(off&&!state.course.left){state.course.left=true;for(const c of state.chasers)if(!c.patrolPass&&c.kind!=='bear'&&!activeCourseOwner(c))c.expires=p.y+(c.kind==='dog'?2100:220);if(state.course.violation)announce('OFF PISTE',state.course.ambush==='dog'?'The dogs are still very interested.':state.course.ambush==='patrol'?'Ski patrol follows you off piste. Pay next time!':'You left the marked course.',C.blue,3);}const run=state.course;
       if(previous.y<run.endY&&p.y>=run.endY){
@@ -2892,7 +2893,7 @@ window.FROSTLINE_READY = (async () => {
       if(PED_FLAGS.has(o.type)&&Math.abs(o.y-p.y)<=reach)flags.push(o);
     }
     for(const o of people){
-      if(['warning','transforming'].includes(o.werewolfState))continue;
+      if(updatePedestrianFall(o)||['warning','transforming'].includes(o.werewolfState))continue;
       o.walking=false;
       if(Math.hypot(o.x-state.p.x,o.y-state.p.y)>P.activeRadius*endlessSpeedScale(o))continue;
       const oldX=o.x,oldY=o.y;
@@ -3165,13 +3166,33 @@ window.FROSTLINE_READY = (async () => {
     const lines=threat.werewolf?['Oh no! '+threat.werewolfName+' is a werewolf!',threat.werewolfName+'?! RUN!','I knew it, '+threat.werewolfName+'!']:threat.type==='burrower'?['WATCH THE SNOW!','TEETH! IN THE SNOW!']:threat.type==='zombie'?['ZOMBIES!','RUN! THE DEAD!']:threat.type==='bear'||threat.kind==='bear'?S.dialogue.bearTerrified:threat.kind==='fast'||threat.kind==='slow'?S.dialogue.yetiTerrified:S.dialogue.terrified;
     if(clock>=(skier.speakAt||0)){say(pick(lines),skier);skier.speakAt=clock+S.wildlife.npcSpeechCooldown;}
   }
-  function crashSkier(o,obstacle){
-    if(o.eaten||o.dead||o.npcFallUntil>clock)return;
+  function crashNpc(o,obstacle){
+    if(o.eaten||o.dead||o.npcFallUntil>clock)return false;
     o.npcFallAt=clock;o.npcFallUntil=clock+range(...S.skiers.crashSeconds);
-    o.npcResumeVy=Math.max(25,o.vy||o.iceCoastVy||S.skiers.slowSpeed[0]);
     o.npcCrashSide=Math.sign(o.x-(obstacle?.x??o.x))||pick([-1,1]);o.npcCrashObstacle=obstacle;
     o.vx=o.vy=o.motionVx=o.motionVy=o.travelSpeed=0;o.travelStamp=clock;o.onIce=false;delete o.iceCoastVy;
-    o.socialUntil=0;o.catInterest=null;burst(o.x,o.y,C.ice,9);
+    o.socialUntil=0;o.catInterest=null;burst(o.x,o.y,C.ice,9);return true;
+  }
+  function crashSkier(o,obstacle){
+    if(o.eaten||o.dead||o.npcFallUntil>clock)return;
+    o.npcResumeVy=Math.max(25,o.vy||o.iceCoastVy||S.skiers.slowSpeed[0]);crashNpc(o,obstacle);
+  }
+  function crashPedestrian(o,obstacle){
+    if(!crashNpc(o,obstacle))return;
+    o.walking=false;o.stroll=null;o.fleeReturn=null;
+    o.chatUntil=o.waveUntil=o.serveUntil=o.throwUntil=o.cheerUntil=0;
+    o.socialAnimal=o.socialPartner=o.chatPartner=null;
+    // A disguised/partly transforming villager stays human while down, then resumes the reveal.
+    o.npcFallPauseAt=clock;
+  }
+  function updatePedestrianFall(o){
+    if(!o.npcFallUntil)return false;
+    if(o.npcFallUntil>clock){o.walking=false;o.vx=o.vy=o.motionVx=o.motionVy=o.travelSpeed=0;o.travelStamp=clock;return true;}
+    const paused=clock-(o.npcFallPauseAt??o.npcFallAt);
+    if(['warning','transforming'].includes(o.werewolfState))for(const key of ['warningAt','transformStartAt','warningDeadline','transformAt','socialUntil'])if(Number.isFinite(o[key]))o[key]+=paused;
+    o.npcFallUntil=0;o.npcFallPauseAt=null;o.npcCrashObstacle=null;o.pauseUntil=clock+.5;o.pedAvoidUntil=0;
+    o.nextWave=o.nextChat=o.nextServe=o.nextThrow=clock+1;
+    return false;
   }
   const NPC_CRASH_SOLIDS=new Set(['pine','fir','rock','pebble','stump','wideLog','fallingTree','rollingSnowball','lodge','rental','mausoleum','grave','cemeteryFence','areaBarrier','cemeteryPillar','christmasTree','sled','skier','boarder','iceBlock','ruinWall']);
   const NPC_STATIC_SOLIDS=new Set([...NPC_CRASH_SOLIDS].filter(type=>type!=='skier'&&type!=='boarder'));
@@ -3968,7 +3989,8 @@ window.FROSTLINE_READY = (async () => {
     if(o.type==='wolf'&&o.penaltyGate&&!o.wolfAwake){drawSleepingWolf(o,s);return;}
     if(o.type==='wolf'&&o.feedingUntil>clock){drawAnimalFeeding('WOLF',o,s,o.width||43);return;}
     const moving=o.running||o.hunting||o.alertUntil>clock,cycle=(clock*(moving?10:3)+o.phase)%4,runFrame=moving&&cycle<2;
-    const left=Math.cos(o.angle||0)<0,flip=o.type==='wolf'&&runFrame?!left:left;
+    if(o.type==='wolf'){drawWolf(o,s);return;}
+    const left=Math.cos(o.angle||0)<0,flip=left;
     const bob=moving?[0,-1,-2,-1][Math.floor(cycle)]:0;
     shadow(s.x,s.y,17,4);sprite(o.type+(runFrame?'Run':''),s.x,s.y+bob,o.width,{flip});
     if(o.feedingUntil>clock)text('...',s.x,s.y-22,9,C.ink);
@@ -4197,6 +4219,7 @@ window.FROSTLINE_READY = (async () => {
     if(s.x<-margin||s.x>W+margin||s.y<-80-vertical||s.y>H+230+vertical)return;
     // Ordinary bodies do not need the long-obstacle drawing margin. Keep harnesses and moving trunks broad.
     if(TIGHT_DRAW_TYPES.has(o.type)&&!o.santaSleigh){const half=(o.paradeSpanX?houseFootHalfWidth(o)*ZOOM:(o.width||40)*ZOOM*.75)+24+(GRIT_BUILDINGS.has(o.houseSprite||o.type)?12:0);if(s.x+half<0||s.x-half>W)return;}
+    if(o.type.startsWith('person')&&o.npcFallUntil>clock&&!o.eaten&&!o.dead){drawPedestrianFall(o,s);return;}
     if(drawEncounterEnemy(o,s,o.feedingUntil>clock)||drawSeasonalProp(o,s)||drawSpecialProp(o,s))return;
     if(o.villageDetail){drawVillageDetail(o,s);return;}
     if(o.type==='encounterTitle'){text(o.encounter.title.toUpperCase(),s.x,s.y,13,C.teal);return;}

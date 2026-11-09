@@ -273,3 +273,48 @@ function drawPerson(o,s){
   if(o.socialUntil>clock&&o.socialAnimal){const side=Math.sign(o.socialAnimal.x-o.x)||1;line(s.x+side*3,s.y-9,s.x+side*7,s.y-8-Math.round(Math.sin(clock*5)), '#d8af83',2);if(o.socialAnimal.type==='rabbit')box(s.x+side*8,s.y-7,3,2,'#be965e');}
   if(o.job==='bakery'||o.job==='market')box(s.x+(flip?-5:2),s.y-10,4,3,'#e9dfc8');
 }
+
+// Both wolf atlas poses face right. Travel distance drives the gait, and actual
+// lateral travel changes facing only outside a deadband, so downhill motion stays stable.
+function drawWolf(o,s){
+  const g=o.wolfGait??={x:o.x,y:o.y,time:clock,phase:0,active:false,flip:Math.cos(o.angle||0)<0},dt=clock-g.time;
+  if(dt>0){const dx=o.x-g.x,dy=o.y-g.y,d=Math.hypot(dx,dy);g.active=d>.01;if(g.active){g.phase=(g.phase+d/Math.max(30,(o.width||43)*1.2))%1;if(Math.abs(dx)>d*.2&&Math.abs(dx/dt)>12)g.flip=dx<0;}g.x=o.x;g.y=o.y;g.time=clock;}
+  const frame=g.active?Math.floor(g.phase*4):0,bob=g.active?[0,-1,-2,-1][frame]:0;
+  shadow(s.x,s.y,17,4);sprite(g.active&&frame<2?'wolfRun':'wolf',s.x,s.y+bob,o.width,{flip:g.flip});
+}
+
+const pedestrianFallTiles=new Map();
+function pedestrianFallArt(o,pose='body'){
+  const variant=o.costume?'costume:'+o.costume+':'+Math.floor(o.phase*3)%3:o.type,key=variant+':'+pose;
+  if(pedestrianFallTiles.has(key))return pedestrianFallTiles.get(key);
+  let body;
+  if(pose==='body'){
+    if(o.costume){const f=festivalGuestFrame(o.costume,Math.floor(o.phase*3)%3,0);body=document.createElement('canvas');body.width=32;body.height=44;body.getContext('2d').drawImage(festivalGuestAtlas,f.x,f.y,32,44,0,0,32,44);}
+    else body=personMotionTile(o.type,'idle',0);
+    const result={tile:body,anchorX:body.width/2,anchorY:body.height-(o.costume?4:2)};
+    if(pedestrianFallTiles.size>=128)pedestrianFallTiles.delete(pedestrianFallTiles.keys().next().value);pedestrianFallTiles.set(key,result);return result;
+  }
+  body=pedestrianFallArt(o).tile;
+  const w=body.width,h=body.height,hip=Math.round(h*.76),leg=h-hip,tile=document.createElement('canvas');
+  tile.width=pose==='prone'?h+w+12:w+Math.ceil(h*.5)+12;tile.height=pose==='prone'?w+14:hip+12;
+  const c=tile.getContext('2d');c.imageSmoothingEnabled=false;
+  const x=pose==='prone'?Math.round(hip+4):Math.round(w/2+5),y=pose==='prone'?Math.round(tile.height-w*.5-3):tile.height-4;
+  c.save();c.translate(x,y);c.rotate(pose==='prone'?-Math.PI/2:pose==='kneel'?-.18:0);c.drawImage(body,0,0,w,hip,-w/2,-hip,w,hip);c.restore();
+  for(let side=0;side<2;side++){
+    const half=side?w-Math.floor(w/2):Math.floor(w/2),sx=side?Math.floor(w/2):0;
+    c.save();c.translate(x+(side?1:-1)*w*.15,y);c.rotate(pose==='prone'?(side?-.65:-1.15):pose==='sit'?-1.35:side?.8:-.8);c.drawImage(body,sx,hip,half,leg,-half/2,0,half,leg);c.restore();
+  }
+  const result={tile,anchorX:x,anchorY:tile.height-2};
+  if(pedestrianFallTiles.size>=128)pedestrianFallTiles.delete(pedestrianFallTiles.keys().next().value);pedestrianFallTiles.set(key,result);return result;
+}
+function drawPedestrianFall(o,s){
+  const elapsed=clock-o.npcFallAt,remaining=o.npcFallUntil-clock,side=o.npcCrashSide||1,unit=o.costume?1:o.width*ZOOM/atlas[o.type][3];
+  shadow(s.x,s.y,Math.max(7,o.width*ZOOM*.4),3,.12);
+  if(elapsed<.32){
+    const t=clamp(elapsed/.32,0,1),art=pedestrianFallArt(o);ctx.save();ctx.translate(Math.round(s.x+side*t*3),Math.round(s.y-Math.sin(t*Math.PI)*4));ctx.rotate(side*t*1.5);ctx.scale(unit,unit);ctx.drawImage(art.tile,-art.anchorX,-art.anchorY);ctx.restore();return;
+  }
+  const up=remaining<S.skiers.getUpSeconds?clamp(1-remaining/S.skiers.getUpSeconds,0,1):0;
+  if(up>.8){const art=pedestrianFallArt(o);ctx.save();ctx.translate(Math.round(s.x),Math.round(s.y+(1-up)*7));ctx.rotate(side*(1-up)*.8);ctx.scale(unit,unit);ctx.drawImage(art.tile,-art.anchorX,-art.anchorY);ctx.restore();}
+  else {const art=pedestrianFallArt(o,up>.45?'kneel':up>0?'sit':'prone');ctx.save();ctx.translate(Math.round(s.x),Math.round(s.y));ctx.scale((side>0?-1:1)*unit,unit);ctx.drawImage(art.tile,-art.anchorX,-art.anchorY);ctx.restore();}
+  if(!up)for(let i=0;i<2;i++){const a=clock*2+i*Math.PI;box(s.x+Math.cos(a)*8,s.y-11+Math.sin(a)*2,2,2,C.gold);}
+}
