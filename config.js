@@ -20,9 +20,9 @@ window.loadFrostlineConfig = async function () {
   config.endless.encounters.townPeople ??= [36,120];
   config.endless.yetis.wakeMetres ??= 140;
   config.endless.yetis.ravager ??= {};
-  for(const [key,value] of Object.entries({firstMetres:1200,speedMultiplier:1.15,noticeMetres:30,chancePerSection:.25,maxNearby:1,divertSeconds:2,pursueSeconds:.5,mealPauseSeconds:1,monsterMealPauseSeconds:1.5}))config.endless.yetis.ravager[key] ??= value;
+  for(const [key,value] of Object.entries({firstMetres:1200,speedMultiplier:1.15,noticeMetres:30,chancePerSection:.25,maxNearby:1,divertSeconds:2,pursueSeconds:.5,mealPauseSeconds:2,monsterMealPauseSeconds:2}))config.endless.yetis.ravager[key] ??= value;
   config.endless.encounterEnemies ??= {};
-  for(const [kind,defaults] of Object.entries({burrower:{firstMetres:600,chancePerSection:.5,maxNearby:1,noticeMetres:80,speedMultiplier:2,pauseSeconds:.6,zigzagSeconds:.65,zigzagAngleDegrees:32,openSeconds:1.1,cooldownSeconds:12,holeRadius:9},werewolf:{firstMetres:600,chancePerSection:.6,maxNearby:2,noticeMetres:32,transformSeconds:2,triggerLeadSeconds:1.8,speedKmh:94,beforeArrivalSeconds:.45,warningSeconds:.35,passDistanceMetres:8}})){
+  for(const [kind,defaults] of Object.entries({burrower:{firstMetres:600,chancePerSection:.5,maxNearby:1,noticeMetres:80,speedMultiplier:2,pauseSeconds:.6,zigzagSeconds:.65,zigzagAngleDegrees:32,openSeconds:1.1,cooldownSeconds:12,holeRadius:9},werewolf:{firstMetres:600,chancePerSection:.3,maxNearby:2,noticeMetres:32,transformSeconds:2,triggerLeadSeconds:1.8,speedKmh:94,beforeArrivalSeconds:.45,warningSeconds:.35,passDistanceMetres:8,knockdownSeconds:1.6,knockdownLines:["HEY! I was in the MIDDLE of something!", "Argh! You clumsy ski-goblin!", "My transformation! RUINED!", "Watch where you ski, you menace!", "Blast it! Now I have to start OVER!"]}})){
     config.endless.encounterEnemies[kind] ??= {};
     for(const [key,value] of Object.entries(defaults))config.endless.encounterEnemies[kind][key] ??= value;
   }
@@ -31,7 +31,7 @@ window.loadFrostlineConfig = async function () {
   config.chasers.dogCompanion ??= {};
   config.chasers.dogCompanion.scareCounts ??= {};
   for(const [kind,count] of Object.entries({yeti:1,wolf:3,bear:2,werewolf:1}))config.chasers.dogCompanion.scareCounts[kind] ??= count;
-  for(const [key,value] of Object.entries({feedMetres:8,maxFollowing:2,scareMetres:18,barkMetres:14,scareSeconds:2.5,retreatSeconds:3,followDistanceMetres:3.2,playRadiusMetres:5,cruiseSpeedKmh:24,catchUpSpeedKmh:16,challengeSeconds:1,challengeSpeedKmh:42}))config.chasers.dogCompanion[key] ??= value;
+  for(const [key,value] of Object.entries({feedMetres:8,maxFollowing:0,scareMetres:18,barkMetres:14,scareSeconds:2.5,retreatSeconds:3,followDistanceMetres:3.2,playRadiusMetres:5,cruiseSpeedKmh:24,catchUpSpeedKmh:16,challengeSeconds:1,challengeSpeedKmh:42}))config.chasers.dogCompanion[key] ??= value;
   config.endless.regions ??= {};
   config.endless.regions.lakeExitSprings ??= {spacingMetres:10,widthMetres:9,shoreGapMetres:8,jumpSeconds:2.4,durationCap:1.6};
   const regionDefaults = {"enabled":true,"minimumWidthMetres":600,"order":["town","quiet","trees","lake","quiet","rivalRace","forest","cemetery","denseForest","scramble","quiet","christmas","quiet","halloween","quiet"],"firstMetres":450,"gapMetres":[0,0],"lengthMetres":{"beginner":[320,400],"quiet":[180,250],"lake":[240,330],"denseForest":[110,160],"forest":[300,450],"cemetery":[650,850],"crowd":[320,400],"scramble":[70,110]},"beginnerPeople":[65,140],"quietTreesPer100Metres":8,"forestTreesPer100Metres":[12,26],"cemeteryOpeningMetres":[12,18],"zombies":{"count":[8,14],"speedKmh":[7,11],"noticeMetres":22},"crowd":{"firstMetres":1200,"chance":0.55,"minimumGapMetres":1600,"maximumGapMetres":4200,"widthMetres":240,"people":[180,280]},"denseForestDensity":[1,2],"scrambleDensity":[1,1.35]};
@@ -82,7 +82,7 @@ window.loadFrostlineConfig = async function () {
   config.predators.divertReleaseWidthMetres ??= 16;
   config.predators.divertPathAngleDegrees ??= 45;
   config.predators.divertReleaseAngleDegrees ??= 60;
-  config.predators.mealPauseSeconds ??= .8;
+  config.predators.mealPauseSeconds ??= 2;config.render.speechTextSize ??= 9;config.render.speechWrapCharacters ??= 27;config.render.speechLineGap ??= 3;config.render.speechSpacingSeconds ??= 1.2;config.predators.mealReachMetres ??= 4;config.predators.helplessNoticeMetres ??= 15;config.world.chunkRetentionBehind ??= 2500;config.endless.stages ??= {metres:1500,chillStages:26,chillDifficulty:0.15,rampStages:45,maxStage:55,easeStages:5,easeDensity:0.5,easeWidth:1.3,ravagerStage:31,introduce:{burrower:27,werewolf:29}};config.endless.stages.chillStages ??= 1;config.endless.stages.chillDifficulty ??= 0;config.endless.regions.firstCycle ??= {};config.endless.checkpoint ??= {};config.endless.checkpoint.signAheadMetres ??= 50;config.endless.checkpoint.grabPaddingMetres ??= 3;config.lift.courseSideOffset ??= 460;config.lift.gateClearance ??= 140;
   config.night ??= {};
   for(const [key,value] of Object.entries({"enabled":true,"dayNightRounds":true,"playerRadiusMetres":14,"skierRadiusMetres":5,"lampRadiusMetres":24,"lampSpacingMetres":20,"lampSetbackMetres":7,"lightReachMultiplier":3.2,"ambientOpacity":0.97,"transitionSeconds":1.8}))config.night[key] ??= value;
   config.endless.regions.festivals ??= {};

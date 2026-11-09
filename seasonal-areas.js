@@ -1,5 +1,7 @@
 /* Holiday towns and shared day/night lighting. Embedded by build.py. */
 const FESTIVAL_KINDS=new Set(['christmas','halloween']);
+// Festival monsters are softened through the first lap, like the challenge areas (see endless.stages).
+function festivalEase(e){return Math.min(e.ease?.density??1,e.ease?.level??1);}
 function isNight(){
   if(!S.night.enabled)return false;
   if(state.nightOverride!==null)return state.nightOverride;
@@ -187,14 +189,14 @@ function decorateFestival(e,section){
   }else{
     const points=e.paths[0],lengths=[0];for(let i=1;i<points.length;i++)lengths.push(lengths.at(-1)+Math.hypot(points[i].x-points[i-1].x,points[i].y-points[i-1].y));e.cemeteryRoute={points,lengths,length:lengths.at(-1)};
     const width=town.mausoleumWidth;
-    e.mausoleum=entity('mausoleum',plaza.x,plaza.y,{...own,width,r:width*S.village.houseFootWidthRatio,grandMausoleum:true,waveSize:Math.round(mix(...S.endless.regions.cemetery.mausoleum.count,e.difficulty)),released:0});
+    e.mausoleum=entity('mausoleum',plaza.x,plaza.y,{...own,width,r:width*S.village.houseFootWidthRatio,grandMausoleum:true,waveSize:Math.max(1,Math.round(mix(...F.halloweenMausoleumCount,e.difficulty)*festivalEase(e))),released:0});
     for(let i=0,n=Math.round(mix(12,20,e.difficulty));i<n;i++){
       const angle=i*2.399963,p={x:plaza.x+Math.cos(angle)*(180+i%3*30),y:plaza.y+180+Math.sin(angle)*65};
       if(!clearFestivalSpot(e,p,14))continue;
       festivalGuest(town,p,i,{...own,walker:true,path:[p,{x:p.x+Math.cos(angle+.5)*45,y:p.y+35}],pathIndex:1,pathDir:1,walkSpeed:range(8,15)});
     }
     // Ordinary cemetery roles, including visibly resting skeleton jumpers and grave wake waves.
-    for(const [role,n] of [['wanderer',Math.round(mix(...F.zombies,e.difficulty))],['ambusher',Math.round(mix(...F.skeletons,e.difficulty))]])for(let i=0;i<n;i++){
+    for(const [role,n] of [['wanderer',Math.round(mix(...F.zombies,e.difficulty)*festivalEase(e))],['ambusher',Math.round(mix(...F.skeletons,e.difficulty)*festivalEase(e))]])for(let i=0;i<n;i++){
       let p;
       for(let j=0;j<9;j++){p=festivalPoint(e,(i+.5)/n,Math.sin(i*2.4)*.9,i%4===0?1:0);p.y+=(j-4)*28;if(clearFestivalSpot(e,p,40)&&!mausoleumForecourt(e,p.x,p.y,30))break;p=null;}
       if(!p)continue;
@@ -204,7 +206,7 @@ function decorateFestival(e,section){
     }
   }
   // A finite authored cast in these towns; ordinary safe towns remain protected from new spawns.
-  for(const [kind,n] of [['lurker',Math.round(mix(...F.yetis,e.difficulty))],['wolf',Math.round(mix(...F.wolves,e.difficulty))]])for(let i=0;i<n;i++){
+  for(const [kind,n] of [['lurker',Math.round(mix(...F.yetis,e.difficulty)*festivalEase(e))],['wolf',Math.round(mix(...F.wolves,e.difficulty)*festivalEase(e))]])for(let i=0;i<n;i++){
     let p;
     for(let j=0;j<12;j++){p=festivalPoint(e,(i+.65)/(n+.3),(i%2?1:-1)*(.45+j*.035));p.y+=j*26;if(clearFestivalSpot(e,p,30))break;p=null;}
     if(!p)continue;
@@ -382,9 +384,10 @@ function drawSeasonalProp(o,s){
 }
 // Static light is cached in world coordinates. Moving bodies are lit every render.
 const NIGHT_TILE_SIZE=256,NIGHT_LIGHT_RESOLUTION=4,NIGHT_TILE_LIMIT=96;
-const NIGHT_STATIC_TYPES=new Set(['lamp','lodge','rental','mausoleum','iceBlock','ruinWall','gate','entrance','finish','courseStart','raceRail','christmasTree','paradeGarland','jackLantern','mistletoe','spring','ramp','rainbow','lift','liftLabel','trailChoices']);
+const NIGHT_STATIC_TYPES=new Set(['checkpointSign','lamp','lodge','rental','mausoleum','iceBlock','ruinWall','gate','entrance','finish','courseStart','raceRail','christmasTree','paradeGarland','jackLantern','mistletoe','spring','ramp','rainbow','lift','liftLabel','trailChoices']);
 const nightMask=document.createElement('canvas'),nightMaskCtx=nightMask.getContext('2d'),nightGlow=document.createElement('canvas'),nightGlowCtx=nightGlow.getContext('2d');
 const nightTileGlow=document.createElement('canvas'),nightTileGlowCtx=nightTileGlow.getContext('2d');
+const NIGHT_STATIC_VIEW=objectView(o=>NIGHT_STATIC_TYPES.has(o.type));
 nightTileGlow.width=nightTileGlow.height=NIGHT_TILE_SIZE/NIGHT_LIGHT_RESOLUTION;
 const lightTiles=new Map(),nightLightObjects=new Map(),nightLightBuckets=new Map(),nightStaticTiles=new Map(),nightTilePool=[];
 let nightLightEpoch=0,nightLightSerial=0;
@@ -427,6 +430,7 @@ function appendNightLights(o,lights){
   }else if(o.type==='jackLantern')add(x,y-6,44,'#ffab5b',1,true);
   else if(o.type==='mistletoe')add(x,y-24,60,'#eeb0b3');
   else if(['spring','ramp','rainbow','lift','liftLabel','trailChoices'].includes(o.type))add(x,y-10,40,'#e8c18d',1,true);
+  else if(o.type==='checkpointSign')add(x,y-18,30,'#ffd18b',.8,true);
 }
 function nightLights(layers){
   const lights=[];appendNightLights(state.p,lights);for(const o of layers)if(o!==state.p)appendNightLights(o,lights);
@@ -443,8 +447,8 @@ function removeNightLightEntry(entry){
 }
 function syncNightStaticLights(){
   const epoch=++nightLightEpoch;
-  for(const o of state.objects){
-    if(!NIGHT_STATIC_TYPES.has(o.type)||o.dead||o.eaten||o.collected)continue;
+  for(const o of viewItems(NIGHT_STATIC_VIEW)){
+    if(o.dead||o.eaten||o.collected)continue;
     const old=nightLightObjects.get(o);
     if(old&&old.x===o.x&&old.y===o.y&&old.width===o.width&&old.half===o.half&&old.type===o.type&&old.festival===o.festival&&old.grand===o.grandMausoleum&&old.lampRadius===S.night.lampRadiusMetres&&old.lightRadiusWorld===o.lightRadiusWorld&&old.lightReachMultiplier===S.night.lightReachMultiplier){old.seen=epoch;continue;}
     if(old)removeNightLightEntry(old);

@@ -2,12 +2,31 @@
   "$schema": "./game-config.schema.json",
   "version": 1,
   "endless": {
+    "checkpoint": {
+      "signAheadMetres": 50,
+      "grabPaddingMetres": 3
+    },
     "autoStart": false,
     "recordVersion": 4,
     "playerSpeedKmh": 90,
     "sectionMetres": 240,
     "lookAheadMetres": 180,
     "difficultyRampMetres": 1200,
+    "stages": {
+      "metres": 1500,
+      "chillStages": 26,
+      "chillDifficulty": 0.15,
+      "rampStages": 45,
+      "maxStage": 55,
+      "easeStages": 5,
+      "easeDensity": 0.5,
+      "easeWidth": 1.3,
+      "ravagerStage": 31,
+      "introduce": {
+        "burrower": 27,
+        "werewolf": 29
+      }
+    },
     "waveMetres": 650,
     "itemSpreadMetres": 55,
     "gates": {
@@ -72,8 +91,8 @@
         "maxNearby": 1,
         "divertSeconds": 2,
         "pursueSeconds": 0.5,
-        "mealPauseSeconds": 1,
-        "monsterMealPauseSeconds": 1.5
+        "mealPauseSeconds": 2,
+        "monsterMealPauseSeconds": 2
       }
     },
     "maxPlayerSpeedKmh": 90,
@@ -113,18 +132,25 @@
         "quiet",
         "trees",
         "lake",
-        "quiet",
-        "rivalRace",
-        "forest",
-        "cemetery",
-        "denseForest",
-        "scramble",
+        "runout",
+        "burrowField",
         "quiet",
         "christmas",
         "quiet",
+        "avalanche",
+        "cemetery",
         "halloween",
-        "quiet"
+        "quiet",
+        "rivalRace",
+        "forest",
+        "quiet",
+        "denseForest",
+        "boulder",
+        "scramble",
+        "quiet",
+        "piedPiper"
       ],
+      "firstCycle": {},
       "firstMetres": 450,
       "gapMetres": [
         0,
@@ -142,6 +168,10 @@
         "lake": [
           240,
           330
+        ],
+        "runout": [
+          1350,
+          1350
         ],
         "denseForest": [
           110,
@@ -174,6 +204,22 @@
         "halloween": [
           900,
           1200
+        ],
+        "piedPiper": [
+          1000,
+          1300
+        ],
+        "avalanche": [
+          2400,
+          3000
+        ],
+        "burrowField": [
+          1200,
+          1500
+        ],
+        "boulder": [
+          1100,
+          1400
         ]
       },
       "beginnerPeople": [
@@ -297,19 +343,19 @@
         "sleighEveryMetres": 280,
         "reindeerPairs": 3,
         "yetis": [
-          2,
+          1,
           4
         ],
         "wolves": [
-          4,
+          2,
           8
         ],
         "zombies": [
-          20,
+          10,
           40
         ],
         "skeletons": [
-          8,
+          4,
           14
         ],
         "christmasParade": {
@@ -336,7 +382,11 @@
             "slowSpeedKmh": 68,
             "fastSpeedKmh": 94
           }
-        }
+        },
+        "halloweenMausoleumCount": [
+          3,
+          10
+        ]
       },
       "lakeExitSprings": {
         "spacingMetres": 10,
@@ -344,6 +394,236 @@
         "shoreGapMetres": 8,
         "jumpSeconds": 2.4,
         "durationCap": 1.6
+      },
+      "levels": {
+        "piedPiper": {
+          "chasingYetis": [
+            10,
+            10
+          ],
+          "chaserSpeedKmh": [
+            90.5,
+            90.5
+          ],
+          "chaserSpeedSpreadKmh": [
+            0,
+            0
+          ],
+          "skiersPer100Metres": [
+            1.6,
+            1.2
+          ],
+          "icePer100Metres": [
+            0.25,
+            0.2
+          ],
+          "sideTreesPer100Metres": [
+            4,
+            4
+          ],
+          "obstaclesPer100Metres": [
+            12,
+            16
+          ],
+          "bearsPer100Metres": [
+            0.3,
+            0.5
+          ],
+          "wolfPacksPer100Metres": [
+            0.2,
+            0.35
+          ],
+          "ambushSeconds": [
+            8,
+            5
+          ],
+          "playerScreenY": [
+            0.45,
+            0.45
+          ]
+        },
+        "avalanche": {
+          "ballSeconds": [
+            2.2,
+            1.4
+          ],
+          "ballTravelMetres": [
+            600,
+            600
+          ],
+          "fallingTreesPer100Metres": [
+            0.8,
+            1.8
+          ],
+          "sideTreesPer100Metres": [
+            5,
+            5
+          ],
+          "ballExtraKmh": [
+            30,
+            45
+          ],
+          "trailSeconds": [
+            1.6,
+            1.6
+          ],
+          "volleyEvery": [
+            5,
+            4
+          ],
+          "skiersPer100Metres": [
+            2,
+            2.5
+          ],
+          "chasingYetis": [
+            3,
+            5
+          ],
+          "chaserSpeedKmh": [
+            80,
+            86
+          ],
+          "chaserSpeedSpreadKmh": [
+            4,
+            4
+          ],
+          "lurkersPer100Metres": [
+            1.4,
+            2
+          ],
+          "lurkerSpeedKmh": [
+            62,
+            70
+          ],
+          "bearsPer100Metres": [
+            0.9,
+            1.3
+          ],
+          "wolfPacksPer100Metres": [
+            0.6,
+            0.9
+          ],
+          "ambushSeconds": [
+            9,
+            6
+          ]
+        },
+        "burrowField": {
+          "jumpSpacingMetres": [
+            60,
+            52
+          ],
+          "icePatchEvery": [
+            3,
+            3
+          ],
+          "spawnSeconds": [
+            1.8,
+            0.45
+          ],
+          "pincerChance": [
+            0.2,
+            0.4
+          ],
+          "arriveSeconds": [
+            1.3,
+            1.0
+          ],
+          "strikePause": [
+            0.2,
+            0.15
+          ],
+          "sideTreesPer100Metres": [
+            6,
+            6
+          ],
+          "aimFollowMetresPerSecond": [
+            22,
+            32
+          ],
+          "commitSeconds": [
+            0.4,
+            0.3
+          ]
+        },
+        "boulder": {
+          "startBehindMetres": [
+            45,
+            38
+          ],
+          "startKmh": [
+            60,
+            65
+          ],
+          "accelerationKmhPerSecond": [
+            8,
+            10
+          ],
+          "topSpeedRatio": [
+            0.9,
+            0.95
+          ],
+          "catchUpMetres": [
+            34,
+            28
+          ],
+          "catchUpPerMetre": [
+            0.03,
+            0.04
+          ],
+          "radiusMetres": [
+            4,
+            4
+          ],
+          "growthMetresPer100Metres": [
+            0.7,
+            0.9
+          ],
+          "maxRadiusMetres": [
+            11,
+            13
+          ],
+          "obstaclesPer100Metres": [
+            14,
+            18
+          ],
+          "jumpsPer100Metres": [
+            1.2,
+            1
+          ],
+          "icePer100Metres": [
+            0.5,
+            0.4
+          ],
+          "skiersPer100Metres": [
+            1,
+            1.4
+          ],
+          "bearsPer100Metres": [
+            0.2,
+            0.3
+          ],
+          "sideTreesPer100Metres": [
+            5,
+            5
+          ],
+          "playerScreenY": [
+            0.5,
+            0.5
+          ],
+          "nextBoulderSeconds": [
+            1.2,
+            0.9
+          ],
+          "gateGapMetres": [
+            8,
+            6.5
+          ],
+          "gateFunnelMetres": [
+            50,
+            50
+          ]
+        }
       }
     },
     "wildlife": {
@@ -376,7 +656,7 @@
       },
       "werewolf": {
         "firstMetres": 600,
-        "chancePerSection": 0.6,
+        "chancePerSection": 0.3,
         "maxNearby": 2,
         "noticeMetres": 32,
         "transformSeconds": 2,
@@ -384,7 +664,15 @@
         "passDistanceMetres": 8,
         "beforeArrivalSeconds": 0.45,
         "warningSeconds": 0.35,
-        "triggerLeadSeconds": 1.8
+        "triggerLeadSeconds": 1.8,
+        "knockdownSeconds": 1.6,
+        "knockdownLines": [
+          "HEY! I was in the MIDDLE of something!",
+          "Argh! You clumsy ski-goblin!",
+          "My transformation! RUINED!",
+          "Watch where you ski, you menace!",
+          "Blast it! Now I have to start OVER!"
+        ]
       }
     }
   },
@@ -1083,7 +1371,7 @@
       "length": 540,
       "fee": 0,
       "pace": 156,
-      "spacing": 380,
+      "spacing": 520,
       "density": 1,
       "color": "#24716d",
       "kind": "forest"
@@ -1878,7 +2166,11 @@
     "playerWidth": 44,
     "fallWidth": 60,
     "speechSeconds": 2.5,
-    "speechLimit": 5,
+    "speechTextSize": 9,
+    "speechWrapCharacters": 27,
+    "speechLineGap": 3,
+    "speechLimit": 3,
+    "speechSpacingSeconds": 1.2,
     "messageSeconds": 3.2,
     "messageLimit": 4,
     "resultSeconds": 18,
@@ -1905,7 +2197,8 @@
     "chunkMarginAbove": 550,
     "chunkMarginBelow": 700,
     "chunkRetention": 6000,
-    "sceneryRetentionBehind": 6500,
+    "chunkRetentionBehind": 2500,
+    "sceneryRetentionBehind": 2500,
     "ambientCount": 3,
     "uphillCount": 5,
     "uphillForestY": -400,
@@ -2276,7 +2569,7 @@
     "npcFearDistance": 310,
     "npcFleeSpeed": 290,
     "npcFleeLateralSpeed": 200,
-    "npcSpeechCooldown": 4,
+    "npcSpeechCooldown": 8,
     "npcWolfFallSeconds": 3,
     "wolfKillKmh": 30,
     "ramSpeedFraction": 0.85,
@@ -2329,7 +2622,7 @@
     "captureDistance": 23,
     "knockoutDistance": 30,
     "patrolFallSeconds": 1.4,
-    "slowTalkSeconds": 7,
+    "slowTalkSeconds": 12,
     "dogContactSpeed": 130,
     "dogContactChaseDistance": 1700,
     "patrolWaves": {
@@ -2353,7 +2646,7 @@
     "yetiCelebrationJumpPixels": 14,
     "dogCompanion": {
       "feedMetres": 8,
-      "maxFollowing": 2,
+      "maxFollowing": 0,
       "scareMetres": 18,
       "barkMetres": 14,
       "scareSeconds": 2.5,
@@ -2374,7 +2667,7 @@
     "despawnScreens": 3
   },
   "predators": {
-    "mealPauseSeconds": 0.8,
+    "mealPauseSeconds": 2,
     "divertChance": 1,
     "divertRadiusMetres": 35,
     "divertRecheckSeconds": 0.2,
@@ -2383,7 +2676,9 @@
     "divertReleaseWidthMetres": 16,
     "divertPathAngleDegrees": 45,
     "divertReleaseAngleDegrees": 60,
-    "offDownhillSpeedRatio": 0.5
+    "offDownhillSpeedRatio": 0.5,
+    "mealReachMetres": 4,
+    "helplessNoticeMetres": 15
   },
   "skiers": {
     "crashSeconds": [
@@ -2436,6 +2731,8 @@
     "x": 400,
     "startY": -600,
     "routeBendDistance": 900,
+    "courseSideOffset": 460,
+    "gateClearance": 140,
     "rideSeconds": 2.4,
     "rideSpeed": 150,
     "chairSpeed": 78,
@@ -2525,78 +2822,158 @@
       "Move over, snow snail!",
       "Your grandma skis faster!",
       "Coming through, amateur!",
-      "Try to keep up!"
+      "Try to keep up!",
+      "Out of the way, pal!",
+      "Is that a pizza or a parking brake?",
+      "I've seen glaciers move faster!",
+      "Beep beep! Fast lane!",
+      "Nice form. For a fridge.",
+      "You call that a tuck?",
+      "See you at the bottom. Eventually!",
+      "Blink and you'll miss me!"
     ],
     "fastBumps": [
       "You were in MY way!",
       "That counts as overtaking.",
-      "Learn to ski, speed bump!"
+      "Learn to ski, speed bump!",
+      "Watch it, slowpoke!",
+      "My skis! My beautiful skis!",
+      "Did you get my autograph?",
+      "Next time, use your mirrors!",
+      "You owe me a new pole!"
     ],
     "terrified": [
       "WOLVES! HELP!",
       "NOT MY SKIS! RUN!",
       "HELP! THEY ARE GAINING!",
-      "PLEASE EAT THE OTHER GUY!"
+      "PLEASE EAT THE OTHER GUY!",
+      "WHY IS IT ALWAYS WOLVES?!",
+      "I KNEW I SHOULD HAVE STAYED IN BED!",
+      "TELL MY SKIS I LOVED THEM!",
+      "SOMEBODY! ANYBODY!",
+      "DON'T LOOK BACK! JUST SKI!",
+      "I TASTE TERRIBLE, I PROMISE!"
     ],
     "bearTerrified": [
       "BEAR! KEEP SKIING!",
       "HELP! A BEAR!",
-      "PLEASE EAT THE OTHER GUY!"
+      "PLEASE EAT THE OTHER GUY!",
+      "THE BEAR! THE BEAR!",
+      "I ONLY WANTED A PICNIC!",
+      "BEARS CAN'T SKI! RIGHT?!",
+      "NICE BEAR! GOOD BEAR!",
+      "IT'S GOT MY SANDWICH!"
     ],
     "yetiTerrified": [
       "YETI! RUN!",
       "HELP! IT IS GAINING!",
-      "PLEASE EAT THE OTHER GUY!"
+      "PLEASE EAT THE OTHER GUY!",
+      "IT'S REAL! IT'S REALLY REAL!",
+      "I DIDN'T BELIEVE IN YOU, SORRY!",
+      "NOT TODAY, SNOW MONSTER!",
+      "IT'S SO FLUFFY AND SO HUNGRY!",
+      "SKI! SKI! SKI!",
+      "I'M MOSTLY BONES! AND SCARF!"
     ],
     "rescued": [
       "You saved me! Thank you!",
       "My hero! I owe you cocoa!",
       "THANK YOU! That was close!",
-      "Best skier on this mountain!"
+      "Best skier on this mountain!",
+      "I'll name my next dog after you!",
+      "You're braver than you look!",
+      "Free cocoa for life! Probably.",
+      "I'm never skiing alone again!",
+      "Did you see that?! You saved me!"
     ],
     "wolfCaught": [
       "AAAH! MY TROUSERS!",
-      "BAD DOG! BAD DOG!"
+      "BAD DOG! BAD DOG!",
+      "NOT THE GOOD JACKET!",
+      "SIT! STAY! PLEASE STAY!",
+      "WHO'S A GOOD BOY? NOT YOU!",
+      "I'M ALLERGIC TO BEING EATEN!"
     ],
     "cheers": [
       "PERFECT RUN!",
       "EVERY SINGLE FLAG!",
       "BRAVO!",
       "WHAT A LEGEND!",
-      "TEN OUT OF TEN!"
+      "TEN OUT OF TEN!",
+      "INCREDIBLE!",
+      "DID YOU SEE THAT?!",
+      "SOMEONE FILM THIS!",
+      "SKI GOD!",
+      "ENCORE! ENCORE!",
+      "FLAWLESS!",
+      "I'M TELLING MY GRANDKIDS!"
     ],
     "skierBumps": [
       "I had right of way!",
       "Excellent parking.",
-      "That was my good knee!"
+      "That was my good knee!",
+      "Hey! Personal space!",
+      "You ski like you drive.",
+      "I'm suing! Probably.",
+      "Ow! My dignity!",
+      "Brakes exist, you know!",
+      "Was that a hug or a crash?"
     ],
     "personBumps": [
       "Bloody tourists!",
       "#@! MY COCOA!",
       "Oi! These are NEW boots!",
-      "You absolute snowplough!"
+      "You absolute snowplough!",
+      "Watch where you're going!",
+      "My knitting! Three weeks of knitting!",
+      "Ski lane's over there, genius!",
+      "I was just standing here!",
+      "You nearly flattened my hat!",
+      "There are perfectly good roads!",
+      "Do I look like a slalom flag?!"
     ],
     "greetings": [
       "Looking sharp!",
       "Lovely day for poor decisions.",
       "Save some snow for us.",
-      "The cocoa is mostly cocoa."
+      "The cocoa is mostly cocoa.",
+      "Morning! Mind the yetis.",
+      "Nice hat! Mine's warmer.",
+      "Heard there's cocoa in the next town.",
+      "Careful, the bears are cranky today.",
+      "Ski safe! Or at least ski fast.",
+      "Don't feed the yetis. Seriously.",
+      "Fresh powder! Best day ever!",
+      "My dog likes you. That's rare."
     ],
     "catAnnoyed": [
       "You scared the cat!",
       "Oi! We were having a moment.",
-      "Slow down, you monster!"
+      "Slow down, you monster!",
+      "She was purring! PURRING!",
+      "Now she'll be up that tree all day!",
+      "Who raised you, a snowplough?",
+      "That cat has a lawyer, you know."
     ],
     "politeYeti": [
       "Sorry! Just a little nibble?",
       "I can wait.",
-      "Lovely scarf!"
+      "Lovely scarf!",
+      "Pardon me, coming through!",
+      "Just one bite? A small one?",
+      "No hard feelings, I hope!",
+      "You look delicious. I mean lovely!",
+      "Mind if I join you for lunch?"
     ],
     "mushroomCheers": [
       "FULL BASKET!",
       "EVERY SINGLE MUSHROOM!",
       "SOUP FOR EVERYONE!",
-      "MASTER FORAGER!"
+      "MASTER FORAGER!",
+      "THE MUSHROOM WHISPERER!",
+      "RISOTTO TONIGHT!",
+      "NOT A SINGLE ONE MISSED!",
+      "FUNGI FANTASTIC!"
     ],
     "patrolTaunts": [
       "Pay for the course, cheapskate!",
@@ -2608,7 +2985,10 @@
       "Nice skis. Shame about the budget.",
       "Pay up, penny pincher!",
       "We take coins, not excuses!",
-      "Cheapskate coming through!"
+      "Cheapskate coming through!",
+      "Tickets, please! Oh wait, you don't have one!",
+      "Even the yetis paid for this run!",
+      "Free ride's over, mate!"
     ]
   },
   "simulation": {
@@ -2793,7 +3173,7 @@
       "triggerRadiusMetres": 60,
       "warningSeconds": 0.55,
       "fallSeconds": 0.3,
-      "fallenRadiusMetres": 3
+      "fallenRadiusMetres": 2.2
     },
     "logJump": {
       "widthMetres": 100,
@@ -2835,5 +3215,192 @@
     "transitionSeconds": 1.8,
     "lampSetbackMetres": 7,
     "lightReachMultiplier": 3.2
+  },
+  "museum": {
+    "exhibitsPerLeg": 4,
+    "legWidth": 1700,
+    "legDrop": 980,
+    "trailWidth": 70,
+    "clearanceWidth": 460,
+    "exhibitDrop": 150,
+    "textOffset": 55,
+    "wrapCharacters": 27,
+    "exhibits": [
+      {
+        "id": "rules",
+        "title": "HOW CREATURES WORK",
+        "text": "A jump off a ramp or hill clears any creature. Ram one at full speed: it's out, but you fall. Sleeping or waking ones only knock you down. Awake hunters catch you, unless you carry a sword."
+      },
+      {
+        "id": "sleepingYeti",
+        "title": "SLEEPING YETI",
+        "text": "Dozes near the trail and wakes when you get close. Bumping it only knocks you down."
+      },
+      {
+        "id": "yeti",
+        "title": "WHITE FANG YETI",
+        "text": "The regular chaser. Ski straight downhill to stay ahead; it gains on you when you turn."
+      },
+      {
+        "id": "fastYeti",
+        "title": "AVALANCHE YETI",
+        "text": "A faster chaser. Lead it past other skiers: Yetis stop to eat whoever is in the way."
+      },
+      {
+        "id": "stiltwalker",
+        "title": "STILTWALKER",
+        "text": "Tall, pale, easily distracted. The fastest Yeti, but it grabs any snack nearby first, even another Yeti."
+      },
+      {
+        "id": "bear",
+        "title": "BEAR",
+        "text": "Snoozes in the woods, then gallops after you. Slower than a Yeti."
+      },
+      {
+        "id": "wolves",
+        "title": "WOLF PACK",
+        "text": "Hunts in packs of three or four. Wolves chase rabbits and skiers too."
+      },
+      {
+        "id": "werewolf",
+        "title": "WEREWOLF",
+        "text": "Looks like a villager until you ski close: a scream, then a two-second change. Crash into it mid-change to knock it flat."
+      },
+      {
+        "id": "zombie",
+        "title": "ZOMBIE",
+        "text": "Wanders cemeteries. Lying by its grave it only trips you; walking, it catches you."
+      },
+      {
+        "id": "skeleton",
+        "title": "SKELETON",
+        "text": "Rests by a grave, rattles, then leaps once. The leap knocks you down, so get up before the zombies arrive."
+      },
+      {
+        "id": "burrower",
+        "title": "SNOW BURROWER",
+        "text": "Tunnels in, stops just ahead of you, then pops open. Turn away during its pause, or fly over it off a jump. Can't be rammed."
+      },
+      {
+        "id": "dog",
+        "title": "DOG",
+        "text": "Pass close by and it gets a treat. Next time it follows you and barks a few monsters away."
+      },
+      {
+        "id": "smallAnimals",
+        "title": "RABBIT AND FOX",
+        "text": "Come close slowly and they sniff around. Foxes and wolves hunt rabbits."
+      },
+      {
+        "id": "cat",
+        "title": "CAT",
+        "text": "Lures slow skiers over for a pet. Hit it fast and it bolts up the nearest tree."
+      },
+      {
+        "id": "villagers",
+        "title": "VILLAGERS",
+        "text": "Walk, chat, cheer and feed the animals. Monsters will gladly eat them instead of you."
+      },
+      {
+        "id": "skiers",
+        "title": "SKIERS AND BOARDERS",
+        "text": "Slow traffic. Bump one and you both go down. Also on the menu for hungry monsters."
+      },
+      {
+        "id": "fastSkier",
+        "title": "FAST SKIER",
+        "text": "Red jacket. Overtakes from behind and cuts toward your line."
+      },
+      {
+        "id": "snowman",
+        "title": "SNOWMAN",
+        "text": "Harmless. Knock its hat off and it grows a new one."
+      },
+      {
+        "id": "trees",
+        "title": "TREES",
+        "text": "Solid. Hit one fast and it snaps, and so do you. Flying off a jump clears them."
+      },
+      {
+        "id": "rocks",
+        "title": "ROCKS AND STUMPS",
+        "text": "Solid obstacles. A shield saves you from one fall."
+      },
+      {
+        "id": "softStuff",
+        "title": "BUSHES AND SLEDS",
+        "text": "Bushes slow you down. Hit a sled fast and it rockets off downhill."
+      },
+      {
+        "id": "fallingTree",
+        "title": "FALLING TREE",
+        "text": "Leans as you approach, then topples across the trail. Watch which way it goes."
+      },
+      {
+        "id": "rollingSnowball",
+        "title": "ROLLING SNOWBALL",
+        "text": "Sets off as you come near and curves across your path, growing as it rolls."
+      },
+      {
+        "id": "logJump",
+        "title": "LOG JUMP",
+        "text": "A trunk across the whole trail. Hit the bump in the middle to sail over."
+      },
+      {
+        "id": "ice",
+        "title": "ICE",
+        "text": "Locks your direction until you reach snow again. Entering downhill speeds you up."
+      },
+      {
+        "id": "rugged",
+        "title": "CHURNED SNOW",
+        "text": "Rough patches that slow you down."
+      },
+      {
+        "id": "hills",
+        "title": "HILLS",
+        "text": "Jumps. Bigger hills mean longer flights. Steer in the air to plan your landing."
+      },
+      {
+        "id": "ramps",
+        "title": "RAMPS AND MOGULS",
+        "text": "Launch pads. Every jump boosts your speed."
+      },
+      {
+        "id": "rainbow",
+        "title": "RAINBOW",
+        "text": "A colourful jump with a speed boost and a powder trail."
+      },
+      {
+        "id": "mushroom",
+        "title": "MUSHROOM",
+        "text": "A harmless puff of spores. In Spore Decisions you collect them."
+      },
+      {
+        "id": "shieldGate",
+        "title": "SHIELD GATE",
+        "text": "Ski between the flags to earn gear. A shield saves you from one fall."
+      },
+      {
+        "id": "swordGate",
+        "title": "SWORD GATE",
+        "text": "A sword saves you from one catch. Missing a gate breaks your gear streak."
+      },
+      {
+        "id": "checkpoint",
+        "title": "CHECKPOINT",
+        "text": "Every Arcade town's chairlift station. Follow the sign and ski into it: if you're caught, you ride back down here. Continue later from the summit."
+      },
+      {
+        "id": "chairlift",
+        "title": "CHAIRLIFT",
+        "text": "On the free slopes, ski into the station to ride back up."
+      },
+      {
+        "id": "theEnd",
+        "title": "THAT'S EVERYTHING",
+        "text": "Now go and meet them for real."
+      }
+    ]
   }
 }

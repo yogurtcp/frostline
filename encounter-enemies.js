@@ -1,10 +1,12 @@
 /* Sparse course encounters. Native pixel tiles stay bounded; no extra actor-wide AI scans. */
 const WEREWOLF_NAMES=['Jim','Nora','Oscar','Mia','Hugo','Elsie'];
-function surpriseAreaAllowed(e){return !e||!e.noNewPredators&&!['quiet','lake','beginner'].includes(e.kind);}
+function surpriseAreaAllowed(e){return !e||!e.noNewPredators&&!['quiet','lake','beginner','runout'].includes(e.kind);}
 function spawnEncounterEnemies(section,endY){
   const root=section.endlessRoot,E=S.endless.encounterEnemies;
   const spawn=(kind,C)=>{
     const from=Math.max(section.startY,root.startY+C.firstMetres*PX_PER_M);
+    // New threats are introduced gradually: none of this kind before its stage.
+    if(!state.endless?.debug&&endlessStage((endY-root.startY)/PX_PER_M)<(S.endless.stages.introduce?.[kind]??1))return;
     if(endY-from<180||random()>=C.chancePerSection)return;
     for(let attempt=0;attempt<8;attempt++){
       const y=range(from+60,endY-100),e=endlessEncounterAt(y);if(!surpriseAreaAllowed(e))continue;
@@ -36,7 +38,7 @@ function spawnEncounterEnemies(section,endY){
         if(patchAt(x,y)||nearbyFootprints(x,y,80).some(o=>obstacleClearance(o,x,y)<24))continue;
         person=entity(pick(['personRed','personGreen','personYellow']),x,y,{width:32,r:10,arcadeRun:section,encounter:e});
       }
-      Object.assign(person,{werewolf:true,werewolfState:'disguised',werewolfName:pick(WEREWOLF_NAMES),walker:false,roam:0,stroll:null,pauseUntil:Infinity,arcadeRun:person.arcadeRun||section});return;
+      touchKinds();Object.assign(person,{werewolf:true,werewolfState:'disguised',werewolfName:pick(WEREWOLF_NAMES),walker:false,roam:0,stroll:null,pauseUntil:Infinity,arcadeRun:person.arcadeRun||section});return;
     }
   };
   spawn('burrower',E.burrower);spawn('werewolf',E.werewolf);
@@ -103,6 +105,14 @@ function startBurrow(o){
   o.burrowState='rushing';o.rushAt=clock;o.rushTarget=target;o.r=0;o.burrowTrail=[];
   return true;
 }
+// A crash during the scream or the change knocks the villager flat, half-changed. Once up, they start over.
+function knockDownWerewolf(o){
+  const W=S.endless.encounterEnemies.werewolf;
+  o.knockProgress=o.werewolfState==='transforming'?clamp((clock-o.transformAt)/(o.transformDuration??W.transformSeconds),0,1):0;
+  o.werewolfState='knocked';o.knockedAt=clock;o.knockedUntil=clock+W.knockdownSeconds;o.knockSide=Math.sign(o.x-state.p.x)||1;
+  o.socialUntil=o.knockedUntil+W.warningSeconds+W.transformSeconds;o.waveUntil=0;o.walking=false;o.vx=o.vy=0;
+  burst(o.x,o.y,C.ice,10);state.speech=state.speech.filter(b=>b.object!==o);say(pick(W.knockdownLines),o,Math.max(1.4,W.knockdownSeconds));beep(240,.16,'square',.016);
+}
 function updateEncounterEnemies(dt){
   if(!state.started)return;
   const p=state.p,E=S.endless.encounterEnemies;
@@ -112,11 +122,13 @@ function updateEncounterEnemies(dt){
     if(o.burrowState==='waiting'){
       // Manual stress spawns wait with the player until a real approach is possible.
       if(o.debugSpawn){o.x=p.x;o.y=p.y+200;}
-      if((o.debugSpawn||!active&&clock>=(state.endless.nextBurrowAt||0)&&surpriseAreaAllowed(endlessEncounterAt(p.y)))&&Math.hypot(o.x-p.x,o.y-p.y)<E.burrower.noticeMetres*PX_PER_M&&startBurrow(o)){
+      const area=endlessEncounterAt(p.y),ready=!active&&clock>=(state.endless.nextBurrowAt||0)&&surpriseAreaAllowed(area);
+      if((o.debugSpawn||ready)&&Math.hypot(o.x-p.x,o.y-p.y)<E.burrower.noticeMetres*PX_PER_M&&startBurrow(o)){
         active=true;if(!o.debugSpawn)state.endless.nextBurrowAt=clock+E.burrower.cooldownSeconds;
       }
       continue;
     }
+    if(o.burrowState==='rushing'&&o.fieldBurrower){rushFieldBurrower(o,dt);continue;}
     if(o.burrowState==='rushing'){
       const B=E.burrower,target=burrowIntercept(o)||o.rushTarget;o.rushTarget=target;
       const dx=target.x-o.x,dy=target.y-o.y,distance=Math.hypot(dx,dy),speed=topSpeed()*B.speedMultiplier,step=speed*dt;
@@ -136,7 +148,7 @@ function updateEncounterEnemies(dt){
       continue;
     }
     if(o.burrowState==='settled'){
-      if(clock-o.settleAt>=E.burrower.pauseSeconds){o.burrowState='open';o.openAt=clock;o.r=E.burrower.holeRadius;burst(o.x,o.y,C.ice,10);beep(180,.08,'triangle',.015);resolveEnemyContact(o);if(state.deathTimer)return;}
+      if(clock-o.settleAt>=(o.strikePause??E.burrower.pauseSeconds)){o.burrowState='open';o.openAt=clock;o.r=E.burrower.holeRadius;burst(o.x,o.y,C.ice,10);beep(180,.08,'triangle',.015);resolveEnemyContact(o);if(state.deathTimer)return;}
       continue;
     }
     if(o.burrowState==='open'){
@@ -157,6 +169,12 @@ function updateEncounterEnemies(dt){
       o.werewolfState='warning';o.warningAt=clock;o.transformStartAt=clock+warning;o.warningDeadline=clock+budget;o.socialUntil=clock+warning+W.transformSeconds;o.waveUntil=clock+warning;o.walking=false;o.roam=o.vx=o.vy=0;o.fearUntil=0;o.threat=null;
       say('AAAAH!',o,Math.max(.7,warning+.6));beep(780,.18,'sawtooth',.014);continue;
     }
+    if(o.werewolfState==='knocked'){
+      if(clock<o.knockedUntil)continue;
+      // Back on their feet: scream again, then the full transformation from the start.
+      o.werewolfState='warning';o.warningAt=clock;o.transformStartAt=clock+W.warningSeconds;o.warningDeadline=clock+W.warningSeconds+W.transformSeconds;o.waveUntil=clock+W.warningSeconds;o.socialUntil=clock+W.warningSeconds+W.transformSeconds;
+      say('AAAAH!',o,W.warningSeconds+.6);beep(780,.18,'sawtooth',.014);continue;
+    }
     if(o.werewolfState==='warning'){
       if(speed2>900){const arrival=((o.x-p.x)*p.vx+(o.y-p.y)*p.vy)/speed2;if(arrival>=0)o.warningDeadline=Math.min(o.warningDeadline,clock+Math.max(.08,arrival-W.beforeArrivalSeconds));}
       if(clock<o.transformStartAt&&o.warningDeadline-clock>.12)continue;
@@ -168,7 +186,7 @@ function updateEncounterEnemies(dt){
     // Once the morph starts, keep its full duration even if the player passes or accelerates.
     // Stay planted during the reveal so the skier actually sees a person become a wolf.
     if(clock-o.transformAt>=(o.transformDuration??E.werewolf.transformSeconds)){
-      o.type='wolf';o.werewolfState='wolf';o.width=52;o.r=12;o.animal=true;o.ai='hunt';o.linkedChase=o.wolfAwake=true;o.alertUntil=Infinity;o.wolfSpeedKmh=E.werewolf.speedKmh;o.packId=o.id;o.packIndex=0;o.costume=null;o.job=null;o.walker=false;o.path=null;o.socialUntil=0;o.nextAI=clock;
+      retype(o,'wolf');o.werewolfState='wolf';o.width=52;o.r=12;o.animal=true;o.ai='hunt';o.linkedChase=o.wolfAwake=true;o.alertUntil=Infinity;o.wolfSpeedKmh=E.werewolf.speedKmh;o.packId=o.id;o.packIndex=0;o.costume=null;o.job=null;o.walker=false;o.path=null;o.socialUntil=0;o.nextAI=clock;
       o.motionVx=o.motionVy=o.travelSpeed=0;o.travelStamp=clock;delete o.worldChunk;burst(o.x,o.y,'#c3c7ce',8);say('AWOOOO!',o,1.5);
     }
   }
@@ -246,6 +264,14 @@ function drawEncounterEnemy(o,s,feeding=false){
     }
     const tile=burrowerTile(o.burrowState==='open'||feeding,feeding?Math.floor(clock*10)%2:0),width=o.width*ZOOM;
     ctx.save();if(o.dead||o.burrowState==='closing')ctx.globalAlpha=clamp(o.dead?(o.fadeUntil-clock)/S.wildlife.predatorFadeSeconds:1-(clock-o.closeAt)/.28,0,1);const pop=o.burrowState==='open'?clamp((clock-o.openAt)/.14,0,1):1;ctx.drawImage(tile,Math.round(s.x-width/2),Math.round(s.y-width*tile.height/tile.width/2+(1-pop)*4),width,width*tile.height/tile.width);ctx.restore();return true;
+  }
+  if(o.werewolf&&o.werewolfState==='knocked'&&!o.dead){
+    // Topple over, lie flat with dizzy stars, then sit back up just before standing.
+    const W=S.endless.encounterEnemies.werewolf,elapsed=clock-o.knockedAt,left=o.knockedUntil-clock,tile=werewolfTransformTile(o,o.knockProgress||0);
+    const turn=elapsed<.25?elapsed/.25:left<.3?clamp(left/.3,0,1):1,scale=52*ZOOM/32,width=tile.width*scale,height=tile.height*scale;
+    ctx.save();ctx.translate(Math.round(s.x),Math.round(s.y));shadow(0,0,20*turn+10,3);ctx.rotate(o.knockSide*turn*Math.PI/2);ctx.drawImage(tile,Math.round(-width/2),Math.round(-41*scale+turn*10*scale),width,height);ctx.restore();
+    if(turn>=1)for(let i=0;i<3;i++){const a=clock*5+i*TAU/3;box(s.x+o.knockSide*-6+Math.cos(a)*7,s.y-14+Math.sin(a)*2.5,2,2,i%2?C.gold:'#f4f1e6');}
+    return true;
   }
   if(!o.werewolf||['disguised','warning'].includes(o.werewolfState))return false;
   const transforming=o.werewolfState==='transforming',progress=transforming?clamp((clock-o.transformAt)/(o.transformDuration??S.endless.encounterEnemies.werewolf.transformSeconds),0,1):1;

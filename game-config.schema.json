@@ -3783,6 +3783,11 @@
           "type": "number",
           "minimum": 0
         },
+        "speechSpacingSeconds": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Minimum seconds between two different speakers starting a line; a speaker already talking can still change their line."
+        },
         "messageSeconds": {
           "type": "number",
           "minimum": 0,
@@ -3830,6 +3835,24 @@
           },
           "minItems": 3,
           "maxItems": 3
+        },
+        "speechTextSize": {
+          "type": "number",
+          "minimum": 7,
+          "maximum": 28,
+          "description": "Speech text size. 14 or more uses the double-size pixel font."
+        },
+        "speechWrapCharacters": {
+          "type": "integer",
+          "minimum": 8,
+          "maximum": 40,
+          "description": "Characters per speech line before wrapping."
+        },
+        "speechLineGap": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 12,
+          "description": "Extra pixels between speech lines."
         }
       }
     },
@@ -3870,7 +3893,8 @@
         "animalVisitorChance",
         "humanPredatorChance",
         "wildPredatorChance",
-        "wolfShareOfPredators"
+        "wolfShareOfPredators",
+        "chunkRetentionBehind"
       ],
       "properties": {
         "seed": {
@@ -3906,6 +3930,11 @@
         "chunkRetention": {
           "type": "number",
           "minimum": 0
+        },
+        "chunkRetentionBehind": {
+          "type": "number",
+          "minimum": 0,
+          "description": "World units: forest chunks this far uphill of the skier are dropped (you never ski back up)."
         },
         "sceneryRetentionBehind": {
           "type": "number",
@@ -5656,8 +5685,9 @@
             },
             "maxFollowing": {
               "type": "integer",
-              "minimum": 1,
-              "maximum": 4
+              "minimum": 0,
+              "maximum": 100,
+              "description": "Most dogs that can follow you at once. 0 means no limit."
             },
             "speedMultiplier": {
               "type": "number",
@@ -5766,7 +5796,7 @@
         "mealPauseSeconds": {
           "type": "number",
           "minimum": 0,
-          "description": "Pause after a Yeti or chasing bear eats NPC prey. Defaults to 0.8 seconds; player contact remains dangerous during the meal."
+          "description": "Pause after a Yeti, chasing bear or zombie eats NPC prey. Defaults to 2 seconds; player contact remains dangerous during the meal."
         },
         "divertChance": {
           "type": "number",
@@ -5819,6 +5849,16 @@
           "minimum": 0.1,
           "maximum": 1,
           "description": "Horizontal and uphill velocity multiplier for enemy pursuit (0.5 = half speed); positive downhill Y keeps its configured speed."
+        },
+        "mealReachMetres": {
+          "type": "number",
+          "minimum": 0,
+          "description": "A hunting Yeti eats edible prey within this distance (it would otherwise steer around them as obstacles)."
+        },
+        "helplessNoticeMetres": {
+          "type": "number",
+          "minimum": 0,
+          "description": "A hunter goes for a fallen skier within this distance even when it is off the route to the player."
         }
       }
     },
@@ -6046,6 +6086,18 @@
           "type": "number",
           "minimum": 0,
           "exclusiveMinimum": 0
+        },
+        "courseSideOffset": {
+          "type": "number",
+          "minimum": 300,
+          "maximum": 1500,
+          "description": "Default distance of the chairlift lane from a course's centre line. The lane bends further out around any gate that reaches it, and only swings in to a station inside a village."
+        },
+        "gateClearance": {
+          "type": "number",
+          "minimum": 20,
+          "maximum": 400,
+          "description": "Minimum gap between the chairlift line and the outer flag of any nearby gate."
         }
       }
     },
@@ -8836,7 +8888,7 @@
             "pathPlacementChance",
             "pathOffsetMetres"
           ],
-          "description": "Tall pine that warns, rotates rigidly sideways toward the skier\u2019s side, and remains a jumpable fallen obstacle.",
+          "description": "Tall pine that warns, rotates rigidly sideways toward the skier’s side, and remains a jumpable fallen obstacle.",
           "properties": {
             "pathPlacementChance": {
               "type": "number",
@@ -9087,7 +9139,70 @@
         },
         "difficultyRampMetres": {
           "type": "number",
-          "minimum": 500
+          "minimum": 500,
+          "description": " (unused since stages)"
+        },
+        "stages": {
+          "type": "object",
+          "description": "Endless difficulty by stage: one stage per `metres`; stage 1 is gentle, `rampStages` equals the old hardest, it keeps rising until `maxStage`.",
+          "additionalProperties": false,
+          "properties": {
+            "metres": {
+              "type": "number",
+              "minimum": 1,
+              "description": "Metres per stage"
+            },
+            "chillStages": {
+              "type": "number",
+              "minimum": 1,
+              "description": "Opening stages that stay near the easy end (the first lap)"
+            },
+            "chillDifficulty": {
+              "type": "number",
+              "minimum": 0,
+              "description": "Difficulty reached at the end of the chill stages"
+            },
+            "rampStages": {
+              "type": "number",
+              "minimum": 2,
+              "description": "Stage at which difficulty reaches the old hardest (1.0)"
+            },
+            "maxStage": {
+              "type": "number",
+              "minimum": 1,
+              "description": "Difficulty stops rising after this stage"
+            },
+            "easeStages": {
+              "type": "number",
+              "minimum": 0,
+              "description": "Number of opening stages that are extra gentle"
+            },
+            "easeDensity": {
+              "type": "number",
+              "minimum": 0,
+              "description": "Density multiplier for obstacles and creatures at stage 1 (eases to 1)"
+            },
+            "easeWidth": {
+              "type": "number",
+              "minimum": 0,
+              "description": "Corridor width multiplier at stage 1 (eases to 1)"
+            },
+            "ravagerStage": {
+              "type": "number",
+              "minimum": 1,
+              "description": "First stage where Stalker Yetis (ravagers) can appear"
+            },
+            "introduce": {
+              "type": "object",
+              "description": "First stage at which each surprise enemy kind can appear (burrower, werewolf)",
+              "additionalProperties": {
+                "type": "number",
+                "minimum": 1,
+                "description": "First stage"
+              },
+              "properties": {}
+            }
+          }
         },
         "waveMetres": {
           "type": "number",
@@ -9508,7 +9623,7 @@
             "order": {
               "type": "array",
               "minItems": 1,
-              "maxItems": 32,
+              "maxItems": 40,
               "items": {
                 "type": "string",
                 "enum": [
@@ -9524,9 +9639,24 @@
                   "scramble",
                   "rivalRace",
                   "christmas",
-                  "halloween"
+                  "halloween",
+                  "piedPiper",
+                  "avalanche",
+                  "burrowField",
+                  "boulder",
+                  "runout"
                 ]
               }
+            },
+            "firstCycle": {
+              "type": "object",
+              "description": "Area kinds that only join the playlist from this cycle (lap) onward; earlier laps skip them",
+              "additionalProperties": {
+                "type": "number",
+                "minimum": 1,
+                "description": "First cycle"
+              },
+              "properties": {}
             },
             "firstMetres": {
               "type": "number",
@@ -9564,6 +9694,15 @@
                   "maxItems": 2
                 },
                 "lake": {
+                  "type": "array",
+                  "items": {
+                    "type": "number",
+                    "minimum": 20
+                  },
+                  "minItems": 2,
+                  "maxItems": 2
+                },
+                "runout": {
                   "type": "array",
                   "items": {
                     "type": "number",
@@ -9647,6 +9786,42 @@
                     "minimum": 250,
                     "maximum": 1600
                   }
+                },
+                "piedPiper": {
+                  "type": "array",
+                  "items": {
+                    "type": "number",
+                    "minimum": 20
+                  },
+                  "minItems": 2,
+                  "maxItems": 2
+                },
+                "avalanche": {
+                  "type": "array",
+                  "items": {
+                    "type": "number",
+                    "minimum": 20
+                  },
+                  "minItems": 2,
+                  "maxItems": 2
+                },
+                "burrowField": {
+                  "type": "array",
+                  "items": {
+                    "type": "number",
+                    "minimum": 20
+                  },
+                  "minItems": 2,
+                  "maxItems": 2
+                },
+                "boulder": {
+                  "type": "array",
+                  "items": {
+                    "type": "number",
+                    "minimum": 20
+                  },
+                  "minItems": 2,
+                  "maxItems": 2
                 }
               },
               "required": [
@@ -9655,7 +9830,8 @@
                 "lake",
                 "denseForest",
                 "forest",
-                "cemetery"
+                "cemetery",
+                "runout"
               ]
             },
             "beginnerPeople": {
@@ -10138,6 +10314,16 @@
                       }
                     }
                   }
+                },
+                "halloweenMausoleumCount": {
+                  "type": "array",
+                  "items": {
+                    "type": "number",
+                    "minimum": 0
+                  },
+                  "minItems": 2,
+                  "maxItems": 2,
+                  "description": "[easy, hard] zombies per grand-mausoleum wave in the Halloween town"
                 }
               }
             },
@@ -10176,6 +10362,591 @@
                   "type": "number",
                   "minimum": 1,
                   "maximum": 2.8
+                }
+              }
+            },
+            "levels": {
+              "type": "object",
+              "additionalProperties": false,
+              "description": "Challenge areas. A [easy, hard] pair scales with how often the area has been visited.",
+              "properties": {
+                "piedPiper": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "description": "Ten Yetis chase you through a flagged, cluttered course with ambushes and sparse ice.",
+                  "properties": {
+                    "chasingYetis": {
+                      "type": "array",
+                      "items": {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      "minItems": 2,
+                      "maxItems": 2,
+                      "description": "[easy, hard] Yetis let loose behind you as you enter"
+                    },
+                    "chaserSpeedKmh": {
+                      "type": "array",
+                      "items": {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      "minItems": 2,
+                      "maxItems": 2,
+                      "description": "[easy, hard] pack speed: 90.5 km/h, barely faster than you"
+                    },
+                    "chaserSpeedSpreadKmh": {
+                      "type": "array",
+                      "items": {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      "minItems": 2,
+                      "maxItems": 2,
+                      "description": "[easy, hard] ± spread of individual speeds"
+                    },
+                    "skiersPer100Metres": {
+                      "type": "array",
+                      "items": {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      "minItems": 2,
+                      "maxItems": 2,
+                      "description": "[easy, hard] lone skiers and boarders on the slope"
+                    },
+                    "icePer100Metres": {
+                      "type": "array",
+                      "items": {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      "minItems": 2,
+                      "maxItems": 2,
+                      "description": "[easy, hard] black ice pools on the line"
+                    },
+                    "sideTreesPer100Metres": {
+                      "type": "array",
+                      "items": {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      "minItems": 2,
+                      "maxItems": 2,
+                      "description": "[easy, hard] trees beside the line"
+                    },
+                    "obstaclesPer100Metres": {
+                      "type": "array",
+                      "items": {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      "minItems": 2,
+                      "maxItems": 2,
+                      "description": "[easy, hard] trees, rocks and stumps scattered over the course"
+                    },
+                    "bearsPer100Metres": {
+                      "type": "array",
+                      "items": {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      "minItems": 2,
+                      "maxItems": 2,
+                      "description": "[easy, hard] bears on the slope"
+                    },
+                    "wolfPacksPer100Metres": {
+                      "type": "array",
+                      "items": {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      "minItems": 2,
+                      "maxItems": 2,
+                      "description": "[easy, hard] wolf packs on the slope"
+                    },
+                    "ambushSeconds": {
+                      "type": "array",
+                      "items": {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      "minItems": 2,
+                      "maxItems": 2,
+                      "description": "[easy, hard] seconds between surprise enemies (side-charging Yeti, or a bear or wolf pack just below the screen)"
+                    },
+                    "playerScreenY": {
+                      "type": "array",
+                      "items": {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      "minItems": 2,
+                      "maxItems": 2,
+                      "description": "[easy, hard] where you sit on screen (0 top, 1 bottom) while Yetis are on your tail, so the pack stays in view"
+                    }
+                  }
+                },
+                "avalanche": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "description": "Rolling snowballs keep coming from behind while trees topple ahead.",
+                  "properties": {
+                    "ballSeconds": {
+                      "type": "array",
+                      "items": {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      "minItems": 2,
+                      "maxItems": 2,
+                      "description": "[easy, hard]"
+                    },
+                    "ballTravelMetres": {
+                      "type": "array",
+                      "items": {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      "minItems": 2,
+                      "maxItems": 2,
+                      "description": "[easy, hard]"
+                    },
+                    "fallingTreesPer100Metres": {
+                      "type": "array",
+                      "items": {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      "minItems": 2,
+                      "maxItems": 2,
+                      "description": "[easy, hard]"
+                    },
+                    "sideTreesPer100Metres": {
+                      "type": "array",
+                      "items": {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      "minItems": 2,
+                      "maxItems": 2,
+                      "description": "[easy, hard]"
+                    },
+                    "ballExtraKmh": {
+                      "type": "array",
+                      "items": {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      "minItems": 2,
+                      "maxItems": 2,
+                      "description": "[easy, hard]"
+                    },
+                    "trailSeconds": {
+                      "type": "array",
+                      "items": {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      "minItems": 2,
+                      "maxItems": 2,
+                      "description": "[easy, hard]"
+                    },
+                    "volleyEvery": {
+                      "type": "array",
+                      "items": {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      "minItems": 2,
+                      "maxItems": 2,
+                      "description": "[easy, hard] every Nth spawn is a volley of three balls across the corridor"
+                    },
+                    "skiersPer100Metres": {
+                      "type": "array",
+                      "items": {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      "minItems": 2,
+                      "maxItems": 2,
+                      "description": "[easy, hard] lone skiers and boarders on the slope"
+                    },
+                    "chasingYetis": {
+                      "type": "array",
+                      "items": {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      "minItems": 2,
+                      "maxItems": 2,
+                      "description": "[easy, hard] Yetis let loose behind you as you enter"
+                    },
+                    "chaserSpeedKmh": {
+                      "type": "array",
+                      "items": {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      "minItems": 2,
+                      "maxItems": 2,
+                      "description": "[easy, hard] their average speed"
+                    },
+                    "chaserSpeedSpreadKmh": {
+                      "type": "array",
+                      "items": {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      "minItems": 2,
+                      "maxItems": 2,
+                      "description": "[easy, hard] ± spread of individual speeds"
+                    },
+                    "lurkersPer100Metres": {
+                      "type": "array",
+                      "items": {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      "minItems": 2,
+                      "maxItems": 2,
+                      "description": "[easy, hard] slow sleeping Yetis on the slope"
+                    },
+                    "lurkerSpeedKmh": {
+                      "type": "array",
+                      "items": {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      "minItems": 2,
+                      "maxItems": 2,
+                      "description": "[easy, hard] their speed once awake"
+                    },
+                    "bearsPer100Metres": {
+                      "type": "array",
+                      "items": {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      "minItems": 2,
+                      "maxItems": 2,
+                      "description": "[easy, hard] bears on the slope"
+                    },
+                    "wolfPacksPer100Metres": {
+                      "type": "array",
+                      "items": {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      "minItems": 2,
+                      "maxItems": 2,
+                      "description": "[easy, hard] wolf packs on the slope"
+                    },
+                    "ambushSeconds": {
+                      "type": "array",
+                      "items": {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      "minItems": 2,
+                      "maxItems": 2,
+                      "description": "[easy, hard] seconds between surprise enemies"
+                    }
+                  }
+                },
+                "burrowField": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "description": "Burrowers streak in from the screen edges toward where you will be.",
+                  "properties": {
+                    "jumpSpacingMetres": {
+                      "type": "array",
+                      "items": {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      "minItems": 2,
+                      "maxItems": 2,
+                      "description": "[easy, hard] metres between jumps on the line"
+                    },
+                    "icePatchEvery": {
+                      "type": "array",
+                      "items": {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      "minItems": 2,
+                      "maxItems": 2,
+                      "description": "[easy, hard] every Nth jump slot is a small ice pool"
+                    },
+                    "spawnSeconds": {
+                      "type": "array",
+                      "items": {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      "minItems": 2,
+                      "maxItems": 2,
+                      "description": "[easy, hard] seconds between burrower attacks"
+                    },
+                    "pincerChance": {
+                      "type": "array",
+                      "items": {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      "minItems": 2,
+                      "maxItems": 2,
+                      "description": "[easy, hard] chance an attack comes from both sides"
+                    },
+                    "arriveSeconds": {
+                      "type": "array",
+                      "items": {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      "minItems": 2,
+                      "maxItems": 2,
+                      "description": "[easy, hard] seconds from the screen edge to the strike point"
+                    },
+                    "strikePause": {
+                      "type": "array",
+                      "items": {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      "minItems": 2,
+                      "maxItems": 2,
+                      "description": "[easy, hard] seconds a burrower trembles before it bursts out"
+                    },
+                    "sideTreesPer100Metres": {
+                      "type": "array",
+                      "items": {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      "minItems": 2,
+                      "maxItems": 2,
+                      "description": "[easy, hard] trees beside the line"
+                    },
+                    "aimFollowMetresPerSecond": {
+                      "type": "array",
+                      "items": {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      "minItems": 2,
+                      "maxItems": 2,
+                      "description": "[easy, hard] how fast a rushing burrower can shift its aim point to follow you"
+                    },
+                    "commitSeconds": {
+                      "type": "array",
+                      "items": {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      "minItems": 2,
+                      "maxItems": 2,
+                      "description": "[easy, hard] it stops re-aiming this long before it arrives"
+                    }
+                  }
+                },
+                "boulder": {
+                  "type": "object",
+                  "description": "The Boulder: a growing giant snowball rolls after you and flattens everything; keep a clean, fast line.",
+                  "additionalProperties": false,
+                  "properties": {
+                    "startBehindMetres": {
+                      "type": "array",
+                      "items": {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      "minItems": 2,
+                      "maxItems": 2,
+                      "description": "[easy, hard] where the boulder appears behind you"
+                    },
+                    "startKmh": {
+                      "type": "array",
+                      "items": {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      "minItems": 2,
+                      "maxItems": 2,
+                      "description": "[easy, hard] its speed when it appears"
+                    },
+                    "accelerationKmhPerSecond": {
+                      "type": "array",
+                      "items": {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      "minItems": 2,
+                      "maxItems": 2,
+                      "description": "[easy, hard] how fast it builds speed"
+                    },
+                    "topSpeedRatio": {
+                      "type": "array",
+                      "items": {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      "minItems": 2,
+                      "maxItems": 2,
+                      "description": "[easy, hard] its cruising speed as a share of your top speed"
+                    },
+                    "catchUpMetres": {
+                      "type": "array",
+                      "items": {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      "minItems": 2,
+                      "maxItems": 2,
+                      "description": "[easy, hard] beyond this gap it speeds up to keep the pressure on"
+                    },
+                    "catchUpPerMetre": {
+                      "type": "array",
+                      "items": {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      "minItems": 2,
+                      "maxItems": 2,
+                      "description": "[easy, hard] extra speed fraction per metre beyond that gap"
+                    },
+                    "radiusMetres": {
+                      "type": "array",
+                      "items": {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      "minItems": 2,
+                      "maxItems": 2,
+                      "description": "[easy, hard] starting radius"
+                    },
+                    "growthMetresPer100Metres": {
+                      "type": "array",
+                      "items": {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      "minItems": 2,
+                      "maxItems": 2,
+                      "description": "[easy, hard] radius gained per 100 m rolled"
+                    },
+                    "maxRadiusMetres": {
+                      "type": "array",
+                      "items": {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      "minItems": 2,
+                      "maxItems": 2,
+                      "description": "[easy, hard] largest radius"
+                    },
+                    "obstaclesPer100Metres": {
+                      "type": "array",
+                      "items": {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      "minItems": 2,
+                      "maxItems": 2,
+                      "description": "[easy, hard] trees, rocks, stumps, bushes and sleds on the slope"
+                    },
+                    "jumpsPer100Metres": {
+                      "type": "array",
+                      "items": {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      "minItems": 2,
+                      "maxItems": 2,
+                      "description": "[easy, hard] ramps, moguls and small hills"
+                    },
+                    "icePer100Metres": {
+                      "type": "array",
+                      "items": {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      "minItems": 2,
+                      "maxItems": 2,
+                      "description": "[easy, hard] black ice pools (speed)"
+                    },
+                    "skiersPer100Metres": {
+                      "type": "array",
+                      "items": {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      "minItems": 2,
+                      "maxItems": 2,
+                      "description": "[easy, hard] lone skiers and boarders"
+                    },
+                    "bearsPer100Metres": {
+                      "type": "array",
+                      "items": {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      "minItems": 2,
+                      "maxItems": 2,
+                      "description": "[easy, hard] bears on the slope"
+                    },
+                    "sideTreesPer100Metres": {
+                      "type": "array",
+                      "items": {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      "minItems": 2,
+                      "maxItems": 2,
+                      "description": "[easy, hard] trees beside the corridor"
+                    },
+                    "playerScreenY": {
+                      "type": "array",
+                      "items": {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      "minItems": 2,
+                      "maxItems": 2,
+                      "description": "[easy, hard] where you sit on screen (0 top, 1 bottom) while the boulder rolls, so it stays in view"
+                    },
+                    "nextBoulderSeconds": {
+                      "type": "array",
+                      "items": {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      "minItems": 2,
+                      "maxItems": 2,
+                      "description": "[easy, hard] seconds after a boulder rolls past you before the next one starts behind you"
+                    },
+                    "gateGapMetres": {
+                      "type": "array",
+                      "items": {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      "minItems": 2,
+                      "maxItems": 2,
+                      "description": "[easy, hard] width of the gap in the tree wall at the end (the boulder cannot fit and crashes)"
+                    },
+                    "gateFunnelMetres": {
+                      "type": "array",
+                      "items": {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      "minItems": 2,
+                      "maxItems": 2,
+                      "description": "[easy, hard] length of the tree funnel leading to the gap"
+                    }
+                  }
                 }
               }
             }
@@ -10371,8 +11142,44 @@
                   "minimum": 0.5,
                   "maximum": 5,
                   "description": "Projected seconds before the nearest pass to begin the warning; independent of transformation duration."
+                },
+                "knockdownSeconds": {
+                  "type": "number",
+                  "minimum": 0.3,
+                  "maximum": 5,
+                  "description": "How long a werewolf stays down after the skier crashes into it while it screams or transforms. It then gets up and restarts the full transformation."
+                },
+                "knockdownLines": {
+                  "type": "array",
+                  "minItems": 1,
+                  "maxItems": 20,
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 60
+                  },
+                  "description": "One is shouted at random when a crash knocks a changing werewolf down."
                 }
               }
+            }
+          }
+        },
+        "checkpoint": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Every Arcade town's chairlift station is its checkpoint: ski into it to save; after being caught you restart there, and the summit shows a CONTINUE gate.",
+          "properties": {
+            "signAheadMetres": {
+              "type": "number",
+              "minimum": 5,
+              "maximum": 300,
+              "description": "How far before the station the signposts stand on each route through town."
+            },
+            "grabPaddingMetres": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 20,
+              "description": "Extra reach around the station that still counts as skiing into it."
             }
           }
         }
@@ -10429,6 +11236,88 @@
           "type": "number",
           "minimum": 1,
           "maximum": 5
+        }
+      }
+    },
+    "museum": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "The summit MUSEUM gate leads onto a marked trail below it that zigzags across the slope past statues of everything in the game, each with a note written on the snow.",
+      "properties": {
+        "exhibitDrop": {
+          "type": "number",
+          "minimum": 60,
+          "maximum": 400,
+          "description": "How far below the trail each exhibit stands."
+        },
+        "textOffset": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 300,
+          "description": "How far below each exhibit its note is written."
+        },
+        "wrapCharacters": {
+          "type": "integer",
+          "minimum": 12,
+          "maximum": 60
+        },
+        "exhibits": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "title",
+              "text"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "Which exhibit to stage (see museum.js). Unknown ids show the note on its own."
+              },
+              "title": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 40
+              },
+              "text": {
+                "type": "string",
+                "maxLength": 240
+              }
+            }
+          }
+        },
+        "exhibitsPerLeg": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 10,
+          "description": "Exhibits along each switchback of the trail."
+        },
+        "legWidth": {
+          "type": "number",
+          "minimum": 400,
+          "maximum": 4000,
+          "description": "Sideways length of each switchback (world units)."
+        },
+        "legDrop": {
+          "type": "number",
+          "minimum": 100,
+          "maximum": 3000,
+          "description": "How far each switchback descends. Width/drop sets how sideways the trail runs."
+        },
+        "trailWidth": {
+          "type": "number",
+          "minimum": 20,
+          "maximum": 300,
+          "description": "Width of the marked snow trail."
+        },
+        "clearanceWidth": {
+          "type": "number",
+          "minimum": 150,
+          "maximum": 1200,
+          "description": "Distance from the trail kept clear of random scenery and predators."
         }
       }
     }
