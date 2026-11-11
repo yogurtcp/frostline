@@ -101,6 +101,8 @@ window.loadFrostlineConfig = async function () {
   yetiFrames.werewolfIdle=['werewolf',0,0,32,40];
   for(const [key,frame] of Object.entries(yetiFrames))config.atlas[key] ??= frame;
   config.wildlife.ramSpeedFraction ??= .85;
+  config.wildlife.catInteraction ??= {};
+  for(const [key,value] of Object.entries({"petRadius":80,"petSeconds":0.65,"lureRadius":360,"lureSeconds":8,"cooldownSeconds":12,"scatterRadius":100,"scatterSeconds":2.2,"scatterSpeed":110}))config.wildlife.catInteraction[key] ??= value;
   config.physics.releaseTurnFollow ??= 3;
   config.village.populationMultiplier ??= 2;
   const regionRanges = ['gapMetres','beginnerPeople','forestTreesPer100Metres','cemeteryOpeningMetres','denseForestDensity','scrambleDensity'].map(key=>config.endless.regions[key]).concat(Object.values(config.endless.regions.lengthMetres),[config.endless.regions.specialAreas.rivalRace.count,config.endless.regions.specialAreas.rivalRace.speedRatio,config.endless.regions.cemetery.clusterSpacingMetres,config.endless.regions.cemetery.mausoleum.count,config.endless.regions.zombies.wandererCount,config.endless.regions.zombies.graveWake.count,config.endless.regions.zombies.roamerCount,config.endless.regions.zombies.wandererSpeedKmh,config.endless.regions.zombies.count,config.endless.regions.zombies.speedKmh,config.endless.regions.crowd.people],['crossingMetres','rows','chokeWidthMetres'].map(key=>config.endless.regions.cemetery[key]).filter(Array.isArray));

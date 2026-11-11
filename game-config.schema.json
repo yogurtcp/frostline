@@ -5464,6 +5464,45 @@
         "predatorFadeSeconds": {
           "type": "number",
           "exclusiveMinimum": 0
+        },
+        "catInteraction": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Slowly approach a cat to draw a crowd; rush into its gathering to scatter spectators. Distances/speeds use world units. Optional fields use loader defaults.",
+          "properties": {
+            "petRadius": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "petSeconds": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "lureRadius": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "lureSeconds": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "cooldownSeconds": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "scatterRadius": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "scatterSeconds": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "scatterSpeed": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            }
+          }
         }
       }
     },

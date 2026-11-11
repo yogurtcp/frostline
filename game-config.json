@@ -2602,7 +2602,17 @@
     "packLimit": 2,
     "bearMaxImpactAngleDegrees": 45,
     "yetiMaxImpactAngleDegrees": 10,
-    "predatorFadeSeconds": 2.4
+    "predatorFadeSeconds": 2.4,
+    "catInteraction": {
+      "petRadius": 80,
+      "petSeconds": 0.65,
+      "lureRadius": 360,
+      "lureSeconds": 8,
+      "cooldownSeconds": 12,
+      "scatterRadius": 100,
+      "scatterSeconds": 2.2,
+      "scatterSpeed": 110
+    }
   },
   "chasers": {
     "speedRatios": {
