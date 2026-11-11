@@ -5503,6 +5503,48 @@
               "exclusiveMinimum": 0
             }
           }
+        },
+        "squirrel": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Harmless forest squirrels: course spacing in metres, other distances/speeds in world units. Optional fields use loader defaults.",
+          "properties": {
+            "spacingMetres": {
+              "type": "number",
+              "minimum": 0,
+              "description": "Spacing beside authored forest/trail paths; zero disables these course spawns."
+            },
+            "roamSpeed": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "fleeSpeed": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "noticeRadius": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "treeSearchRadius": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "climbSpeed": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "perchSeconds": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "townCount": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 8,
+              "description": "Maximum squirrels beside each normal village road."
+            }
+          }
         }
       }
     },

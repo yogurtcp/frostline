@@ -2612,6 +2612,16 @@
       "scatterRadius": 100,
       "scatterSeconds": 2.2,
       "scatterSpeed": 110
+    },
+    "squirrel": {
+      "spacingMetres": 110,
+      "roamSpeed": 65,
+      "fleeSpeed": 170,
+      "noticeRadius": 110,
+      "treeSearchRadius": 300,
+      "climbSpeed": 60,
+      "perchSeconds": 4.5,
+      "townCount": 2
     }
   },
   "chasers": {
@@ -2762,7 +2772,8 @@
       "rabbit",
       "fir",
       "cat",
-      "bush"
+      "bush",
+      "squirrel"
     ],
     "wild": [
       "pine",
@@ -2776,7 +2787,8 @@
       "bear",
       "cat",
       "lurker",
-      "bush"
+      "bush",
+      "squirrel"
     ],
     "classic": [
       "skier",
@@ -3300,6 +3312,11 @@
         "id": "smallAnimals",
         "title": "RABBIT AND FOX",
         "text": "Come close slowly and they sniff around. Foxes and wolves hunt rabbits."
+      },
+      {
+        "id": "squirrel",
+        "title": "SQUIRREL",
+        "text": "Scampers across the snow and nibbles nuts. Startle one and it bolts up a tree. Predators can catch it on the ground."
       },
       {
         "id": "cat",

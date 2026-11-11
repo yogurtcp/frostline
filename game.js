@@ -221,6 +221,7 @@ window.FROSTLINE_READY = (async () => {
     "personGreen":{"type":"personGreen","width":30,"r":10},
     "dog":{"type":"dog","width":34,"r":10,"roam":15},
     "cat":{"type":"cat","width":27,"r":8,"animal":true,"ai":"idle","climb":0},
+    "squirrel":{"type":"squirrel","width":32,"r":5,"animal":true,"ai":"idle","climb":0},
     "rabbit":{"type":"rabbit","width":20,"r":5,"animal":true,"ai":"idle","climb":0},
     "fox":{"type":"fox","width":39,"r":10,"animal":true,"ai":"idle","climb":0},
     "wolf":{"type":"wolf","width":43,"r":11,"animal":true,"ai":"idle","climb":0},
@@ -703,8 +704,21 @@ window.FROSTLINE_READY = (async () => {
     if(from===e.startY)mouth(false);
     if(to===e.endY)mouth(true);
   }
+  function populateSquirrels(e,section,from,to){
+    if(!['forest','trees','denseForest','quiet','runout'].includes(e.kind))return;
+    const step=S.wildlife.squirrel.spacingMetres*PX_PER_M*e.scale,first=e.startY+200*e.scale;if(step<=0)return;
+    for(let row=Math.max(0,Math.ceil((from-first)/step));;row++){
+      const y=first+row*step;if(y>=to||y>e.endY-120*e.scale)break;
+      const path=e.paths[row%e.paths.length],side=row%2?-1:1;
+      for(const offset of [55,85,35]){
+        const x=encounterPathX(path,y)+side*offset*e.scale;
+        if(patchAt(x,y)||state.objects.some(o=>o.r>0&&NPC_STATIC_SOLIDS.has(o.type)&&obstacleClearance(o,x,y)<14))continue;
+        entity('squirrel',x,y,{...ARCADE_ITEMS.squirrel,arcadeRun:section,encounter:e,nextAI:clock+range(1,3)});break;
+      }
+    }
+  }
   function populateEndlessEncounter(e,section,toY){
-    const scale=e.scale,from=e.generatedY,to=Math.min(e.endY,toY);if(to<=from)return;if(e.kind!=='trees'){populateEndlessRegion(e,section,from,to);if(e.kind==='quiet'||e.kind==='runout'){clearSnowRoadTrees(e.snowRoad);addRouteLamps(e.paths[0],null,from,to,e);}e.generatedY=to;return;}
+    const scale=e.scale,from=e.generatedY,to=Math.min(e.endY,toY);if(to<=from)return;if(e.kind!=='trees'){populateEndlessRegion(e,section,from,to);populateSquirrels(e,section,from,to);if(e.kind==='quiet'||e.kind==='runout'){clearSnowRoadTrees(e.snowRoad);addRouteLamps(e.paths[0],null,from,to,e);}e.generatedY=to;return;}
     const own={arcadeRun:section,encounter:e},root=section.endlessRoot;
     if(from===e.startY)entity('encounterTitle',root.x,e.startY-60*scale,{...own,r:0,width:300});
     populateForestBoundary(e,section,from,to);
@@ -717,7 +731,7 @@ window.FROSTLINE_READY = (async () => {
       }
       if(random()<.1){const path=pick(e.paths),x=encounterPathX(path,y),vy=range(...S.skiers.slowSpeed);entity('skier',x+range(-.4,.4)*e.half,y,{...own,width:42,r:12,vx:0,vy:vy*scale,endlessBaseVy:vy});}
     }
-    e.generatedY=to;delete e.clearanceRows;
+    populateSquirrels(e,section,from,to);e.generatedY=to;delete e.clearanceRows;
   }
   function endlessPursuitRoute(c,target){
     if(!state.endless||!activeCourseOwner(c))return null;
@@ -1619,6 +1633,10 @@ window.FROSTLINE_READY = (async () => {
       }
       if(!cat){const h=pick(houses)||{x:base,y:origin+V.firstRow};entity('cat',h.x+40,h.y+40,{width:27,r:8,animal:true,ai:'idle',nextAI:clock+8,climb:0,town});}
     }
+    for(let i=0;i<S.wildlife.squirrel.townCount;i++){
+      const point=main.points[Math.min(main.points.length-1,Math.floor((i+1)*main.points.length/(S.wildlife.squirrel.townCount+1)))];
+      decorate('squirrel',point.x+(i?-1:1)*(main.width/2+52),point.y+65,{...ARCADE_ITEMS.squirrel,nextAI:clock+range(1,3)});
+    }
     const dogSpots=[];for(const p of shuffled(main.points)){if(dogSpots.length>=V.dogCount)break;if(dogSpots.some(q=>Math.hypot(q.x-p.x,q.y-p.y)<80))continue;dogSpots.push(p);entity('dog',p.x+45,p.y,{width:34,r:10,roam:15,town});}
     for(let i=0;i<V.skierCount;i++){const p=pick(main.points);entity('skier',p.x,p.y,{width:42,r:12,vy:30,vx:0,town});}
     populateVillageLife(town,houses,rowYs,centers,decorate,shuffled);
@@ -2030,15 +2048,15 @@ window.FROSTLINE_READY = (async () => {
   }
   // Edible creatures for opportunistic predators. Predator kinds (wolf, fox, bear, lurkers)
   // are deliberately absent: predators never hunt each other.
-  const CREATURE_TYPES=new Set(['skier','boarder','personRed','personYellow','personGreen','dog','cat','rabbit']);
+  const CREATURE_TYPES=new Set(['skier','boarder','personRed','personYellow','personGreen','dog','cat','rabbit','squirrel']);
   // Candidate prey: exactly the objects whose ediblePrey type test can pass.
   const PREY_VIEW=objectView(o=>CREATURE_TYPES.has(o.type||(o.kind==='dog'?'dog':o.kind==='patrol'?'skier':null)));
   function ediblePrey(o){
     const chasingNpc=o.kind==='dog'||o.kind==='patrol',type=o.type||(chasingNpc?(o.kind==='dog'?'dog':'skier'):null);
-    return CREATURE_TYPES.has(type)&&!o.eaten&&!o.dead&&!o.leaving&&(!o.patrolPass||o.remaining>0)&&(!chasingNpc||!(state.p.y>o.expires))&&((o.r??(chasingNpc?12:0))>0||type.startsWith('person'));
+    return CREATURE_TYPES.has(type)&&!(type==='squirrel'&&o.climb>8)&&!o.eaten&&!o.dead&&!o.leaving&&(!o.patrolPass||o.remaining>0)&&(!chasingNpc||!(state.p.y>o.expires))&&((o.r??(chasingNpc?12:0))>0||type.startsWith('person'));
   }
   const objectGroupCache={};
-  const GROUP_TYPES=new Set(['burrower','dog','rabbit','cat','fox','wolf','skier','boarder','zombie','fallingTree','rollingSnowball','cemeteryPlot','ice','rugged','ramp','mogul','smallHill','largeHill','logBump']);
+  const GROUP_TYPES=new Set(['burrower','dog','rabbit','squirrel','cat','fox','wolf','skier','boarder','zombie','fallingTree','rollingSnowball','cemeteryPlot','ice','rugged','ramp','mogul','smallHill','largeHill','logBump']);
   const GROUP_VIEW=objectView(o=>o.werewolf||o.animal||o.retiring||o.grandMausoleum||o.santaSleigh||GROUP_TYPES.has(o.type));
   function objectGroups(){
     const c=objectGroupCache;
@@ -2052,7 +2070,7 @@ window.FROSTLINE_READY = (async () => {
       switch(type){
         case 'burrower':groups.burrowers.push(o);break;
         case 'dog':groups.dogs.push(o);break;
-        case 'rabbit':case 'cat':case 'fox':groups.wildlife.push(o);break;
+        case 'rabbit':case 'squirrel':case 'cat':case 'fox':groups.wildlife.push(o);break;
         case 'wolf':groups.wildlife.push(o);groups.groundHunters.push(o);break;
         case 'skier':case 'boarder':groups.wildlife.push(o);groups.skiers.push(o);break;
         case 'zombie':groups.zombies.push(o);groups.groundHunters.push(o);break;
@@ -2456,12 +2474,12 @@ window.FROSTLINE_READY = (async () => {
         if(state.safeTrails.some(r=>!(forestOutside&&r===state.course)&&r.arcade&&y>r.startY-120&&y<r.endY+60&&Math.abs(x-centerAt(y,r))<S.world.safeCourseHalfWidth+100))continue;
         if(nearArcadeFeature(x,y)||nearMushroom(x,y)||patchAt(x,y)||insideTown(x,y)||museumArea(x,y)||state.villages.some(t=>roadDistance(t.approachRoad,x,y)<t.approachRoad.width/2+60)||(!state.course&&state.zone.kind==='start'&&Math.abs(x)<S.world.meadowHalfWidth&&y>S.world.meadowTop&&y<S.world.meadowBottom))continue;
         if(state.objects.some(o=>(o.type==='gate'||o.type==='entrance')&&Math.abs(o.x-x)<o.half+60&&Math.abs(o.y-y)<140))continue;
-        const type=forestOutside?pick(['pine','pine','pine','fir','fir','bush','rock','rabbit']):ambientType(x,y);
+        const type=forestOutside?pick(['pine','pine','pine','fir','fir','bush','rock','rabbit','squirrel']):ambientType(x,y);
         if(MONSTER_KINDS.has(type)&&(state.endless||humanArea(x,y)))continue;
         if(type==='wolf'){if(!spawnWolfPack(x,y,{worldChunk:key}).length)entity('fir',x,y,{width:65,r:16,worldChunk:key});continue;}
         const fast=type==='skier'&&random()<(state.course?.arcade?.fastChance??S.skiers.ambientFastChance);
-        const widths={pine:range(60,90),fir:range(52,74),rock:44,pebble:28,skier:42,personGreen:30,rabbit:20,fox:39,wolf:43,bear:60,cat:25,lurker:55,bush:35};
-        entity(type,x,y,{worldChunk:key,fast,width:widths[type],r:['lurker','bear'].includes(type)?18:type==='rabbit'?5:12,animal:['rabbit','fox','wolf','bear','cat'].includes(type),humanVisitor:humanArea(x,y)||random()<S.world.animalVisitorChance,ai:'idle',nextAI:clock+range(1,5),climb:0,vy:type==='skier'?(fast?range(...S.skiers.fastSpeed):range(...S.skiers.slowSpeed)):0});
+        const widths={pine:range(60,90),fir:range(52,74),rock:44,pebble:28,skier:42,personGreen:30,rabbit:20,squirrel:32,fox:39,wolf:43,bear:60,cat:25,lurker:55,bush:35};
+        entity(type,x,y,{worldChunk:key,fast,width:widths[type],r:['lurker','bear'].includes(type)?18:['rabbit','squirrel'].includes(type)?5:12,animal:['rabbit','squirrel','fox','wolf','bear','cat'].includes(type),humanVisitor:humanArea(x,y)||random()<S.world.animalVisitorChance,ai:'idle',nextAI:clock+range(1,5),climb:0,vy:type==='skier'?(fast?range(...S.skiers.fastSpeed):range(...S.skiers.slowSpeed)):0});
       }
       populateEndlessFlanks(state.chunks.get(key),key);
       if(random()<S.world.lakeChance){const x=(tx+.5)*size,y=(ty+.5)*size;if(!endlessEncounterAt(y)&&!insideTown(x,y)&&!safeApproach(x,y)&&!classicArea(x,y,360)&&!museumArea(x,y,400)&&!state.safeTrails.some(r=>r.arcade&&y>r.startY-360&&y<r.endY+360&&Math.abs(x-centerAt(y,r))<S.world.safeCourseHalfWidth+360)&&y>S.world.lakeMinY&&!state.objects.some(o=>o.type==='gate'&&Math.hypot(o.x-x,o.y-y)<260||o.collectible&&Math.hypot(o.x-x,o.y-y)<360))entity('ice',x,y,{worldChunk:key,rx:range(...S.world.lakeRadiusX),ry:range(...S.world.lakeRadiusY),width:330,r:0});}
@@ -2486,9 +2504,9 @@ window.FROSTLINE_READY = (async () => {
         let x=center+range(-S.world.terrainOffsetX,S.world.terrainOffsetX);if(nearGate&&Math.abs(x-nearGate.x)<nearGate.half+40)x=nearGate.x+(x<nearGate.x?-1:1)*range(145,270);
         if(nearArcadeFeature(x,y)||patchAt(x,y)||nearMushroom(x,y,S.mushroomHunt.obstacleClearance+35))continue;
         const kinds=s.kind==='slalom'?S.spawnTables.classic:s.kind==='mushroom'?S.spawnTables.mushroom:s.kind==='forest'?S.spawnTables.forest:S.spawnTables.mixed;
-        const type=pick(kinds),fast=type==='skier'&&random()<S.skiers.courseFastChance,sizes={personGreen:30,personYellow:30,pine:range(63,93),fir:range(49,70),rock:47,dog:34,skier:42,boarder:43,mushroom:37,ramp:61,mogul:40,sled:45,cat:25,rainbow:130,bush:35};
+        const type=pick(kinds),fast=type==='skier'&&random()<S.skiers.courseFastChance,sizes={personGreen:30,personYellow:30,pine:range(63,93),fir:range(49,70),rock:47,dog:34,skier:42,boarder:43,mushroom:37,ramp:61,mogul:40,sled:45,cat:25,squirrel:32,rainbow:130,bush:35};
         if(GRIT_TREES.has(type)&&state.roads.some(r=>r.surface==='snow'&&roadDistance(r,x,y)<r.width/2+Math.max(20,(sizes[type]||70)*.32)+48))continue;
-        entity(type,x,y+range(-30,30),{fast,width:sizes[type],r:type==='pine'?18:type==='ramp'||type==='rainbow'?25:13,animal:type==='cat',ai:'idle',climb:0,nextAI:clock+3,vx:type==='dog'?range(-15,15):0,vy:type==='skier'?(fast?range(...S.skiers.fastSpeed):range(...S.skiers.slowSpeed)):type==='boarder'?range(...S.skiers.boarderSpeed):0});
+        entity(type,x,y+range(-30,30),{fast,width:sizes[type],r:type==='pine'?18:type==='squirrel'?5:type==='ramp'||type==='rainbow'?25:13,animal:['cat','squirrel'].includes(type),ai:'idle',climb:0,nextAI:clock+3,vx:type==='dog'?range(-15,15):0,vy:type==='skier'?(fast?range(...S.skiers.fastSpeed):range(...S.skiers.slowSpeed)):type==='boarder'?range(...S.skiers.boarderSpeed):0});
       }
       if(s.kind==='freestyle'&&Math.floor(y/180)%2===0)entity('ramp',center+range(-105,105),y+55,{width:100,r:24});
       state.generated+=range(...S.world.terrainSpacing)/Math.max(.8,s.density);
@@ -2740,6 +2758,7 @@ window.FROSTLINE_READY = (async () => {
       else if(!o.petted){o.petted=true;say('Prrrr.',o);}
       return;
     }
+    if(o.type==='squirrel'){startleSquirrel(o,p);return;}
     if(['rabbit','fox'].includes(o.type)){greetSmallAnimal(o,true);return;}
 
     // Accelerating inside an existing slow contact must not cause another fall.
@@ -3260,7 +3279,7 @@ window.FROSTLINE_READY = (async () => {
   const HOUSE_CELL=128,HOUSE_REACH=64,TREE_CELL=96;
   const HOUSE_TYPES=new Set(['lodge','rental','mausoleum','iceBlock','ruinWall']);
   const TREE_TYPES=new Set(['pine','fir','smallPine','spruceTree','crookedTree','cedarTree','alpineTree','wideLog','fallingTree','christmasTree','grave','cemeteryFence','areaBarrier','cemeteryPillar']);
-  const TIGHT_DRAW_TYPES=new Set([...HOUSE_TYPES,...TREE_TYPES,'skier','boarder','personRed','personYellow','personGreen','dog','cat','wolf','bear','rabbit','fox'].filter(type=>!['fallingTree','wideLog','cemeteryFence','areaBarrier'].includes(type)));
+  const TIGHT_DRAW_TYPES=new Set([...HOUSE_TYPES,...TREE_TYPES,'skier','boarder','personRed','personYellow','personGreen','dog','cat','wolf','bear','rabbit','squirrel','fox'].filter(type=>!['fallingTree','wideLog','cemeteryFence','areaBarrier'].includes(type)));
   const houseSolids={},treeSolids={},skierSolids={};
   function solidBounds(o){
     if(['wideLog','fallingTree','cemeteryFence','areaBarrier'].includes(o.type)){const [ax,ay,bx,by]=obstacleSegment(o);return [Math.min(ax,bx)-o.r,Math.min(ay,by)-o.r,Math.max(ax,bx)+o.r,Math.max(ay,by)+o.r];}
@@ -3694,9 +3713,67 @@ window.FROSTLINE_READY = (async () => {
       }else {o.motionVx=o.motionVy=o.travelSpeed=0;o.travelStamp=clock;resolveEnemyContact(o);if(state.deathTimer)return;}
     }
   }
+  const SQUIRREL_TREES=objectView(o=>GRIT_TREES.has(o.type));
+  function startleSquirrel(o,threat){
+    if(o.eaten||o.dead||o.climb>0)return;
+    const C=S.wildlife.squirrel;
+    o.fleeUntil=clock+2.5;o.angle=Math.atan2(o.y-threat.y,o.x-threat.x);
+    if(clock<(o.treeSearchAt||0))return;
+    o.treeSearchAt=clock+.75;
+    let best=null,distance=C.treeSearchRadius;
+    for(const tree of viewItems(SQUIRREL_TREES)){
+      if(tree.dead||tree.eaten||tree.r<=0)continue;
+      const d=Math.hypot(tree.x-o.x,tree.y-o.y);
+      if(d<distance){distance=d;best=tree;}
+    }
+    o.perch=best;
+  }
+  function updateSquirrel(o,dt,threats){
+    const C=S.wildlife.squirrel,p=state.p;
+    if(o.perch&&(o.perch.dead||o.perch.eaten||o.perch.r<=0||clock>=(o.treeCheckAt||0)&&!viewItems(SQUIRREL_TREES).includes(o.perch))){o.perch=null;o.climb=0;o.ai='idle';}
+    if(clock>=(o.treeCheckAt||0))o.treeCheckAt=clock+.5;
+    const stop=()=>{o.running=false;o.motionVx=o.motionVy=o.travelSpeed=0;o.travelStamp=clock;};
+    if(o.climb>0){
+      stop();o.x=ease(o.x,o.perch.x+(o.squirrelFacing?-8:8),8,dt);
+      const height=Math.min(80,o.perch.width*.6);
+      if(o.ai==='descending'){
+        o.climb=Math.max(0,o.climb-C.climbSpeed*dt);
+        if(!o.climb){o.perch=null;o.ai='idle';o.nextAI=clock+1.2;o.treeSearchAt=clock+1;}
+      }else{
+        o.climb=Math.min(height,o.climb+C.climbSpeed*dt);o.ai=o.climb>=height?'perched':'climbing';
+        if(o.ai==='perched'&&clock>=o.perchUntil){
+          if(threats.some(t=>Math.hypot(t.x-o.x,t.y-o.y)<C.noticeRadius)||p.speed>S.villageLife.animalSpookSpeed&&Math.hypot(p.x-o.x,p.y-o.y)<C.noticeRadius)o.perchUntil=clock+1;
+          else o.ai='descending';
+        }
+      }
+      return;
+    }
+    let threat=null,distance=C.noticeRadius;
+    for(const t of threats){const d=Math.hypot(t.x-o.x,t.y-o.y);if(d<distance){distance=d;threat=t;}}
+    if(!threat&&state.started&&p.air<=0&&Math.hypot(p.x-o.x,p.y-o.y)<(p.speed>S.villageLife.animalSpookSpeed?C.noticeRadius:28))threat=p;
+    if(threat)startleSquirrel(o,threat);
+    let goal=null;
+    if(o.fleeUntil>clock){
+      o.ai='flee';
+      if(o.perch){
+        const side=o.x<o.perch.x?-1:1;goal={x:o.perch.x+side*(o.perch.r+12),y:o.perch.y+10};
+        o.angle=Math.atan2(goal.y-o.y,goal.x-o.x);
+        if(Math.hypot(goal.x-o.x,goal.y-o.y)<12){o.climb=.1;o.perchUntil=clock+C.perchSeconds+Math.min(80,o.perch.width*.6)/C.climbSpeed;o.ai='climbing';stop();return;}
+      }
+    }else{
+      o.perch=null;
+      if(clock>=(o.nextAI||0)){o.ai=o.ai==='hop'?'idle':'hop';o.angle=range(0,TAU);o.nextAI=clock+(o.ai==='hop'?range(.45,1.1):range(1.4,3.2));}
+      if(o.ai!=='hop'){stop();return;}
+    }
+    const before={x:o.x,y:o.y},speed=o.ai==='flee'?C.fleeSpeed:C.roamSpeed;
+    travel(o,o.angle,speed,dt,false,false,true,false,goal,false,false,!!goal);
+    const dx=o.x-before.x,dy=o.y-before.y,d=Math.hypot(dx,dy);
+    o.squirrelGait=(o.squirrelGait||0)+d/32;o.running=d>.01;
+    if(Math.abs(dx)>d*.2&&Math.abs(dx)>dt*8)o.squirrelFacing=dx<0;
+  }
   function updateWildlife(dt){
-    const p=state.p,A=S.wildlife,rabbits=[],cats=[],skis=[],hunters=[];
-    for(const o of objectGroups().wildlife){const t=o.type;if(t==='rabbit'){if(!o.eaten)rabbits.push(o);}else if(t==='cat')cats.push(o);else if(t==='skier'||t==='boarder')skis.push(o);else if(t==='fox'||t==='wolf')hunters.push(o);}
+    const p=state.p,A=S.wildlife,rabbits=[],cats=[],skis=[],hunters=[];let squirrelThreats;
+    for(const o of objectGroups().wildlife){const t=o.type;if(t==='rabbit'||t==='squirrel'){if(ediblePrey(o))rabbits.push(o);}else if(t==='cat')cats.push(o);else if(t==='skier'||t==='boarder')skis.push(o);else if(t==='fox'||t==='wolf')hunters.push(o);}
     for(const o of objectGroups().animals){
       if(o.ravagerIntroFor){
         const h=o.ravagerIntroFor;
@@ -3712,6 +3789,7 @@ window.FROSTLINE_READY = (async () => {
       if(o.type==='wolf'&&dogFearRetreat(o,dt,(o.wolfSpeedKmh?o.wolfSpeedKmh/S.physics.hudKmhPerSpeed:A.wolfPlayerChaseSpeed)*endlessSpeedScale(o))){o.running=true;continue;}
       if(o.type==='bear'){resolveEnemyContact(o,{passive:true});if(o.dead)continue;}
       if(state.started&&o.type==='bear'&&(courseCreature(o,p.x,p.y)||!humanArea(o.x,o.y)&&!humanArea(p.x,p.y))&&Math.hypot(o.x-p.x,o.y-p.y)<endlessAnimalNotice(o,A.bearWakeDistance)){o.animal=false;retype(o,'awakened');o.r=0;state.chasers.push({kind:'bear',chaseRun:o.arcadeRun,x:o.x,y:o.y,speed:A.bearChaseSpeed,endlessBaseKmh:state.endless&&activeCourseOwner(o)?A.bearChaseSpeed*S.physics.hudKmhPerSpeed:undefined,phase:o.phase,expires:p.y+A.bearChaseDistance,talkAt:Infinity});continue;}
+      if(o.type==='squirrel'){updateSquirrel(o,dt,squirrelThreats??=npcPredatorThreats());continue;}
       if(['rabbit','fox'].includes(o.type)&&moveSocialAnimal(o,dt,hunters))continue;
       if(o.feedingUntil>clock){o.running=false;continue;}
       if(o.type==='cat'){
@@ -3739,7 +3817,7 @@ window.FROSTLINE_READY = (async () => {
       }
       if(o.type==='fox'){
         if(clock>o.nextAI){o.hunting=random()<A.huntChance;o.nextAI=clock+range(...A.huntInterval);}
-        if(o.hunting&&!target){target=rabbits.filter(r=>!r.eaten&&Math.hypot(r.x-o.x,r.y-o.y)<A.rabbitDetection).sort((a,b)=>Math.hypot(a.x-o.x,a.y-o.y)-Math.hypot(b.x-o.x,b.y-o.y))[0];speed=o.type==='wolf'?A.wolfHuntSpeed:A.foxHuntSpeed;}
+        if(o.hunting&&!target){target=rabbits.filter(r=>ediblePrey(r)&&Math.hypot(r.x-o.x,r.y-o.y)<A.rabbitDetection).sort((a,b)=>Math.hypot(a.x-o.x,a.y-o.y)-Math.hypot(b.x-o.x,b.y-o.y))[0];speed=o.type==='wolf'?A.wolfHuntSpeed:A.foxHuntSpeed;}
       }
       if(o.type==='rabbit'){
         const predator=hunters.find(q=>!q.dead&&(q.type==='fox'||q.type==='wolf')&&q.hunting&&Math.hypot(q.x-o.x,q.y-o.y)<A.rabbitFearDistance);
@@ -4610,6 +4688,7 @@ window.FROSTLINE_READY = (async () => {
     if(o.type==='smallHill'||o.type==='largeHill'){drawHill(o,s);return;}
     if(o.type==='lurker'){drawYeti(o,s,'idle',o.width);return;}
     if(o.type==='bear'){drawBear(o,s);return;}
+    if(o.type==='squirrel'){drawSquirrel(o,s);return;}
     if(o.type==='rabbit'){sprite(o.running||Math.sin(clock*6+o.phase)>.3?'rabbitRun':'rabbit',s.x,s.y-(o.running?Math.abs(Math.sin(clock*10))*3:0),o.width,{flip:Math.cos(o.angle||0)<0});return;}
     if(o.type==='fox'||o.type==='wolf'){drawPredator(o,s);if(o.carryBreadUntil>clock)box(s.x+(Math.cos(o.angle||0)<0?-9:7),s.y-5,5,3,'#c69a63');return;}
     if(o.type==='cat'){

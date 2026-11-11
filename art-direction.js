@@ -318,3 +318,33 @@ function drawPedestrianFall(o,s){
   else {const art=pedestrianFallArt(o,up>.45?'kneel':up>0?'sit':'prone');ctx.save();ctx.translate(Math.round(s.x),Math.round(s.y));ctx.scale((side>0?-1:1)*unit,unit);ctx.drawImage(art.tile,-art.anchorX,-art.anchorY);ctx.restore();}
   if(!up)for(let i=0;i<2;i++){const a=clock*2+i*Math.PI;box(s.x+Math.cos(a)*8,s.y-11+Math.sin(a)*2,2,2,C.gold);}
 }
+
+
+const squirrelTiles=new Map();
+function squirrelTile(frame){
+  if(squirrelTiles.has(frame))return squirrelTiles.get(frame);
+  const tile=document.createElement('canvas');tile.width=28;tile.height=26;
+  const t=tile.getContext('2d'),b=(x,y,w,h,c)=>{t.fillStyle=c;t.fillRect(x,y,w,h);};
+  const run=frame<6,climb=frame>=8,phase=frame/6*TAU,tail=run?Math.round(Math.sin(phase)):0;
+  const dark='#593b36',fur='#b5683f',light='#db9853',cream='#f0cf94';
+  // A broad curled brush with a pale inner edge makes the silhouette read at game size.
+  b(3,3+tail,7,2,dark);b(1,5+tail,11,3,dark);b(0,8+tail,12,7,dark);b(2,15+tail,11,4,dark);b(7,19,9,3,dark);
+  b(3,5+tail,6,2,light);b(2,7+tail,8,7,fur);b(4,7+tail,5,3,light);b(2,10+tail,3,5,light);b(4,14+tail,7,3,fur);b(8,17,6,3,fur);
+  b(7,10+tail,3,4,dark);b(6,10+tail,2,3,cream);b(8,14,4,3,light);
+  const lift=run?Math.round(Math.max(0,Math.sin(phase))*2):0;
+  b(12,12-lift,10,10,dark);b(13,12-lift,8,9,fur);b(14,14-lift,4,6,light);b(18,14-lift,3,6,cream);
+  b(16,7-lift,9,8,dark);b(17,8-lift,7,6,light);b(16,4-lift,3,5,dark);b(17,5-lift,1,4,fur);b(21,5-lift,2,3,dark);
+  b(23,11-lift,4,3,cream);b(26,11-lift,2,2,dark);b(22,9-lift,2,2,'#172333');if(frame!==7)b(22,9-lift,1,1,'#fff1d2');
+  if(run){const foot=Math.round(Math.sin(phase)*3);b(12+foot,22-lift,5,2,dark);b(20-foot,22-lift,5,2,dark);b(22,16-lift,3,2,fur);}
+  else if(climb){const step=frame%2;b(22,14-step*2,3,2,cream);b(24,13-step*2,2,2,dark);b(13,22-step,4,2,dark);b(21,21+step,4,2,dark);}
+  else{const nibble=frame===7?1:0;b(12,22,6,2,dark);b(20,22,5,2,dark);b(22,17-nibble,4,5,'#885637');b(22,16-nibble,4,2,'#563c31');b(22,18-nibble,2,2,'#d4a365');b(20,18-nibble,2,2,cream);}
+  squirrelTiles.set(frame,tile);return tile;
+}
+function drawSquirrel(o,s){
+  const moving=o.running&&o.travelStamp===clock,climbing=o.climb>0;
+  const frame=climbing?8+(Math.floor((o.climb||0)/6)%2):moving?Math.floor((o.squirrelGait||0)*6)%6:6+(Math.floor(clock*3+(o.phase||0))%2);
+  const tile=squirrelTile(frame),w=Math.max(1,Math.round((o.width||32)*ZOOM)),h=Math.round(w*26/28);
+  const hop=moving?Math.max(0,Math.sin((o.squirrelGait||0)*TAU))*3:0;
+  shadow(s.x,s.y,8,2,.12);ctx.save();ctx.translate(Math.round(s.x),Math.round(s.y-(o.climb||0)*ZOOM-hop));if(o.squirrelFacing)ctx.scale(-1,1);
+  ctx.drawImage(tile,-Math.round(w/2),-h+1,w,h);ctx.restore();
+}

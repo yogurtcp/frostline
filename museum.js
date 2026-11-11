@@ -16,6 +16,7 @@ const MUSEUM_STAGERS={
   skeleton:(x,y)=>museumItem('zombie',x,y,{width:32,r:10,zombieRole:'ambusher',zombieState:'resting',zombieStyle:2}),
   burrower:(x,y)=>museumItem('burrower',x,y,{width:36,r:9,burrowState:'open',openAt:-9}),
   smallAnimals:(x,y)=>{museumItem('rabbit',x-40,y,ARCADE_ITEMS.rabbit);museumItem('fox',x+30,y,ARCADE_ITEMS.fox);},
+  squirrel:(x,y)=>museumItem('squirrel',x,y,ARCADE_ITEMS.squirrel),
   cat:(x,y)=>museumItem('cat',x,y,ARCADE_ITEMS.cat),
   dog:(x,y)=>museumItem('dog',x,y,{...ARCADE_ITEMS.dog,roam:0}),
   villagers:(x,y)=>{museumItem('personRed',x-34,y,{width:30,r:10});museumItem('personYellow',x+34,y,{width:30,r:10});},
