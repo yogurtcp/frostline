@@ -2604,8 +2604,8 @@
     "yetiMaxImpactAngleDegrees": 10,
     "predatorFadeSeconds": 2.4,
     "catInteraction": {
-      "petRadius": 80,
-      "petSeconds": 0.65,
+      "petRadius": 100,
+      "petSeconds": 0.4,
       "lureRadius": 360,
       "lureSeconds": 8,
       "cooldownSeconds": 12,

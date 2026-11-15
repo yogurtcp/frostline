@@ -3178,7 +3178,7 @@ window.FROSTLINE_READY = (async () => {
     }
   }
   function updateCatInteractions(dt,previous){
-    const p=state.p,A=S.wildlife,C=A.catInteraction;
+    const p=state.p,A=S.wildlife,C=A.catInteraction,petSpeed=Math.max(S.villageLife.animalSpookSpeed,S.physics.traverseSpeed);
     const grounded=state.started&&!p.fall&&!p.awaitingInput&&p.air<=0;
     let audience;
     for(const cat of viewItems(CAT_VIEW)){
@@ -3189,7 +3189,8 @@ window.FROSTLINE_READY = (async () => {
         audience??=viewItems(CAT_AUDIENCE_VIEW);
         if(audience.some(n=>catSpectator(n,cat)&&Math.hypot(n.x-cat.x,n.y-cat.y)<C.scatterRadius)){spookCat(cat);continue;}
       }
-      if(distance>C.petRadius||p.speed>S.villageLife.animalSpookSpeed||cat.petNeedsLeave||clock<(cat.petReadyAt||0)){cat.petElapsed=0;continue;}
+      if(distance<C.petRadius*2.5&&!(cat.lureUntil>clock)&&clock>=(cat.meowAt||0)){say('Meow?',cat,1.4);cat.meowAt=clock+S.villageLife.npcCooldownSeconds;}
+      if(distance>C.petRadius||p.speed>petSpeed||cat.petNeedsLeave||clock<(cat.petReadyAt||0)){cat.petElapsed=0;continue;}
       cat.petElapsed=(cat.petElapsed||0)+dt;
       if(cat.petElapsed+1e-8<C.petSeconds)continue;
       cat.petElapsed=0;cat.petNeedsLeave=true;cat.petReadyAt=clock+C.cooldownSeconds;
@@ -3817,9 +3818,20 @@ window.FROSTLINE_READY = (async () => {
         if(o.ai==='flee'||o.ai==='climb'){
           if(!o.perch)o.perch=state.objects.filter(t=>['pine','fir','lodge','rental'].includes(t.type)).sort((a,b)=>Math.hypot(a.x-o.x,a.y-o.y)-Math.hypot(b.x-o.x,b.y-o.y))[0];
           if(o.perch){const dx=o.perch.x-o.x,dy=o.perch.y-o.y,d=Math.hypot(dx,dy);if(d>8){o.x+=dx/d*A.catFleeSpeed*dt;o.y+=dy/d*A.catFleeSpeed*cemeteryYScale(o.x,o.y)*dt;}else{o.ai='climb';o.climb=Math.min(o.perch.width*A.catClimbHeightRatio,(o.climb||0)+A.catClimbSpeed*dt);}}
-          if(clock>(o.calmAt||Infinity)){o.ai='idle';o.climb=0;o.perch=null;}continue;
+          if(clock>(o.calmAt||Infinity)){
+            if(o.perch){o.x=o.perch.x;o.y=o.perch.y+(['lodge','rental'].includes(o.perch.type)?36:Math.max(36,(o.perch.r||0)+o.r+6));}
+            o.ai='idle';o.climb=0;o.perch=null;o.touched=false;o.homeX=o.x;o.homeY=o.y;
+          }continue;
         }
-        if(clock>o.nextAI){o.ai=random()<A.catRoamChance?'flee':'idle';o.nextAI=clock+range(...A.catRoamSeconds);o.calmAt=clock+A.catCalmSeconds;}continue;
+        // Ordinary curiosity is a little stroll, never an unprovoked escape up a tree.
+        o.motionVx=o.motionVy=o.travelSpeed=0;o.travelStamp=clock;
+        if(o.lureUntil>clock){o.ai='idle';continue;}
+        if(clock>o.nextAI){o.ai=random()<A.catRoamChance?'roam':'idle';o.angle=range(0,TAU);o.roamUntil=clock+S.villageLife.socialSeconds;o.nextAI=clock+range(...A.catRoamSeconds);}
+        if(o.ai==='roam'){
+          if(clock>=o.roamUntil||Math.hypot(o.x-o.homeX,o.y-o.homeY)>60)o.ai='idle';
+          else {const x=o.x;travel(o,o.angle,S.villageLife.npcAnimalApproachSpeed,dt,false,false,true);if(Math.abs(o.x-x)>dt*3)o.catFacing=o.x<x;}
+        }
+        continue;
       }
       let target=null,speed=o.type==='rabbit'?A.rabbitWalkSpeed:o.type==='bear'?A.bearRoamSpeed:A.roamSpeed;
       if(o.type==='wolf'&&(courseCreature(o,p.x,p.y)||!humanArea(p.x,p.y)&&!humanArea(o.x,o.y))&&Math.hypot(o.x-p.x,o.y-p.y)<endlessAnimalNotice(o,A.wolfAlertDistance)){for(const mate of hunters)if(mate.type==='wolf'&&!mate.dead&&mate.packId===o.packId)mate.alertUntil=clock+A.wolfAlertSeconds;}
@@ -4712,7 +4724,8 @@ window.FROSTLINE_READY = (async () => {
     if(o.type==='rabbit'){sprite(o.running||Math.sin(clock*6+o.phase)>.3?'rabbitRun':'rabbit',s.x,s.y-(o.running?Math.abs(Math.sin(clock*10))*3:0),o.width,{flip:Math.cos(o.angle||0)<0});return;}
     if(o.type==='fox'||o.type==='wolf'){drawPredator(o,s);if(o.carryBreadUntil>clock)box(s.x+(Math.cos(o.angle||0)<0?-9:7),s.y-5,5,3,'#c69a63');return;}
     if(o.type==='cat'){
-      sprite(o.ai==='climb'?'catClimb':'cat',s.x,s.y-(o.climb||0)*ZOOM,o.width,{flip:o.perch?.x<o.x});
+      const step=o.ai==='roam'&&o.travelStamp===clock&&o.travelSpeed>0?Math.sin(clock*12+o.phase)*.6:0;
+      sprite(o.ai==='climb'?'catClimb':'cat',s.x,s.y-(o.climb||0)*ZOOM-step,o.width,{flip:o.ai==='climb'?o.perch?.x<o.x:!!o.catFacing});
       if(o.lureUntil>clock&&catAvailable(o)){
         const y=s.y-o.width*ZOOM-5-Math.sin(clock*2)*2;
         for(const side of [-1,1]){const x=s.x+side*8;box(x-3,y,2,2,'#cc827b');box(x+1,y,2,2,'#cc827b');box(x-3,y+2,6,2,'#cc827b');box(x-1,y+4,2,2,'#cc827b');}
