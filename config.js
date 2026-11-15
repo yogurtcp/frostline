@@ -1,7 +1,8 @@
 /* JSON is the source of tuning values. The embedded copy keeps file:// play self-contained. */
 window.loadFrostlineConfig = async function () {
   let config = window.FROSTLINE_CONFIG;
-  if (['http:', 'https:'].includes(window.location.protocol)) {
+  // A published HTML release already embeds its matching config; only live editing needs another request.
+  if (window.FROSTLINE_DEV && ['http:', 'https:'].includes(window.location.protocol)) {
     const url = new URL('game-config.json', window.location.href);if(window.FROSTLINE_DEV)url.searchParams.set('dev','1');
     let response;
     try { response = await fetch(url, { cache: 'no-store' }); } catch (_) { /* Network loss: the embedded snapshot is playable offline. */ }

@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#f1f6ff">
-<meta name="frostline-build" content="382f553256a51382">
+<meta name="frostline-build" content="b494bacf37669900">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="manifest" href="manifest.webmanifest">
@@ -19,12 +19,12 @@ body{padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bot
 </style>
 </head>
 <body><main><canvas id="slope" tabindex="0" aria-label="Frostline skiing game. Tap the left or right side to turn once. Tap the bottom or swipe up or down to point downhill. Two-finger taps jump. Arrow keys also steer. Enter courses by skiing between their start posts. M toggles sound. Space jumps. P toggles day and night. R adds a debug burrower. T adds a debug werewolf villager ahead. No menus."></canvas><div id="app-status" role="status">Loading slope…</div><button id="install-app" hidden>Install app</button><noscript><style>#app-status{display:none}</style>Enable JavaScript to ski.</noscript></main>
-<dialog id="install-help" aria-labelledby="install-title"><h2 id="install-title">Install Frostline</h2><p id="install-instructions"></p><p>Once saved, Frostline plays offline. Online startups check for updates. Installing this same site keeps your scores and settings. A downloaded file or a different browser uses a separate save.</p><p><a href="https://yogurtcp.github.io/frostline/">Open published game</a></p><button id="close-install-help">Done</button></dialog>
-<script>/* Install/offline support. Updates are checked once, before the game starts. */
+<dialog id="install-help" aria-labelledby="install-title"><h2 id="install-title">Install Frostline</h2><p id="install-instructions"></p><p>Once saved, Frostline plays offline. Installed apps check for updates at startup; ordinary browser visits open directly. Installing this same site keeps your scores and settings. A downloaded file or a different browser uses a separate save.</p><p><a href="https://yogurtcp.github.io/frostline/">Open published game</a></p><button id="close-install-help">Done</button></dialog>
+<script>/* Browser visits load normally; installed apps check once before startup. */
 (() => {
-  const BUILD = '382f553256a51382';
+  const BUILD = 'b494bacf37669900';
   window.FROSTLINE_DEV = new URL(location.href).searchParams.has('dev');
-  let prompt = null, playing = false;
+  let prompt = null, playing = false, offlinePreparation = false;
   const standalone = () => window.matchMedia('(display-mode: standalone)').matches || navigator.standalone;
   const status = document.getElementById('app-status'), button = document.getElementById('install-app'), help = document.getElementById('install-help');
   const message = value => { status.textContent = value; };
@@ -32,7 +32,7 @@ body{padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bot
   window.FrostlineApp = {
     build: BUILD, updateState: 'starting',
     playing(value) { playing = value; refreshButton(); },
-    ready() { status.hidden = true; refreshButton(); }
+    ready() { status.hidden = true; refreshButton(); if (!standalone()) prepareOffline().catch(() => {}); }
   };
   window.addEventListener('beforeinstallprompt', event => { event.preventDefault(); prompt = event; refreshButton(); });
   window.addEventListener('appinstalled', () => { prompt = null; button.hidden = true; });
@@ -64,9 +64,21 @@ body{padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bot
     channel.port1.onmessage = event => { clearTimeout(timer); channel.port1.close(); resolve(event.data.version); };
     worker.postMessage({ type: 'FROSTLINE_VERSION' }, [channel.port2]);
   });
+  async function prepareOffline() {
+    // Optional installation/offline preparation must not delay a browser game.
+    if (offlinePreparation) return;
+    offlinePreparation = true;
+    if (window.FROSTLINE_DEV || !navigator.onLine || !['http:', 'https:'].includes(location.protocol) || !('serviceWorker' in navigator)) return;
+    const scope = new URL('./', location.href).href;
+    const registration = await navigator.serviceWorker.getRegistration(scope);
+    if (!registration || registration.scope !== scope) await navigator.serviceWorker.register('./sw.js', { scope: './', updateViaCache: 'none' });
+  }
   window.FROSTLINE_BOOT = (async () => {
     if (window.FROSTLINE_DEV || !['http:', 'https:'].includes(location.protocol) || !('serviceWorker' in navigator)) {
       window.FrostlineApp.updateState = 'unsupported'; message('Loading slope…'); return;
+    }
+    if (!standalone()) {
+      window.FrostlineApp.updateState = 'browser'; message('Loading slope…'); return;
     }
     message(navigator.onLine ? 'Checking for updates…' : 'Loading offline slope…');
     try {
@@ -106,7 +118,8 @@ body{padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bot
 <script>/* JSON is the source of tuning values. The embedded copy keeps file:// play self-contained. */
 window.loadFrostlineConfig = async function () {
   let config = window.FROSTLINE_CONFIG;
-  if (['http:', 'https:'].includes(window.location.protocol)) {
+  // A published HTML release already embeds its matching config; only live editing needs another request.
+  if (window.FROSTLINE_DEV && ['http:', 'https:'].includes(window.location.protocol)) {
     const url = new URL('game-config.json', window.location.href);if(window.FROSTLINE_DEV)url.searchParams.set('dev','1');
     let response;
     try { response = await fetch(url, { cache: 'no-store' }); } catch (_) { /* Network loss: the embedded snapshot is playable offline. */ }

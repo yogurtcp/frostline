@@ -1,8 +1,8 @@
-/* Install/offline support. Updates are checked once, before the game starts. */
+/* Browser visits load normally; installed apps check once before startup. */
 (() => {
   const BUILD = '__BUILD_VERSION__';
   window.FROSTLINE_DEV = new URL(location.href).searchParams.has('dev');
-  let prompt = null, playing = false;
+  let prompt = null, playing = false, offlinePreparation = false;
   const standalone = () => window.matchMedia('(display-mode: standalone)').matches || navigator.standalone;
   const status = document.getElementById('app-status'), button = document.getElementById('install-app'), help = document.getElementById('install-help');
   const message = value => { status.textContent = value; };
@@ -10,7 +10,7 @@
   window.FrostlineApp = {
     build: BUILD, updateState: 'starting',
     playing(value) { playing = value; refreshButton(); },
-    ready() { status.hidden = true; refreshButton(); }
+    ready() { status.hidden = true; refreshButton(); if (!standalone()) prepareOffline().catch(() => {}); }
   };
   window.addEventListener('beforeinstallprompt', event => { event.preventDefault(); prompt = event; refreshButton(); });
   window.addEventListener('appinstalled', () => { prompt = null; button.hidden = true; });
@@ -42,9 +42,21 @@
     channel.port1.onmessage = event => { clearTimeout(timer); channel.port1.close(); resolve(event.data.version); };
     worker.postMessage({ type: 'FROSTLINE_VERSION' }, [channel.port2]);
   });
+  async function prepareOffline() {
+    // Optional installation/offline preparation must not delay a browser game.
+    if (offlinePreparation) return;
+    offlinePreparation = true;
+    if (window.FROSTLINE_DEV || !navigator.onLine || !['http:', 'https:'].includes(location.protocol) || !('serviceWorker' in navigator)) return;
+    const scope = new URL('./', location.href).href;
+    const registration = await navigator.serviceWorker.getRegistration(scope);
+    if (!registration || registration.scope !== scope) await navigator.serviceWorker.register('./sw.js', { scope: './', updateViaCache: 'none' });
+  }
   window.FROSTLINE_BOOT = (async () => {
     if (window.FROSTLINE_DEV || !['http:', 'https:'].includes(location.protocol) || !('serviceWorker' in navigator)) {
       window.FrostlineApp.updateState = 'unsupported'; message('Loading slope…'); return;
+    }
+    if (!standalone()) {
+      window.FrostlineApp.updateState = 'browser'; message('Loading slope…'); return;
     }
     message(navigator.onLine ? 'Checking for updates…' : 'Loading offline slope…');
     try {

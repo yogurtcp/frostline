@@ -32,7 +32,21 @@ self.addEventListener('fetch', event => {
   if (event.request.method !== 'GET' || url.origin !== ROOT.origin || url.searchParams.has('dev')) return;
   const home = url.pathname === ROOT.pathname || url.pathname === new URL('index.html', ROOT).pathname;
   if (event.request.mode === 'navigate' && home) {
-    event.respondWith(caches.open(CACHE).then(async cache => (await cache.match(ROOT)) || fetch(event.request)));
+    event.respondWith((async () => {
+      const cache = await caches.open(CACHE), saved = await cache.match(ROOT);
+      // Online browser visits get the current HTML without a second in-page updater.
+      // Never put a newer HTML into this version's cache: its shell must stay consistent.
+      const network = fetch(event.request, { cache: 'no-cache' }).then(response => {
+        if (!response.ok) throw new Error('Slope is unavailable');
+        return response;
+      });
+      if (!saved) return network;
+      let timer;
+      try {
+        return await Promise.race([network, new Promise((_, reject) => { timer = setTimeout(() => reject(new Error('Using offline slope')), 1500); })]);
+      } catch (_) { return saved; }
+      finally { clearTimeout(timer); }
+    })());
   } else if (SHELL.slice(1).some(path => new URL(path, ROOT).pathname === url.pathname)) {
     event.respondWith((async () => {
       const cache = await caches.open(CACHE), key = new URL(url.pathname, ROOT.origin);
