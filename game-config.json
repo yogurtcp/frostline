@@ -2614,14 +2614,19 @@
       "scatterSpeed": 110
     },
     "squirrel": {
-      "spacingMetres": 110,
+      "spacingMetres": 360,
       "roamSpeed": 65,
       "fleeSpeed": 170,
       "noticeRadius": 110,
       "treeSearchRadius": 300,
       "climbSpeed": 60,
       "perchSeconds": 4.5,
-      "townCount": 2
+      "townCount": 1,
+      "ambientChance": 0.2
+    },
+    "arcadeAnimals": {
+      "rabbitSpacingMetres": 160,
+      "foxSpacingMetres": 600
     }
   },
   "chasers": {

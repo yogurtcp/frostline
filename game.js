@@ -704,21 +704,28 @@ window.FROSTLINE_READY = (async () => {
     if(from===e.startY)mouth(false);
     if(to===e.endY)mouth(true);
   }
-  function populateSquirrels(e,section,from,to){
+  function populateSmallWildlife(e,section,from,to){
     if(!['forest','trees','denseForest','quiet','runout'].includes(e.kind))return;
-    const step=S.wildlife.squirrel.spacingMetres*PX_PER_M*e.scale,first=e.startY+200*e.scale;if(step<=0)return;
-    for(let row=Math.max(0,Math.ceil((from-first)/step));;row++){
-      const y=first+row*step;if(y>=to||y>e.endY-120*e.scale)break;
-      const path=e.paths[row%e.paths.length],side=row%2?-1:1;
-      for(const offset of [55,85,35]){
-        const x=encounterPathX(path,y)+side*offset*e.scale;
-        if(patchAt(x,y)||state.objects.some(o=>o.r>0&&NPC_STATIC_SOLIDS.has(o.type)&&obstacleClearance(o,x,y)<14))continue;
-        entity('squirrel',x,y,{...ARCADE_ITEMS.squirrel,arcadeRun:section,encounter:e,nextAI:clock+range(1,3)});break;
+    const A=S.wildlife,profiles=[
+      ['squirrel',A.squirrel.spacingMetres,200,[55,85,35]],
+      ['rabbit',A.arcadeAnimals.rabbitSpacingMetres,420,[30,65,105]],
+      ['fox',A.arcadeAnimals.foxSpacingMetres,780,[95,130,60]]
+    ];
+    for(const [type,spacing,offset,offsets] of profiles){
+      const step=spacing*PX_PER_M*e.scale,first=e.startY+offset*e.scale;if(step<=0)continue;
+      for(let row=Math.max(0,Math.ceil((from-first)/step));;row++){
+        const y=first+row*step;if(y>=to||y>e.endY-120*e.scale)break;
+        const path=e.paths[row%e.paths.length],side=row%2?-1:1,item=ARCADE_ITEMS[type];
+        for(const offset of offsets){
+          const x=encounterPathX(path,y)+side*offset*e.scale;
+          if(patchAt(x,y)||state.objects.some(o=>o.r>0&&NPC_STATIC_SOLIDS.has(o.type)&&obstacleClearance(o,x,y)<item.r+9))continue;
+          entity(type,x,y,{...item,arcadeRun:section,encounter:e,humanVisitor:true,nextAI:clock+range(1,3)});break;
+        }
       }
     }
   }
   function populateEndlessEncounter(e,section,toY){
-    const scale=e.scale,from=e.generatedY,to=Math.min(e.endY,toY);if(to<=from)return;if(e.kind!=='trees'){populateEndlessRegion(e,section,from,to);populateSquirrels(e,section,from,to);if(e.kind==='quiet'||e.kind==='runout'){clearSnowRoadTrees(e.snowRoad);addRouteLamps(e.paths[0],null,from,to,e);}e.generatedY=to;return;}
+    const scale=e.scale,from=e.generatedY,to=Math.min(e.endY,toY);if(to<=from)return;if(e.kind!=='trees'){populateEndlessRegion(e,section,from,to);populateSmallWildlife(e,section,from,to);if(e.kind==='quiet'||e.kind==='runout'){clearSnowRoadTrees(e.snowRoad);addRouteLamps(e.paths[0],null,from,to,e);}e.generatedY=to;return;}
     const own={arcadeRun:section,encounter:e},root=section.endlessRoot;
     if(from===e.startY)entity('encounterTitle',root.x,e.startY-60*scale,{...own,r:0,width:300});
     populateForestBoundary(e,section,from,to);
@@ -731,7 +738,7 @@ window.FROSTLINE_READY = (async () => {
       }
       if(random()<.1){const path=pick(e.paths),x=encounterPathX(path,y),vy=range(...S.skiers.slowSpeed);entity('skier',x+range(-.4,.4)*e.half,y,{...own,width:42,r:12,vx:0,vy:vy*scale,endlessBaseVy:vy});}
     }
-    populateSquirrels(e,section,from,to);e.generatedY=to;delete e.clearanceRows;
+    populateSmallWildlife(e,section,from,to);e.generatedY=to;delete e.clearanceRows;
   }
   function endlessPursuitRoute(c,target){
     if(!state.endless||!activeCourseOwner(c))return null;
@@ -963,7 +970,7 @@ window.FROSTLINE_READY = (async () => {
         if(!a.encounters.some(e=>e.kind!=='forest'&&a.nextLakeY+ry>e.startY-100*lakeScale&&a.nextLakeY-ry<e.endY+100*lakeScale)){
           const lake=entity('ice',root.x+range(-140,140)*lakeScale,a.nextLakeY,{rx,ry,width:rx*2,r:0,arcadeRun:section,arcadeFeature:true});
           // Natural forest lakes keep their open water footprint even when streamed after trees.
-          state.objects=state.objects.filter(o=>o.encounter?.kind!=='forest'||!TREE_TYPES.has(o.type)&&!['smallHill','largeHill','rainbow'].includes(o.type)||!lakeContains(lake,o.x,o.y));
+          state.objects=state.objects.filter(o=>o.encounter?.kind!=='forest'||!TREE_TYPES.has(o.type)&&!['smallHill','largeHill','rainbow','squirrel','rabbit','fox'].includes(o.type)||!lakeContains(lake,o.x,o.y));
         }
         const density=Math.max(.02,mix(...E.rates.lakes,p.t)*p.wave*p.lakes);
         a.nextLakeY+=Math.max(110,100/density*range(.8,1.2))*PX_PER_M*lakeScale;
@@ -1710,7 +1717,19 @@ window.FROSTLINE_READY = (async () => {
     }
     if(!town.endlessRun)for(let n=0;n<4;n++)entity(n%2?'personRed':'personGreen',town.stationX-65+n*22,town.stationY+80+n*15,{width:30,r:10,town,job:'queue'});
     const cafe=ordered.find(h=>h.buildingKind==='cafe')||{x:centers[0],y:rowYs[0]};
-    for(let i=0;i<L.rabbitsPerTown;i++)entity('rabbit',cafe.x+(i?1:-1)*(cafe.width||100),cafe.y+100+i*40,{width:20,r:5,animal:true,ai:'idle',nextAI:clock+3,town,humanVisitor:true});
+    for(let i=0;i<L.rabbitsPerTown;i++){
+      const extra={width:20,r:5,animal:true,ai:'idle',nextAI:clock+3,town,humanVisitor:true};let rabbit;
+      const middle=Math.floor((i+1)*town.route.length/(L.rabbitsPerTown+1)),segments=town.route.length-1;
+      for(const delta of [0,1,-1,2,-2]){
+        const index=1+((middle-1+delta)%segments+segments)%segments,a=town.route[index-1],b=town.route[index],length=Math.hypot(b.x-a.x,b.y-a.y)||1;
+        for(const side of [i%2?-1:1,i%2?1:-1]){
+          const distance=side*(town.mainRoadWidth/2+38),x=(a.x+b.x)/2+(b.y-a.y)/length*distance,y=(a.y+b.y)/2-(b.x-a.x)/length*distance;
+          rabbit=decorate('rabbit',x,y,extra);if(rabbit)break;
+        }
+        if(rabbit)break;
+      }
+      if(!rabbit)entity('rabbit',cafe.x+(i%2?1:-1)*(cafe.width||100),cafe.y+100+i*40,extra);
+    }
     if(random()<L.foxVisitChance)entity('fox',town.x+S.village.halfWidth-100,cafe.y+140,{width:39,r:10,animal:true,ai:'idle',nextAI:clock+3,town,humanVisitor:true});
   }
   function villageReaction(source,key){
@@ -2474,7 +2493,8 @@ window.FROSTLINE_READY = (async () => {
         if(state.safeTrails.some(r=>!(forestOutside&&r===state.course)&&r.arcade&&y>r.startY-120&&y<r.endY+60&&Math.abs(x-centerAt(y,r))<S.world.safeCourseHalfWidth+100))continue;
         if(nearArcadeFeature(x,y)||nearMushroom(x,y)||patchAt(x,y)||insideTown(x,y)||museumArea(x,y)||state.villages.some(t=>roadDistance(t.approachRoad,x,y)<t.approachRoad.width/2+60)||(!state.course&&state.zone.kind==='start'&&Math.abs(x)<S.world.meadowHalfWidth&&y>S.world.meadowTop&&y<S.world.meadowBottom))continue;
         if(state.objects.some(o=>(o.type==='gate'||o.type==='entrance')&&Math.abs(o.x-x)<o.half+60&&Math.abs(o.y-y)<140))continue;
-        const type=forestOutside?pick(['pine','pine','pine','fir','fir','bush','rock','rabbit','squirrel']):ambientType(x,y);
+        const chosen=forestOutside?pick(['pine','pine','pine','fir','fir','bush','rock','rabbit','squirrel']):ambientType(x,y);
+        const type=chosen==='squirrel'&&random()>=S.wildlife.squirrel.ambientChance?'fir':chosen;
         if(MONSTER_KINDS.has(type)&&(state.endless||humanArea(x,y)))continue;
         if(type==='wolf'){if(!spawnWolfPack(x,y,{worldChunk:key}).length)entity('fir',x,y,{width:65,r:16,worldChunk:key});continue;}
         const fast=type==='skier'&&random()<(state.course?.arcade?.fastChance??S.skiers.ambientFastChance);

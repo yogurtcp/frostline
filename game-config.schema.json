@@ -5543,6 +5543,27 @@
               "minimum": 0,
               "maximum": 8,
               "description": "Maximum squirrels beside each normal village road."
+            },
+            "ambientChance": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "description": "Fraction of ambient squirrel selections kept; rejected selections become ordinary fir scenery."
+            }
+          }
+        },
+        "arcadeAnimals": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Small wildlife beside authored Arcade forest and trail paths. Distances in metres; zero disables that animal. Optional fields use loader defaults.",
+          "properties": {
+            "rabbitSpacingMetres": {
+              "type": "number",
+              "minimum": 0
+            },
+            "foxSpacingMetres": {
+              "type": "number",
+              "minimum": 0
             }
           }
         }

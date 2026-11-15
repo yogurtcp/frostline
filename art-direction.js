@@ -326,7 +326,7 @@ function squirrelTile(frame){
   const tile=document.createElement('canvas');tile.width=28;tile.height=26;
   const t=tile.getContext('2d'),b=(x,y,w,h,c)=>{t.fillStyle=c;t.fillRect(x,y,w,h);};
   const run=frame<6,climb=frame>=8,phase=frame/6*TAU,tail=run?Math.round(Math.sin(phase)):0;
-  const dark='#593b36',fur='#b5683f',light='#db9853',cream='#f0cf94';
+  const dark='#454a55',fur='#85898b',light='#b6b8b2',cream='#e6e4d8';
   // A broad curled brush with a pale inner edge makes the silhouette read at game size.
   b(3,3+tail,7,2,dark);b(1,5+tail,11,3,dark);b(0,8+tail,12,7,dark);b(2,15+tail,11,4,dark);b(7,19,9,3,dark);
   b(3,5+tail,6,2,light);b(2,7+tail,8,7,fur);b(4,7+tail,5,3,light);b(2,10+tail,3,5,light);b(4,14+tail,7,3,fur);b(8,17,6,3,fur);
