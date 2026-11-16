@@ -233,6 +233,10 @@
         "ravagerIntro": [
           500,
           560
+        ],
+        "legendarium": [
+          300,
+          300
         ]
       },
       "beginnerPeople": [
@@ -641,6 +645,12 @@
       "creatureIntroductions": {
         "unlockAfterIntro": true,
         "once": true
+      },
+      "legendary": {
+        "enabled": true,
+        "chancePerArea": 0.28,
+        "firstMetres": 1800,
+        "maxActive": 2
       }
     },
     "wildlife": {

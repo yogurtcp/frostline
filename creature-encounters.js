@@ -58,6 +58,7 @@ function updateCreatureIntroductions(){
     if(s.x>30&&s.x<W-30&&s.y>110&&s.y<H-70&&Math.hypot(h.x-state.p.x,h.y-state.p.y)<Math.max(360,state.p.speed*1.3)){h.introStaged=false;awakenYeti(h);}
   }
 }
+const FEUD_SLEEPERS=objectView(o=>o.type==='lurker');
 let feudScanAt=0,feudCourse=null;
 function feudAlive(o){return o&&!o.dead&&!o.eaten&&!o.leaving&&!o.retiring;}
 function feudReady(o){return feudAlive(o)&&!o.waiting&&!(o.wakeUntil>clock)&&!(o.stunnedUntil>clock)&&!(o.feedingUntil>clock)&&!(o.scaredUntil>clock);}
@@ -69,7 +70,7 @@ function monstersSee(a,b){
 function updateMonsterFeuds(){
   if(!state.started)return;if(feudCourse!==state.course){feudCourse=state.course;feudScanAt=0;}
   if(clock<feudScanAt)return;feudScanAt=clock+.25;
-  const wolves=objectGroups().werewolves.filter(o=>o.werewolfState==='wolf'&&feudAlive(o)),yetis=state.chasers.filter(o=>['fast','slow'].includes(o.kind)&&feudAlive(o)),sleepers=state.objects.filter(o=>o.type==='lurker'&&!o.introStaged&&feudAlive(o));
+  const wolves=objectGroups().werewolves.filter(o=>o.werewolfState==='wolf'&&feudAlive(o)),yetis=state.chasers.filter(o=>['fast','slow'].includes(o.kind)&&feudAlive(o)),sleepers=viewItems(FEUD_SLEEPERS).filter(o=>!o.introStaged&&feudAlive(o));
   const live=new Set([...wolves,...yetis]);for(const o of live)if(o.monsterRival&&(!live.has(o.monsterRival)||!feudAlive(o.monsterRival)))clearMonsterFeud(o);
   const notice=S.predators.monsterFeuds.noticeMetres*PX_PER_M;
   for(const wolf of wolves){

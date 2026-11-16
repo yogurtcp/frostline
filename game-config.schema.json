@@ -9858,7 +9858,8 @@
                   "boulder",
                   "runout",
                   "werewolfIntro",
-                  "ravagerIntro"
+                  "ravagerIntro",
+                  "legendarium"
                 ]
               }
             },
@@ -10053,6 +10054,16 @@
                     "type": "number",
                     "minimum": 200,
                     "maximum": 2000
+                  },
+                  "minItems": 2,
+                  "maxItems": 2
+                },
+                "legendarium": {
+                  "type": "array",
+                  "items": {
+                    "type": "number",
+                    "minimum": 200,
+                    "maximum": 1000
                   },
                   "minItems": 2,
                   "maxItems": 2
@@ -11195,6 +11206,29 @@
                 "once": {
                   "type": "boolean",
                   "description": "Skip the two authored introductions after the first daytime lap"
+                }
+              }
+            },
+            "legendary": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "enabled": {
+                  "type": "boolean"
+                },
+                "chancePerArea": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                "firstMetres": {
+                  "type": "number",
+                  "minimum": 0
+                },
+                "maxActive": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 4
                 }
               }
             }

@@ -34,6 +34,9 @@ window.loadFrostlineConfig = async function () {
   for(const [kind,count] of Object.entries({yeti:1,wolf:3,bear:2,werewolf:1}))config.chasers.dogCompanion.scareCounts[kind] ??= count;
   for(const [key,value] of Object.entries({feedMetres:8,maxFollowing:0,scareMetres:18,barkMetres:14,scareSeconds:2.5,retreatSeconds:3,followDistanceMetres:3.2,playRadiusMetres:5,cruiseSpeedKmh:24,catchUpSpeedKmh:16,challengeSeconds:1,challengeSpeedKmh:42}))config.chasers.dogCompanion[key] ??= value;
   config.endless.regions ??= {};
+  config.endless.regions.legendary ??= {};
+  for(const [key,value] of Object.entries({enabled:true,chancePerArea:.28,firstMetres:1800,maxActive:2}))config.endless.regions.legendary[key] ??= value;
+  config.endless.regions.lengthMetres ??= {};config.endless.regions.lengthMetres.legendarium ??= [300,300];
   config.endless.regions.creatureIntroductions ??= {};
   config.endless.regions.creatureIntroductions.unlockAfterIntro ??= true;
   config.endless.regions.creatureIntroductions.once ??= true;
