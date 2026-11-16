@@ -17,8 +17,8 @@ window.FROSTLINE_READY = (async () => {
   const range = (a,b) => a + random()*(b-a);
   const C = S.colors, stages = S.courses;
   const MONSTER_KINDS=new Set(['wolf','bear','lurker','zombie','fast','slow','burrower']);
-  const ENDLESS_DEBUG_AREAS=['forest','trees','town','crowd','quiet','cemetery','lake','denseForest','scramble','rivalRace','christmas','halloween','piedPiper','avalanche','burrowField','boulder'];
-  const WIDE_REGIONS=new Set(['town','christmas','halloween','trees','cemetery','denseForest','scramble','crowd','beginner','piedPiper','avalanche','burrowField','boulder']);
+  const ENDLESS_DEBUG_AREAS=['forest','trees','town','crowd','quiet','cemetery','lake','denseForest','scramble','rivalRace','christmas','halloween','piedPiper','avalanche','burrowField','boulder','werewolfIntro','ravagerIntro'];
+  const WIDE_REGIONS=new Set(['town','christmas','halloween','trees','cemetery','denseForest','scramble','crowd','beginner','piedPiper','avalanche','burrowField','boulder','werewolfIntro','ravagerIntro']);
   // __SPECIAL_AREAS_CODE__
   // __SEASONAL_AREAS_CODE__
   // __ENCOUNTER_ENEMIES_CODE__
@@ -26,6 +26,7 @@ window.FROSTLINE_READY = (async () => {
   // __LEVELS_CODE__
   // __ART_DIRECTION_CODE__
   // __ANIMAL_INTERACTIONS_CODE__
+  // __CREATURE_ENCOUNTERS_CODE__
   // Source rectangles in the actual generated PNG atlases. No stand-in art.
   const atlas = S.atlas;
   const images = {}, spriteCache = new Map();
@@ -449,6 +450,7 @@ window.FROSTLINE_READY = (async () => {
     for(let tries=0;tries<R.order.length;tries++){
       const index=a.regionOrderIndex||0;a.regionOrderIndex=index+1;
       const kind=R.order[index%R.order.length],cycle=Math.floor(index/R.order.length)+1;
+      if(!a.debug&&cycle>1&&R.creatureIntroductions.once&&INTRO_KINDS.has(kind))continue;
       if(a.debug||cycle>=(R.firstCycle?.[kind]??1))return kind;
     }
     return 'quiet';
@@ -469,7 +471,7 @@ window.FROSTLINE_READY = (async () => {
     a.previousEncounterKind=a.lastEncounterKind;a.encounters.push(e);a.lastEncounterKind=kind;if(kind==='crowd')a.lastCrowdEndY=e.endY;
     if(townKind){
       let names=S.village.names.filter(name=>!a.townNames.includes(name));if(!names.length){a.townNames=[];names=S.village.names;}const name=a.resumeTownName&&names.includes(a.resumeTownName)?a.resumeTownName:pick(names);delete a.resumeTownName;a.townNames.push(name);
-      const resume={version:S.endless.recordVersion,kind,visit,townName:name,townNames:[...a.townNames],themeVisits:{...a.themeVisits},regionOrderIndex:a.regionOrderIndex||0,encounterCount:e.id,metres:Math.max(0,(startY-a.startY)/PX_PER_M),crowdGapMetres:a.lastCrowdEndY===undefined?null:Math.max(0,(startY-a.lastCrowdEndY)/PX_PER_M),lastEncounterKind:a.previousEncounterKind??null};
+      const resume={version:S.endless.recordVersion,kind,visit,townName:name,townNames:[...a.townNames],themeVisits:{...a.themeVisits},regionOrderIndex:a.regionOrderIndex||0,regionOrder:[...R.order],creatureUnlockMetres:creatureUnlockMetres(a),encounterCount:e.id,metres:Math.max(0,(startY-a.startY)/PX_PER_M),crowdGapMetres:a.lastCrowdEndY===undefined?null:Math.max(0,(startY-a.lastCrowdEndY)/PX_PER_M),lastEncounterKind:a.previousEncounterKind??null};
       const town=kind==='christmas'?makeChristmasParade(e,root,name):makeVillage(startY,root.x,false,{endlessRun:root,name,layoutSeed:FESTIVAL_KINDS.has(kind)?Math.floor(random()*4294967296):undefined,festival:FESTIVAL_KINDS.has(kind)?kind:null,lengthWorld:length,deferLanes:true,people:Math.round(mix(...Cf.townPeople,difficulty)*(FESTIVAL_KINDS.has(kind)?R.festivals.peopleMultiplier:1)),village:{corridorHalfWidth:half,mainRoadWidth:S.village.mainRoadWidth*half/S.village.corridorHalfWidth}});
       e.town=town;town.encounter=e;e.title=town.name;e.band=town.halfWidth;
       for(const route of [town.route,town.backRoute?.points].filter(Boolean)){
@@ -494,6 +496,7 @@ window.FROSTLINE_READY = (async () => {
       if(variant===1)e.paths.pop();e.title=['Forked Pines','Winding Grove','Forest Islands'][variant];
       e.band=Math.max(...e.paths.flat().map(p=>Math.abs(p.x-root.x)))+e.half+350*scale;
     }
+    rememberCreatureIntroduction(e);
     e.coreBand=e.band;
     if(kind!=='cemetery'&&!SPECIAL_KINDS.has(kind)&&(WIDE_REGIONS.has(kind)||kind==='lake'))e.band=Math.max(e.band,R.minimumWidthMetres*PX_PER_M*scale/2);
     if(e.town){e.town.halfWidth=e.band;if(kind!=='christmas')populateForestBoundary(e,section,e.startY,e.endY,{banks:false});}
@@ -508,7 +511,8 @@ window.FROSTLINE_READY = (async () => {
     e.band=1000*e.scale;e.paths=[[point(0),point(1)]];
     if(['crowd','beginner'].includes(e.kind)){e.centerX=e.kind==='crowd'?state.p.x:root.x;e.crowdWidthMetres=Math.max(e.kind==='crowd'?R.crowd.widthMetres:0,R.minimumWidthMetres);e.half=e.crowdWidthMetres*PX_PER_M*e.scale/2-60;e.band=e.half+200;e.paths=[[{x:e.centerX,y:e.startY},{x:e.centerX,y:e.endY}]];}
     const names={crowd:'Rush Hour Slope',beginner:'Rush Hour Slope',quiet:'Snowy Trail',lake:'Stillwater Lake',runout:'Long Glide',denseForest:'Close Pines',scramble:'Wild Patch',forest:'Open Pines',cemetery:'Frost Rest Cemetery'};e.title=names[e.kind];
-    if(SPECIAL_KINDS.has(e.kind)){planSpecialArea(e,section);}
+    if(INTRO_KINDS.has(e.kind)){planCreatureIntroduction(e,section);}
+    else if(SPECIAL_KINDS.has(e.kind)){planSpecialArea(e,section);}
     else if(LEVEL_KINDS.has(e.kind)){planLevelArea(e,section);}
     else if(e.kind==='cemetery'){
       const C=R.cemetery,length=e.endY-e.startY,side=pick([-1,1]);e.openCemetery=true;e.centerX=root.x;
@@ -579,6 +583,7 @@ window.FROSTLINE_READY = (async () => {
     const R=S.endless.regions,scale=e.scale,length=e.endY-e.startY,root=section.endlessRoot,own={arcadeRun:section,encounter:e};
     if(from===e.startY)entity('encounterTitle',e.centerX??root.x,e.startY-60*scale,{...own,r:0,width:300});
     const rows=(step,callback,offset=0)=>{for(let row=Math.max(0,Math.ceil((from-e.startY-offset)/step));;row++){const y=e.startY+offset+row*step;if(y>=to||y>=e.endY)break;callback(y,row);}};
+    if(INTRO_KINDS.has(e.kind)){populateCreatureIntroduction(e,section,from,to);return;}
     if(e.specialArea){populateSpecialArea(e,section,from,to);return;}
     if(LEVEL_KINDS.has(e.kind)){populateLevelArea(e,section,from,to);return;}
     if(e.kind==='beginner'||e.kind==='crowd'){
@@ -806,7 +811,7 @@ window.FROSTLINE_READY = (async () => {
       // Rebuild from the saved town: same area sequence, difficulty, distance, name and gear.
       const a=state.endless,back=resume.metres*PX_PER_M;
       a.startY-=back;run.startY-=back;a.savedMetres=resume.metres;a.checkpoint=resume;a.resumeCheckpoint=true;
-      a.themeVisits={...resume.themeVisits,[resume.kind]:resume.visit-1};a.regionOrderIndex=resume.regionOrderIndex;a.encounterCount=resume.encounterCount-1;
+      a.themeVisits={...resume.themeVisits,[resume.kind]:resume.visit-1};a.regionOrderIndex=resumeRegionCursor(resume);restoreCreatureIntroductions(a,resume);a.encounterCount=resume.encounterCount-1;
       a.townNames=resume.townNames.filter(name=>name!==resume.townName);a.resumeTownName=resume.townName;a.lastEncounterKind=resume.lastEncounterKind;
       if(resume.crowdGapMetres!==null&&resume.crowdGapMetres!==undefined)a.lastCrowdEndY=startY-resume.crowdGapMetres*PX_PER_M;
       a.debugNextKind=resume.kind;a.nextEncounterY=startY;a.nextGateY=startY+80;a.nextYetiY=startY;a.nextWildlifeY=startY;
@@ -869,10 +874,10 @@ window.FROSTLINE_READY = (async () => {
     const a=state.endless,R=S.endless.yetis.ravager,scale=section.endlessScale;
     const from=Math.max(section.startY,a.startY+R.firstMetres*PX_PER_M);
     const P=endlessPressure((endY-a.startY)/PX_PER_M);
-    if(endY-from<180*scale||P.stage<S.endless.stages.ravagerStage||random()>=R.chancePerSection*Math.min(1,P.t))return;
+    if(endY-from<180*scale||!creatureUnlocked('ravager',endY)||random()>=R.chancePerSection)return;
     for(let attempt=0;attempt<10;attempt++){
       const y=range(from+80*scale,endY-100*scale),e=endlessEncounterAt(y);
-      if(e?.town||e?.noNewPredators||['quiet','lake','beginner'].includes(e?.kind))continue;
+      if(!creatureUnlocked('ravager',y)||e?.town||e?.noNewPredators||['quiet','lake','beginner'].includes(e?.kind))continue;
       const path=e?pick(e.paths):null;
       const x=path?encounterPathX(path,y)+pick([-1,1])*e.half*range(.15,.45):section.x+range(-200,200)*scale;
       if(patchAt(x,y)||state.objects.some(o=>o.r>0&&!o.dead&&!o.eaten&&obstacleClearance(o,x,y)<40))continue;
@@ -2230,7 +2235,7 @@ window.FROSTLINE_READY = (async () => {
     say('CHOMP!',hunter,1.2);burst(meal.x,meal.y,C.ice,9);
   }
   function consumeNearbyPrey(hunter,previous,pause=S.predators.mealPauseSeconds,radius=S.chasers.captureDistance,contacts=null){
-    if(hunter.dead||hunter.eaten||hunter.retiring||hunter.leaving||hunter.stunnedUntil>clock||hunter.feedingUntil>clock||hunter.scaredUntil>clock)return false;
+    if(hunter.dead||hunter.eaten||hunter.monsterRival||hunter.retiring||hunter.leaving||hunter.stunnedUntil>clock||hunter.feedingUntil>clock||hunter.scaredUntil>clock)return false;
     if(resolveEnemyContact(hunter,{ramOnly:true}))return false;
     const index=contacts&&(contacts.index??=preyContactIndex()),meal=contactPrey(hunter,previous,radius,index);if(!meal)return false;
     eatChaserPrey(hunter,meal,previous,pause);return true;
@@ -2246,7 +2251,7 @@ window.FROSTLINE_READY = (async () => {
   }
   const ravagerCache={};
   function ravagerPrey(o,hunter){
-    if(o===hunter||o.eaten||o.dead||o.retiring||o.leaving||o.type==='awakened')return false;
+    if(o===hunter||o.eaten||o.dead||o.retiring||o.leaving||o.monsterRival||o.werewolf||o.type==='awakened')return false;
     if(ediblePrey(o))return true;
     const kind=enemyKind(o);
     return (kind==='fox'||MONSTER_KINDS.has(kind))&&(o.r>0||o.kind==='fast'||o.kind==='slow'||o.kind==='bear')&&!(kind==='zombie'&&o.zombieState==='spent');
@@ -3088,7 +3093,7 @@ window.FROSTLINE_READY = (async () => {
     updateEndlessSpeed();
     const p=state.p,previous={x:p.x,y:p.y};movePlayer(dt);constrainParadeBuildings(p,previous);pruneDistantEnemies();extendEndless();ensureWorld();spawnFastSkier();
     if(state.course){const run=state.course;if(!run.timingStarted&&p.y>=run.startY){run.timingStarted=true;run.time+=dt*clamp((p.y-run.startY)/(p.y-previous.y||1),0,1);}else if(run.timingStarted)run.time+=dt;spawnTerrain();}
-    updateTerrainFeatures(dt,previous);updateEncounterEnemies(dt);if(state.deathTimer)return;updateCatInteractions(dt,previous);updateVillageLife(dt);updateWildlife(dt);if(state.sceneCard||state.deathTimer)return;updateZombies(dt);if(state.sceneCard||state.deathTimer)return;updateFestivalTraffic(dt);updateSkiers(dt);updateSleighTeams(dt);resolveGroundPredatorPrey();updatePedestrians(dt);updateClosePasses(previous);updateAnimalPickups(previous);updateSpecialEvents();
+    updateCreatureIntroductions();updateTerrainFeatures(dt,previous);updateEncounterEnemies(dt);updateMonsterFeuds();if(state.deathTimer)return;updateCatInteractions(dt,previous);updateVillageLife(dt);updateWildlife(dt);if(state.sceneCard||state.deathTimer)return;updateZombies(dt);if(state.sceneCard||state.deathTimer)return;updateFestivalTraffic(dt);updateSkiers(dt);updateSleighTeams(dt);resolveGroundPredatorPrey();updatePedestrians(dt);updateClosePasses(previous);updateAnimalPickups(previous);updateSpecialEvents();
     for(const o of state.objects){
       if(o.type==='mistletoe'&&tryMistletoe(o)||o.cocoaShop&&tryCocoaShop(o))return;
       if(o.type!=='skier'&&o.type!=='boarder'&&o.type!=='rollingSnowball'&&!o.animal&&(o.vx||o.vy)){o.motionFromX=o.x;o.motionFromY=o.y;o.motionFromStamp=clock;o.motionVx=o.vx||0;o.motionVy=(o.vy||0)*cemeteryYScale(o.x,o.y);o.x+=o.motionVx*dt;o.y+=o.motionVy*dt;o.travelSpeed=Math.hypot(o.motionVx,o.motionVy);o.travelStamp=clock;if(NPC_STATIC_SOLIDS.has(o.type))invalidateSolidGrids();}
@@ -3102,7 +3107,7 @@ window.FROSTLINE_READY = (async () => {
       if(creature&&monsterContact(o))hit(o);
       if(state.sceneCard||state.deathTimer)return;
       if(o.dead)continue;
-      if(state.started&&!(o.stunnedUntil>clock)&&!o.retiring&&o.type==='lurker'&&(courseCreature(o,p.x,p.y)||!humanArea(o.x,o.y)&&!humanArea(p.x,p.y))&&(Math.hypot(o.x-p.x,o.y-p.y)<yetiWakeDistance(o)||o.shoreLake&&state.objects.some(q=>['skier','boarder'].includes(q.type)&&!q.eaten&&!q.dead&&q.r>0&&Math.hypot(q.x-o.x,q.y-o.y)<S.wildlife.yetiWakeDistance*endlessSpeedScale(o)&&!patchAt(q.x,q.y)))){retype(o,'awakened');o.r=0;const hunter={kind:o.arcadeTier==='slow'?'slow':'fast',arcadeTier:o.arcadeTier,ravager:o.ravager,ravagerIntroPrey:o.ravagerIntroPrey,encounter:o.encounter,chaseRun:o.arcadeRun,shoreLake:o.shoreLake,endlessBaseKmh:o.endlessBaseKmh,x:o.x,y:o.y,speed:o.arcadeRun?o.yetiSpeedKmh/S.physics.hudKmhPerSpeed:topSpeed()*S.wildlife.yetiWildSpeedRatio,wakeUntil:clock+yetiWakeDelay(o),phase:o.phase,expires:p.y+S.wildlife.yetiWildChaseDistance,talkAt:clock+6};if(hunter.ravagerIntroPrey)hunter.ravagerIntroPrey.ravagerIntroFor=hunter;state.chasers.push(hunter);say('Oh. Breakfast.',o);}
+      if(state.started&&!(o.stunnedUntil>clock)&&!o.retiring&&!o.introStaged&&o.type==='lurker'&&(courseCreature(o,p.x,p.y)||!humanArea(o.x,o.y)&&!humanArea(p.x,p.y))&&(Math.hypot(o.x-p.x,o.y-p.y)<yetiWakeDistance(o)||o.shoreLake&&state.objects.some(q=>['skier','boarder'].includes(q.type)&&!q.eaten&&!q.dead&&q.r>0&&Math.hypot(q.x-o.x,q.y-o.y)<S.wildlife.yetiWakeDistance*endlessSpeedScale(o)&&!patchAt(q.x,q.y)))){awakenYeti(o);say('Oh. Breakfast.',o);}
       if(o.type==='gate'&&o.run===state.course&&!o.checked&&previous.y<o.y&&p.y>=o.y)crossCourseGate(o,previous,p);
       if(o.type==='entrance'&&!state.course&&state.zone.kind!=='museum'&&previous.y<o.y&&p.y>=o.y&&Math.abs(p.x-o.x)<o.half){startCourse(o.stage,o);break;}
       if(o.type==='lift'&&o.checkpoint&&!o.taken&&state.endless&&!p.awaitingInput&&nearCheckpointStation(o,p))takeCheckpoint(o);
@@ -3828,6 +3833,7 @@ window.FROSTLINE_READY = (async () => {
       if(linkedWolf)o.linkedChase=true;
       if(o.eaten||o.dead||o.stunnedUntil>clock||!o.animal||o.penaltyGate&&!o.wolfAwake||!linkedWolf&&Math.hypot(o.x-p.x,o.y-p.y)>A.activeRadius)continue;
       if(o.type==='wolf'&&dogFearRetreat(o,dt,(o.wolfSpeedKmh?o.wolfSpeedKmh/S.physics.hudKmhPerSpeed:A.wolfPlayerChaseSpeed)*endlessSpeedScale(o))){o.running=true;continue;}
+      if(o.werewolf&&updateMonsterFeudActor(o,dt))continue;
       if(o.type==='bear'){resolveEnemyContact(o,{passive:true});if(o.dead)continue;}
       if(state.started&&o.type==='bear'&&(courseCreature(o,p.x,p.y)||!humanArea(o.x,o.y)&&!humanArea(p.x,p.y))&&Math.hypot(o.x-p.x,o.y-p.y)<endlessAnimalNotice(o,A.bearWakeDistance)){o.animal=false;retype(o,'awakened');o.r=0;state.chasers.push({kind:'bear',chaseRun:o.arcadeRun,x:o.x,y:o.y,speed:A.bearChaseSpeed,endlessBaseKmh:state.endless&&activeCourseOwner(o)?A.bearChaseSpeed*S.physics.hudKmhPerSpeed:undefined,phase:o.phase,expires:p.y+A.bearChaseDistance,talkAt:Infinity});continue;}
       if(o.type==='cat'&&o.catGuide){updateShortcutCat(o,dt);continue;}
@@ -3966,6 +3972,7 @@ window.FROSTLINE_READY = (async () => {
       if(c.wakeUntil>clock)continue;
       if(c.stunnedUntil>clock)continue;
       if(dogFearRetreat(c,dt,c.speed))continue;
+      if(updateMonsterFeudActor(c,dt))continue;
       if(p.y>c.expires){c.leaving=true;c.speed*=.97;continue;}
       const feeding=c.feedingUntil>clock,previous={x:c.x,y:c.y},entryTarget=christmasYetiEntryTarget(c);
       if(!feeding&&!entryTarget&&(c.kind==='fast'||c.kind==='slow'||c.kind==='bear')){
@@ -4701,7 +4708,7 @@ window.FROSTLINE_READY = (async () => {
     // Ordinary bodies do not need the long-obstacle drawing margin. Keep harnesses and moving trunks broad.
     if(TIGHT_DRAW_TYPES.has(o.type)&&!o.santaSleigh){const half=(o.paradeSpanX?houseFootHalfWidth(o)*ZOOM:(o.width||40)*ZOOM*.75)+24+(GRIT_BUILDINGS.has(o.houseSprite||o.type)?12:0);if(s.x+half<0||s.x-half>W)return;}
     if(o.type.startsWith('person')&&o.npcFallUntil>clock&&!o.eaten&&!o.dead){drawPedestrianFall(o,s);return;}
-    if(drawLevelProp(o,s)||drawEncounterEnemy(o,s,o.feedingUntil>clock)||drawSeasonalProp(o,s)||drawSpecialProp(o,s))return;
+    if(drawMonsterFight(o,s)||drawLevelProp(o,s)||drawEncounterEnemy(o,s,o.feedingUntil>clock)||drawSeasonalProp(o,s)||drawSpecialProp(o,s))return;
     if(o.villageDetail){drawVillageDetail(o,s);return;}
     if(o.type==='encounterTitle'){text(o.encounter.title.toUpperCase(),s.x,s.y,13,C.teal);return;}
     if(o.dead){ctx.save();ctx.globalAlpha=clamp((o.fadeUntil-clock)/(o.type==='wolf'?S.wildlife.wolfFadeSeconds:S.wildlife.predatorFadeSeconds),0,1);if(o.type==='wolf')sprite('wolf',s.x,s.y,o.width,{rotate:Math.PI/2});else drawKnockedOut(o,s,o.type);ctx.restore();return;}
@@ -4906,7 +4913,7 @@ window.FROSTLINE_READY = (async () => {
     if(c.eaten)return;
     if(c===state.deathYeti&&state.deathTimer>0){drawYeti(c,screen(c.x,c.y),'feed',59);return;}
     if(c.dead||c.stunnedUntil>clock){ctx.save();if(c.dead)ctx.globalAlpha=clamp((c.fadeUntil-clock)/S.wildlife.predatorFadeSeconds,0,1);drawKnockedOut(c,screen(c.x,c.y),c.kind);ctx.restore();return;}
-    const s=screen(c.x,c.y),bob=Math.sin(clock*(c.kind==='slow'?5:9)+c.phase)*2;
+    const s=screen(c.x,c.y);if(drawMonsterFight(c,s))return;const bob=Math.sin(clock*(c.kind==='slow'?5:9)+c.phase)*2;
     if(c.waiting||c.wakeUntil>clock){
       drawYeti(c,s,c.waiting?'idle':'alert',56);
       text(c.waiting?'...':'!',s.x+(c.waiting?0:18),s.y-(c.waiting?28:18),c.waiting?9:15,c.waiting?C.muted:C.red);return;
@@ -5085,7 +5092,7 @@ window.FROSTLINE_READY = (async () => {
   canvas.addEventListener('pointermove',e=>{if(state.input.pointer?.id!==e.pointerId)return;e.preventDefault();updateSwipe(e);});
   canvas.addEventListener('pointerup',e=>{activePointers.delete(e.pointerId);if(state.input.pointer?.id!==e.pointerId)return;e.preventDefault();updateSwipe(e);finishPointerTap(e);releasePointer();});const cancel=e=>{activePointers.delete(e.pointerId);if(state.input.pointer?.id===e.pointerId)releasePointer();};canvas.addEventListener('pointercancel',cancel);canvas.addEventListener('lostpointercapture',cancel);window.addEventListener('pointerup',e=>activePointers.delete(e.pointerId));window.addEventListener('pointercancel',e=>activePointers.delete(e.pointerId));
   const sceneHeldKeys=new Set();
-  window.addEventListener('keydown',e=>{if(state.deathAnimation){e.preventDefault();sceneHeldKeys.add(e.code);return;}if(state.sceneCard&&!e.target?.closest?.('dialog,#install-app')){e.preventDefault();sceneHeldKeys.add(e.code);if(!e.repeat&&!['Shift','Control','Alt','Meta'].includes(e.key))dismissSceneCard();return;}if(sceneHeldKeys.has(e.code)){e.preventDefault();return;}if(e.target?.closest?.('button,dialog,a,input,textarea,select,[contenteditable]'))return;const debugEnemy={KeyR:'burrower',KeyT:'werewolf'}[e.code]??{r:'burrower',t:'werewolf'}[e.key.toLowerCase()];if(debugEnemy&&!e.ctrlKey&&!e.metaKey&&!e.altKey&&!e.shiftKey){if(!e.repeat&&debugEncounterEnemy(debugEnemy))e.preventDefault();return;}if(e.code==='KeyP'&&!e.ctrlKey&&!e.metaKey&&!e.altKey){e.preventDefault();if(!e.repeat)toggleDayNight();return;}const difficultyStep=['[','-'].includes(e.key)?-1:[']','+','='].includes(e.key)?1:e.code==='BracketLeft'||e.code==='NumpadSubtract'?-1:e.code==='BracketRight'||e.code==='NumpadAdd'?1:0;if(difficultyStep&&!e.ctrlKey&&!e.metaKey&&!e.altKey&&(!e.shiftKey||['+','[',']'].includes(e.key))){if(!e.repeat&&debugEndlessDifficulty(difficultyStep)){e.preventDefault();return;}}const letter={q:10,w:11,e:12,y:13,u:14,i:15,o:16}[e.key.toLowerCase()]??{KeyQ:10,KeyW:11,KeyE:12,KeyY:13,KeyU:14,KeyI:15,KeyO:16}[e.code];if(letter&&!e.ctrlKey&&!e.metaKey&&!e.altKey&&!e.shiftKey){if(e.repeat&&(state.endless||!state.course&&state.zone.kind==='start')){e.preventDefault();return;}if(!e.repeat&&debugEndlessArea(letter)){e.preventDefault();return;}}const number=Number(e.key)||Number(e.code.match(/^(?:Digit|Numpad)([1-9])$/)?.[1]);if(number>=1&&number<=9&&!e.ctrlKey&&!e.metaKey&&!e.altKey&&!e.shiftKey){if(!e.repeat&&debugEndlessArea(number)){e.preventDefault();return;}}const key={ArrowLeft:'left',ArrowRight:'right',ArrowUp:'up',ArrowDown:'down',a:'left',d:'right',w:'up',s:'down'}[e.key];if(key){e.preventDefault();if((state.p.awaitingInput&&e.repeat)||!startMoving())return;state.input[key]=true;keyboardDirection(key,e.repeat);}if(e.code==='Space')e.preventDefault();if(e.key.toLowerCase()==='m'&&!e.repeat){state.muted=!state.muted;save();announce(state.muted?'SOUND OFF':'SOUND ON','',C.teal,1);}});
+  window.addEventListener('keydown',e=>{if(state.deathAnimation){e.preventDefault();sceneHeldKeys.add(e.code);return;}if(state.sceneCard&&!e.target?.closest?.('dialog,#install-app')){e.preventDefault();sceneHeldKeys.add(e.code);if(!e.repeat&&!['Shift','Control','Alt','Meta'].includes(e.key))dismissSceneCard();return;}if(sceneHeldKeys.has(e.code)){e.preventDefault();return;}if(e.target?.closest?.('button,dialog,a,input,textarea,select,[contenteditable]'))return;const debugEnemy={KeyR:'burrower',KeyT:'werewolf'}[e.code]??{r:'burrower',t:'werewolf'}[e.key.toLowerCase()];if(debugEnemy&&!e.ctrlKey&&!e.metaKey&&!e.altKey&&!e.shiftKey){if(!e.repeat&&debugEncounterEnemy(debugEnemy))e.preventDefault();return;}if(e.code==='KeyP'&&!e.ctrlKey&&!e.metaKey&&!e.altKey){e.preventDefault();if(!e.repeat)toggleDayNight();return;}const difficultyStep=['[','-'].includes(e.key)?-1:[']','+','='].includes(e.key)?1:e.code==='BracketLeft'||e.code==='NumpadSubtract'?-1:e.code==='BracketRight'||e.code==='NumpadAdd'?1:0;if(difficultyStep&&!e.ctrlKey&&!e.metaKey&&!e.altKey&&(!e.shiftKey||['+','[',']'].includes(e.key))){if(!e.repeat&&debugEndlessDifficulty(difficultyStep)){e.preventDefault();return;}}const letter={q:10,w:11,e:12,y:13,u:14,i:15,o:16,f:17,g:18}[e.key.toLowerCase()]??{KeyQ:10,KeyW:11,KeyE:12,KeyY:13,KeyU:14,KeyI:15,KeyO:16,KeyF:17,KeyG:18}[e.code];if(letter&&!e.ctrlKey&&!e.metaKey&&!e.altKey&&!e.shiftKey){if(e.repeat&&(state.endless||!state.course&&state.zone.kind==='start')){e.preventDefault();return;}if(!e.repeat&&debugEndlessArea(letter)){e.preventDefault();return;}}const number=Number(e.key)||Number(e.code.match(/^(?:Digit|Numpad)([1-9])$/)?.[1]);if(number>=1&&number<=9&&!e.ctrlKey&&!e.metaKey&&!e.altKey&&!e.shiftKey){if(!e.repeat&&debugEndlessArea(number)){e.preventDefault();return;}}const key={ArrowLeft:'left',ArrowRight:'right',ArrowUp:'up',ArrowDown:'down',a:'left',d:'right',w:'up',s:'down'}[e.key];if(key){e.preventDefault();if((state.p.awaitingInput&&e.repeat)||!startMoving())return;state.input[key]=true;keyboardDirection(key,e.repeat);}if(e.code==='Space')e.preventDefault();if(e.key.toLowerCase()==='m'&&!e.repeat){state.muted=!state.muted;save();announce(state.muted?'SOUND OFF':'SOUND ON','',C.teal,1);}});
   window.addEventListener('keyup',e=>{sceneHeldKeys.delete(e.code);const key={ArrowLeft:'left',ArrowRight:'right',ArrowUp:'up',ArrowDown:'down',a:'left',d:'right',w:'up',s:'down'}[e.key];if(key)state.input[key]=false;});
   window.addEventListener('blur',()=>{activePointers.clear();delete state.input.tap;sceneHeldKeys.clear();state.input.left=state.input.right=state.input.up=state.input.down=false;if(state.input.pointer)releasePointer();});
   window.addEventListener('resize',resize);

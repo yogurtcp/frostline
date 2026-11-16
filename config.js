@@ -34,6 +34,11 @@ window.loadFrostlineConfig = async function () {
   for(const [kind,count] of Object.entries({yeti:1,wolf:3,bear:2,werewolf:1}))config.chasers.dogCompanion.scareCounts[kind] ??= count;
   for(const [key,value] of Object.entries({feedMetres:8,maxFollowing:0,scareMetres:18,barkMetres:14,scareSeconds:2.5,retreatSeconds:3,followDistanceMetres:3.2,playRadiusMetres:5,cruiseSpeedKmh:24,catchUpSpeedKmh:16,challengeSeconds:1,challengeSpeedKmh:42}))config.chasers.dogCompanion[key] ??= value;
   config.endless.regions ??= {};
+  config.endless.regions.creatureIntroductions ??= {};
+  config.endless.regions.creatureIntroductions.unlockAfterIntro ??= true;
+  config.endless.regions.creatureIntroductions.once ??= true;
+  config.predators.monsterFeuds ??= {};
+  for(const [key,value] of Object.entries({noticeMetres:32,fightSeconds:1.8,winnerPauseSeconds:.8}))config.predators.monsterFeuds[key] ??= value;
   config.endless.regions.lakeExitSprings ??= {spacingMetres:10,widthMetres:9,shoreGapMetres:8,jumpSeconds:2.4,durationCap:1.6};
   const regionDefaults = {"enabled":true,"minimumWidthMetres":600,"order":["town","quiet","trees","lake","quiet","rivalRace","forest","cemetery","denseForest","scramble","quiet","christmas","quiet","halloween","quiet"],"firstMetres":450,"gapMetres":[0,0],"lengthMetres":{"beginner":[320,400],"quiet":[180,250],"lake":[240,330],"denseForest":[110,160],"forest":[300,450],"cemetery":[650,850],"crowd":[320,400],"scramble":[70,110]},"beginnerPeople":[65,140],"quietTreesPer100Metres":8,"forestTreesPer100Metres":[12,26],"cemeteryOpeningMetres":[12,18],"zombies":{"count":[8,14],"speedKmh":[7,11],"noticeMetres":22},"crowd":{"firstMetres":1200,"chance":0.55,"minimumGapMetres":1600,"maximumGapMetres":4200,"widthMetres":240,"people":[180,280]},"denseForestDensity":[1,2],"scrambleDensity":[1,1.35]};
   config.endless.regions ??= regionDefaults;
@@ -45,7 +50,7 @@ window.loadFrostlineConfig = async function () {
     config.endless.regions.specialAreas[key] ??= value;
     if(value&&typeof value==='object'&&!Array.isArray(value))for(const [field,fallback] of Object.entries(value))config.endless.regions.specialAreas[key][field] ??= fallback;
   }
-  for(const [key,value] of Object.entries({rivalRace:[800,1000],christmas:[900,1200],halloween:[900,1200]}))config.endless.regions.lengthMetres[key] ??= value;
+  for(const [key,value] of Object.entries({rivalRace:[800,1000],christmas:[900,1200],halloween:[900,1200],werewolfIntro:[440,500],ravagerIntro:[500,560]}))config.endless.regions.lengthMetres[key] ??= value;
   config.endless.regions.crowd ??= regionDefaults.crowd;
   for(const [key,value] of Object.entries(regionDefaults.crowd))config.endless.regions.crowd[key] ??= value;
   config.endless.regions.cemetery ??= {};

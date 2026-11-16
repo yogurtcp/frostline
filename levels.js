@@ -189,15 +189,16 @@ function updateBurrowField(e,L){
   if(p.y<e.startY+80*s||p.y>e.endY-120*s||p.fall||p.awaitingInput)return;
   if(!e.nextBurrow){e.nextBurrow=clock+1.2;announce('THE GROUND IS MOVING','WATCH BOTH SIDES',C.red,2);return;}
   if(clock<e.nextBurrow)return;
-  e.nextBurrow=clock+levelValue(e,L.spawnSeconds)/levelEase(e)*range(.7,1.3);
-  for(const side of random()<levelValue(e,L.pincerChance)?[-1,1]:[pick([-1,1])])spawnFieldBurrower(e,L,side);
+  const teaching=e.visit===1&&!e.firstBurrowShown;e.firstBurrowShown=true;
+  e.nextBurrow=clock+(teaching?6:levelValue(e,L.spawnSeconds)/levelEase(e)*range(.7,1.3));
+  for(const side of !teaching&&random()<levelValue(e,L.pincerChance)?[-1,1]:[pick([-1,1])])spawnFieldBurrower(e,L,side,teaching?1:null);
 }
-function spawnFieldBurrower(e,L,side){
-  const p=state.p,b=viewBounds(),travel=levelValue(e,L.arriveSeconds)*range(.85,1.15),pause=levelValue(e,L.strikePause),ahead=travel+pause;
+function spawnFieldBurrower(e,L,side,pauseOverride=null){
+  const p=state.p,b=viewBounds(),travel=levelValue(e,L.arriveSeconds)*range(.85,1.15),pause=pauseOverride??levelValue(e,L.strikePause),ahead=travel+pause;
   const tx=clamp(p.x+p.vx*ahead,b.left+40,b.right-40),ty=p.y+p.vy*ahead,sx=side<0?b.left-40:b.right+40,sy=ty+range(-80,30);
-  entity('burrower',sx,sy,{arcadeRun:e.section,encounter:e,r:0,width:42,fieldBurrower:true,burrowState:'rushing',rushAt:clock,burrowTrail:[],
+  const o=entity('burrower',sx,sy,{arcadeRun:e.section,encounter:e,r:0,width:42,fieldBurrower:true,burrowState:'rushing',rushAt:clock,burrowTrail:[],
     targetX:tx,targetY:ty,rushSpeed:Math.hypot(tx-sx,ty-sy)/travel,strikePause:pause,aimFollow:levelValue(e,L.aimFollowMetresPerSecond)*PX_PER_M,commitSeconds:levelValue(e,L.commitSeconds)});
-  beep(side<0?140:160,.06,'triangle',.012);
+  beep(side<0?140:160,.06,'triangle',.012);return o;
 }
 // It keeps re-aiming at where you will be, but its aim only shifts so fast, and in the last moment it commits:
 // a late, sharp change of line makes it miss, as does a jump or ice.

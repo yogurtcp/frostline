@@ -6022,6 +6022,27 @@
           "type": "number",
           "minimum": 0,
           "description": "A hunter goes for a fallen skier within this distance even when it is off the route to the player."
+        },
+        "monsterFeuds": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "noticeMetres": {
+              "type": "number",
+              "minimum": 5,
+              "maximum": 80
+            },
+            "fightSeconds": {
+              "type": "number",
+              "minimum": 0.5,
+              "maximum": 5
+            },
+            "winnerPauseSeconds": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 5
+            }
+          }
         }
       }
     },
@@ -9079,7 +9100,7 @@
             "pathPlacementChance",
             "pathOffsetMetres"
           ],
-          "description": "Tall pine that warns, rotates rigidly sideways toward the skier’s side, and remains a jumpable fallen obstacle.",
+          "description": "Tall pine that warns, rotates rigidly sideways toward the skier\u2019s side, and remains a jumpable fallen obstacle.",
           "properties": {
             "pathPlacementChance": {
               "type": "number",
@@ -9381,11 +9402,11 @@
             "ravagerStage": {
               "type": "number",
               "minimum": 1,
-              "description": "First stage where Stalker Yetis (ravagers) can appear"
+              "description": "Fallback random Ravager unlock stage when there is no authored Ravager introduction"
             },
             "introduce": {
               "type": "object",
-              "description": "First stage at which each surprise enemy kind can appear (burrower, werewolf)",
+              "description": "Fallback random surprise-enemy unlock stages when there is no matching authored introduction",
               "additionalProperties": {
                 "type": "number",
                 "minimum": 1,
@@ -9835,7 +9856,9 @@
                   "avalanche",
                   "burrowField",
                   "boulder",
-                  "runout"
+                  "runout",
+                  "werewolfIntro",
+                  "ravagerIntro"
                 ]
               }
             },
@@ -10010,6 +10033,26 @@
                   "items": {
                     "type": "number",
                     "minimum": 20
+                  },
+                  "minItems": 2,
+                  "maxItems": 2
+                },
+                "werewolfIntro": {
+                  "type": "array",
+                  "items": {
+                    "type": "number",
+                    "minimum": 200,
+                    "maximum": 2000
+                  },
+                  "minItems": 2,
+                  "maxItems": 2
+                },
+                "ravagerIntro": {
+                  "type": "array",
+                  "items": {
+                    "type": "number",
+                    "minimum": 200,
+                    "maximum": 2000
                   },
                   "minItems": 2,
                   "maxItems": 2
@@ -10594,7 +10637,7 @@
                       },
                       "minItems": 2,
                       "maxItems": 2,
-                      "description": "[easy, hard] ± spread of individual speeds"
+                      "description": "[easy, hard] \u00b1 spread of individual speeds"
                     },
                     "skiersPer100Metres": {
                       "type": "array",
@@ -10791,7 +10834,7 @@
                       },
                       "minItems": 2,
                       "maxItems": 2,
-                      "description": "[easy, hard] ± spread of individual speeds"
+                      "description": "[easy, hard] \u00b1 spread of individual speeds"
                     },
                     "lurkersPer100Metres": {
                       "type": "array",
@@ -11138,6 +11181,20 @@
                       "description": "[easy, hard] length of the tree funnel leading to the gap"
                     }
                   }
+                }
+              }
+            },
+            "creatureIntroductions": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "unlockAfterIntro": {
+                  "type": "boolean",
+                  "description": "Unlock random encounters after the matching introduction exit, replacing stage gates when that area is in the playlist"
+                },
+                "once": {
+                  "type": "boolean",
+                  "description": "Skip the two authored introductions after the first daytime lap"
                 }
               }
             }

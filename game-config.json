@@ -133,7 +133,6 @@
         "trees",
         "lake",
         "runout",
-        "burrowField",
         "quiet",
         "christmas",
         "quiet",
@@ -148,7 +147,13 @@
         "boulder",
         "scramble",
         "quiet",
-        "piedPiper"
+        "piedPiper",
+        "quiet",
+        "werewolfIntro",
+        "quiet",
+        "ravagerIntro",
+        "quiet",
+        "burrowField"
       ],
       "firstCycle": {},
       "firstMetres": 450,
@@ -220,6 +225,14 @@
         "boulder": [
           1100,
           1400
+        ],
+        "werewolfIntro": [
+          440,
+          500
+        ],
+        "ravagerIntro": [
+          500,
+          560
         ]
       },
       "beginnerPeople": [
@@ -624,6 +637,10 @@
             50
           ]
         }
+      },
+      "creatureIntroductions": {
+        "unlockAfterIntro": true,
+        "once": true
       }
     },
     "wildlife": {
@@ -2719,7 +2736,12 @@
     "divertReleaseAngleDegrees": 60,
     "offDownhillSpeedRatio": 0.5,
     "mealReachMetres": 4,
-    "helplessNoticeMetres": 15
+    "helplessNoticeMetres": 15,
+    "monsterFeuds": {
+      "noticeMetres": 32,
+      "fightSeconds": 1.8,
+      "winnerPauseSeconds": 0.8
+    }
   },
   "skiers": {
     "crashSeconds": [

@@ -6,10 +6,10 @@ function spawnEncounterEnemies(section,endY){
   const spawn=(kind,C)=>{
     const from=Math.max(section.startY,root.startY+C.firstMetres*PX_PER_M);
     // New threats are introduced gradually: none of this kind before its stage.
-    if(!state.endless?.debug&&endlessStage((endY-root.startY)/PX_PER_M)<(S.endless.stages.introduce?.[kind]??1))return;
+    if(!creatureUnlocked(kind,endY))return;
     if(endY-from<180||random()>=C.chancePerSection)return;
     for(let attempt=0;attempt<8;attempt++){
-      const y=range(from+60,endY-100),e=endlessEncounterAt(y);if(!surpriseAreaAllowed(e))continue;
+      const y=range(from+60,endY-100),e=endlessEncounterAt(y);if(!creatureUnlocked(kind,y)||!surpriseAreaAllowed(e))continue;
       const path=e?.paths?.length?pick(e.paths):null,center=path?encounterPathX(path,y):root.x;
       const near=o=>(kind==='burrower'?o.type==='burrower':o.werewolf)&&!o.dead&&!o.eaten&&Math.hypot(o.x-center,o.y-y)<180*PX_PER_M;
       if(state.objects.filter(near).length>=C.maxNearby)return;
@@ -31,7 +31,7 @@ function spawnEncounterEnemies(section,endY){
         if(before||after)return (before||after).x;
         return path?encounterPathX(path,at):root.x;
       };
-      const residents=state.objects.filter(o=>o.type.startsWith('person')&&!o.werewolf&&!o.dead&&!o.eaten&&o.r>0&&!o.job&&!o.cheerRun&&o.y>=from&&o.y<endY&&Math.abs(o.x-routeAt(o.y))>=28&&Math.abs(o.x-routeAt(o.y))<=50&&surpriseAreaAllowed(endlessEncounterAt(o.y)));
+      const residents=state.objects.filter(o=>o.type.startsWith('person')&&!o.werewolf&&!o.dead&&!o.eaten&&o.r>0&&!o.job&&!o.cheerRun&&o.y>=from&&o.y<endY&&Math.abs(o.x-routeAt(o.y))>=28&&Math.abs(o.x-routeAt(o.y))<=50&&creatureUnlocked(kind,o.y)&&surpriseAreaAllowed(endlessEncounterAt(o.y)));
       let person=residents.length?pick(residents):null;
       if(!person){
         const x=routeAt(y)+pick([-1,1])*range(32,48);
