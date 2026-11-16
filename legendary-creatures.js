@@ -8,10 +8,18 @@ function planLegendShowcase(e,section){
   e.legendIndex=(legendPreviewIndex+e.visit-1)%LEGEND_KINDS.length;e.legendKind=LEGEND_KINDS[e.legendIndex];e.title=LEGEND_NAMES[e.legendKind];if(LEGEND_V2.has(e.legendKind))e.endY=e.startY+legendV2Config(e.legendKind).showcaseMetres*PX_PER_M;
   Object.assign(e,{noFlags:true,noNewPredators:true,half:330,band:3000,centerX:section.endlessRoot.x});e.paths=[[{x:e.centerX,y:e.startY},{x:e.centerX,y:e.endY}]];
 }
+// Legends are rarer early on and grow more common as the run gets harder (see endless.stages).
+function legendChance(e){const C=S.endless.regions.legendary,c=C.chancePerArea;return Array.isArray(c)?mix(c[0],c[1],clamp(e.levelDifficulty??e.difficulty??1,0,1)):c;}
+// Beaten or outwitted legends pay out in gear, never points.
+function legendGift(kind,o,line){
+  const a=state.endless||state.arcade,G=S.arcade.gear;if(!a)return;
+  if(kind==='sword')a.swords=Math.min((a.swords||0)+1,G.maxSwords);else a.shields=Math.min((a.shields||0)+1,G.maxShields);
+  burst(o.x,o.y,C.gold,16);beep(880,.12);say(line,state.p,2);
+}
 function planLegendaryEncounter(e,section){
   const C=S.endless.regions.legendary,choices=LEGEND_ELIGIBLE[e.kind];
   if(e.kind==='legendarium')e.legendKind=LEGEND_KINDS[e.legendIndex];
-  else{if(!C.enabled||!choices||(e.startY-state.endless.startY)/PX_PER_M<C.firstMetres||random()>=C.chancePerArea)return;const options=choices.filter(k=>k!=='wisps'||e.night);if(!options.length)return;e.legendKind=pick(options);}
+  else{if(!C.enabled||!choices||(e.startY-state.endless.startY)/PX_PER_M<C.firstMetres||(e.stage??99)<(C.firstStage??1)||random()>=legendChance(e))return;const options=choices.filter(k=>k!=='wisps'||e.night);if(!options.length)return;e.legendKind=pick(options);}
   const y=e.startY+(e.endY-e.startY)*(e.kind==='legendarium'?.3:.55),path=e.paths[0];e.legendPlan={kind:e.legendKind,x:encounterPathX(path,y),y,spawned:false};if(e.town)populateLegendaryEncounter(e,section,e.startY,e.endY);
 }
 function populateLegendShowcase(e,section,from,to){
@@ -74,6 +82,7 @@ function updateLegendaryCreatures(dt,previous){
   if(!state.started)return;updateFoxSpirit(dt);
   for(const o of actors){
     o.temporary=o.temporary.filter(q=>{if(q.until<=clock)q.eaten=true;return !q.eaten;});
+    if(o.defeated&&!o.bounty){o.bounty=true;if(o.legendKind==='troll')legendGift('sword',o,"THE TROLL'S AXE IS YOURS!");else if(o.legendKind==='gargoyle')legendGift('shield',o,'A STONE WARD!');}
     if(o.dead||o.eaten||o.defeated){restoreLegendSnow(o);continue;}
     if(!legendV2Nearby(o)){restoreLegendSnow(o);continue;}
     if(!o.announced&&Math.abs(p.y-o.homeY)<650){o.announced=true;announce(LEGEND_NAMES[o.legendKind].toUpperCase(),LEGEND_HINTS[o.legendKind],C.teal,3);}
@@ -82,13 +91,23 @@ function updateLegendaryCreatures(dt,previous){
     const elapsed=clock-o.activeAt; o.motionFromX=o.x;o.motionFromY=o.y;o.motionFromStamp=clock;
     if(updateLegendV2(o,dt,previous)){o.motionVx=(o.x-o.motionFromX)/dt;o.motionVy=(o.y-o.motionFromY)/dt;continue;}
     if(o.legendKind==='hut'){
-      const cycle=elapsed%16,moving=cycle<5||cycle>=8&&cycle<13;o.legendState=moving?'standing':'crouching';const shift=cycle<5?-Math.cos(cycle/5*Math.PI):cycle<8?1:cycle<13?Math.cos((cycle-8)/5*Math.PI):-1;o.x=o.homeX+shift*145;o.y=o.homeY;
+      // It strides across the slope toward your line, crouching between strides (then it is a solid wall).
+      const cycle=elapsed%16,moving=cycle<5||cycle>=8&&cycle<13;o.legendState=moving?'standing':'crouching';const shift=cycle<5?-Math.cos(cycle/5*Math.PI):cycle<8?1:cycle<13?Math.cos((cycle-8)/5*Math.PI):-1;
+      o.originX??=o.homeX;if(p.y<o.homeY)o.homeX=ease(o.homeX,o.originX+clamp(p.x-o.originX,-260,260),.6,dt);o.x=o.homeX+shift*145;o.y=o.homeY;
       if(o.legendState==='crouching')legendBump(o,previous,o.x,o.y,75);else for(const side of [-1,1])legendBump(o,previous,o.x+side*66,o.y,16);
+      // Threading the chicken legs while the house is up earns Baba Yaga's charm.
+      if(!o.rewarded&&o.legendState==='standing'&&!p.fall&&previous.y<o.y&&p.y>=o.y&&Math.abs(p.x-o.x)<48){o.rewarded=true;legendGift('shield',o,"BABA YAGA'S CHARM!");}
     }else if(o.legendKind==='giant'){
       const cycle=elapsed%7;o.legendState=cycle<2?'inhale':cycle<5?'blowing':'rest';
-      if(o.legendState==='blowing'&&Math.abs(p.y-o.homeY)<650&&!legendSheltered(o,p.x,p.y)&&p.air<=0){p.x-=135*dt;}
+      if(o.legendState==='blowing'&&Math.abs(p.y-o.homeY)<650&&!legendSheltered(o,p.x,p.y)&&p.air<=0){p.x-=S.endless.regions.legendary.giantGustMetresPerSecond*PX_PER_M*dt;}
     }else if(o.legendKind==='kelpie'){
-      if(p.y>o.homeY-430){const x=o.homeX+Math.sin(elapsed*1.1)*170,y=o.homeY+clamp((elapsed-1)*110,0,650);const goal={x,y};travel(o,Math.atan2(goal.y-o.y,goal.x-o.x),190,dt,false,false,true,false,goal,true);
+      if(p.y>o.homeY-430){
+        // The water horse hunts whoever crosses its lake. Its frozen wake is fast: ride it to get away.
+        const hunting=o.huntUntil===undefined?(o.huntUntil=clock+S.endless.regions.legendary.kelpieHuntSeconds):o.huntUntil;
+        const goal=clock<hunting&&!p.fall?{x:p.x+p.vx*.35,y:p.y+p.vy*.35}:{x:o.homeX+Math.sin(elapsed*1.1)*170,y:o.homeY+650};
+        if(clock>=hunting&&!o.gaveUp){o.gaveUp=true;say('...',o,1);}
+        travel(o,Math.atan2(goal.y-o.y,goal.x-o.x),topSpeed()*S.endless.regions.legendary.kelpieSpeedRatio,dt,false,false,true,false,goal,true);
+        if(clock<hunting)legendBump(o,previous,o.x,o.y,26);
         if(clock>=(o.wakeAt||0)){legendaryIce(o,o.x,o.y+70,36,78,9);o.wakeAt=clock+.45;}}
     }else if(o.legendKind==='troll'){
       if(!o.legendState||o.legendState==='waiting'){if(Math.abs(p.y-o.homeY)<480){o.legendState='aiming';o.until=clock+1;}}
@@ -98,8 +117,10 @@ function updateLegendaryCreatures(dt,previous){
       legendBump(o,previous,o.x,o.y,28,true);
       if(Math.abs(p.y-o.bridge.y)<o.bridge.length/2&&Math.abs(p.x-o.bridge.x)>o.bridge.half)legendBump(o,previous,p.x,p.y,5);
     }else if(o.legendKind==='thunderbird'){
-      o.x=o.homeX+Math.sin(elapsed*.8)*200;o.y=o.homeY+Math.sin(elapsed*.4)*70;
-      if(clock>=o.nextAt&&Math.abs(p.y-o.homeY)<850){o.marks.push({x:clamp(p.x+p.vx*1.4,o.homeX-320,o.homeX+320),y:p.y+Math.max(180,p.vy*1.4),at:clock+1.4});o.nextAt=clock+3.8;}
+      // It flies along above you for a while, calling down a strike where you are heading every couple of seconds.
+      const T=S.endless.regions.legendary,following=p.y>o.homeY-850&&elapsed<T.thunderbirdFollowSeconds;
+      if(following){o.x=ease(o.x,p.x+Math.sin(elapsed*.8)*160,1.5,dt);o.y=ease(o.y,p.y-260,2,dt);}else{o.y+=topSpeed()*.5*dt;}
+      if(following&&clock>=o.nextAt){o.marks.push({x:p.x+p.vx*1.4,y:p.y+Math.max(180,p.vy*1.4),at:clock+1.4});o.nextAt=clock+T.thunderbirdStrikeSeconds;}
       for(const m of o.marks)if(!m.struck&&clock>=m.at){m.struck=true;m.fade=clock+.65;legendBump(o,previous,m.x,m.y,48);burst(m.x,m.y,'#b3d9eb',14);
         let n=0;for(const t of nearbyFootprints(m.x,m.y,150))if(TREE_TYPES.has(t.type)&&Math.hypot(t.x-m.x,t.y-m.y)<130&&n++<2){t.eaten=true;const f=entity('fallingTree',t.x,t.y,{arcadeRun:o.arcadeRun,encounter:o.encounter,fallTowardX:m.x});f.legendLightning=true;Object.assign(f,{fallState:'falling',fallAt:clock,fallSide:m.x<f.x?-1:1,r:S.terrainFeatures.fallingTree.fallenRadiusMetres*PX_PER_M});}}
       o.marks=o.marks.filter(m=>!m.struck||m.fade>clock).slice(-4);

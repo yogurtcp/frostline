@@ -648,9 +648,18 @@
       },
       "legendary": {
         "enabled": true,
-        "chancePerArea": 0.28,
+        "chancePerArea": [
+          0.12,
+          0.3
+        ],
         "firstMetres": 1800,
+        "firstStage": 3,
         "maxActive": 2,
+        "giantGustMetresPerSecond": 6,
+        "kelpieHuntSeconds": 7,
+        "kelpieSpeedRatio": 0.95,
+        "thunderbirdFollowSeconds": 12,
+        "thunderbirdStrikeSeconds": 2.4,
         "dragon": {
           "hoverKmh": 18,
           "rideSpeedRatio": 1.18,
@@ -667,7 +676,8 @@
           "nudgeRadians": 0.32,
           "maxHeadingDegrees": 55,
           "rollSeconds": 14,
-          "showcaseMetres": 500
+          "showcaseMetres": 500,
+          "wakeSideMetres": 60
         },
         "kitsune": {
           "noticeMetres": 65,
@@ -679,7 +689,8 @@
             0.92
           ],
           "spiritSeconds": 4,
-          "showcaseMetres": 600
+          "showcaseMetres": 600,
+          "noticeSideMetres": 70
         }
       }
     },

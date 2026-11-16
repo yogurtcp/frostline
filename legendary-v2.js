@@ -8,7 +8,7 @@ function setupLegendV2(o,showcase){
   if(o.legendKind==='dragon'){
     Object.assign(o,{legendState:'hover',altitude:48,rideUsed:false,flightStarted:0});
     // An actual jump is required to board. This ramp belongs to the same streamed scene.
-    const ramp=entity('smallHill',o.x,o.y-280,{arcadeRun:o.arcadeRun,encounter:o.encounter,r:27,width:72,arcadeFeature:true,jumpSeconds:1.3,jumpDurationCap:1.5,dragonRamp:o});o.boardingRamp=ramp;
+    const ramp=entity('smallHill',o.x,o.y-280,{arcadeRun:o.arcadeRun,encounter:o.encounter,r:55,width:130,arcadeFeature:true,jumpSeconds:1.3,jumpDurationCap:1.5,dragonRamp:o});o.boardingRamp=ramp;
     if(showcase)for(const [dy,dx] of [[450,0],[1150,-70],[1900,70],[2800,0]])addLegendGate(o,o.x+dx,o.y+dy,78);
   }else if(o.legendKind==='mountain'){
     Object.assign(o,{legendState:'sleep',heading:0,targetHeading:0,rollAngle:0,ramRadius:72,r:72,nudges:0});
@@ -33,7 +33,7 @@ function moveDragonRider(p,dt){
 function boardDragon(o){
   const p=state.p;if(p.dragonRide||p.fall||p.awaitingInput||p.air<=0||o.rideUsed||o.legendState==='dive'||o.legendState==='departed')return false;
   const height=p.airTotal?Math.sin((1-p.air/p.airTotal)*Math.PI)*p.jumpHeight:0;
-  if(height<28||Math.abs(height-(o.altitude+48))>50||Math.abs(p.x-o.x)>58||Math.abs(p.y-(o.y-64))>50)return false;
+  if(height<20||Math.abs(height-(o.altitude+48))>85||Math.abs(p.x-o.x)>90||Math.abs(p.y-(o.y-64))>80)return false;
   p.dragonRide=o;p.dragonOffsetX=clamp(p.x-o.x,-42,42);p.x=o.x+p.dragonOffsetX;p.y=o.y-64;p.air=1;p.airTotal=0;p.landingSteer=null;p.landingFeedback=null;p.onIce=false;
   o.rideUsed=true;o.legendState='riding';o.rideAt=clock;state.lastTrack=null;
   announce('DRAGON RIDER','STEER OFF A WING BEFORE IT DIVES - GATES ARE BELOW YOU',C.teal,2.7);burst(p.x,p.y,C.gold,12);return true;
@@ -104,7 +104,7 @@ function ramHitsActors(o,previous){
 function updateStoneRam(o,dt,previous){
   const p=state.p,K=legendV2Config('mountain');
   if(o.legendState==='sleep'){
-    if(p.y>o.homeY-K.noticeMetres*PX_PER_M&&p.y<o.homeY+120&&Math.abs(p.x-o.x)<240&&p.speed>100){o.legendState='wake';o.wakeAt=clock;say('Hrrmph?',o,1.5);}legendBump(o,previous,o.x,o.y,60);return;
+    if(p.y>o.homeY-K.noticeMetres*PX_PER_M&&p.y<o.homeY+120&&Math.abs(p.x-o.x)<(K.wakeSideMetres??60)*PX_PER_M&&p.speed>100){o.legendState='wake';o.wakeAt=clock;say('Hrrmph?',o,1.5);}legendBump(o,previous,o.x,o.y,60);return;
   }
   if(o.legendState==='wake'){if(clock-o.wakeAt<.45){legendBump(o,previous,o.x,o.y,60);return;}o.legendState='rolling';o.r=0;invalidateSolidGrids();o.rollAt=clock;o.rollSpeed=topSpeed()*K.rollSpeedRatio;say('RUMMMBLE',o,1.5);}
   if(o.legendState==='rolling'){
@@ -130,7 +130,7 @@ function updateKitsune(o,dt,previous){
   const p=state.p,K=legendV2Config('kitsune');
   if(o.rewarded){o.foxes=[];o.y+=topSpeed()*.8*dt;if(p.y>o.y+300||clock-o.caughtAt>3)o.eaten=true;return;}
   if(o.legendState==='watch'){
-    if(Math.hypot(o.x-p.x,o.y-p.y)>Math.min(K.noticeMetres*PX_PER_M,Math.max(260,p.speed*.85))||p.y>o.y+80)return;
+    if(p.y<o.y-K.noticeMetres*PX_PER_M||p.y>o.y+80||Math.abs(o.x-p.x)>(K.noticeSideMetres??70)*PX_PER_M)return;
     o.legendState='chase';o.chaseAt=clock;o.nextCross=clock+K.splitSeconds;o.foxHeading=(random()-.5)*.5;say('Catch me!',o,1.5);
   }
   if(clock-o.chaseAt>K.chaseSeconds||p.y>o.y+400){o.legendState='gone';o.eaten=true;return;}

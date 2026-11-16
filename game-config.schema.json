@@ -9100,7 +9100,7 @@
             "pathPlacementChance",
             "pathOffsetMetres"
           ],
-          "description": "Tall pine that warns, rotates rigidly sideways toward the skier\u2019s side, and remains a jumpable fallen obstacle.",
+          "description": "Tall pine that warns, rotates rigidly sideways toward the skier’s side, and remains a jumpable fallen obstacle.",
           "properties": {
             "pathPlacementChance": {
               "type": "number",
@@ -10648,7 +10648,7 @@
                       },
                       "minItems": 2,
                       "maxItems": 2,
-                      "description": "[easy, hard] \u00b1 spread of individual speeds"
+                      "description": "[easy, hard] ± spread of individual speeds"
                     },
                     "skiersPer100Metres": {
                       "type": "array",
@@ -10845,7 +10845,7 @@
                       },
                       "minItems": 2,
                       "maxItems": 2,
-                      "description": "[easy, hard] \u00b1 spread of individual speeds"
+                      "description": "[easy, hard] ± spread of individual speeds"
                     },
                     "lurkersPer100Metres": {
                       "type": "array",
@@ -11217,18 +11217,54 @@
                   "type": "boolean"
                 },
                 "chancePerArea": {
-                  "type": "number",
-                  "minimum": 0,
-                  "maximum": 1
+                  "type": "array",
+                  "items": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                  },
+                  "minItems": 2,
+                  "maxItems": 2,
+                  "description": "[easy, hard] chance an eligible area hosts a legend; grows with stage difficulty"
                 },
                 "firstMetres": {
                   "type": "number",
                   "minimum": 0
                 },
+                "firstStage": {
+                  "type": "number",
+                  "minimum": 1,
+                  "description": "No legends before this stage"
+                },
                 "maxActive": {
                   "type": "integer",
                   "minimum": 1,
                   "maximum": 4
+                },
+                "giantGustMetresPerSecond": {
+                  "type": "number",
+                  "minimum": 0,
+                  "description": "Frost Giant's sideways push on an unsheltered skier"
+                },
+                "kelpieHuntSeconds": {
+                  "type": "number",
+                  "minimum": 0,
+                  "description": "How long the Kelpie hunts you across its lake"
+                },
+                "kelpieSpeedRatio": {
+                  "type": "number",
+                  "minimum": 0,
+                  "description": "Kelpie speed as a share of your top speed"
+                },
+                "thunderbirdFollowSeconds": {
+                  "type": "number",
+                  "minimum": 0,
+                  "description": "How long the Thunderbird flies along above you"
+                },
+                "thunderbirdStrikeSeconds": {
+                  "type": "number",
+                  "minimum": 0,
+                  "description": "Seconds between Thunderbird strikes"
                 },
                 "dragon": {
                   "type": "object",
@@ -11309,6 +11345,11 @@
                       "type": "number",
                       "minimum": 250,
                       "maximum": 1500
+                    },
+                    "wakeSideMetres": {
+                      "type": "number",
+                      "minimum": 0,
+                      "description": "The stone ram wakes for a skier passing within this distance to the side"
                     }
                   }
                 },
@@ -11355,6 +11396,11 @@
                       "type": "number",
                       "minimum": 250,
                       "maximum": 1500
+                    },
+                    "noticeSideMetres": {
+                      "type": "number",
+                      "minimum": 0,
+                      "description": "The Kitsune notices a skier passing within this distance to the side"
                     }
                   }
                 }
