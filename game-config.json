@@ -2627,6 +2627,22 @@
     "arcadeAnimals": {
       "rabbitSpacingMetres": 160,
       "foxSpacingMetres": 600
+    },
+    "catGuide": {
+      "noticeRadius": 170,
+      "followDistance": 300,
+      "leadDistance": 130,
+      "pathPadding": 5
+    },
+    "bonusRabbit": {
+      "everyRabbits": 7,
+      "noticeRadius": 260,
+      "chaseSeconds": 22,
+      "weaveWidth": 150,
+      "weaveLength": 190,
+      "speedRatio": 0.86,
+      "grabPadding": 12,
+      "fullStockPoints": 100
     }
   },
   "chasers": {
@@ -2750,7 +2766,14 @@
     "fastSteeringFollow": 1.2,
     "tauntDistance": 260,
     "tauntCooldownSeconds": 6,
-    "bumpSpeechCooldownSeconds": 3
+    "bumpSpeechCooldownSeconds": 3,
+    "closePass": {
+      "minimumDownhill": 0.45,
+      "speedFraction": 0.85,
+      "minimumKmh": 40,
+      "relativeKmh": 18,
+      "edgeGap": 8
+    }
   },
   "lift": {
     "x": 400,
@@ -3241,7 +3264,8 @@
     "ambientOpacity": 0.97,
     "transitionSeconds": 1.8,
     "lampSetbackMetres": 7,
-    "lightReachMultiplier": 3.2
+    "lightReachMultiplier": 3.2,
+    "pedestrianRadiusMetres": 9
   },
   "museum": {
     "exhibitsPerLeg": 4,
@@ -3316,7 +3340,7 @@
       {
         "id": "smallAnimals",
         "title": "RABBIT AND FOX",
-        "text": "Come close slowly and they sniff around. Foxes and wolves hunt rabbits."
+        "text": "Rabbits and foxes roam the snow; foxes hunt rabbits. Some rabbits carry shiny parcels: catch one for a shield or sword."
       },
       {
         "id": "squirrel",
@@ -3326,7 +3350,7 @@
       {
         "id": "cat",
         "title": "CAT",
-        "text": "Lures slow skiers over for a pet. Hit it fast and it bolts up the nearest tree."
+        "text": "Marked village cats lead narrow snow routes through the houses. Follow the paw prints; the cat waits if you fall behind."
       },
       {
         "id": "villagers",
@@ -3336,7 +3360,7 @@
       {
         "id": "skiers",
         "title": "SKIERS AND BOARDERS",
-        "text": "Slow traffic. Bump one and you both go down. Also on the menu for hungry monsters."
+        "text": "Slow traffic. Hit one and you both fall. A very close fast downhill pass can startle one into falling without touching it."
       },
       {
         "id": "fastSkier",

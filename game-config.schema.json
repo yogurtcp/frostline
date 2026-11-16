@@ -5566,6 +5566,67 @@
               "minimum": 0
             }
           }
+        },
+        "catGuide": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "noticeRadius": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "followDistance": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "leadDistance": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "pathPadding": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            }
+          }
+        },
+        "bonusRabbit": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "everyRabbits": {
+              "type": "integer",
+              "minimum": 2,
+              "maximum": 50
+            },
+            "noticeRadius": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "chaseSeconds": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "weaveWidth": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "weaveLength": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "speedRatio": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "grabPadding": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "fullStockPoints": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            }
+          }
         }
       }
     },
@@ -6138,6 +6199,34 @@
           "type": "number",
           "minimum": 0.2,
           "maximum": 1
+        },
+        "closePass": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "minimumDownhill": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "speedFraction": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "minimumKmh": {
+              "type": "number",
+              "minimum": 0
+            },
+            "relativeKmh": {
+              "type": "number",
+              "minimum": 0
+            },
+            "edgeGap": {
+              "type": "number",
+              "minimum": 0
+            }
+          }
         }
       }
     },
@@ -11338,6 +11427,10 @@
           "type": "number",
           "minimum": 1,
           "maximum": 5
+        },
+        "pedestrianRadiusMetres": {
+          "type": "number",
+          "exclusiveMinimum": 0
         }
       }
     },
