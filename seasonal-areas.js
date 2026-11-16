@@ -427,7 +427,7 @@ function appendNightLights(o,lights){
   if(o.dead||o.eaten||o.collected)return;
   const x=o.x*ZOOM,y=o.y*ZOOM,w=(o.width||40)*ZOOM;
   const add=(px,py,r,color='#ffc277',strength=1,core=false)=>{const light={x:px,y:py,r:r*S.night.lightReachMultiplier,color,strength,core};lights.push(light);return light;};
-  if(o===state.p){const lift=o.air>0&&o.airTotal?Math.sin(o.air/o.airTotal*Math.PI)*o.jumpHeight*ZOOM:0;add(x,y-8-lift,S.night.playerRadiusMetres*PX_PER_M*ZOOM,'#efc48b');}
+  if(o===state.p){const lift=o.dragonRide?o.dragonRide.altitude*ZOOM:o.air>0&&o.airTotal?Math.sin(o.air/o.airTotal*Math.PI)*o.jumpHeight*ZOOM:0;add(x,y-8-lift,S.night.playerRadiusMetres*PX_PER_M*ZOOM,'#efc48b');}
   else if(o.werewolf&&!(o.npcFallUntil>clock)&&['warning','transforming'].includes(o.werewolfState)){const fade=o.werewolfState==='warning'?1:clamp(((o.transformDuration??1)-(clock-o.transformAt))/.2,0,1);add(x,y-12,40,'#ffd096',fade);}
   else if(o.type==='legendary'&&o.legendKind==='wisps'&&!o.defeated)add(x,y-15,120*ZOOM,'#9de5b9',.8);
   else if(o.type==='lamp')add(x,y-22,(o.lightRadiusWorld??S.night.lampRadiusMetres*PX_PER_M)*ZOOM,'#ffbd70',1,true);

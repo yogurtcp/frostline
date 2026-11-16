@@ -7,3 +7,5 @@ Character and pose studies for review, not gameplay changes or finished animatio
 - **Kitsune — moving shell game:** copies visibly emerge from tail-smoke, then cross along independent paths. The real fox retains its physical continuity through the split, can finish in any lane, and never secretly swaps identity. No permanent footprint or other unique marker. Catching it earns a fox spirit that later sends a false skier away to distract a predator.
 
 Generated with the built-in image-generation tool, using the actual game's gritty sprite atlas as style/scale guidance. Exact prompts are in prompts.json. Raw sheets remain separate from the game-sized review exports. Sprite previews show the existing skier beside the designs for scale.
+
+The user approved these designs. Runtime integration now lives in legendary-v2.js, using copies of the native exports at assets/legend-{dragon,mountain,kitsune}.png. The original source sheets and prompts are preserved. The playable showcase includes real dragon boarding/exit, close-pass ram steering and a fox-spirit decoy reward.

@@ -36,6 +36,7 @@ window.loadFrostlineConfig = async function () {
   config.endless.regions ??= {};
   config.endless.regions.legendary ??= {};
   for(const [key,value] of Object.entries({enabled:true,chancePerArea:.28,firstMetres:1800,maxActive:2}))config.endless.regions.legendary[key] ??= value;
+  for(const [name,defaults] of Object.entries({dragon:{showcaseMetres:650,hoverKmh:18,rideSpeedRatio:1.18,rideSeconds:7.5,warnSeconds:2,deckHalfWidthMetres:5.5,exitJumpSeconds:1.3},ram:{showcaseMetres:500,rollSpeedRatio:.84,noticeMetres:40,flankGapMetres:4.5,nudgeRadians:.32,maxHeadingDegrees:55,rollSeconds:14},kitsune:{showcaseMetres:600,noticeMetres:65,splitSeconds:.8,crossSeconds:2.6,chaseSeconds:16,speedRatio:[.66,.92],spiritSeconds:4}})){config.endless.regions.legendary[name] ??= {};for(const [key,value] of Object.entries(defaults))config.endless.regions.legendary[name][key] ??= value;}
   config.endless.regions.lengthMetres ??= {};config.endless.regions.lengthMetres.legendarium ??= [300,300];
   config.endless.regions.creatureIntroductions ??= {};
   config.endless.regions.creatureIntroductions.unlockAfterIntro ??= true;

@@ -1,11 +1,11 @@
 /* Native-pixel folklore encounters. One bounded scene per eligible area; no new controls required. */
 const LEGEND_KINDS=['hut','kitsune','giant','kelpie','troll','thunderbird','gargoyle','wisps','dragon','mountain'];
 const LEGEND_NAMES={hut:"Baba Yaga's Walking Hut",kitsune:'Kitsune',giant:'Frost Giant',kelpie:'Kelpie',troll:'Bridge Troll',thunderbird:'Thunderbird',gargoyle:'Gargoyle',wisps:"Will-o'-the-wisps",dragon:'Snow Dragon',mountain:'Mountain Spirit'};
-const LEGEND_HINTS={hut:'PASS BETWEEN ITS LEGS WHILE THE HOUSE IS UP',kitsune:'FOLLOW THE REAL FOOTPRINTS - COPIES HIDE YOUR VIEW',giant:'HIDE BEHIND ROCKS WHEN THE GIANT BLOWS',kelpie:'ITS FROZEN WAKE IS FAST - CHOOSE YOUR HEADING FIRST',troll:'BAIT ITS CHARGE, THEN TAKE THE OTHER SIDE OF THE BRIDGE',thunderbird:'SPARKS WARN YOU - LIGHTNING TOPPLES NEARBY TREES',gargoyle:'PASS SLOWLY TO LEAVE IT ASLEEP - WATCH ITS LANDING SHADOW',wisps:'FOLLOW THE LIGHT OFF THE ROAD TO FIND ITS GIFT',dragon:'ITS BREATH MAKES ICE - AIM BEFORE YOU ENTER',mountain:'THE CROWD WAKES IT - SNOW HIDES TREES ONLY BRIEFLY'};
+const LEGEND_HINTS={hut:'PASS BETWEEN ITS LEGS WHILE THE HOUSE IS UP',kitsune:'WATCH THE ORIGINAL THROUGH THE SPLIT - CATCH A FOX SPIRIT',giant:'HIDE BEHIND ROCKS WHEN THE GIANT BLOWS',kelpie:'ITS FROZEN WAKE IS FAST - CHOOSE YOUR HEADING FIRST',troll:'BAIT ITS CHARGE, THEN TAKE THE OTHER SIDE OF THE BRIDGE',thunderbird:'SPARKS WARN YOU - LIGHTNING TOPPLES NEARBY TREES',gargoyle:'PASS SLOWLY TO LEAVE IT ASLEEP - WATCH ITS LANDING SHADOW',wisps:'FOLLOW THE LIGHT OFF THE ROAD TO FIND ITS GIFT',dragon:'JUMP ONTO ITS BACK - STEER OFF BEFORE IT DIVES',mountain:'PASS CLOSE TO EITHER FLANK TO STEER ITS ROLL'};
 const LEGEND_VIEW=objectView(o=>o.type==='legendary'),LEGEND_ELIGIBLE={forest:['hut','kitsune','giant','thunderbird','dragon','mountain','troll'],trees:['kitsune','giant','gargoyle'],denseForest:['hut','kitsune'],lake:['kelpie','dragon'],town:['gargoyle','wisps'],halloween:['hut','gargoyle','wisps'],cemetery:['gargoyle','wisps'],avalanche:['giant','dragon'],boulder:['thunderbird','mountain']};
 let legendPreviewIndex=0,legendPanel=null,legendPanelValue=-1;
 function planLegendShowcase(e,section){
-  e.legendIndex=(legendPreviewIndex+e.visit-1)%LEGEND_KINDS.length;e.legendKind=LEGEND_KINDS[e.legendIndex];e.title=LEGEND_NAMES[e.legendKind];
+  e.legendIndex=(legendPreviewIndex+e.visit-1)%LEGEND_KINDS.length;e.legendKind=LEGEND_KINDS[e.legendIndex];e.title=LEGEND_NAMES[e.legendKind];if(LEGEND_V2.has(e.legendKind))e.endY=e.startY+legendV2Config(e.legendKind).showcaseMetres*PX_PER_M;
   Object.assign(e,{noFlags:true,noNewPredators:true,half:330,band:3000,centerX:section.endlessRoot.x});e.paths=[[{x:e.centerX,y:e.startY},{x:e.centerX,y:e.endY}]];
 }
 function planLegendaryEncounter(e,section){
@@ -39,14 +39,12 @@ function populateLegendaryEncounter(e,section,from,to){
     for(const side of [-1,1])for(const dy of [-180,180])prop('rock',side*180,dy,{width:90,r:35});
   }else if(kind==='gargoyle'){
     o.x+=105;o.width=70;if(scene||!e.town)prop('lodge',-260,100,{width:180,r:75,buildingKind:'inn'});prop('rock',125,10,{width:50,r:18});
-  }else if(kind==='mountain'){
-    o.x-=330;o.width=210;for(let i=0;i<5;i++){const q=prop('pine',(i-2)*115,i%2?150:240,{width:76,r:20});q.legendSnowTree=true;}
-    for(let i=0;i<3;i++)prop('skier',(i-1)*70,-190-i*40,{width:42,r:12,vy:40,vx:0,endlessBaseVy:40});
-  }else if(kind==='hut')o.width=165;
-  else if(kind==='dragon'){o.x-=180;o.width=165;}
+  }else if(kind==='mountain'){o.width=210;}else if(kind==='hut')o.width=165;
+  else if(kind==='dragon'){o.width=165;}
   else if(kind==='thunderbird')o.width=120;
   else if(kind==='wisps'){o.width=44;const y=point.y+540,path=e.town?.backRoute?.points;o.gift={x:path?encounterPathX(path,y):point.x+260,y};for(const dx of [0,45,-45,90,-90])if(!nearbyFootprints(o.gift.x+dx,y,80).some(q=>obstacleClearance(q,o.gift.x+dx,y)<25)){o.gift.x+=dx;break;}}
   else if(kind==='kitsune')o.width=65;
+  setupLegendV2(o,scene);
 }
 function legendActors(){return viewItems(LEGEND_VIEW);}
 function legendaryIce(o,x,y,rx=45,ry=80,seconds=8){
@@ -73,25 +71,19 @@ function restoreLegendSnow(o){for(const [q,r] of o.buried){if(q.legendBuried===o
 function updateLegendaryCreatures(dt,previous){
   const p=state.p,actors=legendActors(),current=state.endless?endlessEncounterAt(p.y):null;
   if(legendPanel){legendPanel.hidden=!state.endless?.legendShowcase;if(!legendPanel.hidden&&current?.legendIndex!==legendPanelValue){legendPanelValue=current?.legendIndex??0;legendPanel.querySelector('select').value=legendPanelValue;}}
-  if(!state.started)return;
+  if(!state.started)return;updateFoxSpirit(dt);
   for(const o of actors){
     o.temporary=o.temporary.filter(q=>{if(q.until<=clock)q.eaten=true;return !q.eaten;});
     if(o.dead||o.eaten||o.defeated){restoreLegendSnow(o);continue;}
-    if(!legendNearby(o)){restoreLegendSnow(o);continue;}
+    if(!legendV2Nearby(o)){restoreLegendSnow(o);continue;}
     if(!o.announced&&Math.abs(p.y-o.homeY)<650){o.announced=true;announce(LEGEND_NAMES[o.legendKind].toUpperCase(),LEGEND_HINTS[o.legendKind],C.teal,3);}
     if(!o.activeAt&&p.y>o.homeY-850)o.activeAt=clock;
     if(!o.activeAt)continue;
     const elapsed=clock-o.activeAt; o.motionFromX=o.x;o.motionFromY=o.y;o.motionFromStamp=clock;
+    if(updateLegendV2(o,dt,previous)){o.motionVx=(o.x-o.motionFromX)/dt;o.motionVy=(o.y-o.motionFromY)/dt;continue;}
     if(o.legendKind==='hut'){
       const cycle=elapsed%16,moving=cycle<5||cycle>=8&&cycle<13;o.legendState=moving?'standing':'crouching';const shift=cycle<5?-Math.cos(cycle/5*Math.PI):cycle<8?1:cycle<13?Math.cos((cycle-8)/5*Math.PI):-1;o.x=o.homeX+shift*145;o.y=o.homeY;
       if(o.legendState==='crouching')legendBump(o,previous,o.x,o.y,75);else for(const side of [-1,1])legendBump(o,previous,o.x+side*66,o.y,16);
-    }else if(o.legendKind==='kitsune'){
-      if(!o.chasing&&p.y>o.homeY-260){o.chasing=true;o.startRun=clock;}
-      if(o.chasing){const goal={x:o.homeX+Math.sin(elapsed*1.3)*130,y:o.y+200};travel(o,Math.atan2(goal.y-o.y,goal.x-o.x),topSpeed()*.78,dt,false,false,true,false,goal);if(clock>=(o.trackAt||0)){o.tracks.push({x:o.x,y:o.y,until:clock+4});o.trackAt=clock+.16;}o.tracks=o.tracks.filter(q=>q.until>clock).slice(-28);
-        o.copies=[-1,1].map(side=>({x:o.x+side*140+Math.sin(elapsed*2+side)*30,y:o.y+side*70}));
-        for(const q of o.copies)if(legendContact(o,previous,q.x,q.y,22)){p.legendVeilUntil=clock+.9;o.hitUntil=clock+1;p.speed*=.85;burst(p.x,p.y,'#bd9166',12);}
-        if(!o.rewarded&&legendContact(o,previous,o.x,o.y,20)){o.rewarded=true;p.boost=Math.max(p.boost,1.6);if(state.course)state.course.points+=100;burst(o.x,o.y,C.gold,15);say('YOU FOUND ME!',o,1.5);}
-      }
     }else if(o.legendKind==='giant'){
       const cycle=elapsed%7;o.legendState=cycle<2?'inhale':cycle<5?'blowing':'rest';
       if(o.legendState==='blowing'&&Math.abs(p.y-o.homeY)<650&&!legendSheltered(o,p.x,p.y)&&p.air<=0){p.x-=135*dt;}
@@ -118,13 +110,7 @@ function updateLegendaryCreatures(dt,previous){
       if(o.legendState==='returning'){o.x=ease(o.x,o.homeX,4,dt);o.y=ease(o.y,o.homeY,4,dt);o.altitude=45;if(clock>=o.until){o.x=o.homeX;o.y=o.homeY;o.altitude=0;o.legendState='waiting';}}
     }else if(o.legendKind==='wisps'){
       if(p.y>o.homeY-450){o.x=ease(o.x,o.gift.x,1.1,dt);o.y=ease(o.y,o.gift.y,1.1,dt);if(!o.rewarded&&p.air<=0&&Math.hypot(p.x-o.gift.x,p.y-o.gift.y)<35){o.rewarded=true;const a=state.endless||state.arcade;if(a)a.shields=Math.min(a.shields+1,S.arcade.gear.maxShields);p.boost=Math.max(p.boost,1);burst(o.x,o.y,C.gold,15);say('A GIFT FOR A BRAVE SOUL',o,2);}}
-    }else if(o.legendKind==='dragon'){
-      o.x=o.homeX-180+Math.sin(elapsed*.55)*180;
-      if(!o.breath&&p.y>o.homeY-500){o.breath={at:clock+1.7,ax:o.homeX-220,ay:o.homeY-80,bx:o.homeX+180,by:o.homeY+600};}
-      const b=o.breath;if(b&&!b.frozen&&clock>=b.at){b.frozen=true;for(let i=0;i<10;i++){const t=i/9;legendaryIce(o,mix(b.ax,b.bx,t),mix(b.ay,b.by,t),54,80,12);}burst(o.x,o.y,'#a8cddd',12);}
-    }else if(o.legendKind==='mountain'){
-      if(!o.sneezeAt){if(clock<(o.crowdCheckAt||0))continue;o.crowdCheckAt=clock+.4;const crowd=viewItems(SKIER_VIEW).filter(q=>!q.dead&&!q.eaten&&Math.abs(q.y-o.homeY)<700&&Math.abs(q.x-o.homeX)<400);if(crowd.length>=3&&p.y>o.homeY-650){o.sneezeAt=clock+2;o.legendState='inhale';say('AH... AH...',o,2);}}
-      if(o.sneezeAt&&clock>=o.sneezeAt){if(!o.sneezed){o.sneezed=true;o.legendState='sneeze';say('CHOOO!',o,1.8);o.waveAt=clock;const eligible=nearbyFootprints(o.homeX,o.homeY+200,460);for(const q of eligible)if(TREE_TYPES.has(q.type)&&Math.abs(q.x-o.homeX)<300&&Math.abs(q.y-o.homeY-200)<400&&!q.legendBuried){o.buried.push([q,q.r]);q.r=0;q.legendBuried=o;}invalidateSolidGrids();}if(clock-o.waveAt>3.5){restoreLegendSnow(o);o.legendState='rest';}}
+
     }
     o.motionVx=(o.x-o.motionFromX)/dt;o.motionVy=(o.y-o.motionFromY)/dt;
   }
@@ -170,7 +156,7 @@ function legendTile(kind,frame=0){
   legendTiles.set(key,tile);return tile;
 }
 function drawLegendaryCreature(o,s){
-  if(o.type!=='legendary')return false;const kind=o.legendKind,frame=kind==='hut'?(o.legendState==='crouching'?2:Math.floor(clock*4)%2):['giant','mountain'].includes(kind)?(['inhale','blowing','sneeze'].includes(o.legendState)?1:0):Math.floor(clock*5)%2;
+  if(o.type!=='legendary')return false;if(drawLegendV2(o,s))return true;const kind=o.legendKind,frame=kind==='hut'?(o.legendState==='crouching'?2:Math.floor(clock*4)%2):['giant','mountain'].includes(kind)?(['inhale','blowing','sneeze'].includes(o.legendState)?1:0):Math.floor(clock*5)%2;
   const tile=legendTile(kind,frame),width=o.width*ZOOM,height=width*80/72;
   const paint=(x,y,alpha=1)=>{ctx.save();ctx.globalAlpha=alpha*(o.defeated?clamp(1-(clock-o.defeatedAt)/1.5,0,1):1);ctx.drawImage(tile,Math.round(x-width/2),Math.round(y-height-(o.altitude||0)*ZOOM),Math.round(width),Math.round(height));ctx.restore();};
   if(kind==='kitsune')for(const q of o.copies){const p=screen(q.x,q.y);paint(p.x,p.y,.8);}
@@ -182,7 +168,8 @@ function drawLegendaryCreature(o,s){
 function drawLegendaryGround(){
   const view=viewBounds();
   for(const o of legendActors()){
-    if(!legendNearby(o)||o.defeated)continue;
+    if(!legendV2Nearby(o)||o.defeated)continue;
+    drawLegendV2Marks(o);
     for(const q of o.tracks){const p=screen(q.x,q.y);box(p.x-4,p.y,2,3,'#819f9d');box(p.x+3,p.y+3,2,3,'#819f9d');}
     if(o.legendKind==='giant'&&o.legendState==='blowing')for(let i=0;i<18;i++){const x=o.homeX+360-((clock*400+i*67)%800),y=o.homeY-350+(i*83)%900,p=screen(x,y);line(p.x,p.y,p.x+12,p.y-2,'#a2c9cd',1);}
     if(o.bridge){const b=o.bridge,a=screen(b.x-700,b.y-b.length/2),z=screen(b.x+700,b.y+b.length/2);box(a.x,a.y,z.x-a.x,z.y-a.y,'#688e9e');box(a.x,a.y,z.x-a.x,5,'#c2d9d7');for(let y=b.y-b.length/2;y<b.y+b.length/2;y+=30){const p=screen(b.x-b.half,y);box(p.x,p.y,b.half*2*ZOOM,10,'#ad8864');line(p.x,p.y,p.x+b.half*2*ZOOM,p.y,'#725e51');}for(const side of [-1,1]){const p=screen(b.x+side*b.half,b.y-b.length/2),q=screen(b.x+side*b.half,b.y+b.length/2);line(p.x,p.y,q.x,q.y,'#6b6760',2);}}

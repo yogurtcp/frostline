@@ -86,7 +86,7 @@ function updateClosePasses(previous){
   const cap=topSpeed()*(S.physics.acrossSpeedFraction+S.physics.downhillSpeedFraction*downhill*downhill);
   if(p.speed<cap*K.speedFraction||p.speed*S.physics.hudKmhPerSpeed<K.minimumKmh)return;
   for(const o of objectGroups().skiers){
-    if(o.fast||o.rival||o.santaSleigh||o.sleighRoot||o.dead||o.eaten||o.npcFallUntil>clock||o.nearPassUntil>clock||Math.abs(o.y-p.y)>250)continue;
+    if(o.foxDecoy||o.fast||o.rival||o.santaSleigh||o.sleighRoot||o.dead||o.eaten||o.npcFallUntil>clock||o.nearPassUntil>clock||Math.abs(o.y-p.y)>250)continue;
     const relative=Math.hypot(p.vx-(o.motionVx??o.vx??0),p.vy-(o.motionVy??o.vy??0))*S.physics.hudKmhPerSpeed;
     if(relative<K.relativeKmh)continue;
     const pass=sweptRelativePass(o,previous),touch=S.physics.playerRadius+o.r;
