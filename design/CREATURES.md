@@ -1,7 +1,7 @@
 # Legendary creatures: design brief for review
 
 **Status: all legendary creatures are switched OFF in normal play** (`endless.regions.legendary.enabled: false`).
-Until each one is approved they can only be seen in the showcase: `?showcase=legends` (or press **L**), with `&creature=dragon|mountain|kitsune` for the three that have generated art.
+All 18 are playable in the **Creature Lab**: `?showcase=creatures` (or `?showcase=legends`, or press **L**), with `&creature=<kind>` to jump to one (kinds: witch, ghost, unicorn, griffin, medusa, cyclops, phoenix, genie, hut, kitsune, giant, kelpie, troll, thunderbird, gargoyle, wisps, dragon, mountain). See "Lab implementation" at the end for what was actually built.
 
 This brief covers only the recent legendary creatures: the ten already built (by Codex, with mechanics later reworked by Claude) and eight new proposals. The Yetis, werewolves, Ravager, zombies, skeletons, bears, wolves, burrowers and the rest of the cast stay in the game and are not under review.
 
@@ -227,3 +227,35 @@ Start with the cheapest decisions:
 1. **Kitsune, Dragon, Stone Ram.** They have real art already. Decide whether the mechanics earn their place. The Stone Ram probably overlaps with the Boulder level.
 2. **Hut, Troll, Gargoyle, Giant, Kelpie, Thunderbird, Wisps.** Code-drawn placeholder art. Decide keep or drop **before** generating art.
 3. **The new ones.** Generate art only for the ones we like on paper. Witch, Unicorn and Medusa first.
+
+
+---
+
+# Lab implementation (2026-11-17)
+
+Code: `legendary-v3.js` (art for all sheets, the eight new creatures, bystander reactions, lab dressing and panel), plus small hooks in `legendary-creatures.js`, `legendary-v2.js` and `game.js`. Art comes straight from `design/creatures/*/native.png` + `frames.json` (embedded by `build.py`). Prototype tuning lives in the `V3` object at the top of `legendary-v3.js`; move it to `game-config.json` once a creature is approved.
+
+**Lab:** each creature has its own bay with ~6 walking bystanders and a few NPC skiers who react (flee with screams, or gather in awe). Two Yetis (80 km/h, ~45 m back) are released when a creature wakes, so monster interactions can be tested. Panel: creature picker, ‹ Retry ›, Day/night, Exit, **Yetis on/off**, **+Yeti**, **+People**. Dying restarts the current bay.
+
+**Every creature now has a stake and/or a prize:**
+
+| Creature | Challenge | Prize | Also affects |
+| --- | --- | --- | --- |
+| Witch | Potions land where you'll be: green = slush, purple = dizzy, orange = speed burst | Touch her during the low swoop (marked "!") → sword (broom) | Yetis stumble in splashes; skiers fall |
+| Ghosts (3) | Drift through trees after you; touch = chilled stiff ~1 s | Lead each ghost into a lamp's light (each lamp banishes one, then gutters) → all 3 = shield | Bystanders flee; skiers knocked over |
+| Unicorn | Gallops its own weave; stay within ~6.5 m for 2.5 s without touching (touch = it bolts) | 6 s of rainbow invincibility; Yetis you touch are bonked | Bystanders in awe |
+| Griffin | Shadow locks on the nearest prey and leads its aim; dodge late | Being carried = ~90 m escape (shield softens the drop, otherwise you fall) | Carries off Yetis, wolves, bystanders |
+| Medusa | Glare sweeps left/centre/right (shimmer = warning); stone 1.3 s; statues block it | Slip within ~7.5 m of her → shield (mirror) | Yetis turn to stone 4 s; bystanders become permanent statues |
+| Cyclops | Throws exactly where you are (keep turning); boulders stay as rocks | Ram his shins at full speed → sword (costs a fall) | Boulders flatten Yetis and bystanders |
+| Phoenix | Burning stripe turns snow to slush | Ride the hot air right behind it → big jump + shield (feather) | — |
+| Genie | Touch the lamp (off the line, between rocks) | Pick a gate: shield / sword / GREED (both + 3 Yetis) | — |
+| Hut | Strides toward your line; crouched = wall | Thread its legs while standing → shield | Bystanders flee |
+| Kitsune | Shell game of 3 foxes | Catch the real one → fox spirit | — |
+| Frost Giant | Gust shoves you sideways; rocks shelter | **New:** frost charm (shield) sits upwind | **New:** gust shoves Yetis and skiers too |
+| Kelpie | Hunts you for 7 s; its wake ice is fast | **New:** survive the hunt untouched → shield (bridle) | — |
+| Bridge Troll | Aims, then charges | Ram head-on → sword | — |
+| Thunderbird | Marked strikes; trees topple | **New:** dodge every strike → sword (feather) | **New:** strikes knock down Yetis and skiers |
+| Gargoyle | Swoops to your landing spot if you're fast | Ram it while landed → shield | — |
+| Wisps (night) | Lead you off the road | Shield | — |
+| Dragon | Board from the ramp, steer off before the dive | The ride (escape) | — |
+| Stone Ram | Rolls once woken; flank passes steer it | A bulldozer into your pursuers | Smashes trees, Yetis, skiers |

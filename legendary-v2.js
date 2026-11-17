@@ -2,7 +2,7 @@
 const LEGEND_V2=new Set(['dragon','mountain','kitsune']),FOX_DECOYS=objectView(o=>o.foxDecoy),RAM_GATES=objectView(o=>o.type==='gate');
 const legendV2Art=new Map(),ramPreyCache={time:-1,index:null};
 function legendV2Config(kind){return S.endless.regions.legendary[kind==='mountain'?'ram':kind];}
-function legendV2Nearby(o){return LEGEND_V2.has(o.legendKind)?!o.eaten&&Math.abs(state.p.y-o.y)<2100&&Math.abs(state.p.x-o.x)<1500:legendNearby(o);}
+function legendV2Nearby(o){return LEGEND_V2.has(o.legendKind)||LEGEND_V3.has(o.legendKind)?!o.eaten&&Math.abs(state.p.y-o.y)<2100&&Math.abs(state.p.x-o.x)<1500:legendNearby(o);}
 function setupLegendV2(o,showcase){
   if(!LEGEND_V2.has(o.legendKind))return;o.showcase=showcase;o.travelled=0;o.gait=0;
   if(o.legendKind==='dragon'){
@@ -159,6 +159,8 @@ function spawnLegendRewardHunter(o){
   const p=state.p,c={kind:'slow',arcadeTier:'slow',x:p.x+100,y:p.y-130,chaseRun:o.arcadeRun,speed:68/S.physics.hudKmhPerSpeed,endlessBaseKmh:68,phase:0,expires:Infinity,wakeUntil:clock+.4,talkAt:clock+9};state.chasers.push(c);
 }
 function updateLegendV2(o,dt,previous){
+  if(LEGEND_V3.has(o.legendKind)){updateLegendV3(o,dt,previous);return true;}
+  labReactions(o);labTick(o);
   if(!LEGEND_V2.has(o.legendKind))return false;
   if(o.legendKind==='dragon')updateDragon(o,dt,previous);else if(o.legendKind==='mountain')updateStoneRam(o,dt,previous);else updateKitsune(o,dt,previous);return true;
 }

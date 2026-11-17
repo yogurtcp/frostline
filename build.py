@@ -9,6 +9,13 @@ assets = {name: 'data:image/png;base64,' + base64.b64encode((root / 'assets' / f
           for name, file in [('ski', 'ski-sprites.png'), ('village', 'village-sprites.png'), ('wildlife', 'wildlife-sprites.png'), ('trees', 'tree-sprites.png')]}
 for name, file in [('hillSmall', 'hill-small.png'), ('hillLarge', 'hill-large.png'), ('fallingTree', 'falling-tree.png'), ('wideLog', 'wide-log-v2.png'), ('rollingSnowball', 'rolling-snowball.png'), ('bears', 'bear-sprites.png'), ('people', 'people-animations.png'), ('cozyBuildings', 'cozy-buildings.png'), ('yetis', 'yeti-sprites.png'), ('stiltwalker', 'stiltwalker.png'), ('werewolf', 'werewolf.png'), ('legendDragon','legend-dragon.png'), ('legendMountain','legend-mountain.png'), ('legendKitsune','legend-kitsune.png'), ('stageIcons','stage-icons.png'), ('mapPickup','map-pickup.png')]:
     assets[name] = 'data:image/png;base64,' + base64.b64encode((root / 'assets' / file).read_bytes()).decode()
+# Creature lab sheets: native exports straight from design/creatures (see design/creatures/README.md).
+CREATURE_SHEETS = ['witch', 'ghost', 'unicorn', 'griffin', 'medusa', 'cyclops', 'phoenix', 'genie', 'hut', 'giant', 'kelpie', 'troll', 'thunderbird', 'gargoyle', 'wisps', 'witch-props', 'medusa-props', 'cyclops-props']
+creature_art = {}
+for name in CREATURE_SHEETS:
+    folder = root / 'design/creatures' / name
+    assets['creature:' + name] = 'data:image/png;base64,' + base64.b64encode((folder / 'native.png').read_bytes()).decode()
+    creature_art[name] = [{k: f[k] for k in ('x', 'y', 'w', 'h', 'anchor')} for f in json.loads((folder / 'frames.json').read_text())['frames']]
 assets['gritty'] = 'data:image/png;base64,' + base64.b64encode((root / 'assets/gritty-sprites.png').read_bytes()).decode()
 scenes = json.loads((root / 'assets/scenes/manifest.json').read_text())
 for scene in scenes['images']:
@@ -21,7 +28,7 @@ validate(config, schema)
 # Escape HTML script terminators in editable dialogue and labels.
 encode = lambda data: json.dumps(data).replace('<', '\\u003c')
 page = page.replace('__CONFIG__', encode(config)).replace('__SCHEMA__', encode(schema)).replace('__CONFIG_CODE__', (root / 'config.js').read_text())
-game_code = (root / 'game.js').read_text().replace('// __SPECIAL_AREAS_CODE__', (root / 'special-areas.js').read_text()).replace('// __MUSEUM_CODE__', (root / 'museum.js').read_text()).replace('// __LEVELS_CODE__', (root / 'levels.js').read_text()).replace('// __SEASONAL_AREAS_CODE__', (root / 'seasonal-areas.js').read_text()).replace('// __ART_DIRECTION_CODE__', (root / 'art-direction.js').read_text()).replace('// __ENCOUNTER_ENEMIES_CODE__', (root / 'encounter-enemies.js').read_text()).replace('// __ANIMAL_INTERACTIONS_CODE__', (root / 'animal-interactions.js').read_text()).replace('// __CREATURE_ENCOUNTERS_CODE__', (root / 'creature-encounters.js').read_text()).replace('// __LEGENDARY_CREATURES_CODE__', (root / 'legendary-creatures.js').read_text()).replace('// __LEGENDARY_V2_CODE__', (root / 'legendary-v2.js').read_text()).replace('// __ROUTE_MAP_CODE__', (root / 'route-map.js').read_text().replace('__ROUTE_MAP_ART__', (root / 'assets/route-map-art.json').read_text()))
+game_code = (root / 'game.js').read_text().replace('// __SPECIAL_AREAS_CODE__', (root / 'special-areas.js').read_text()).replace('// __MUSEUM_CODE__', (root / 'museum.js').read_text()).replace('// __LEVELS_CODE__', (root / 'levels.js').read_text()).replace('// __SEASONAL_AREAS_CODE__', (root / 'seasonal-areas.js').read_text()).replace('// __ART_DIRECTION_CODE__', (root / 'art-direction.js').read_text()).replace('// __ENCOUNTER_ENEMIES_CODE__', (root / 'encounter-enemies.js').read_text()).replace('// __ANIMAL_INTERACTIONS_CODE__', (root / 'animal-interactions.js').read_text()).replace('// __CREATURE_ENCOUNTERS_CODE__', (root / 'creature-encounters.js').read_text()).replace('// __LEGENDARY_CREATURES_CODE__', (root / 'legendary-creatures.js').read_text()).replace('// __LEGENDARY_V2_CODE__', (root / 'legendary-v2.js').read_text()).replace('// __LEGENDARY_V3_CODE__', (root / 'legendary-v3.js').read_text().replace('__CREATURE_ART__', json.dumps(creature_art, separators=(',', ':')))).replace('// __ROUTE_MAP_CODE__', (root / 'route-map.js').read_text().replace('__ROUTE_MAP_ART__', (root / 'assets/route-map-art.json').read_text()))
 page = page.replace('__ASSET_DATA__', json.dumps(assets)).replace('__GAME_CODE__', game_code)
 page = page.replace('__APP_CODE__', (root / 'app.js').read_text())
 worker = (root / 'sw.template.js').read_text()
