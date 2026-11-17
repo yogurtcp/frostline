@@ -1881,3 +1881,7 @@ User: boulders just appeared. Thrown boulders are now drawn in flight in the sky
 ## 178. Stronger frost giant wind (2026-11-17)
 
 User: wind too weak. giantGustMetresPerSecond 6 -> 12, giantBreezeMetresPerSecond 2 -> 4 (config and config.js defaults).
+
+## 179. Close passes knock over walkers too (2026-11-17)
+
+User asked whether passing very near people knocks them down. Checked with a scripted pass test: it worked for NPC skiers only, within about 0.8 m beyond touching, at 85% or more of top speed while heading downhill. Pedestrians were never included. updateClosePasses now also covers PEOPLE_VIEW walkers (except werewolves, carried or petrified people), and skiers.closePass.edgeGap is 8 -> 12 px (about 1.2 m). Re-tested: skiers and walkers both fall at 0.6 m and 1.4 m gaps, and neither falls at 2.2 m.

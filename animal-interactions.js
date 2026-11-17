@@ -93,6 +93,13 @@ function updateClosePasses(previous){
     if(!pass.passed||pass.distance<=touch||pass.distance>touch+K.edgeGap)continue;
     crashSkier(o,null);o.nearPassUntil=clock+8;o.npcCrashSide=Math.sign(o.x-p.x)||1;say('WHOA!',o,1.3);
   }
+  // Walkers get bowled over by a fast close pass too.
+  for(const o of viewItems(PEOPLE_VIEW)){
+    if(o.dead||o.eaten||o.werewolf||o.legendCarried||o.legendStoneUntil>clock||o.npcFallUntil>clock||o.nearPassUntil>clock||Math.abs(o.y-p.y)>250)continue;
+    const pass=sweptRelativePass(o,previous),touch=S.physics.playerRadius+o.r;
+    if(!pass.passed||pass.distance<=touch||pass.distance>touch+K.edgeGap)continue;
+    crashPedestrian(o,null);o.nearPassUntil=clock+8;o.npcCrashSide=Math.sign(o.x-p.x)||1;say(pick(['WHOA!','HEY!','My cocoa!']),o,1.3);
+  }
 }
 function updateAnimalPickups(previous){
   if(state.p.air>0||state.p.fall||state.p.awaitingInput)return;

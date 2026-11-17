@@ -2849,7 +2849,7 @@
       "speedFraction": 0.85,
       "minimumKmh": 40,
       "relativeKmh": 18,
-      "edgeGap": 8
+      "edgeGap": 12
     }
   },
   "lift": {
