@@ -1877,3 +1877,7 @@ User reviewed all 18 in the lab and asked for changes (summarised in the "Curren
 ## 177. Cyclops boulders fly and land (2026-11-17)
 
 User: boulders just appeared. Thrown boulders are now drawn in flight in the sky layer: a high tumbling arc from his hand, or dropping from above the screen once he is out of sight (`a0`), alternating the two boulder frames. On landing the rock hops and settles (`landedAt`, 0.45 s), with a spreading dust ring and fragments flung sideways (`drawBoulderImpact`). A boulder that lands on an existing obstacle shows the impact and crumbles instead of staying.
+
+## 178. Stronger frost giant wind (2026-11-17)
+
+User: wind too weak. giantGustMetresPerSecond 6 -> 12, giantBreezeMetresPerSecond 2 -> 4 (config and config.js defaults).

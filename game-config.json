@@ -651,7 +651,7 @@
         "enabled": true,
         "fromLap": 2,
         "giantWindMetres": 150,
-        "giantBreezeMetresPerSecond": 2,
+        "giantBreezeMetresPerSecond": 4,
         "chancePerArea": [
           0.12,
           0.3
@@ -659,7 +659,7 @@
         "firstMetres": 1800,
         "firstStage": 3,
         "maxActive": 2,
-        "giantGustMetresPerSecond": 6,
+        "giantGustMetresPerSecond": 12,
         "kelpieHuntSeconds": 30,
         "kelpieSpeedRatio": 0.95,
         "thunderbirdFollowSeconds": 12,
