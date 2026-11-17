@@ -1,0 +1,186 @@
+{
+  "sourceSize": [
+    1774,
+    887
+  ],
+  "width": 256,
+  "height": 144,
+  "cellWidth": 64,
+  "cellHeight": 72,
+  "alphaMode": "binary",
+  "animationGroups": [
+    {
+      "name": "Walk",
+      "frames": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "fps": 7
+    }
+  ],
+  "frames": [
+    {
+      "name": "Walk left contact",
+      "x": 0,
+      "y": 0,
+      "w": 64,
+      "h": 72,
+      "bodyBounds": [
+        14,
+        21,
+        36,
+        43
+      ],
+      "anchor": [
+        32,
+        64
+      ],
+      "source": [
+        103,
+        79,
+        247,
+        297
+      ]
+    },
+    {
+      "name": "Walk left passing",
+      "x": 64,
+      "y": 0,
+      "w": 64,
+      "h": 72,
+      "bodyBounds": [
+        13,
+        22,
+        37,
+        42
+      ],
+      "anchor": [
+        32,
+        64
+      ],
+      "source": [
+        540,
+        81,
+        255,
+        286
+      ]
+    },
+    {
+      "name": "Walk right contact",
+      "x": 128,
+      "y": 0,
+      "w": 64,
+      "h": 72,
+      "bodyBounds": [
+        13,
+        21,
+        38,
+        43
+      ],
+      "anchor": [
+        32,
+        64
+      ],
+      "source": [
+        985,
+        81,
+        260,
+        295
+      ]
+    },
+    {
+      "name": "Walk right passing",
+      "x": 192,
+      "y": 0,
+      "w": 64,
+      "h": 72,
+      "bodyBounds": [
+        12,
+        22,
+        39,
+        42
+      ],
+      "anchor": [
+        32,
+        64
+      ],
+      "source": [
+        1431,
+        81,
+        267,
+        286
+      ]
+    },
+    {
+      "name": "Side-step left",
+      "x": 0,
+      "y": 72,
+      "w": 64,
+      "h": 72,
+      "bodyBounds": [
+        11,
+        24,
+        42,
+        40
+      ],
+      "anchor": [
+        32,
+        64
+      ],
+      "source": [
+        65,
+        535,
+        290,
+        276
+      ]
+    },
+    {
+      "name": "Side-step right",
+      "x": 64,
+      "y": 72,
+      "w": 64,
+      "h": 72,
+      "bodyBounds": [
+        10,
+        24,
+        43,
+        40
+      ],
+      "anchor": [
+        32,
+        64
+      ],
+      "source": [
+        532,
+        538,
+        294,
+        274
+      ]
+    },
+    {
+      "name": "Pay the toll",
+      "x": 128,
+      "y": 72,
+      "w": 64,
+      "h": 72,
+      "bodyBounds": [
+        9,
+        22,
+        45,
+        42
+      ],
+      "anchor": [
+        32,
+        64
+      ],
+      "source": [
+        959,
+        522,
+        309,
+        289
+      ]
+    }
+  ]
+}

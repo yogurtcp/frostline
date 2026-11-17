@@ -1,0 +1,69 @@
+{
+  "sourceSize": [
+    1774,
+    887
+  ],
+  "width": 160,
+  "height": 96,
+  "cellWidth": 80,
+  "cellHeight": 96,
+  "alphaMode": "binary",
+  "animationGroups": [
+    {
+      "name": "Carrying",
+      "frames": [
+        0,
+        1
+      ],
+      "fps": 5
+    }
+  ],
+  "frames": [
+    {
+      "name": "Carry wings up with skier",
+      "x": 0,
+      "y": 0,
+      "w": 80,
+      "h": 96,
+      "bodyBounds": [
+        15,
+        8,
+        50,
+        80
+      ],
+      "anchor": [
+        40,
+        88
+      ],
+      "source": [
+        240,
+        54,
+        478,
+        758
+      ]
+    },
+    {
+      "name": "Carry wings down with skier",
+      "x": 80,
+      "y": 0,
+      "w": 80,
+      "h": 96,
+      "bodyBounds": [
+        12,
+        34,
+        56,
+        54
+      ],
+      "anchor": [
+        40,
+        88
+      ],
+      "source": [
+        1021,
+        292,
+        534,
+        516
+      ]
+    }
+  ]
+}

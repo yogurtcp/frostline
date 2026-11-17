@@ -1,0 +1,106 @@
+{
+  "sourceSize": [
+    1774,
+    887
+  ],
+  "width": 96,
+  "height": 112,
+  "cellWidth": 48,
+  "cellHeight": 56,
+  "alphaMode": "binary",
+  "animationGroups": [],
+  "frames": [
+    {
+      "name": "Stone Yeti running",
+      "x": 0,
+      "y": 0,
+      "w": 48,
+      "h": 56,
+      "bodyBounds": [
+        9,
+        22,
+        30,
+        26
+      ],
+      "anchor": [
+        24,
+        48
+      ],
+      "source": [
+        356,
+        108,
+        325,
+        285
+      ]
+    },
+    {
+      "name": "Stone bear",
+      "x": 48,
+      "y": 0,
+      "w": 48,
+      "h": 56,
+      "bodyBounds": [
+        9,
+        31,
+        30,
+        17
+      ],
+      "anchor": [
+        24,
+        48
+      ],
+      "source": [
+        1089,
+        183,
+        364,
+        207
+      ]
+    },
+    {
+      "name": "Stone wolf",
+      "x": 0,
+      "y": 56,
+      "w": 48,
+      "h": 56,
+      "bodyBounds": [
+        13,
+        36,
+        22,
+        12
+      ],
+      "anchor": [
+        24,
+        48
+      ],
+      "source": [
+        332,
+        615,
+        310,
+        166
+      ]
+    },
+    {
+      "name": "Stone walking person",
+      "x": 48,
+      "y": 56,
+      "w": 48,
+      "h": 56,
+      "bodyBounds": [
+        16,
+        23,
+        15,
+        25
+      ],
+      "anchor": [
+        24,
+        48
+      ],
+      "source": [
+        1178,
+        538,
+        158,
+        265
+      ]
+    }
+  ]
+}

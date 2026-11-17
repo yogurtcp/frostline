@@ -1,0 +1,165 @@
+{
+  "sourceSize": [
+    1536,
+    1024
+  ],
+  "width": 288,
+  "height": 224,
+  "cellWidth": 96,
+  "cellHeight": 112,
+  "alphaMode": "binary",
+  "animationGroups": [
+    {
+      "name": "Run",
+      "frames": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "fps": 9
+    }
+  ],
+  "frames": [
+    {
+      "name": "Run left contact",
+      "x": 0,
+      "y": 0,
+      "w": 96,
+      "h": 112,
+      "bodyBounds": [
+        14,
+        14,
+        68,
+        90
+      ],
+      "anchor": [
+        48,
+        104
+      ],
+      "source": [
+        126,
+        67,
+        280,
+        371
+      ]
+    },
+    {
+      "name": "Run left push-off",
+      "x": 96,
+      "y": 0,
+      "w": 96,
+      "h": 112,
+      "bodyBounds": [
+        12,
+        15,
+        71,
+        89
+      ],
+      "anchor": [
+        48,
+        104
+      ],
+      "source": [
+        607,
+        67,
+        291,
+        366
+      ]
+    },
+    {
+      "name": "Run flight right lead",
+      "x": 192,
+      "y": 0,
+      "w": 96,
+      "h": 112,
+      "bodyBounds": [
+        11,
+        22,
+        74,
+        82
+      ],
+      "anchor": [
+        48,
+        104
+      ],
+      "source": [
+        1110,
+        63,
+        305,
+        339
+      ]
+    },
+    {
+      "name": "Run right contact",
+      "x": 0,
+      "y": 112,
+      "w": 96,
+      "h": 112,
+      "bodyBounds": [
+        13,
+        16,
+        70,
+        88
+      ],
+      "anchor": [
+        48,
+        104
+      ],
+      "source": [
+        141,
+        584,
+        287,
+        363
+      ]
+    },
+    {
+      "name": "Run right push-off",
+      "x": 96,
+      "y": 112,
+      "w": 96,
+      "h": 112,
+      "bodyBounds": [
+        15,
+        22,
+        66,
+        82
+      ],
+      "anchor": [
+        48,
+        104
+      ],
+      "source": [
+        627,
+        587,
+        271,
+        339
+      ]
+    },
+    {
+      "name": "Run flight left lead",
+      "x": 192,
+      "y": 112,
+      "w": 96,
+      "h": 112,
+      "bodyBounds": [
+        13,
+        17,
+        69,
+        87
+      ],
+      "anchor": [
+        48,
+        104
+      ],
+      "source": [
+        1115,
+        594,
+        283,
+        357
+      ]
+    }
+  ]
+}

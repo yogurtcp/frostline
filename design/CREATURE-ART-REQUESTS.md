@@ -46,3 +46,7 @@ Copy the existing death cards (for example `death-wolf.png` / `death-wolf-night.
 ## 3. No new art needed
 
 Witch, Medusa (the creature itself), Cyclops (boulders included), Kelpie, Snow Dragon and Stone Ram are already complete.
+
+## Delivery (2026-11-17)
+
+All requested artwork, including the nice-to-haves, is complete: eight day/night cards and thirteen sheets /65 sprite-effect frames. See [ROUND2.md](creatures/ROUND2.md) for paths and integration notes, and [native animated previews](../creature-art-round2.html). Death cards are registered in the game; new sprite sheets are ready for Claude to integrate after review.

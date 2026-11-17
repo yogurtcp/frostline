@@ -2,7 +2,7 @@
 
 Generated from [CREATURES.md](../CREATURES.md) using the built-in image-generation tool, November 2026. Review at [creature-art.html](../../creature-art.html): native size beside the actual 22-pixel skier, selectable poses, optional 3× nearest-neighbour zoom.
 
-**Art only.** No new creature behaviour is implemented or enabled by this delivery. `endless.regions.legendary.enabled` remains `false`. Claude can integrate these assets after review. Existing Dragon, Stone Ram and Kitsune identities are preserved unchanged.
+The original delivery was art only; Claude has since integrated it into the Creature Lab and normal-play spawning. This delivery does not change behaviour or tuning. New round-two sprite sheets remain an art handoff for approval/integration; the requested death cards are installed. See [round-two handoff](ROUND2.md) and [animated native previews](../../creature-art-round2.html). Existing Dragon, Stone Ram and Kitsune identities are preserved unchanged.
 
 Each directory contains:
 
@@ -40,4 +40,4 @@ Additional props: `witch-props` has three potion bottles and corresponding splas
 
 Add ground shadows, wind, gaze cones, landing warnings, magic trails and lighting in the renderer. These effects are deliberately not baked into creature bodies. The ghost retains generated alpha; other native sheets use binary transparency for crisp pixel edges.
 
-Optional reproducible bake: run `tools/bake-creature-art.cjs` with Playwright available on `NODE_PATH`. It reads `generation-jobs.json`; originals and exact prompts remain untouched. Stage-map icons have explicit source row boundaries because the generated rows were not evenly spaced.
+Optional reproducible bake: run `tools/bake-creature-art.cjs` with Playwright and Sharp available on `NODE_PATH`. It reads `generation-jobs.json`; originals and exact prompts remain untouched. Stage-map icons have explicit source row boundaries because the generated rows were not evenly spaced.

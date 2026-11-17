@@ -1,0 +1,19 @@
+{
+  "name": "death-ghost",
+  "category": "scene",
+  "targetWidth": 320,
+  "targetHeight": 200,
+  "columns": 1,
+  "rows": 1,
+  "poses": [],
+  "prompt": "Use case: illustration-story. A finished Frostline funny death-card pixel-art illustration, landscape8:5, native320x200 pixels and64 colours, same cute detailed cozy pixel clusters as attached existing death-bear card. Input1 is STYLE reference only; input2 is CREATURE IDENTITY reference; input3 is PLAYER AND PIXEL STYLE reference. The skier always wears a red ski jacket, blue trousers, navy knitted beanie, amber goggles, dark boots and teal skis. Preserve the creature colours/anatomy/architecture from input2. A complete charming winter scene on snowy mountain slope, snowy evergreen trees and distant alpine mountains. Bright daylight, pale clear blue sky, soft blue snow shadows, warm cabin accents. Main action centred and fully visible within central80% of composition to survive8:5 cropping. Funny cartoon mishap, never gory, no blood, injury detail or realistic horror. No text, captions, letters, panels, border, watermark or UI. Real low-resolution pixel art with controlled square clusters, no blur, no photorealism or smooth digital painting. A small classic white-sheet ghost has comically SWALLOWED/WRAPPED the skier into one billowing sheet bundle. Its two little hollow eyes look startled and satisfied. Only two long teal skis poke out from under the cloth, with one red-jacket sleeve barely peeking out at the side. Visible cold BLUE MIST curls along the snow. Funny cute impish ghost, not a giant toothy monster.",
+  "transparent": false,
+  "alphaMode": "opaque",
+  "directory": "design/scenes/creature-round2/death-ghost",
+  "references": [
+    "assets/scenes/death-bear.png",
+    "design/creatures/ghost/native.png",
+    "assets/gritty-sprites.png"
+  ],
+  "colors": 64
+}

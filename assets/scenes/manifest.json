@@ -255,6 +255,70 @@
       "source": "design/checkpoint-map/checkpoint-night/source.png",
       "width": 320,
       "height": 200
+    },
+    {
+      "key": "death-ghost",
+      "file": "death-ghost.png",
+      "source": "design/scenes/creature-round2/death-ghost/source.png",
+      "width": 320,
+      "height": 200,
+      "colors": 64
+    },
+    {
+      "key": "death-gargoyle",
+      "file": "death-gargoyle.png",
+      "source": "design/scenes/creature-round2/death-gargoyle/source.png",
+      "width": 320,
+      "height": 200,
+      "colors": 64
+    },
+    {
+      "key": "death-troll",
+      "file": "death-troll.png",
+      "source": "design/scenes/creature-round2/death-troll/source.png",
+      "width": 320,
+      "height": 200,
+      "colors": 64
+    },
+    {
+      "key": "death-baba-yaga",
+      "file": "death-baba-yaga.png",
+      "source": "design/scenes/creature-round2/death-baba-yaga/source.png",
+      "width": 320,
+      "height": 200,
+      "colors": 64
+    },
+    {
+      "key": "death-ghost-night",
+      "file": "death-ghost-night.png",
+      "source": "design/scenes/creature-round2/death-ghost-night/source.png",
+      "width": 320,
+      "height": 200,
+      "colors": 64
+    },
+    {
+      "key": "death-gargoyle-night",
+      "file": "death-gargoyle-night.png",
+      "source": "design/scenes/creature-round2/death-gargoyle-night/source.png",
+      "width": 320,
+      "height": 200,
+      "colors": 64
+    },
+    {
+      "key": "death-troll-night",
+      "file": "death-troll-night.png",
+      "source": "design/scenes/creature-round2/death-troll-night/source.png",
+      "width": 320,
+      "height": 200,
+      "colors": 64
+    },
+    {
+      "key": "death-baba-yaga-night",
+      "file": "death-baba-yaga-night.png",
+      "source": "design/scenes/creature-round2/death-baba-yaga-night/source.png",
+      "width": 320,
+      "height": 200,
+      "colors": 64
     }
   ]
 }

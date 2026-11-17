@@ -1,0 +1,219 @@
+{
+  "sourceSize": [
+    1774,
+    887
+  ],
+  "width": 224,
+  "height": 112,
+  "cellWidth": 56,
+  "cellHeight": 56,
+  "alphaMode": "binary",
+  "animationGroups": [
+    {
+      "name": "Poof",
+      "frames": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "fps": 8
+    },
+    {
+      "name": "Spell ring",
+      "frames": [
+        4,
+        5,
+        6,
+        7
+      ],
+      "fps": 7
+    }
+  ],
+  "frames": [
+    {
+      "name": "Poof seed",
+      "x": 0,
+      "y": 0,
+      "w": 56,
+      "h": 56,
+      "bodyBounds": [
+        20,
+        34,
+        16,
+        14
+      ],
+      "anchor": [
+        28,
+        48
+      ],
+      "source": [
+        140,
+        221,
+        192,
+        165
+      ]
+    },
+    {
+      "name": "Poof expand",
+      "x": 56,
+      "y": 0,
+      "w": 56,
+      "h": 56,
+      "bodyBounds": [
+        13,
+        16,
+        30,
+        32
+      ],
+      "anchor": [
+        28,
+        48
+      ],
+      "source": [
+        520,
+        125,
+        259,
+        272
+      ]
+    },
+    {
+      "name": "Poof full",
+      "x": 112,
+      "y": 0,
+      "w": 56,
+      "h": 56,
+      "bodyBounds": [
+        8,
+        12,
+        40,
+        36
+      ],
+      "anchor": [
+        28,
+        48
+      ],
+      "source": [
+        920,
+        89,
+        338,
+        308
+      ]
+    },
+    {
+      "name": "Poof clear",
+      "x": 168,
+      "y": 0,
+      "w": 56,
+      "h": 56,
+      "bodyBounds": [
+        11,
+        15,
+        34,
+        33
+      ],
+      "anchor": [
+        28,
+        48
+      ],
+      "source": [
+        1417,
+        125,
+        257,
+        253
+      ]
+    },
+    {
+      "name": "Spell ring A",
+      "x": 0,
+      "y": 56,
+      "w": 56,
+      "h": 56,
+      "bodyBounds": [
+        8,
+        30,
+        40,
+        18
+      ],
+      "anchor": [
+        28,
+        48
+      ],
+      "source": [
+        80,
+        613,
+        298,
+        132
+      ]
+    },
+    {
+      "name": "Spell ring B",
+      "x": 56,
+      "y": 56,
+      "w": 56,
+      "h": 56,
+      "bodyBounds": [
+        8,
+        29,
+        40,
+        19
+      ],
+      "anchor": [
+        28,
+        48
+      ],
+      "source": [
+        509,
+        599,
+        318,
+        153
+      ]
+    },
+    {
+      "name": "Spell ring C",
+      "x": 112,
+      "y": 56,
+      "w": 56,
+      "h": 56,
+      "bodyBounds": [
+        8,
+        29,
+        40,
+        19
+      ],
+      "anchor": [
+        28,
+        48
+      ],
+      "source": [
+        950,
+        602,
+        315,
+        151
+      ]
+    },
+    {
+      "name": "Spell ring D",
+      "x": 168,
+      "y": 56,
+      "w": 56,
+      "h": 56,
+      "bodyBounds": [
+        9,
+        28,
+        37,
+        20
+      ],
+      "anchor": [
+        28,
+        48
+      ],
+      "source": [
+        1370,
+        583,
+        339,
+        184
+      ]
+    }
+  ]
+}

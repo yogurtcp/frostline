@@ -1,0 +1,117 @@
+{
+  "sourceSize": [
+    1774,
+    887
+  ],
+  "width": 64,
+  "height": 64,
+  "cellWidth": 32,
+  "cellHeight": 32,
+  "alphaMode": "binary",
+  "animationGroups": [
+    {
+      "name": "Flicker",
+      "frames": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "fps": 7
+    }
+  ],
+  "frames": [
+    {
+      "name": "Flicker upright",
+      "x": 0,
+      "y": 0,
+      "w": 32,
+      "h": 32,
+      "bodyBounds": [
+        12,
+        15,
+        7,
+        9
+      ],
+      "anchor": [
+        16,
+        24
+      ],
+      "source": [
+        551,
+        161,
+        141,
+        188
+      ]
+    },
+    {
+      "name": "Flicker left",
+      "x": 32,
+      "y": 0,
+      "w": 32,
+      "h": 32,
+      "bodyBounds": [
+        12,
+        15,
+        8,
+        9
+      ],
+      "anchor": [
+        16,
+        24
+      ],
+      "source": [
+        1058,
+        169,
+        157,
+        179
+      ]
+    },
+    {
+      "name": "Flicker tall",
+      "x": 0,
+      "y": 32,
+      "w": 32,
+      "h": 32,
+      "bodyBounds": [
+        12,
+        12,
+        7,
+        12
+      ],
+      "anchor": [
+        16,
+        24
+      ],
+      "source": [
+        555,
+        530,
+        135,
+        241
+      ]
+    },
+    {
+      "name": "Flicker right",
+      "x": 32,
+      "y": 32,
+      "w": 32,
+      "h": 32,
+      "bodyBounds": [
+        12,
+        15,
+        8,
+        9
+      ],
+      "anchor": [
+        16,
+        24
+      ],
+      "source": [
+        1080,
+        591,
+        156,
+        177
+      ]
+    }
+  ]
+}

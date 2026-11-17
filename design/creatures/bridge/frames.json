@@ -1,0 +1,104 @@
+{
+  "sourceSize": [
+    2172,
+    724
+  ],
+  "width": 408,
+  "height": 112,
+  "cellWidth": 136,
+  "cellHeight": 112,
+  "alphaMode": "binary",
+  "animationGroups": [],
+  "frames": [
+    {
+      "name": "Bridge repeat tile",
+      "x": 0,
+      "y": 0,
+      "w": 136,
+      "h": 112,
+      "bodyBounds": [
+        8,
+        40,
+        120,
+        64
+      ],
+      "anchor": [
+        68,
+        104
+      ],
+      "source": [
+        232,
+        100,
+        512,
+        550
+      ],
+      "repeatAxis": "y",
+      "tileRect": [
+        8,
+        40,
+        120,
+        64
+      ]
+    },
+    {
+      "name": "Gorge left edge",
+      "x": 136,
+      "y": 0,
+      "w": 136,
+      "h": 112,
+      "bodyBounds": [
+        36,
+        8,
+        64,
+        96
+      ],
+      "anchor": [
+        68,
+        104
+      ],
+      "source": [
+        1024,
+        64,
+        328,
+        608
+      ],
+      "repeatAxis": "y",
+      "tileRect": [
+        172,
+        8,
+        64,
+        96
+      ]
+    },
+    {
+      "name": "Gorge right edge",
+      "x": 272,
+      "y": 0,
+      "w": 136,
+      "h": 112,
+      "bodyBounds": [
+        36,
+        8,
+        64,
+        96
+      ],
+      "anchor": [
+        68,
+        104
+      ],
+      "source": [
+        1632,
+        64,
+        328,
+        608
+      ],
+      "repeatAxis": "y",
+      "tileRect": [
+        308,
+        8,
+        64,
+        96
+      ]
+    }
+  ]
+}

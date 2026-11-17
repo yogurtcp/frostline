@@ -1,0 +1,139 @@
+{
+  "sourceSize": [
+    1536,
+    1024
+  ],
+  "width": 192,
+  "height": 224,
+  "cellWidth": 64,
+  "cellHeight": 112,
+  "alphaMode": "binary",
+  "animationGroups": [
+    {
+      "name": "Lightning strike",
+      "frames": [
+        0,
+        1,
+        2
+      ],
+      "fps": 10
+    }
+  ],
+  "frames": [
+    {
+      "name": "Bolt fork",
+      "x": 0,
+      "y": 0,
+      "w": 64,
+      "h": 112,
+      "bodyBounds": [
+        24,
+        69,
+        16,
+        35
+      ],
+      "anchor": [
+        32,
+        104
+      ],
+      "source": [
+        165,
+        27,
+        208,
+        454
+      ]
+    },
+    {
+      "name": "Bolt flash",
+      "x": 64,
+      "y": 0,
+      "w": 64,
+      "h": 112,
+      "bodyBounds": [
+        24,
+        71,
+        16,
+        33
+      ],
+      "anchor": [
+        32,
+        104
+      ],
+      "source": [
+        666,
+        27,
+        224,
+        462
+      ]
+    },
+    {
+      "name": "Bolt fade",
+      "x": 128,
+      "y": 0,
+      "w": 64,
+      "h": 112,
+      "bodyBounds": [
+        24,
+        65,
+        16,
+        39
+      ],
+      "anchor": [
+        32,
+        104
+      ],
+      "source": [
+        1194,
+        38,
+        181,
+        443
+      ]
+    },
+    {
+      "name": "Crackling target ring",
+      "x": 0,
+      "y": 112,
+      "w": 64,
+      "h": 112,
+      "bodyBounds": [
+        8,
+        78,
+        48,
+        26
+      ],
+      "anchor": [
+        32,
+        104
+      ],
+      "source": [
+        53,
+        667,
+        397,
+        214
+      ]
+    },
+    {
+      "name": "Scorch decal",
+      "x": 64,
+      "y": 112,
+      "w": 64,
+      "h": 112,
+      "bodyBounds": [
+        12,
+        84,
+        40,
+        20
+      ],
+      "anchor": [
+        32,
+        104
+      ],
+      "source": [
+        617,
+        701,
+        307,
+        155
+      ]
+    }
+  ]
+}

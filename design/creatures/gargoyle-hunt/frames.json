@@ -1,0 +1,163 @@
+{
+  "sourceSize": [
+    1536,
+    1024
+  ],
+  "width": 168,
+  "height": 128,
+  "cellWidth": 56,
+  "cellHeight": 64,
+  "alphaMode": "binary",
+  "animationGroups": [
+    {
+      "name": "Flying chase",
+      "frames": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "fps": 8
+    }
+  ],
+  "frames": [
+    {
+      "name": "Chase upstroke",
+      "x": 0,
+      "y": 0,
+      "w": 56,
+      "h": 64,
+      "bodyBounds": [
+        16,
+        38,
+        23,
+        18
+      ],
+      "anchor": [
+        28,
+        56
+      ],
+      "source": [
+        107,
+        159,
+        296,
+        226
+      ]
+    },
+    {
+      "name": "Chase wings high",
+      "x": 56,
+      "y": 0,
+      "w": 56,
+      "h": 64,
+      "bodyBounds": [
+        11,
+        37,
+        34,
+        19
+      ],
+      "anchor": [
+        28,
+        56
+      ],
+      "source": [
+        550,
+        141,
+        433,
+        245
+      ]
+    },
+    {
+      "name": "Chase downstroke",
+      "x": 112,
+      "y": 0,
+      "w": 56,
+      "h": 64,
+      "bodyBounds": [
+        15,
+        40,
+        25,
+        16
+      ],
+      "anchor": [
+        28,
+        56
+      ],
+      "source": [
+        1117,
+        195,
+        312,
+        207
+      ]
+    },
+    {
+      "name": "Chase recovery",
+      "x": 0,
+      "y": 64,
+      "w": 56,
+      "h": 64,
+      "bodyBounds": [
+        20,
+        40,
+        15,
+        16
+      ],
+      "anchor": [
+        28,
+        56
+      ],
+      "source": [
+        162,
+        684,
+        195,
+        199
+      ]
+    },
+    {
+      "name": "Screech warning",
+      "x": 56,
+      "y": 64,
+      "w": 56,
+      "h": 64,
+      "bodyBounds": [
+        10,
+        35,
+        35,
+        21
+      ],
+      "anchor": [
+        28,
+        56
+      ],
+      "source": [
+        546,
+        617,
+        441,
+        260
+      ]
+    },
+    {
+      "name": "Claws-out lunge",
+      "x": 112,
+      "y": 64,
+      "w": 56,
+      "h": 64,
+      "bodyBounds": [
+        12,
+        40,
+        31,
+        16
+      ],
+      "anchor": [
+        28,
+        56
+      ],
+      "source": [
+        1082,
+        664,
+        388,
+        204
+      ]
+    }
+  ]
+}

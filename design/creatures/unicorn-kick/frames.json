@@ -1,0 +1,60 @@
+{
+  "sourceSize": [
+    1774,
+    887
+  ],
+  "width": 128,
+  "height": 72,
+  "cellWidth": 64,
+  "cellHeight": 72,
+  "alphaMode": "binary",
+  "animationGroups": [],
+  "frames": [
+    {
+      "name": "Rear",
+      "x": 0,
+      "y": 0,
+      "w": 64,
+      "h": 72,
+      "bodyBounds": [
+        15,
+        25,
+        34,
+        39
+      ],
+      "anchor": [
+        32,
+        64
+      ],
+      "source": [
+        200,
+        183,
+        450,
+        526
+      ]
+    },
+    {
+      "name": "Back kick",
+      "x": 64,
+      "y": 0,
+      "w": 64,
+      "h": 72,
+      "bodyBounds": [
+        9,
+        28,
+        45,
+        36
+      ],
+      "anchor": [
+        32,
+        64
+      ],
+      "source": [
+        999,
+        222,
+        604,
+        487
+      ]
+    }
+  ]
+}

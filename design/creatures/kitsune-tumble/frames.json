@@ -1,0 +1,117 @@
+{
+  "sourceSize": [
+    1774,
+    887
+  ],
+  "width": 112,
+  "height": 112,
+  "cellWidth": 56,
+  "cellHeight": 56,
+  "alphaMode": "binary",
+  "animationGroups": [
+    {
+      "name": "Tumble",
+      "frames": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "fps": 6
+    }
+  ],
+  "frames": [
+    {
+      "name": "Trip forward",
+      "x": 0,
+      "y": 0,
+      "w": 56,
+      "h": 56,
+      "bodyBounds": [
+        11,
+        22,
+        33,
+        26
+      ],
+      "anchor": [
+        28,
+        48
+      ],
+      "source": [
+        336,
+        126,
+        317,
+        249
+      ]
+    },
+    {
+      "name": "Roll on back",
+      "x": 56,
+      "y": 0,
+      "w": 56,
+      "h": 56,
+      "bodyBounds": [
+        11,
+        27,
+        33,
+        21
+      ],
+      "anchor": [
+        28,
+        48
+      ],
+      "source": [
+        1057,
+        169,
+        317,
+        201
+      ]
+    },
+    {
+      "name": "Roll recover",
+      "x": 0,
+      "y": 56,
+      "w": 56,
+      "h": 56,
+      "bodyBounds": [
+        13,
+        25,
+        30,
+        23
+      ],
+      "anchor": [
+        28,
+        48
+      ],
+      "source": [
+        356,
+        549,
+        286,
+        224
+      ]
+    },
+    {
+      "name": "Dizzy sit",
+      "x": 56,
+      "y": 56,
+      "w": 56,
+      "h": 56,
+      "bodyBounds": [
+        15,
+        23,
+        25,
+        25
+      ],
+      "anchor": [
+        28,
+        48
+      ],
+      "source": [
+        1068,
+        524,
+        243,
+        242
+      ]
+    }
+  ]
+}

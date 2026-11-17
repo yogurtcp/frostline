@@ -1,0 +1,735 @@
+[
+  {
+    "name": "death-ghost",
+    "category": "scene",
+    "targetWidth": 320,
+    "targetHeight": 200,
+    "columns": 1,
+    "rows": 1,
+    "poses": [],
+    "prompt": "Use case: illustration-story. A finished Frostline funny death-card pixel-art illustration, landscape8:5, native320x200 pixels and64 colours, same cute detailed cozy pixel clusters as attached existing death-bear card. Input1 is STYLE reference only; input2 is CREATURE IDENTITY reference; input3 is PLAYER AND PIXEL STYLE reference. The skier always wears a red ski jacket, blue trousers, navy knitted beanie, amber goggles, dark boots and teal skis. Preserve the creature colours/anatomy/architecture from input2. A complete charming winter scene on snowy mountain slope, snowy evergreen trees and distant alpine mountains. Bright daylight, pale clear blue sky, soft blue snow shadows, warm cabin accents. Main action centred and fully visible within central80% of composition to survive8:5 cropping. Funny cartoon mishap, never gory, no blood, injury detail or realistic horror. No text, captions, letters, panels, border, watermark or UI. Real low-resolution pixel art with controlled square clusters, no blur, no photorealism or smooth digital painting. A small classic white-sheet ghost has comically SWALLOWED/WRAPPED the skier into one billowing sheet bundle. Its two little hollow eyes look startled and satisfied. Only two long teal skis poke out from under the cloth, with one red-jacket sleeve barely peeking out at the side. Visible cold BLUE MIST curls along the snow. Funny cute impish ghost, not a giant toothy monster.",
+    "transparent": false,
+    "alphaMode": "opaque",
+    "directory": "design/scenes/creature-round2/death-ghost",
+    "references": [
+      "assets/scenes/death-bear.png",
+      "design/creatures/ghost/native.png",
+      "assets/gritty-sprites.png"
+    ],
+    "colors": 64
+  },
+  {
+    "name": "death-gargoyle",
+    "category": "scene",
+    "targetWidth": 320,
+    "targetHeight": 200,
+    "columns": 1,
+    "rows": 1,
+    "poses": [],
+    "prompt": "Use case: illustration-story. A finished Frostline funny death-card pixel-art illustration, landscape8:5, native320x200 pixels and64 colours, same cute detailed cozy pixel clusters as attached existing death-bear card. Input1 is STYLE reference only; input2 is CREATURE IDENTITY reference; input3 is PLAYER AND PIXEL STYLE reference. The skier always wears a red ski jacket, blue trousers, navy knitted beanie, amber goggles, dark boots and teal skis. Preserve the creature colours/anatomy/architecture from input2. A complete charming winter scene on snowy mountain slope, snowy evergreen trees and distant alpine mountains. Bright daylight, pale clear blue sky, soft blue snow shadows, warm cabin accents. Main action centred and fully visible within central80% of composition to survive8:5 cropping. Funny cartoon mishap, never gory, no blood, injury detail or realistic horror. No text, captions, letters, panels, border, watermark or UI. Real low-resolution pixel art with controlled square clusters, no blur, no photorealism or smooth digital painting. The grey stone GARGOYLE with short horns, green eyes and bat wings is hunched on the snow, contentedly chewing with puffed cheeks. The skier is completely hidden: ONLY a pair of teal skis sticking out near its mouth and a discarded navy knitted beanie in front tell the joke. Little harmless snow crumbs, no body, bones, blood or gore. Maintain compact weathered grey gargoyle identity.",
+    "transparent": false,
+    "alphaMode": "opaque",
+    "directory": "design/scenes/creature-round2/death-gargoyle",
+    "references": [
+      "assets/scenes/death-bear.png",
+      "design/creatures/gargoyle/native.png",
+      "assets/gritty-sprites.png"
+    ],
+    "colors": 64
+  },
+  {
+    "name": "death-troll",
+    "category": "scene",
+    "targetWidth": 320,
+    "targetHeight": 200,
+    "columns": 1,
+    "rows": 1,
+    "poses": [],
+    "prompt": "Use case: illustration-story. A finished Frostline funny death-card pixel-art illustration, landscape8:5, native320x200 pixels and64 colours, same cute detailed cozy pixel clusters as attached existing death-bear card. Input1 is STYLE reference only; input2 is CREATURE IDENTITY reference; input3 is PLAYER AND PIXEL STYLE reference. The skier always wears a red ski jacket, blue trousers, navy knitted beanie, amber goggles, dark boots and teal skis. Preserve the creature colours/anatomy/architecture from input2. A complete charming winter scene on snowy mountain slope, snowy evergreen trees and distant alpine mountains. Bright daylight, pale clear blue sky, soft blue snow shadows, warm cabin accents. Main action centred and fully visible within central80% of composition to survive8:5 cropping. Funny cartoon mishap, never gory, no blood, injury detail or realistic horror. No text, captions, letters, panels, border, watermark or UI. Real low-resolution pixel art with controlled square clusters, no blur, no photorealism or smooth digital painting. The broad green tusked bridge TROLL with gold belt and axe on his belt stands at the snowy end of a wooden ROPE BRIDGE over a deep blue snowy GORGE. He holds the intact red-jacket SKIER UPSIDE DOWN by ONE teal ski with one hand, skier dangling safely above the gorge looking surprised, other ski attached to the other boot. Troll extends his OTHER hand palm-up toward viewer demanding a toll, greedy grin. Two arms only. Clear visual joke with both hands and dangling skier visible, snowy gorge walls and bridge readable.",
+    "transparent": false,
+    "alphaMode": "opaque",
+    "directory": "design/scenes/creature-round2/death-troll",
+    "references": [
+      "assets/scenes/death-bear.png",
+      "design/creatures/troll/native.png",
+      "assets/gritty-sprites.png"
+    ],
+    "colors": 64
+  },
+  {
+    "name": "death-baba-yaga",
+    "category": "scene",
+    "targetWidth": 320,
+    "targetHeight": 200,
+    "columns": 1,
+    "rows": 1,
+    "poses": [],
+    "prompt": "Use case: illustration-story. A finished Frostline funny death-card pixel-art illustration, landscape8:5, native320x200 pixels and64 colours, same cute detailed cozy pixel clusters as attached existing death-bear card. Input1 is STYLE reference only; input2 is CREATURE IDENTITY reference; input3 is PLAYER AND PIXEL STYLE reference. The skier always wears a red ski jacket, blue trousers, navy knitted beanie, amber goggles, dark boots and teal skis. Preserve the creature colours/anatomy/architecture from input2. A complete charming winter scene on snowy mountain slope, snowy evergreen trees and distant alpine mountains. Bright daylight, pale clear blue sky, soft blue snow shadows, warm cabin accents. Main action centred and fully visible within central80% of composition to survive8:5 cropping. Funny cartoon mishap, never gory, no blood, injury detail or realistic horror. No text, captions, letters, panels, border, watermark or UI. Real low-resolution pixel art with controlled square clusters, no blur, no photorealism or smooth digital painting. BABA YAGA'S exact snow-roof timber hut stands on two LONG YELLOW CHICKEN LEGS. Its teal front DOOR is wide OPEN, warm orange light inside. The red-jacket skier is being comically pulled backwards INSIDE the doorway, upper body disappearing inside, booted legs and two teal skis sticking out. A thin BONY HAND grasps the jacket; one big hooked WITCH NOSE peeks around the inside doorframe. Do not show a whole unrelated witch. House has its existing chimney, two golden windows, wooden logs and layered snowy roof. The chicken feet and open door must be clearly visible.",
+    "transparent": false,
+    "alphaMode": "opaque",
+    "directory": "design/scenes/creature-round2/death-baba-yaga",
+    "references": [
+      "assets/scenes/death-bear.png",
+      "design/creatures/hut/native.png",
+      "assets/gritty-sprites.png"
+    ],
+    "colors": 64
+  },
+  {
+    "name": "hut-run",
+    "category": "creature",
+    "targetWidth": 80,
+    "targetHeight": 90,
+    "columns": 3,
+    "rows": 2,
+    "poses": [
+      "Run left contact",
+      "Run left push-off",
+      "Run flight right lead",
+      "Run right contact",
+      "Run right push-off",
+      "Run flight left lead"
+    ],
+    "prompt": "Use case: stylized-concept. Production sprite sheet for Frostline. Input images are REFERENCE ONLY for exact character identity, palette, scale and pixel style; do not edit the reference atlas. Match tiny crisp PC-game pixel clusters, dark slate outlines, muted blue-violet shadows, off-white snow and restrained warm highlights. Core colours ink #344b53, snow #edf1df, shade #a6bec5, teal #508d92, gold #e4bd6f. Same above/front 3/4 downhill game view; skier is only22 native pixels wide. Distinct articulated key poses that survive native reduction, not mirrored copies. Genuine transparent alpha background with generous clean gutters. No labels, text, grids, floor, shadows, blur, painted checkerboard, background, scenery or smooth HD rendering. Each cell one complete pose, same character scale and bottom-centre anchor; do not crop limbs. Keep anatomy and costume exactly consistent with attached character. Baba Yaga's SAME snow-roof timber HUT, teal door, amber windows, chimney, two LONG YELLOW CHICKEN LEGS. Six consecutive FAST RUN phases toward viewer/downhill, house leans eagerly forward, long decisive leg strides with knees high and toes spread, alternating contact, push-off and airborne crossover. Legs bend at knees and hips; house stays SAME size, tilts/bobs a few pixels, never stretches. Include very small discrete kicked-up white SNOW PUFFS close to feet (not a floor/shadow). This is a chasing sprint, clearly different from strolling or mirrored side swaps. Keep house architecture and broad gap between legs from reference. Layout: exactly 3 columns by 2 rows, read left to right. Exactly 6 occupied cells. Maximum native body 80x90px; this is a GAME SPRITE sheet, not concept art.",
+    "transparent": true,
+    "alphaMode": "binary",
+    "directory": "design/creatures/hut-run",
+    "references": [
+      "assets/gritty-sprites.png",
+      "design/creatures/hut/native.png"
+    ],
+    "animationGroups": [
+      {
+        "name": "Run",
+        "frames": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "fps": 9
+      }
+    ]
+  },
+  {
+    "name": "troll-bridge",
+    "category": "creature",
+    "targetWidth": 45,
+    "targetHeight": 55,
+    "columns": 4,
+    "rows": 2,
+    "poses": [
+      "Walk left contact",
+      "Walk left passing",
+      "Walk right contact",
+      "Walk right passing",
+      "Side-step left",
+      "Side-step right",
+      "Pay the toll"
+    ],
+    "prompt": "Use case: stylized-concept. Production sprite sheet for Frostline. Input images are REFERENCE ONLY for exact character identity, palette, scale and pixel style; do not edit the reference atlas. Match tiny crisp PC-game pixel clusters, dark slate outlines, muted blue-violet shadows, off-white snow and restrained warm highlights. Core colours ink #344b53, snow #edf1df, shade #a6bec5, teal #508d92, gold #e4bd6f. Same above/front 3/4 downhill game view; skier is only22 native pixels wide. Distinct articulated key poses that survive native reduction, not mirrored copies. Genuine transparent alpha background with generous clean gutters. No labels, text, grids, floor, shadows, blur, painted checkerboard, background, scenery or smooth HD rendering. Each cell one complete pose, same character scale and bottom-centre anchor; do not crop limbs. Keep anatomy and costume exactly consistent with attached character. Exact broad green tusked TROLL, gold belt, axe tucked at belt. Seven complete poses: 1 left leg reaches toward CAMERA with right arm swung forward;2 left leg supports body while right knee passes;3 right leg reaches camera, left arm swings forward;4 right leg supports while left knee passes. This is an articulated four-phase FRONT-facing walking loop, not mirrored poses.5 a clear side-step to his left;6 side-step to his right;7 planted feet, big grin, one hand extended PALM UP demanding toll while other rests near belt. Same size, tusks, face, belt and axe across all. Layout: exactly 4 columns by 2 rows, read left to right. Exactly 7 occupied cells. Leave the final unused cell completely transparent. Maximum native body 45x55px; this is a GAME SPRITE sheet, not concept art.",
+    "transparent": true,
+    "alphaMode": "binary",
+    "directory": "design/creatures/troll-bridge",
+    "references": [
+      "assets/gritty-sprites.png",
+      "design/creatures/troll/native.png"
+    ],
+    "animationGroups": [
+      {
+        "name": "Walk",
+        "frames": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "fps": 7
+      }
+    ]
+  },
+  {
+    "name": "bridge",
+    "category": "effects",
+    "targetWidth": 120,
+    "targetHeight": 96,
+    "columns": 3,
+    "rows": 1,
+    "poses": [
+      "Bridge repeat tile",
+      "Gorge left edge",
+      "Gorge right edge"
+    ],
+    "prompt": "Use case: stylized-concept. Production sprite sheet for Frostline. Input images are REFERENCE ONLY for exact character identity, palette, scale and pixel style; do not edit the reference atlas. Match tiny crisp PC-game pixel clusters, dark slate outlines, muted blue-violet shadows, off-white snow and restrained warm highlights. Core colours ink #344b53, snow #edf1df, shade #a6bec5, teal #508d92, gold #e4bd6f. Same above/front 3/4 downhill game view; skier is only22 native pixels wide. Distinct articulated key poses that survive native reduction, not mirrored copies. Genuine transparent alpha background with generous clean gutters. No labels, text, grids, floor, shadows, blur, painted checkerboard, background, scenery or smooth HD rendering. Each cell one complete pose, same character scale and bottom-centre anchor; do not crop limbs. Keep anatomy and costume exactly consistent with attached character. Three ENVIRONMENT TILES, top-down ski-game ground view, independent isolated rectangular tiles with transparent gutters:1 horizontal wooden PLANK deck with two slender ROPE RAILS on left/right, deck about120 native pixels wide by64high. Deck planks cross the width; repeating rope posts and rails run vertically/downhill. TOP and BOTTOM edges of this tile must connect seamlessly when repeated VERTICALLY: identical edge colours/pattern registration, no cap, stair, entrance or taper.2 LEFT GORGE EDGE about64wide by96high: snow-covered cliff lip on LEFT, deep navy/blue rocky drop on RIGHT.3 matching RIGHT GORGE EDGE mirrored geography: dark rocky drop LEFT and white snow lip RIGHT. Both cliff tiles repeat vertically with matching top/bottom edges, jagged SIDE contours, no isolated floating rock. No bridge perspective vanishing point. Keep rectangular repeating surfaces top-to-bottom, no cast shadow outside tiles. Layout: exactly 3 columns by 1 rows, read left to right. Exactly 3 occupied cells. Maximum native body 120x96px; this is a GAME SPRITE sheet, not concept art.",
+    "transparent": true,
+    "alphaMode": "binary",
+    "directory": "design/creatures/bridge",
+    "references": [
+      "assets/gritty-sprites.png"
+    ],
+    "tileFrames": [
+      0,
+      1,
+      2
+    ],
+    "frameTargets": [
+      [
+        120,
+        64
+      ],
+      [
+        64,
+        96
+      ],
+      [
+        64,
+        96
+      ]
+    ],
+    "sourceRects": [
+      [
+        232,
+        100,
+        512,
+        550
+      ],
+      [
+        1024,
+        64,
+        328,
+        608
+      ],
+      [
+        1632,
+        64,
+        328,
+        608
+      ]
+    ]
+  },
+  {
+    "name": "gargoyle-hunt",
+    "category": "creature",
+    "targetWidth": 35,
+    "targetHeight": 46,
+    "columns": 3,
+    "rows": 2,
+    "poses": [
+      "Chase upstroke",
+      "Chase wings high",
+      "Chase downstroke",
+      "Chase recovery",
+      "Screech warning",
+      "Claws-out lunge"
+    ],
+    "prompt": "Use case: stylized-concept. Production sprite sheet for Frostline. Input images are REFERENCE ONLY for exact character identity, palette, scale and pixel style; do not edit the reference atlas. Match tiny crisp PC-game pixel clusters, dark slate outlines, muted blue-violet shadows, off-white snow and restrained warm highlights. Core colours ink #344b53, snow #edf1df, shade #a6bec5, teal #508d92, gold #e4bd6f. Same above/front 3/4 downhill game view; skier is only22 native pixels wide. Distinct articulated key poses that survive native reduction, not mirrored copies. Genuine transparent alpha background with generous clean gutters. No labels, text, grids, floor, shadows, blur, painted checkerboard, background, scenery or smooth HD rendering. Each cell one complete pose, same character scale and bottom-centre anchor; do not crop limbs. Keep anatomy and costume exactly consistent with attached character. Exact compact grey stone GARGOYLE with short curled horns, green eyes, bat wings, clawed feet and tail; no plinth. Six poses: first4 sequential powerful flying CHASE wingbeats toward viewer: wings rising, wings high fully spread, forceful downstroke, wings folded under for recovery. Articulate shoulders, elbows, fingers and torso, consistent identity, face forward.5 warning SCREECH, wings flared high, mouth wide open with small stone fangs;6 LUNGE straight toward viewer, BOTH clawed hands extended in foreground, wings swept backward, fierce face. Entire wings inside each cell. Layout: exactly 3 columns by 2 rows, read left to right. Exactly 6 occupied cells. Maximum native body 35x46px; this is a GAME SPRITE sheet, not concept art.",
+    "transparent": true,
+    "alphaMode": "binary",
+    "directory": "design/creatures/gargoyle-hunt",
+    "references": [
+      "assets/gritty-sprites.png",
+      "design/creatures/gargoyle/native.png"
+    ],
+    "animationGroups": [
+      {
+        "name": "Flying chase",
+        "frames": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "fps": 8
+      }
+    ]
+  },
+  {
+    "name": "wisp",
+    "category": "effects",
+    "targetWidth": 10,
+    "targetHeight": 12,
+    "columns": 2,
+    "rows": 2,
+    "poses": [
+      "Flicker upright",
+      "Flicker left",
+      "Flicker tall",
+      "Flicker right"
+    ],
+    "prompt": "Use case: stylized-concept. Production sprite sheet for Frostline. Input images are REFERENCE ONLY for exact character identity, palette, scale and pixel style; do not edit the reference atlas. Match tiny crisp PC-game pixel clusters, dark slate outlines, muted blue-violet shadows, off-white snow and restrained warm highlights. Core colours ink #344b53, snow #edf1df, shade #a6bec5, teal #508d92, gold #e4bd6f. Same above/front 3/4 downhill game view; skier is only22 native pixels wide. Distinct articulated key poses that survive native reduction, not mirrored copies. Genuine transparent alpha background with generous clean gutters. No labels, text, grids, floor, shadows, blur, painted checkerboard, background, scenery or smooth HD rendering. Each cell one complete pose, same character scale and bottom-centre anchor; do not crop limbs. Keep anatomy and costume exactly consistent with attached character. A SINGLE tiny pale GREEN-WHITE ghost FLAME with two tiny dark eyes. Exactly ONE flame PER cell, NEVER a group. Four flicker phases: upright round base, tip leans left, elongated tip rises, tip leans right. Keep dark eyes readable at native10x12px. White core, mint rim, discrete pixel tips. No external glow or aura (engine adds light). Four-phase loop. Layout: exactly 2 columns by 2 rows, read left to right. Exactly 4 occupied cells. Maximum native body 10x12px; this is a GAME SPRITE sheet, not concept art.",
+    "transparent": true,
+    "alphaMode": "binary",
+    "directory": "design/creatures/wisp",
+    "references": [
+      "assets/gritty-sprites.png"
+    ],
+    "animationGroups": [
+      {
+        "name": "Flicker",
+        "frames": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "fps": 7
+      }
+    ]
+  },
+  {
+    "name": "phoenix-fire",
+    "category": "creature",
+    "targetWidth": 80,
+    "targetHeight": 110,
+    "columns": 5,
+    "rows": 2,
+    "poses": [
+      "Fireball spin 0",
+      "Fireball spin 90",
+      "Fireball spin 180",
+      "Fireball spin 270",
+      "Burst spark",
+      "Burst expand",
+      "Burst full",
+      "Burst fade",
+      "Melted ice A",
+      "Melted ice B"
+    ],
+    "prompt": "Use case: stylized-concept. Production sprite sheet for Frostline. Input images are REFERENCE ONLY for exact character identity, palette, scale and pixel style; do not edit the reference atlas. Match tiny crisp PC-game pixel clusters, dark slate outlines, muted blue-violet shadows, off-white snow and restrained warm highlights. Core colours ink #344b53, snow #edf1df, shade #a6bec5, teal #508d92, gold #e4bd6f. Same above/front 3/4 downhill game view; skier is only22 native pixels wide. Distinct articulated key poses that survive native reduction, not mirrored copies. Genuine transparent alpha background with generous clean gutters. No labels, text, grids, floor, shadows, blur, painted checkerboard, background, scenery or smooth HD rendering. Each cell one complete pose, same character scale and bottom-centre anchor; do not crop limbs. Keep anatomy and costume exactly consistent with attached character. TEN distinct VFX frames. Top row: cells1-4 a small orange-red/gold FIREBALL spinning in four sequential phases, short curled flame tail changing curl (10x10native). Cell5 the first compact IMPACT SPARK. Bottom row: cell6 expanding IMPACT BURST, cell7 wide peak star-shaped burst, cell8 dissipating separated embers (burst max30x20native). Cells9-10 two MELTED ICE PATCH DECALS, each a vertically elongated irregular wet-blue puddle about80x110native, smooth skiable blue ice, shiny pixel reflections, slushy pale rim and sparse tiny white STEAM curls around edges. Floor decals viewed from above, NOT a splash standing upright. Two different organic outlines. No baked glow gradients, black backdrop or shadows. Source cells evenly spaced even though final items have different native sizes. Layout: exactly 5 columns by 2 rows, read left to right. Exactly 10 occupied cells. Maximum native body 80x110px; this is a GAME SPRITE sheet, not concept art.",
+    "transparent": true,
+    "alphaMode": "binary",
+    "directory": "design/creatures/phoenix-fire",
+    "references": [
+      "assets/gritty-sprites.png",
+      "design/creatures/phoenix/native.png"
+    ],
+    "animationGroups": [
+      {
+        "name": "Fireball",
+        "frames": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "fps": 10
+      },
+      {
+        "name": "Impact",
+        "frames": [
+          4,
+          5,
+          6,
+          7
+        ],
+        "fps": 10
+      }
+    ],
+    "frameTargets": [
+      [
+        10,
+        10
+      ],
+      [
+        10,
+        10
+      ],
+      [
+        10,
+        10
+      ],
+      [
+        10,
+        10
+      ],
+      [
+        8,
+        8
+      ],
+      [
+        22,
+        16
+      ],
+      [
+        30,
+        20
+      ],
+      [
+        26,
+        18
+      ],
+      [
+        80,
+        110
+      ],
+      [
+        80,
+        110
+      ]
+    ]
+  },
+  {
+    "name": "genie-magic",
+    "category": "creature",
+    "targetWidth": 40,
+    "targetHeight": 40,
+    "columns": 4,
+    "rows": 2,
+    "poses": [
+      "Poof seed",
+      "Poof expand",
+      "Poof full",
+      "Poof clear",
+      "Spell ring A",
+      "Spell ring B",
+      "Spell ring C",
+      "Spell ring D"
+    ],
+    "prompt": "Use case: stylized-concept. Production sprite sheet for Frostline. Input images are REFERENCE ONLY for exact character identity, palette, scale and pixel style; do not edit the reference atlas. Match tiny crisp PC-game pixel clusters, dark slate outlines, muted blue-violet shadows, off-white snow and restrained warm highlights. Core colours ink #344b53, snow #edf1df, shade #a6bec5, teal #508d92, gold #e4bd6f. Same above/front 3/4 downhill game view; skier is only22 native pixels wide. Distinct articulated key poses that survive native reduction, not mirrored copies. Genuine transparent alpha background with generous clean gutters. No labels, text, grids, floor, shadows, blur, painted checkerboard, background, scenery or smooth HD rendering. Each cell one complete pose, same character scale and bottom-centre anchor; do not crop limbs. Keep anatomy and costume exactly consistent with attached character. Eight magical VFX poses, no genie body or lamp. Top row four sequential TRANSFORMATION POOF frames: dense blue smoke seed with gold sparkles; curling smoke expands; full40x40blue smoke cloud breaks into lobes with several discrete gold stars; cloud clears into separated small wisps. Bottom row four sequential GROUND SPELL RINGS: tilted flat ellipse on the snow plane, empty transparent middle, turquoise/blue band with discrete gold SPARKLES moving around the circumference, successive arc cracks/pulses. No lettering, runes or menus. Ground rings about40x20native, smoke max40x40. No glow gradient; crisp pixel edges with alpha only between discrete particles. Layout: exactly 4 columns by 2 rows, read left to right. Exactly 8 occupied cells. Maximum native body 40x40px; this is a GAME SPRITE sheet, not concept art.",
+    "transparent": true,
+    "alphaMode": "binary",
+    "directory": "design/creatures/genie-magic",
+    "references": [
+      "assets/gritty-sprites.png",
+      "design/creatures/genie/native.png"
+    ],
+    "animationGroups": [
+      {
+        "name": "Poof",
+        "frames": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "fps": 8
+      },
+      {
+        "name": "Spell ring",
+        "frames": [
+          4,
+          5,
+          6,
+          7
+        ],
+        "fps": 7
+      }
+    ],
+    "frameTargets": [
+      [
+        16,
+        18
+      ],
+      [
+        30,
+        32
+      ],
+      [
+        40,
+        40
+      ],
+      [
+        34,
+        34
+      ],
+      [
+        40,
+        20
+      ],
+      [
+        40,
+        20
+      ],
+      [
+        40,
+        20
+      ],
+      [
+        40,
+        20
+      ]
+    ]
+  },
+  {
+    "name": "petrified",
+    "category": "effects",
+    "targetWidth": 30,
+    "targetHeight": 36,
+    "columns": 2,
+    "rows": 2,
+    "poses": [
+      "Stone Yeti running",
+      "Stone bear",
+      "Stone wolf",
+      "Stone walking person"
+    ],
+    "prompt": "Use case: stylized-concept. Production sprite sheet for Frostline. Input images are REFERENCE ONLY for exact character identity, palette, scale and pixel style; do not edit the reference atlas. Match tiny crisp PC-game pixel clusters, dark slate outlines, muted blue-violet shadows, off-white snow and restrained warm highlights. Core colours ink #344b53, snow #edf1df, shade #a6bec5, teal #508d92, gold #e4bd6f. Same above/front 3/4 downhill game view; skier is only22 native pixels wide. Distinct articulated key poses that survive native reduction, not mirrored copies. Genuine transparent alpha background with generous clean gutters. No labels, text, grids, floor, shadows, blur, painted checkerboard, background, scenery or smooth HD rendering. Each cell one complete pose, same character scale and bottom-centre anchor; do not crop limbs. Keep anatomy and costume exactly consistent with attached character. Four complete FROZEN STONE VICTIMS based on same live identities in gritty atlas.1 stocky white-fur YETI frozen mid-run, bent knee and opposite arm reaching, transformed entirely into grey weathered stone including fur clusters; max38x44native.2 BROWN BEAR on FOUR PAWS, same broad muzzle and low back as reference atlas but all grey stone, frozen in walking stride;30x26native.3 narrow grey WOLF on FOUR PAWS with pointed ears and long tail, frozen running, grey stone22x24native.4 modern WALKING PERSON wearing winter jacket/beanie/trousers/boots (NO SKIS), one foot forward, completely grey stone;15x25native. Statue details use slate/cool grey chips, hair/fur/cloth silhouettes retained, subtle fine cracks, no pedestal, coloured clothes, live warm colours, floor or shadow. Correct proportions beside22pxskier. Layout: exactly 2 columns by 2 rows, read left to right. Exactly 4 occupied cells. Maximum native body 38x44px; this is a GAME SPRITE sheet, not concept art.",
+    "transparent": true,
+    "alphaMode": "binary",
+    "directory": "design/creatures/petrified",
+    "references": [
+      "assets/gritty-sprites.png"
+    ],
+    "frameTargets": [
+      [
+        30,
+        36
+      ],
+      [
+        30,
+        26
+      ],
+      [
+        22,
+        24
+      ],
+      [
+        15,
+        25
+      ]
+    ]
+  },
+  {
+    "name": "lightning",
+    "category": "creature",
+    "targetWidth": 48,
+    "targetHeight": 90,
+    "columns": 3,
+    "rows": 2,
+    "poses": [
+      "Bolt fork",
+      "Bolt flash",
+      "Bolt fade",
+      "Crackling target ring",
+      "Scorch decal"
+    ],
+    "prompt": "Use case: stylized-concept. Production sprite sheet for Frostline. Input images are REFERENCE ONLY for exact character identity, palette, scale and pixel style; do not edit the reference atlas. Match tiny crisp PC-game pixel clusters, dark slate outlines, muted blue-violet shadows, off-white snow and restrained warm highlights. Core colours ink #344b53, snow #edf1df, shade #a6bec5, teal #508d92, gold #e4bd6f. Same above/front 3/4 downhill game view; skier is only22 native pixels wide. Distinct articulated key poses that survive native reduction, not mirrored copies. Genuine transparent alpha background with generous clean gutters. No labels, text, grids, floor, shadows, blur, painted checkerboard, background, scenery or smooth HD rendering. Each cell one complete pose, same character scale and bottom-centre anchor; do not crop limbs. Keep anatomy and costume exactly consistent with attached character. Five VFX frames, one blank final cell. Top row three sequential vertical LIGHTNING BOLTS each16x90native: jagged branching pale blue fork; brightest white/gold thick flash with same branching trunk; broken fading pale blue dashes along same trunk. Bottom left one crackling ground TARGET RING: flat tilted ellipse48x26, transparent centre, blue/gold pixel arcs around its edge and a few tiny sparks, no lettering. Bottom centre a SCORCH MARK decal: dark brown/charcoal irregular starburst crack on snow, small burnt centre and radiating jagged marks, max40x28native, no fire. Bottom right blank. No sky/cloud/background, no blurry glow, no opaque target disk, no extra objects. Layout: exactly 3 columns by 2 rows, read left to right. Exactly 5 occupied cells. Leave the final unused cell completely transparent. Maximum native body 48x90px; this is a GAME SPRITE sheet, not concept art.",
+    "transparent": true,
+    "alphaMode": "binary",
+    "directory": "design/creatures/lightning",
+    "references": [
+      "assets/gritty-sprites.png",
+      "design/creatures/thunderbird/native.png"
+    ],
+    "animationGroups": [
+      {
+        "name": "Lightning strike",
+        "frames": [
+          0,
+          1,
+          2
+        ],
+        "fps": 10
+      }
+    ],
+    "frameTargets": [
+      [
+        16,
+        90
+      ],
+      [
+        16,
+        90
+      ],
+      [
+        16,
+        90
+      ],
+      [
+        48,
+        26
+      ],
+      [
+        40,
+        28
+      ]
+    ]
+  },
+  {
+    "name": "unicorn-kick",
+    "category": "creature",
+    "targetWidth": 45,
+    "targetHeight": 56,
+    "columns": 2,
+    "rows": 1,
+    "poses": [
+      "Rear",
+      "Back kick"
+    ],
+    "prompt": "Use case: stylized-concept. Production sprite sheet for Frostline. Input images are REFERENCE ONLY for exact character identity, palette, scale and pixel style; do not edit the reference atlas. Match tiny crisp PC-game pixel clusters, dark slate outlines, muted blue-violet shadows, off-white snow and restrained warm highlights. Core colours ink #344b53, snow #edf1df, shade #a6bec5, teal #508d92, gold #e4bd6f. Same above/front 3/4 downhill game view; skier is only22 native pixels wide. Distinct articulated key poses that survive native reduction, not mirrored copies. Genuine transparent alpha background with generous clean gutters. No labels, text, grids, floor, shadows, blur, painted checkerboard, background, scenery or smooth HD rendering. Each cell one complete pose, same character scale and bottom-centre anchor; do not crop limbs. Keep anatomy and costume exactly consistent with attached character. Exact white UNICORN with pale golden spiral horn, pastel rainbow mane/tail and dark friendly eyes from reference. Two decisive full-body poses:1 REARING on hind legs, front knees raised, mane tossing, annoyed surprised face;2 BACK KICK, forelegs braced on ground, both hind legs extended sharply backwards/up behind it, head turns slightly toward the skier. Three-quarter view, anatomy readable, never extra legs, same horse proportions, never change identity or add a rider. No impact stars or scenery. Layout: exactly 2 columns by 1 rows, read left to right. Exactly 2 occupied cells. Maximum native body 45x56px; this is a GAME SPRITE sheet, not concept art.",
+    "transparent": true,
+    "alphaMode": "binary",
+    "directory": "design/creatures/unicorn-kick",
+    "references": [
+      "assets/gritty-sprites.png",
+      "design/creatures/unicorn/native.png"
+    ]
+  },
+  {
+    "name": "kitsune-tumble",
+    "category": "creature",
+    "targetWidth": 33,
+    "targetHeight": 40,
+    "columns": 2,
+    "rows": 2,
+    "poses": [
+      "Trip forward",
+      "Roll on back",
+      "Roll recover",
+      "Dizzy sit"
+    ],
+    "prompt": "Use case: stylized-concept. Production sprite sheet for Frostline. Input images are REFERENCE ONLY for exact character identity, palette, scale and pixel style; do not edit the reference atlas. Match tiny crisp PC-game pixel clusters, dark slate outlines, muted blue-violet shadows, off-white snow and restrained warm highlights. Core colours ink #344b53, snow #edf1df, shade #a6bec5, teal #508d92, gold #e4bd6f. Same above/front 3/4 downhill game view; skier is only22 native pixels wide. Distinct articulated key poses that survive native reduction, not mirrored copies. Genuine transparent alpha background with generous clean gutters. No labels, text, grids, floor, shadows, blur, painted checkerboard, background, scenery or smooth HD rendering. Each cell one complete pose, same character scale and bottom-centre anchor; do not crop limbs. Keep anatomy and costume exactly consistent with attached character. Exact small WHITE KITSUNE with red ear markings, amber eyes and its pale fluffy PLUMED TAILS. Four sequential mishap poses:1 trips forward nose down hindquarters up;2 rolls onto BACK, paws up and tail following arc;3 rolls to side and plants front paws to recover;4 sits DIZZY, head droops, small discrete gold circling stars above head. Preserve tiny fox identity, tail colour/plumes, body proportions, fur texture. No tree or floor, no different-coloured fox, no red body. Use motion poses, not same upright fox rotated as a whole image. Layout: exactly 2 columns by 2 rows, read left to right. Exactly 4 occupied cells. Maximum native body 33x40px; this is a GAME SPRITE sheet, not concept art.",
+    "transparent": true,
+    "alphaMode": "binary",
+    "directory": "design/creatures/kitsune-tumble",
+    "references": [
+      "assets/gritty-sprites.png",
+      "design/creatures/kitsune/native.png"
+    ],
+    "animationGroups": [
+      {
+        "name": "Tumble",
+        "frames": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "fps": 6
+      }
+    ]
+  },
+  {
+    "name": "griffin-carry-skier",
+    "category": "creature",
+    "targetWidth": 60,
+    "targetHeight": 80,
+    "columns": 2,
+    "rows": 1,
+    "poses": [
+      "Carry wings up with skier",
+      "Carry wings down with skier"
+    ],
+    "prompt": "Use case: stylized-concept. Production sprite sheet for Frostline. Input images are REFERENCE ONLY for exact character identity, palette, scale and pixel style; do not edit the reference atlas. Match tiny crisp PC-game pixel clusters, dark slate outlines, muted blue-violet shadows, off-white snow and restrained warm highlights. Core colours ink #344b53, snow #edf1df, shade #a6bec5, teal #508d92, gold #e4bd6f. Same above/front 3/4 downhill game view; skier is only22 native pixels wide. Distinct articulated key poses that survive native reduction, not mirrored copies. Genuine transparent alpha background with generous clean gutters. No labels, text, grids, floor, shadows, blur, painted checkerboard, background, scenery or smooth HD rendering. Each cell one complete pose, same character scale and bottom-centre anchor; do not crop limbs. Keep anatomy and costume exactly consistent with attached character. Exact golden-brown GRIFFIN with eagle head/wings, lion body, tufted tail. Same two existing carry key poses from reference, one wings raised and one wings down. In BOTH poses it holds the SAME modern skier safely clutched by jacket under its talons: red ski jacket, navy beanie, amber goggles, blue trousers, dark boots and two long teal skis. Skier's booted legs DANGLE down, surprised small face, full skier and skis visible. Combined griffin+skier max60wide80tall native, griffin body scale consistent with existing60pxwide frame. Talons clearly grip jacket, no gore, no extra limbs or separate floating skier. Preserve everything about griffin's existing identity. Layout: exactly 2 columns by 1 rows, read left to right. Exactly 2 occupied cells. Maximum native body 60x80px; this is a GAME SPRITE sheet, not concept art.",
+    "transparent": true,
+    "alphaMode": "binary",
+    "directory": "design/creatures/griffin-carry-skier",
+    "references": [
+      "assets/gritty-sprites.png",
+      "design/creatures/griffin/native.png"
+    ],
+    "animationGroups": [
+      {
+        "name": "Carrying",
+        "frames": [
+          0,
+          1
+        ],
+        "fps": 5
+      }
+    ]
+  },
+  {
+    "name": "giant-wind",
+    "category": "effects",
+    "targetWidth": 24,
+    "targetHeight": 6,
+    "columns": 2,
+    "rows": 2,
+    "poses": [
+      "Wind thin",
+      "Wind curl",
+      "Wind snow",
+      "Wind taper"
+    ],
+    "prompt": "Use case: stylized-concept. Production sprite sheet for Frostline. Input images are REFERENCE ONLY for exact character identity, palette, scale and pixel style; do not edit the reference atlas. Match tiny crisp PC-game pixel clusters, dark slate outlines, muted blue-violet shadows, off-white snow and restrained warm highlights. Core colours ink #344b53, snow #edf1df, shade #a6bec5, teal #508d92, gold #e4bd6f. Same above/front 3/4 downhill game view; skier is only22 native pixels wide. Distinct articulated key poses that survive native reduction, not mirrored copies. Genuine transparent alpha background with generous clean gutters. No labels, text, grids, floor, shadows, blur, painted checkerboard, background, scenery or smooth HD rendering. Each cell one complete pose, same character scale and bottom-centre anchor; do not crop limbs. Keep anatomy and costume exactly consistent with attached character. Four SMALL horizontal WIND/SNOW STREAK PARTICLES, each max24wide6tallnative. Pale blue-white broken streaks with a few discrete white snow pixels; first thin fast parallel dashes, second tiny curled gust with trailing dash, third three sparse snowflakes pulled into long streak, fourth tapering gust into two tiny dots. Clean transparent space around each, no cloud/background or black line. Horizontal ski-game wind effect with subtle jagged pixel variation, extremely legible at tiny native size. NOT giant body or face, no text. Layout: exactly 2 columns by 2 rows, read left to right. Exactly 4 occupied cells. Maximum native body 24x6px; this is a GAME SPRITE sheet, not concept art.",
+    "transparent": true,
+    "alphaMode": "binary",
+    "directory": "design/creatures/giant-wind",
+    "references": [
+      "assets/gritty-sprites.png"
+    ],
+    "animationGroups": [
+      {
+        "name": "Wind streak",
+        "frames": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "fps": 9
+      }
+    ]
+  },
+  {
+    "name": "death-ghost-night",
+    "category": "scene",
+    "targetWidth": 320,
+    "targetHeight": 200,
+    "columns": 1,
+    "rows": 1,
+    "poses": [],
+    "prompt": "Use case: lighting-weather. Create the NIGHT lighting version of the attached existing Frostline pixel-art death card. The attached image is the EDIT TARGET. Change ONLY time of day and lighting. Preserve exact composition, creature identity and colours, skier red jacket/blue trousers/navy beanie/amber goggles/teal skis, anatomy, gestures, expression, objects, environment and funny action. Do not add/remove characters or alter how the skier is held/swallowed. Same crisp cute cozy320x200 low-resolution pixel-art style,64-colour final palette. Replace bright sky with deep blue/violet starlit night and a small moon high in clear sky. Snow is moonlit cool blue, window/door/lantern lighting is cozy warm AMBER, smooth readability through discrete pixel shades (no blur or gradient). Keep creature faces, dangling skis and key joke clearly legible. Preserve warm light from the hut doorway and keep hand/nose visible where applicable. No text, border, logo, captions, gore or realistic horror. Landscape8:5, centred composition. This must look like the SAME scene viewed at night, not a different illustration.",
+    "transparent": false,
+    "alphaMode": "opaque",
+    "directory": "design/scenes/creature-round2/death-ghost-night",
+    "references": [
+      "design/scenes/creature-round2/death-ghost/source.png"
+    ],
+    "colors": 64
+  },
+  {
+    "name": "death-gargoyle-night",
+    "category": "scene",
+    "targetWidth": 320,
+    "targetHeight": 200,
+    "columns": 1,
+    "rows": 1,
+    "poses": [],
+    "prompt": "Use case: lighting-weather. Create the NIGHT lighting version of the attached existing Frostline pixel-art death card. The attached image is the EDIT TARGET. Change ONLY time of day and lighting. Preserve exact composition, creature identity and colours, skier red jacket/blue trousers/navy beanie/amber goggles/teal skis, anatomy, gestures, expression, objects, environment and funny action. Do not add/remove characters or alter how the skier is held/swallowed. Same crisp cute cozy320x200 low-resolution pixel-art style,64-colour final palette. Replace bright sky with deep blue/violet starlit night and a small moon high in clear sky. Snow is moonlit cool blue, window/door/lantern lighting is cozy warm AMBER, smooth readability through discrete pixel shades (no blur or gradient). Keep creature faces, dangling skis and key joke clearly legible. Preserve warm light from the hut doorway and keep hand/nose visible where applicable. No text, border, logo, captions, gore or realistic horror. Landscape8:5, centred composition. This must look like the SAME scene viewed at night, not a different illustration.",
+    "transparent": false,
+    "alphaMode": "opaque",
+    "directory": "design/scenes/creature-round2/death-gargoyle-night",
+    "references": [
+      "design/scenes/creature-round2/death-gargoyle/source.png"
+    ],
+    "colors": 64
+  },
+  {
+    "name": "death-troll-night",
+    "category": "scene",
+    "targetWidth": 320,
+    "targetHeight": 200,
+    "columns": 1,
+    "rows": 1,
+    "poses": [],
+    "prompt": "Use case: lighting-weather. Create the NIGHT lighting version of the attached existing Frostline pixel-art death card. The attached image is the EDIT TARGET. Change ONLY time of day and lighting. Preserve exact composition, creature identity and colours, skier red jacket/blue trousers/navy beanie/amber goggles/teal skis, anatomy, gestures, expression, objects, environment and funny action. Do not add/remove characters or alter how the skier is held/swallowed. Same crisp cute cozy320x200 low-resolution pixel-art style,64-colour final palette. Replace bright sky with deep blue/violet starlit night and a small moon high in clear sky. Snow is moonlit cool blue, window/door/lantern lighting is cozy warm AMBER, smooth readability through discrete pixel shades (no blur or gradient). Keep creature faces, dangling skis and key joke clearly legible. Preserve warm light from the hut doorway and keep hand/nose visible where applicable. No text, border, logo, captions, gore or realistic horror. Landscape8:5, centred composition. This must look like the SAME scene viewed at night, not a different illustration.",
+    "transparent": false,
+    "alphaMode": "opaque",
+    "directory": "design/scenes/creature-round2/death-troll-night",
+    "references": [
+      "design/scenes/creature-round2/death-troll/source.png"
+    ],
+    "colors": 64
+  },
+  {
+    "name": "death-baba-yaga-night",
+    "category": "scene",
+    "targetWidth": 320,
+    "targetHeight": 200,
+    "columns": 1,
+    "rows": 1,
+    "poses": [],
+    "prompt": "Use case: lighting-weather. Create the NIGHT lighting version of the attached existing Frostline pixel-art death card. The attached image is the EDIT TARGET. Change ONLY time of day and lighting. Preserve exact composition, creature identity and colours, skier red jacket/blue trousers/navy beanie/amber goggles/teal skis, anatomy, gestures, expression, objects, environment and funny action. Do not add/remove characters or alter how the skier is held/swallowed. Same crisp cute cozy320x200 low-resolution pixel-art style,64-colour final palette. Replace bright sky with deep blue/violet starlit night and a small moon high in clear sky. Snow is moonlit cool blue, window/door/lantern lighting is cozy warm AMBER, smooth readability through discrete pixel shades (no blur or gradient). Keep creature faces, dangling skis and key joke clearly legible. Preserve warm light from the hut doorway and keep hand/nose visible where applicable. No text, border, logo, captions, gore or realistic horror. Landscape8:5, centred composition. This must look like the SAME scene viewed at night, not a different illustration.",
+    "transparent": false,
+    "alphaMode": "opaque",
+    "directory": "design/scenes/creature-round2/death-baba-yaga-night",
+    "references": [
+      "design/scenes/creature-round2/death-baba-yaga/source.png"
+    ],
+    "colors": 64
+  }
+]

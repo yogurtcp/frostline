@@ -1,0 +1,38 @@
+/* Optional art/runtime smoke checks. Requires playwright and sharp on NODE_PATH. */
+const fs=require('fs'),path=require('path'),http=require('http'),assert=require('assert'),crypto=require('crypto'),sharp=require('sharp'),{chromium}=require('playwright');
+const root=path.resolve(__dirname,'..'),jobs=JSON.parse(fs.readFileSync(path.join(root,'design/creatures/generation-jobs-round2.json')));
+const output=process.env.FROSTLINE_ART_QA_DIR||'/tmp/frostline-creature-round2';fs.mkdirSync(output,{recursive:true});let browser,server;
+(async()=>{
+  assert.strictEqual(jobs.length,21);const sceneJobs=jobs.filter(j=>j.category==='scene');assert.strictEqual(sceneJobs.length,8);
+  const manifest=JSON.parse(fs.readFileSync(path.join(root,'assets/scenes/manifest.json')));
+  assert.strictEqual(new Set(manifest.images.map(i=>i.key)).size,manifest.images.length);
+  let frameCount=0;
+  for(const j of jobs){
+    const dir=path.join(root,j.directory);for(const name of ['source.png','native.png','frames.json','prompt.txt','spec.json','generation.json'])assert(fs.existsSync(path.join(dir,name)),j.name+'/'+name);
+    const meta=JSON.parse(fs.readFileSync(path.join(dir,'frames.json'))),{data,info}=await sharp(path.join(dir,'native.png')).ensureAlpha().raw().toBuffer({resolveWithObject:true});
+    assert.strictEqual(info.width,meta.width);assert.strictEqual(info.height,meta.height);
+    if(j.category==='scene'){
+      assert.strictEqual(info.width,320);assert.strictEqual(info.height,200);const colors=new Set();for(let i=0;i<data.length;i+=4){assert.strictEqual(data[i+3],255);colors.add(data.subarray(i,i+3).toString('hex'));}assert(colors.size<=64,j.name+' exceeds64 colours');
+      assert.strictEqual(fs.readFileSync(path.join(dir,'native.png'))[25],3,'Scene must use indexed PNG');
+      const entry=manifest.images.find(e=>e.key===j.name);assert(entry,j.name+' not in manifest');assert(fs.readFileSync(path.join(root,'assets/scenes',entry.file)).equals(fs.readFileSync(path.join(dir,'native.png'))));continue;
+    }
+    assert.strictEqual(meta.frames.length,j.poses.length);frameCount+=meta.frames.length;const hashes=[];
+    for(const [i,f]of meta.frames.entries()){
+      assert.strictEqual(f.name,j.poses[i]);const [x,y,w,h]=f.bodyBounds,target=j.frameTargets?.[i]||[j.targetWidth,j.targetHeight];assert(w>0&&h>0&&w<=target[0]&&h<=target[1]);assert(x>=8&&y>=8&&x+w<=f.w-8&&y+h<=f.h-8,'Missing gutters '+j.name);assert.deepStrictEqual(f.anchor,[f.w/2,f.h-8]);
+      let visible=0;const pixels=[];for(let yy=0;yy<f.h;yy++)for(let xx=0;xx<f.w;xx++){const a=((f.y+yy)*info.width+f.x+xx)*4;assert(data[a+3]===0||data[a+3]===255,'Unexpected alpha '+j.name);if(data[a+3]){visible++;assert(xx>=x&&xx<x+w&&yy>=y&&yy<y+h,'Pixel outside body bounds');}pixels.push(...data.subarray(a,a+4));}
+      assert(visible>0,j.name+' empty native pose');hashes.push(crypto.createHash('sha256').update(Buffer.from(pixels)).digest('hex'));
+      if(f.repeatAxis==='y'){const [tx,ty,tw,th]=f.tileRect;for(let xx=0;xx<tw;xx++){const top=(ty*info.width+tx+xx)*4,bottom=((ty+th-1)*info.width+tx+xx)*4;assert(data.subarray(top,top+4).equals(data.subarray(bottom,bottom+4)),'Tile seam mismatch '+j.name);if(j.name==='bridge'&&i===0&&xx>tw*.18&&xx<tw*.82)assert.strictEqual(data[top+3],255,'Gap across repeating bridge deck');}}
+    }
+    assert.strictEqual(new Set(hashes).size,hashes.length,'Duplicate poses '+j.name);
+    for(const group of meta.animationGroups||[])for(const i of group.frames)assert(meta.frames[i]);
+  }
+  console.log('Validated all21 deliveries, '+frameCount+' unique sprite/effect poses, indexed64-colour death cards, gutters, anchors and repeating edges.');
+  server=http.createServer((q,r)=>{try{const u=new URL(q.url,'http://x'),f=path.join(root,u.pathname==='/'?'index.html':decodeURIComponent(u.pathname));let bytes=fs.readFileSync(f);if(f.endsWith('index.html'))bytes=bytes.toString().replace('window.Frostline={','window.Frostline={images,dismissSceneCard,clearSceneCard,');r.setHeader('Content-Type',f.endsWith('.png')?'image/png':f.endsWith('.js')?'text/javascript':f.endsWith('.json')?'application/json':'text/html');r.end(bytes);}catch{r.writeHead(404).end();}}).listen(0,'127.0.0.1');await new Promise(r=>server.once('listening',r));
+  browser=await chromium.launch({executablePath:'/usr/bin/google-chrome',args:['--no-sandbox'],headless:true});const page=await browser.newPage({viewport:{width:540,height:900}}),errors=[];page.on('pageerror',e=>errors.push(e.message));await page.addInitScript(()=>{window.requestAnimationFrame=()=>0;});const base='http://127.0.0.1:'+server.address().port;await page.goto(base);await page.waitForFunction(()=>window.Frostline?.ready,null,{polling:100});
+  const runtime=await page.evaluate(()=>{const g=Frostline,out=[];g.state.bank=4321;for(const [cause,key]of [['GHOST','death-ghost'],['GARGOYLE','death-gargoyle'],['TROLL','death-troll'],['BABA YAGA','death-baba-yaga']])for(const night of [false,true]){g.clearSceneCard();g.resetSummit();g.state.nightOverride=night;g.die(cause);g.render();const card=g.state.sceneCard;if(card?.key!==key||card.night!==night||!g.images['scene:'+key+(night?'-night':'')])throw Error('Wrong automatic death card '+cause+'/'+night);if(card.minimumRemaining!==.5)throw Error('Delay changed');g.dismissSceneCard();if(!g.state.sceneCard)throw Error('Early dismissal');for(let i=0;i<31;i++)g.step(1/60);if(g.state.sceneCard.minimumRemaining>1e-8)throw Error('Still locked');out.push({cause,night,key});}if(g.state.bank!==4321)throw Error('Wallet lost');return out;});console.log('Automatic in-game death-card selection:',runtime);
+  await page.screenshot({path:path.join(output,'death-baba-yaga-night.png')});
+  await page.goto(base+'/creature-art-round2.html');await page.waitForFunction(()=>document.querySelectorAll('canvas').length===13&&Array.from(document.images).every(i=>i.complete),null,{polling:100});await page.evaluate(()=>redraw());assert.strictEqual(await page.locator('article.scene').count(),4);await page.screenshot({path:path.join(output,'gallery.png'),fullPage:true});
+  await page.locator('#play').click();await page.locator('article[data-name="hut-run"] select').selectOption('frame:3');assert.strictEqual(await page.locator('article[data-name="hut-run"] .pose').textContent(),'Run right contact');await page.locator('#zoom').click();assert.strictEqual(await page.locator('article[data-name="hut-run"] canvas').getAttribute('width'),'960');await page.locator('article.scene').first().locator('button').click();assert((await page.locator('article.scene').first().locator('img').getAttribute('src')).includes('-night/'));console.log('Gallery:13 sheets, four day/night pairs, manual pose selection while paused and integer3× zoom work.');
+  await page.evaluate(async()=>{const c=document.createElement('canvas');c.width=900;c.height=460;const t=c.getContext('2d');t.fillStyle='#edf1df';t.fillRect(0,0,c.width,c.height);t.imageSmoothingEnabled=false;const e=entries.find(e=>e.name==='bridge'),im=new Image();im.src=e.directory+'/native.png';await im.decode();for(const [i,f]of e.meta.frames.entries()){const [x,y,w,h]=f.tileRect;for(let k=0;k<4;k++)t.drawImage(im,x,y,w,h,30+i*280,20+k*h,w,h);}window.tileQA=c.toDataURL();});const tile=await page.evaluate(()=>window.tileQA.split(',')[1]);fs.writeFileSync(path.join(output,'bridge-repeat.png'),Buffer.from(tile,'base64'));
+  assert.deepStrictEqual(errors,[]);console.log('No browser errors. Screenshots: '+output);await browser.close();server.close();
+})().catch(async e=>{console.error(e);await browser?.close();server?.close();process.exitCode=1;});

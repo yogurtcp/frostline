@@ -1,0 +1,17 @@
+{
+  "name": "death-gargoyle-night",
+  "category": "scene",
+  "targetWidth": 320,
+  "targetHeight": 200,
+  "columns": 1,
+  "rows": 1,
+  "poses": [],
+  "prompt": "Use case: lighting-weather. Create the NIGHT lighting version of the attached existing Frostline pixel-art death card. The attached image is the EDIT TARGET. Change ONLY time of day and lighting. Preserve exact composition, creature identity and colours, skier red jacket/blue trousers/navy beanie/amber goggles/teal skis, anatomy, gestures, expression, objects, environment and funny action. Do not add/remove characters or alter how the skier is held/swallowed. Same crisp cute cozy320x200 low-resolution pixel-art style,64-colour final palette. Replace bright sky with deep blue/violet starlit night and a small moon high in clear sky. Snow is moonlit cool blue, window/door/lantern lighting is cozy warm AMBER, smooth readability through discrete pixel shades (no blur or gradient). Keep creature faces, dangling skis and key joke clearly legible. Preserve warm light from the hut doorway and keep hand/nose visible where applicable. No text, border, logo, captions, gore or realistic horror. Landscape8:5, centred composition. This must look like the SAME scene viewed at night, not a different illustration.",
+  "transparent": false,
+  "alphaMode": "opaque",
+  "directory": "design/scenes/creature-round2/death-gargoyle-night",
+  "references": [
+    "design/scenes/creature-round2/death-gargoyle/source.png"
+  ],
+  "colors": 64
+}

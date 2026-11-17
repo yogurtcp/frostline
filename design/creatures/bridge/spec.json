@@ -1,0 +1,59 @@
+{
+  "name": "bridge",
+  "category": "effects",
+  "targetWidth": 120,
+  "targetHeight": 96,
+  "columns": 3,
+  "rows": 1,
+  "poses": [
+    "Bridge repeat tile",
+    "Gorge left edge",
+    "Gorge right edge"
+  ],
+  "prompt": "Use case: stylized-concept. Production sprite sheet for Frostline. Input images are REFERENCE ONLY for exact character identity, palette, scale and pixel style; do not edit the reference atlas. Match tiny crisp PC-game pixel clusters, dark slate outlines, muted blue-violet shadows, off-white snow and restrained warm highlights. Core colours ink #344b53, snow #edf1df, shade #a6bec5, teal #508d92, gold #e4bd6f. Same above/front 3/4 downhill game view; skier is only22 native pixels wide. Distinct articulated key poses that survive native reduction, not mirrored copies. Genuine transparent alpha background with generous clean gutters. No labels, text, grids, floor, shadows, blur, painted checkerboard, background, scenery or smooth HD rendering. Each cell one complete pose, same character scale and bottom-centre anchor; do not crop limbs. Keep anatomy and costume exactly consistent with attached character. Three ENVIRONMENT TILES, top-down ski-game ground view, independent isolated rectangular tiles with transparent gutters:1 horizontal wooden PLANK deck with two slender ROPE RAILS on left/right, deck about120 native pixels wide by64high. Deck planks cross the width; repeating rope posts and rails run vertically/downhill. TOP and BOTTOM edges of this tile must connect seamlessly when repeated VERTICALLY: identical edge colours/pattern registration, no cap, stair, entrance or taper.2 LEFT GORGE EDGE about64wide by96high: snow-covered cliff lip on LEFT, deep navy/blue rocky drop on RIGHT.3 matching RIGHT GORGE EDGE mirrored geography: dark rocky drop LEFT and white snow lip RIGHT. Both cliff tiles repeat vertically with matching top/bottom edges, jagged SIDE contours, no isolated floating rock. No bridge perspective vanishing point. Keep rectangular repeating surfaces top-to-bottom, no cast shadow outside tiles. Layout: exactly 3 columns by 1 rows, read left to right. Exactly 3 occupied cells. Maximum native body 120x96px; this is a GAME SPRITE sheet, not concept art.",
+  "transparent": true,
+  "alphaMode": "binary",
+  "directory": "design/creatures/bridge",
+  "references": [
+    "assets/gritty-sprites.png"
+  ],
+  "tileFrames": [
+    0,
+    1,
+    2
+  ],
+  "frameTargets": [
+    [
+      120,
+      64
+    ],
+    [
+      64,
+      96
+    ],
+    [
+      64,
+      96
+    ]
+  ],
+  "sourceRects": [
+    [
+      232,
+      100,
+      512,
+      550
+    ],
+    [
+      1024,
+      64,
+      328,
+      608
+    ],
+    [
+      1632,
+      64,
+      328,
+      608
+    ]
+  ]
+}
