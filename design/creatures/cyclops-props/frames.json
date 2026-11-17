@@ -1,0 +1,105 @@
+{
+  "sourceSize": [
+    1261,
+    1247
+  ],
+  "width": 96,
+  "height": 112,
+  "cellWidth": 48,
+  "cellHeight": 56,
+  "alphaMode": "binary",
+  "frames": [
+    {
+      "name": "Boulder",
+      "x": 0,
+      "y": 0,
+      "w": 48,
+      "h": 56,
+      "bodyBounds": [
+        8,
+        22,
+        32,
+        26
+      ],
+      "anchor": [
+        24,
+        48
+      ],
+      "source": [
+        79,
+        138,
+        474,
+        389
+      ]
+    },
+    {
+      "name": "Boulder turned",
+      "x": 48,
+      "y": 0,
+      "w": 48,
+      "h": 56,
+      "bodyBounds": [
+        8,
+        22,
+        32,
+        26
+      ],
+      "anchor": [
+        24,
+        48
+      ],
+      "source": [
+        711,
+        148,
+        470,
+        378
+      ]
+    },
+    {
+      "name": "Boulder settled",
+      "x": 0,
+      "y": 56,
+      "w": 48,
+      "h": 56,
+      "bodyBounds": [
+        8,
+        21,
+        32,
+        27
+      ],
+      "anchor": [
+        24,
+        48
+      ],
+      "source": [
+        73,
+        745,
+        488,
+        418
+      ]
+    },
+    {
+      "name": "Rock fragments",
+      "x": 48,
+      "y": 56,
+      "w": 48,
+      "h": 56,
+      "bodyBounds": [
+        10,
+        33,
+        28,
+        15
+      ],
+      "anchor": [
+        24,
+        48
+      ],
+      "source": [
+        725,
+        893,
+        424,
+        223
+      ]
+    }
+  ]
+}

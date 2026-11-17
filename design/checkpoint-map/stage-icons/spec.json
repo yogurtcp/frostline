@@ -1,0 +1,48 @@
+{
+  "name": "stage-icons",
+  "category": "icons",
+  "targetWidth": 24,
+  "targetHeight": 24,
+  "columns": 6,
+  "rows": 4,
+  "poses": [
+    "town",
+    "quiet",
+    "trees",
+    "lake",
+    "runout",
+    "christmas",
+    "avalanche",
+    "cemetery",
+    "halloween",
+    "rivalRace",
+    "forest",
+    "denseForest",
+    "boulder",
+    "scramble",
+    "piedPiper",
+    "werewolfIntro",
+    "ravagerIntro",
+    "burrowField",
+    "crowd",
+    "beginner",
+    "legendarium",
+    "opening",
+    "night",
+    "day"
+  ],
+  "prompt": "Use case: stylized-concept. Production pixel-art sprite sheet for Frostline, a snowy downhill ski game. Attached gritty-sprites atlas is STYLE/SCALE guidance only, never an edit target. Match its tiny crisp low-resolution PC-game pixel clusters, dark slate outlines, off-white snow, muted blue-violet shadows and restrained warm accents. Core colours: ink #344b53, snow #edf1df, shade #a6bec5, teal #508d92, gold #e4bd6f. Same above/front 3/4 downhill game view. Cute, characterful and beautifully readable with a strong organic silhouette, never crude boxes or a smooth HD painting. The player is only 22 logical pixels wide; design to survive the stated native width. Each cell holds one complete isolated pose, same identity and character scale, consistent ground/foot baseline; generous transparent gutters, no clipping or cell overlap. Genuine transparent alpha background. No background scene, text, labels, grid lines, watermark, cast shadow, gradients, blur, smooth vector edges or painted checkerboard. The engine adds ground shadows and dynamic glow, so do not paint either around sprites. No extra characters. Follow the exact pose order. For cycles the poses must be consecutive articulated phases, never left/right mirrored substitutes.\nIcon sheet: EXACTLY 24 distinct square game route icons in6columns4rows. Each must read at24x24 native pixels, use strong simple silhouettes. No letters or numbers. Read left-to-right across rows: 1: warm snow-roof chalet; 2: winding snow trail with one amber lamp; 3: zigzag corridor between pines; 4: blue oval frozen lake and snow banks; 5: long parallel ski tracks with a little bench; 6: decorated Christmas tree; 7: three rolling snowballs downhill; 8: gravestone beside iron fence; 9: pumpkin beside a tiny haunted chalet; 10: crossed skis with a tiny checkered racing flag; 11: two widely spaced evergreen trees; 12: five densely clustered dark pines; 13: one giant snow boulder; 14: mixed pine, log and rock; 15: three small scary Yetis following ski tracks; 16: human face changing into an upright wolf; 17: distinct narrow burgundy dark Yeti with long limbs; 18: three small toothed burrow holes; 19: three skiers in red/yellow/green; 20: gentle beginner hill with green flag; 21: little open magical bestiary book; 22: red start flag on snowy slope; 23: warm crescent moon and star; 24: golden sunrise. Treat every slot as one isolated complete icon with generous transparent gutters, no scene/background, no shadows.",
+  "transparent": true,
+  "alphaMode": "binary",
+  "directory": "design/checkpoint-map/stage-icons",
+  "references": [
+    "assets/gritty-sprites.png"
+  ],
+  "sourceRowEdges": [
+    0,
+    310,
+    540,
+    778,
+    1024
+  ]
+}

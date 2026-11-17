@@ -430,6 +430,7 @@ function appendNightLights(o,lights){
   if(o===state.p){const lift=o.dragonRide?o.dragonRide.altitude*ZOOM:o.air>0&&o.airTotal?Math.sin(o.air/o.airTotal*Math.PI)*o.jumpHeight*ZOOM:0;add(x,y-8-lift,S.night.playerRadiusMetres*PX_PER_M*ZOOM,'#efc48b');}
   else if(o.werewolf&&!(o.npcFallUntil>clock)&&['warning','transforming'].includes(o.werewolfState)){const fade=o.werewolfState==='warning'?1:clamp(((o.transformDuration??1)-(clock-o.transformAt))/.2,0,1);add(x,y-12,40,'#ffd096',fade);}
   else if(o.type==='legendary'&&o.legendKind==='wisps'&&!o.defeated)add(x,y-15,120*ZOOM,'#9de5b9',.8);
+  else if(o.type==='routeMapPickup'&&!o.collected)add(x,y-10,40,'#ffd18a',.8);
   else if(o.type==='lamp')add(x,y-22,(o.lightRadiusWorld??S.night.lampRadiusMetres*PX_PER_M)*ZOOM,'#ffbd70',1,true);
   else if(o.grandMausoleum){add(x-w*.35,y-w*.35,58,'#dcb0a1',1,true);add(x+w*.35,y-w*.35,58,'#dcb0a1',1,true);}
   else if(o.paradeBoundary)add(x,y-houseFootDepth(o)*ZOOM/2,Math.max(w*.8+12,houseFootDepth(o)*ZOOM*.6),'#ffc277');
@@ -524,7 +525,7 @@ function drawNightLighting(layers){
     for(const l of bucket.sources.values())if(l.core)cores.set(l.id,l);
   }
   const dynamic=[];appendNightLights(state.p,dynamic);
-  for(const o of layers)if(o!==state.p&&(o.type==='legendary'&&o.legendKind==='wisps'||o.type==='skier'||o.type==='boarder'||carriesTorch(o)||o.catGuide&&o.guideState==='leading'||o.bonusRabbit||o.werewolf&&!(o.npcFallUntil>clock)&&['warning','transforming'].includes(o.werewolfState)))appendNightLights(o,dynamic);
+  for(const o of layers)if(o!==state.p&&(o.type==='routeMapPickup'||o.type==='legendary'&&o.legendKind==='wisps'||o.type==='skier'||o.type==='boarder'||carriesTorch(o)||o.catGuide&&o.guideState==='leading'||o.bonusRabbit||o.werewolf&&!(o.npcFallUntil>clock)&&['warning','transforming'].includes(o.werewolfState)))appendNightLights(o,dynamic);
   t.globalCompositeOperation='destination-out';const hole=glowTile();glow.clearRect(0,0,mw,mh);
   for(const l of dynamic){
     if(l.x+l.r<viewLeft||l.x-l.r>viewLeft+W||l.y+l.r<viewTop||l.y-l.r>viewTop+H)continue;

@@ -1,6 +1,6 @@
 {
   "dismissal": "tap-or-key",
-  "minimumSeconds": 3,
+  "minimumSeconds": 0.5,
   "images": [
     {
       "key": "death-wolf",
@@ -241,6 +241,20 @@
       "width": 320,
       "height": 200,
       "colors": 64
+    },
+    {
+      "key": "checkpoint",
+      "file": "checkpoint.png",
+      "source": "design/checkpoint-map/checkpoint/source.png",
+      "width": 320,
+      "height": 200
+    },
+    {
+      "key": "checkpoint-night",
+      "file": "checkpoint-night.png",
+      "source": "design/checkpoint-map/checkpoint-night/source.png",
+      "width": 320,
+      "height": 200
     }
   ]
 }

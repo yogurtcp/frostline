@@ -1,0 +1,151 @@
+{
+  "sourceSize": [
+    1536,
+    1024
+  ],
+  "width": 144,
+  "height": 112,
+  "cellWidth": 48,
+  "cellHeight": 56,
+  "alphaMode": "binary",
+  "frames": [
+    {
+      "name": "Green potion",
+      "x": 0,
+      "y": 0,
+      "w": 48,
+      "h": 56,
+      "bodyBounds": [
+        19,
+        34,
+        10,
+        14
+      ],
+      "anchor": [
+        24,
+        48
+      ],
+      "source": [
+        183,
+        169,
+        200,
+        278
+      ]
+    },
+    {
+      "name": "Purple potion",
+      "x": 48,
+      "y": 0,
+      "w": 48,
+      "h": 56,
+      "bodyBounds": [
+        19,
+        34,
+        10,
+        14
+      ],
+      "anchor": [
+        24,
+        48
+      ],
+      "source": [
+        664,
+        169,
+        200,
+        278
+      ]
+    },
+    {
+      "name": "Orange potion",
+      "x": 96,
+      "y": 0,
+      "w": 48,
+      "h": 56,
+      "bodyBounds": [
+        19,
+        34,
+        10,
+        14
+      ],
+      "anchor": [
+        24,
+        48
+      ],
+      "source": [
+        1144,
+        169,
+        200,
+        278
+      ]
+    },
+    {
+      "name": "Green splash",
+      "x": 0,
+      "y": 56,
+      "w": 48,
+      "h": 56,
+      "bodyBounds": [
+        9,
+        29,
+        30,
+        19
+      ],
+      "anchor": [
+        24,
+        48
+      ],
+      "source": [
+        99,
+        637,
+        373,
+        237
+      ]
+    },
+    {
+      "name": "Purple splash",
+      "x": 48,
+      "y": 56,
+      "w": 48,
+      "h": 56,
+      "bodyBounds": [
+        9,
+        28,
+        30,
+        20
+      ],
+      "anchor": [
+        24,
+        48
+      ],
+      "source": [
+        580,
+        637,
+        372,
+        244
+      ]
+    },
+    {
+      "name": "Orange splash",
+      "x": 96,
+      "y": 56,
+      "w": 48,
+      "h": 56,
+      "bodyBounds": [
+        9,
+        28,
+        30,
+        20
+      ],
+      "anchor": [
+        24,
+        48
+      ],
+      "source": [
+        1064,
+        637,
+        370,
+        244
+      ]
+    }
+  ]
+}

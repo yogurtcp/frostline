@@ -4,7 +4,8 @@
   "endless": {
     "checkpoint": {
       "signAheadMetres": 50,
-      "grabPaddingMetres": 3
+      "grabPaddingMetres": 3,
+      "mapAfterMetres": 24
     },
     "autoStart": false,
     "recordVersion": 4,
@@ -3531,5 +3532,8 @@
         "text": "Now go and meet them for real."
       }
     ]
+  },
+  "sceneCards": {
+    "minimumSeconds": 0.5
   }
 }

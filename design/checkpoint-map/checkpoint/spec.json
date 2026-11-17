@@ -1,0 +1,18 @@
+{
+  "name": "checkpoint",
+  "category": "scene",
+  "targetWidth": 320,
+  "targetHeight": 200,
+  "columns": 1,
+  "rows": 1,
+  "poses": [
+    "Rest at lift"
+  ],
+  "prompt": "Use case: illustration-story. Asset: cosy funny pixel-art checkpoint interlude for Frostline, 8:5 landscape, designed to be sampled to320x200 real pixels. References: Image1 existing gritty sprite atlas is STYLE/PLAYER-IDENTITY guidance; Image2 cocoa scene is COMPOSITION/PIXEL-ART-MOOD guidance, not an edit target. Create a NEW scene of the game's skier resting at an alpine CHAIRLIFT station. The player wears a RED ski jacket, dark navy wool beanie, blue/dark trousers and amber goggles, skis leaned safely nearby, sitting relaxed on a wooden bench by a cosy small timber lift hut, boots stretched out and hands warming a mug. A clearly visible chairlift chair and cable pass beside the hut; snowy fir trees and mountains establish the slope. Cute and peaceful, warm wooden details, a little unlettered checkpoint flag. No other characters. True coarse low-resolution PC-game pixel art, organic shaded pixel clusters, dark slate outlines, off-white snow, blue-violet shade and warm restrained amber highlights. NOT smooth HD illustration or vector art. Keep all important player/lift elements within central80% so landscape cropping is safe. No text anywhere: the game renders the exact title CHECKPOINT separately, so do not bake lettering. No frame, UI, progress bar, button or watermark. DAY VERSION: crisp pale winter daylight, gentle warm low sun, snow-capped mountains, warm hut windows, no dusk darkness.",
+  "transparent": false,
+  "directory": "design/checkpoint-map/checkpoint",
+  "references": [
+    "assets/gritty-sprites.png",
+    "assets/scenes/cocoa.png"
+  ]
+}

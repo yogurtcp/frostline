@@ -1,0 +1,105 @@
+{
+  "sourceSize": [
+    1536,
+    1024
+  ],
+  "width": 96,
+  "height": 96,
+  "cellWidth": 48,
+  "cellHeight": 48,
+  "alphaMode": "binary",
+  "frames": [
+    {
+      "name": "Map",
+      "x": 0,
+      "y": 0,
+      "w": 48,
+      "h": 48,
+      "bodyBounds": [
+        10,
+        20,
+        28,
+        20
+      ],
+      "anchor": [
+        24,
+        40
+      ],
+      "source": [
+        228,
+        148,
+        414,
+        300
+      ]
+    },
+    {
+      "name": "Map glint",
+      "x": 48,
+      "y": 0,
+      "w": 48,
+      "h": 48,
+      "bodyBounds": [
+        10,
+        18,
+        28,
+        22
+      ],
+      "anchor": [
+        24,
+        40
+      ],
+      "source": [
+        850,
+        122,
+        416,
+        326
+      ]
+    },
+    {
+      "name": "Lift checkpoint",
+      "x": 0,
+      "y": 48,
+      "w": 48,
+      "h": 48,
+      "bodyBounds": [
+        10,
+        14,
+        28,
+        26
+      ],
+      "anchor": [
+        24,
+        40
+      ],
+      "source": [
+        244,
+        570,
+        415,
+        387
+      ]
+    },
+    {
+      "name": "Location pin",
+      "x": 48,
+      "y": 48,
+      "w": 48,
+      "h": 48,
+      "bodyBounds": [
+        14,
+        13,
+        20,
+        27
+      ],
+      "anchor": [
+        24,
+        40
+      ],
+      "source": [
+        987,
+        670,
+        170,
+        233
+      ]
+    }
+  ]
+}

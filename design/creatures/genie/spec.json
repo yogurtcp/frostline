@@ -1,0 +1,31 @@
+{
+  "name": "genie",
+  "category": "creature",
+  "targetWidth": 40,
+  "targetHeight": 62,
+  "columns": 3,
+  "rows": 2,
+  "poses": [
+    "Lamp",
+    "Emerge",
+    "Arms crossed",
+    "Grant left",
+    "Grant right",
+    "Return"
+  ],
+  "prompt": "Use case: stylized-concept. Production pixel-art sprite sheet for Frostline, a snowy downhill ski game. Attached gritty-sprites atlas is STYLE/SCALE guidance only, never an edit target. Match its tiny crisp low-resolution PC-game pixel clusters, dark slate outlines, off-white snow, muted blue-violet shadows and restrained warm accents. Core colours: ink #344b53, snow #edf1df, shade #a6bec5, teal #508d92, gold #e4bd6f. Same above/front 3/4 downhill game view. Cute, characterful and beautifully readable with a strong organic silhouette, never crude boxes or a smooth HD painting. The player is only 22 logical pixels wide; design to survive the stated native width. Each cell holds one complete isolated pose, same identity and character scale, consistent ground/foot baseline; generous transparent gutters, no clipping or cell overlap. Genuine transparent alpha background. No background scene, text, labels, grid lines, watermark, cast shadow, gradients, blur, smooth vector edges or painted checkerboard. The engine adds ground shadows and dynamic glow, so do not paint either around sprites. No extra characters. Follow the exact pose order. For cycles the poses must be consecutive articulated phases, never left/right mirrored substitutes.\nSubject and exact sequence: A whimsical classic BLUE GENIE with a broad grin, crossed muscular arms, small dark topknot/turban, gold cuffs and a curled smoke lower body rising from a GOLD OIL LAMP. Six cells in3columns2rows: 1 lamp alone glinting in snow (isolated lamp, no snow floor, intentionally about18px native), 2 genie partly emerging in curling blue smoke, 3 full genie arms crossed grinning, 4 granting wish with left hand, 5 granting with right hand, 6 curling/fading back into lamp. Same lamp at same baseline in all poses, genie identity stable. Native full genie40px wide. No wish gates/icons/letters, no floor shadow, no diffuse glow, no extra characters.\nLayout: exactly 3 columns by 2 rows, 6 cells, read left to right across rows. Target maximum native width 40px and height 62px. Ground/feet or floating-body anchor stays registered in each cell.",
+  "transparent": true,
+  "alphaMode": "binary",
+  "directory": "design/creatures/genie",
+  "references": [
+    "assets/gritty-sprites.png"
+  ],
+  "frameWidths": [
+    18,
+    null,
+    null,
+    null,
+    null,
+    null
+  ]
+}

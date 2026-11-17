@@ -1,0 +1,23 @@
+{
+  "name": "medusa",
+  "category": "creature",
+  "targetWidth": 40,
+  "targetHeight": 58,
+  "columns": 3,
+  "rows": 2,
+  "poses": [
+    "Sit front",
+    "Look left",
+    "Look right",
+    "Glare left",
+    "Glare right",
+    "Relax"
+  ],
+  "prompt": "Use case: stylized-concept. Production pixel-art sprite sheet for Frostline, a snowy downhill ski game. Attached gritty-sprites atlas is STYLE/SCALE guidance only, never an edit target. Match its tiny crisp low-resolution PC-game pixel clusters, dark slate outlines, off-white snow, muted blue-violet shadows and restrained warm accents. Core colours: ink #344b53, snow #edf1df, shade #a6bec5, teal #508d92, gold #e4bd6f. Same above/front 3/4 downhill game view. Cute, characterful and beautifully readable with a strong organic silhouette, never crude boxes or a smooth HD painting. The player is only 22 logical pixels wide; design to survive the stated native width. Each cell holds one complete isolated pose, same identity and character scale, consistent ground/foot baseline; generous transparent gutters, no clipping or cell overlap. Genuine transparent alpha background. No background scene, text, labels, grid lines, watermark, cast shadow, gradients, blur, smooth vector edges or painted checkerboard. The engine adds ground shadows and dynamic glow, so do not paint either around sprites. No extra characters. Follow the exact pose order. For cycles the poses must be consecutive articulated phases, never left/right mirrored substitutes.\nSubject and exact sequence: A cute formidable green-skinned woman with a nest of six readable little snakes for hair, wearing a muted shawl, seated on one small grey rock. Characterful face and articulated snakes, no horror/gore. Six poses: sitting facing near-front, head turned left, head turned right, glaring left with pale-green bright eyes, glaring right with bright eyes, relaxed with snakes in a second writhing position. Same rock/body/scale/baseline in every frame; primarily head, eyes and snake hair move. Do NOT bake the gaze cone or halo into the art; the engine renders that. No mirror shield in her hand; it is a separate pickup.\nLayout: exactly 3 columns by 2 rows, 6 cells, read left to right across rows. Target maximum native width 40px and height 58px. Ground/feet or floating-body anchor stays registered in each cell.",
+  "transparent": true,
+  "alphaMode": "binary",
+  "directory": "design/creatures/medusa",
+  "references": [
+    "assets/gritty-sprites.png"
+  ]
+}

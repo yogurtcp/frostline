@@ -8,6 +8,8 @@ window.loadFrostlineConfig = async function () {
     try { response = await fetch(url, { cache: 'no-store' }); } catch (_) { /* Network loss: the embedded snapshot is playable offline. */ }
     if(response){if (!response.ok) throw new Error(`Cannot load game-config.json (${response.status})`);config = await response.json();}
   }
+  config.sceneCards ??= {};config.sceneCards.minimumSeconds ??= .5;
+  config.endless?.checkpoint && (config.endless.checkpoint.mapAfterMetres ??= 24);
   config.race.gateBoost ??= {seconds:.65,multiplier:1.08};
   config.endless ??= {"autoStart":false,"recordVersion":1,"playerSpeedKmh":90,"sectionMetres":240,"lookAheadMetres":180,"difficultyRampMetres":2800,"waveMetres":900,"itemSpreadMetres":55,"gates":{"spacingMetres":38,"openingMetres":[19,14],"swingMetres":[11,16],"swordEvery":8},"rates":{"trees":[0.9,3.8],"skiers":[0.8,4.8],"fastSkiers":[0,0.7],"lakes":[0.12,0.85],"jumps":[0.12,0.5]},"lakeRadiusMetres":[20,34],"firstLakeMetres":350,"yetis":{"firstMetres":700,"additionalEveryMetres":900,"intervalMetres":[650,300],"speedKmh":[68,94],"maxActive":4,"wakeSeconds":2.5,"retireBehindMetres":180}};
   config.endless.yetis.maxNearbyHunters ??= config.endless.yetis.maxActive ?? 4;

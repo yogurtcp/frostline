@@ -1,0 +1,557 @@
+[
+  {
+    "name": "witch",
+    "category": "creature",
+    "targetWidth": 40,
+    "targetHeight": 55,
+    "columns": 3,
+    "rows": 2,
+    "poses": [
+      "Fly level",
+      "Bank left",
+      "Bank right",
+      "Throw wind-up",
+      "Throw arm out",
+      "Recover"
+    ],
+    "prompt": "Use case: stylized-concept. Production pixel-art sprite sheet for Frostline, a snowy downhill ski game. Attached gritty-sprites atlas is STYLE/SCALE guidance only, never an edit target. Match its tiny crisp low-resolution PC-game pixel clusters, dark slate outlines, off-white snow, muted blue-violet shadows and restrained warm accents. Core colours: ink #344b53, snow #edf1df, shade #a6bec5, teal #508d92, gold #e4bd6f. Same above/front 3/4 downhill game view. Cute, characterful and beautifully readable with a strong organic silhouette, never crude boxes or a smooth HD painting. The player is only 22 logical pixels wide; design to survive the stated native width. Each cell holds one complete isolated pose, same identity and character scale, consistent ground/foot baseline; generous transparent gutters, no clipping or cell overlap. Genuine transparent alpha background. No background scene, text, labels, grid lines, watermark, cast shadow, gradients, blur, smooth vector edges or painted checkerboard. The engine adds ground shadows and dynamic glow, so do not paint either around sprites. No extra characters. Follow the exact pose order. For cycles the poses must be consecutive articulated phases, never left/right mirrored substitutes.\nSubject and exact sequence: A hunched classic witch riding a straw broom, pointed black-purple hat, green face, purple/black robe, expressive mischievous grin. A few discrete sparkle pixels at straw tail, no glow. Six full-body poses: 1 fly level, 2 bank left, 3 bank right, 4 take one small potion from robe, 5 throw with arm extended, 6 recover arm to broom. Preserve hat, face, robe and broom exactly across poses; broom remains complete in each cell.\nLayout: exactly 3 columns by 2 rows, 6 cells, read left to right across rows. Target maximum native width 40px and height 55px. Ground/feet or floating-body anchor stays registered in each cell.",
+    "transparent": true,
+    "alphaMode": "binary",
+    "directory": "design/creatures/witch",
+    "references": [
+      "assets/gritty-sprites.png"
+    ]
+  },
+  {
+    "name": "unicorn",
+    "category": "creature",
+    "targetWidth": 45,
+    "targetHeight": 56,
+    "columns": 3,
+    "rows": 2,
+    "poses": [
+      "Gather",
+      "Reach forelegs",
+      "Lead contact",
+      "Compression",
+      "Push-off",
+      "Suspension"
+    ],
+    "prompt": "Use case: stylized-concept. Production pixel-art sprite sheet for Frostline, a snowy downhill ski game. Attached gritty-sprites atlas is STYLE/SCALE guidance only, never an edit target. Match its tiny crisp low-resolution PC-game pixel clusters, dark slate outlines, off-white snow, muted blue-violet shadows and restrained warm accents. Core colours: ink #344b53, snow #edf1df, shade #a6bec5, teal #508d92, gold #e4bd6f. Same above/front 3/4 downhill game view. Cute, characterful and beautifully readable with a strong organic silhouette, never crude boxes or a smooth HD painting. The player is only 22 logical pixels wide; design to survive the stated native width. Each cell holds one complete isolated pose, same identity and character scale, consistent ground/foot baseline; generous transparent gutters, no clipping or cell overlap. Genuine transparent alpha background. No background scene, text, labels, grid lines, watermark, cast shadow, gradients, blur, smooth vector edges or painted checkerboard. The engine adds ground shadows and dynamic glow, so do not paint either around sprites. No extra characters. Follow the exact pose order. For cycles the poses must be consecutive articulated phases, never left/right mirrored substitutes.\nSubject and exact sequence: A graceful cute white unicorn with a single clearly visible pale-gold spiral horn, restrained pastel rainbow mane and tail, dark defined hooves, expressive eyes. EXACTLY SIX consecutive phases of one gallop cycle, all facing the same 3/4 diagonal direction, no pose mirroring or character redesign: gathered legs, foreleg reach, leading hoof contact, compression, hindleg push-off, suspension returning to gathered. Actual articulated legs, coherent body volume and flowing mane/tail; tiny isolated sparkle pixels only, no glow. One unicorn per cell.\nLayout: exactly 3 columns by 2 rows, 6 cells, read left to right across rows. Target maximum native width 45px and height 56px. Ground/feet or floating-body anchor stays registered in each cell.",
+    "transparent": true,
+    "alphaMode": "binary",
+    "directory": "design/creatures/unicorn",
+    "references": [
+      "assets/gritty-sprites.png"
+    ]
+  },
+  {
+    "name": "medusa",
+    "category": "creature",
+    "targetWidth": 40,
+    "targetHeight": 58,
+    "columns": 3,
+    "rows": 2,
+    "poses": [
+      "Sit front",
+      "Look left",
+      "Look right",
+      "Glare left",
+      "Glare right",
+      "Relax"
+    ],
+    "prompt": "Use case: stylized-concept. Production pixel-art sprite sheet for Frostline, a snowy downhill ski game. Attached gritty-sprites atlas is STYLE/SCALE guidance only, never an edit target. Match its tiny crisp low-resolution PC-game pixel clusters, dark slate outlines, off-white snow, muted blue-violet shadows and restrained warm accents. Core colours: ink #344b53, snow #edf1df, shade #a6bec5, teal #508d92, gold #e4bd6f. Same above/front 3/4 downhill game view. Cute, characterful and beautifully readable with a strong organic silhouette, never crude boxes or a smooth HD painting. The player is only 22 logical pixels wide; design to survive the stated native width. Each cell holds one complete isolated pose, same identity and character scale, consistent ground/foot baseline; generous transparent gutters, no clipping or cell overlap. Genuine transparent alpha background. No background scene, text, labels, grid lines, watermark, cast shadow, gradients, blur, smooth vector edges or painted checkerboard. The engine adds ground shadows and dynamic glow, so do not paint either around sprites. No extra characters. Follow the exact pose order. For cycles the poses must be consecutive articulated phases, never left/right mirrored substitutes.\nSubject and exact sequence: A cute formidable green-skinned woman with a nest of six readable little snakes for hair, wearing a muted shawl, seated on one small grey rock. Characterful face and articulated snakes, no horror/gore. Six poses: sitting facing near-front, head turned left, head turned right, glaring left with pale-green bright eyes, glaring right with bright eyes, relaxed with snakes in a second writhing position. Same rock/body/scale/baseline in every frame; primarily head, eyes and snake hair move. Do NOT bake the gaze cone or halo into the art; the engine renders that. No mirror shield in her hand; it is a separate pickup.\nLayout: exactly 3 columns by 2 rows, 6 cells, read left to right across rows. Target maximum native width 40px and height 58px. Ground/feet or floating-body anchor stays registered in each cell.",
+    "transparent": true,
+    "alphaMode": "binary",
+    "directory": "design/creatures/medusa",
+    "references": [
+      "assets/gritty-sprites.png"
+    ]
+  },
+  {
+    "name": "hut",
+    "category": "creature",
+    "targetWidth": 80,
+    "targetHeight": 90,
+    "columns": 3,
+    "rows": 2,
+    "poses": [
+      "Stand",
+      "Step left",
+      "Step right",
+      "Lower",
+      "Crouch",
+      "Rise"
+    ],
+    "prompt": "Use case: stylized-concept. Production pixel-art sprite sheet for Frostline, a snowy downhill ski game. Attached gritty-sprites atlas is STYLE/SCALE guidance only, never an edit target. Match its tiny crisp low-resolution PC-game pixel clusters, dark slate outlines, off-white snow, muted blue-violet shadows and restrained warm accents. Core colours: ink #344b53, snow #edf1df, shade #a6bec5, teal #508d92, gold #e4bd6f. Same above/front 3/4 downhill game view. Cute, characterful and beautifully readable with a strong organic silhouette, never crude boxes or a smooth HD painting. The player is only 22 logical pixels wide; design to survive the stated native width. Each cell holds one complete isolated pose, same identity and character scale, consistent ground/foot baseline; generous transparent gutters, no clipping or cell overlap. Genuine transparent alpha background. No background scene, text, labels, grid lines, watermark, cast shadow, gradients, blur, smooth vector edges or painted checkerboard. The engine adds ground shadows and dynamic glow, so do not paint either around sprites. No extra characters. Follow the exact pose order. For cycles the poses must be consecutive articulated phases, never left/right mirrored substitutes.\nSubject and exact sequence: Baba Yaga's walking LOG HUT, with a snowy layered wooden roof, chimney, two warm glowing windows and teal door, on two LONG YELLOW CHICKEN LEGS. House with legs, not a humanoid or a chicken-headed creature. At native scale about80px wide and90px tall standing; the clear gap BETWEEN the legs must fit a22px skier (aim32px gap). EXACT six poses: 1 fully standing with both feet planted apart and clear central gap, 2 left foot forward/right lifted bent knee, 3 right foot forward/left lifted bent knee, 4 knees bend lowering the SAME house, 5 crouched house sits flat on snow with legs hidden, 6 legs extend as it rises. House scale/architecture/window sizes identical throughout; crouching lowers the roof, never shrinks the building. Feet/house rest on the same cell ground baseline.\nLayout: exactly 3 columns by 2 rows, 6 cells, read left to right across rows. Target maximum native width 80px and height 90px. Ground/feet or floating-body anchor stays registered in each cell.",
+    "transparent": true,
+    "alphaMode": "binary",
+    "directory": "design/creatures/hut",
+    "references": [
+      "assets/gritty-sprites.png"
+    ]
+  },
+  {
+    "name": "giant",
+    "category": "creature",
+    "targetWidth": 100,
+    "targetHeight": 120,
+    "columns": 3,
+    "rows": 2,
+    "poses": [
+      "Rest",
+      "Inhale",
+      "Puff cheeks",
+      "Blow",
+      "Sustain gust",
+      "Recover"
+    ],
+    "prompt": "Use case: stylized-concept. Production pixel-art sprite sheet for Frostline, a snowy downhill ski game. Attached gritty-sprites atlas is STYLE/SCALE guidance only, never an edit target. Match its tiny crisp low-resolution PC-game pixel clusters, dark slate outlines, off-white snow, muted blue-violet shadows and restrained warm accents. Core colours: ink #344b53, snow #edf1df, shade #a6bec5, teal #508d92, gold #e4bd6f. Same above/front 3/4 downhill game view. Cute, characterful and beautifully readable with a strong organic silhouette, never crude boxes or a smooth HD painting. The player is only 22 logical pixels wide; design to survive the stated native width. Each cell holds one complete isolated pose, same identity and character scale, consistent ground/foot baseline; generous transparent gutters, no clipping or cell overlap. Genuine transparent alpha background. No background scene, text, labels, grid lines, watermark, cast shadow, gradients, blur, smooth vector edges or painted checkerboard. The engine adds ground shadows and dynamic glow, so do not paint either around sprites. No extra characters. Follow the exact pose order. For cycles the poses must be consecutive articulated phases, never left/right mirrored substitutes.\nSubject and exact sequence: A huge full-bodied ice-blue FROST GIANT, Norse j\u00f6tunn, with a long snowy beard, snow cap, stout legs/boots, large mitten-like hands, expressive brows and a visible friendly-grumpy face. Not a floating rectangular face. Six consistent full-body poses: relaxed rest; inhale chest lifting; cheeks fully puffed shoulders raised; blowing sideways toward the left with pursed/open mouth and beard streaming; sustain gust with beard/hands shifted; exhausted recovery. Genuine body anticipation and release. Do not paint wind streaks outside the sprite; those are engine effects. About100 logical pixels wide, taller than a skier, crisp textured organic pixel shading.\nLayout: exactly 3 columns by 2 rows, 6 cells, read left to right across rows. Target maximum native width 100px and height 120px. Ground/feet or floating-body anchor stays registered in each cell.",
+    "transparent": true,
+    "alphaMode": "binary",
+    "directory": "design/creatures/giant",
+    "references": [
+      "assets/gritty-sprites.png"
+    ]
+  },
+  {
+    "name": "kelpie",
+    "category": "creature",
+    "targetWidth": 45,
+    "targetHeight": 58,
+    "columns": 4,
+    "rows": 2,
+    "poses": [
+      "Gallop gather",
+      "Gallop reach",
+      "Gallop contact",
+      "Gallop compress",
+      "Gallop push",
+      "Gallop float",
+      "Emerge",
+      "Swim away"
+    ],
+    "prompt": "Use case: stylized-concept. Production pixel-art sprite sheet for Frostline, a snowy downhill ski game. Attached gritty-sprites atlas is STYLE/SCALE guidance only, never an edit target. Match its tiny crisp low-resolution PC-game pixel clusters, dark slate outlines, off-white snow, muted blue-violet shadows and restrained warm accents. Core colours: ink #344b53, snow #edf1df, shade #a6bec5, teal #508d92, gold #e4bd6f. Same above/front 3/4 downhill game view. Cute, characterful and beautifully readable with a strong organic silhouette, never crude boxes or a smooth HD painting. The player is only 22 logical pixels wide; design to survive the stated native width. Each cell holds one complete isolated pose, same identity and character scale, consistent ground/foot baseline; generous transparent gutters, no clipping or cell overlap. Genuine transparent alpha background. No background scene, text, labels, grid lines, watermark, cast shadow, gradients, blur, smooth vector edges or painted checkerboard. The engine adds ground shadows and dynamic glow, so do not paint either around sprites. No extra characters. Follow the exact pose order. For cycles the poses must be consecutive articulated phases, never left/right mirrored substitutes.\nSubject and exact sequence: A mysterious TEAL KELPIE horse, with a pale dripping mane/tail, sea-green body, dark defined legs/hooves and bright readable eyes. It is a horse, not a humanoid, and visually distinct from a white rainbow unicorn. Eight frames in4columns2rows: first SIX are a coherent full gallop cycle (gather, reach, contact, compress, push-off, float), same 3/4 facing, no mirror flips; frame7 rises/emerges with forequarters lifted and pixel water drops; frame8 swims away with legs tucked low. Full creature always fits cell; no lake, ice patch, ground or floor shadow. Native about45px wide.\nLayout: exactly 4 columns by 2 rows, 8 cells, read left to right across rows. Target maximum native width 45px and height 58px. Ground/feet or floating-body anchor stays registered in each cell.",
+    "transparent": true,
+    "alphaMode": "binary",
+    "directory": "design/creatures/kelpie",
+    "references": [
+      "assets/gritty-sprites.png"
+    ]
+  },
+  {
+    "name": "troll",
+    "category": "creature",
+    "targetWidth": 45,
+    "targetHeight": 55,
+    "columns": 3,
+    "rows": 2,
+    "poses": [
+      "Idle",
+      "Aim",
+      "Charge reach",
+      "Charge gather",
+      "Recover",
+      "Defeated"
+    ],
+    "prompt": "Use case: stylized-concept. Production pixel-art sprite sheet for Frostline, a snowy downhill ski game. Attached gritty-sprites atlas is STYLE/SCALE guidance only, never an edit target. Match its tiny crisp low-resolution PC-game pixel clusters, dark slate outlines, off-white snow, muted blue-violet shadows and restrained warm accents. Core colours: ink #344b53, snow #edf1df, shade #a6bec5, teal #508d92, gold #e4bd6f. Same above/front 3/4 downhill game view. Cute, characterful and beautifully readable with a strong organic silhouette, never crude boxes or a smooth HD painting. The player is only 22 logical pixels wide; design to survive the stated native width. Each cell holds one complete isolated pose, same identity and character scale, consistent ground/foot baseline; generous transparent gutters, no clipping or cell overlap. Genuine transparent alpha background. No background scene, text, labels, grid lines, watermark, cast shadow, gradients, blur, smooth vector edges or painted checkerboard. The engine adds ground shadows and dynamic glow, so do not paint either around sprites. No extra characters. Follow the exact pose order. For cycles the poses must be consecutive articulated phases, never left/right mirrored substitutes.\nSubject and exact sequence: A broad squat GREEN BRIDGE TROLL, huge nose, two visible tusks, pointed ears, gold belt, sturdy boots and one chunky recognizable AXE. Cute threatening fairy-tale creature with real textured anatomy, no simple block robot. Six consistent full-body poses: 1 idle holding axe, 2 aiming/leaning forward with axe drawn back, 3 charge foreleg reaching and axe held low, 4 opposing charge stride legs gathered, 5 braking/exhausted recovery leaning back, 6 harmless defeated seated pose with axe resting alongside. Same face, tusks, belt/axe geometry and size throughout. No bridge, scenery, speech mark or floor shadow in this sheet.\nLayout: exactly 3 columns by 2 rows, 6 cells, read left to right across rows. Target maximum native width 45px and height 55px. Ground/feet or floating-body anchor stays registered in each cell.",
+    "transparent": true,
+    "alphaMode": "binary",
+    "directory": "design/creatures/troll",
+    "references": [
+      "assets/gritty-sprites.png"
+    ]
+  },
+  {
+    "name": "thunderbird",
+    "category": "creature",
+    "targetWidth": 60,
+    "targetHeight": 65,
+    "columns": 4,
+    "rows": 2,
+    "poses": [
+      "Wings high",
+      "Wings rising",
+      "Wings level",
+      "Downstroke",
+      "Wings low",
+      "Recovery",
+      "Bank left",
+      "Bank right"
+    ],
+    "prompt": "Use case: stylized-concept. Production pixel-art sprite sheet for Frostline, a snowy downhill ski game. Attached gritty-sprites atlas is STYLE/SCALE guidance only, never an edit target. Match its tiny crisp low-resolution PC-game pixel clusters, dark slate outlines, off-white snow, muted blue-violet shadows and restrained warm accents. Core colours: ink #344b53, snow #edf1df, shade #a6bec5, teal #508d92, gold #e4bd6f. Same above/front 3/4 downhill game view. Cute, characterful and beautifully readable with a strong organic silhouette, never crude boxes or a smooth HD painting. The player is only 22 logical pixels wide; design to survive the stated native width. Each cell holds one complete isolated pose, same identity and character scale, consistent ground/foot baseline; generous transparent gutters, no clipping or cell overlap. Genuine transparent alpha background. No background scene, text, labels, grid lines, watermark, cast shadow, gradients, blur, smooth vector edges or painted checkerboard. The engine adds ground shadows and dynamic glow, so do not paint either around sprites. No extra characters. Follow the exact pose order. For cycles the poses must be consecutive articulated phases, never left/right mirrored substitutes.\nSubject and exact sequence: A majestic dark SLATE-BLUE EAGLE THUNDERBIRD, gold feather edging and crest, strong hooked beak, visible talons, feathered wings with articulated primary feathers. A bird with a compact body and broad wings, not a dragon or a stick figure; no invented tribal motifs. Eight poses in4columns2rows: six successive phases of a powerful wingbeat (high, rising/open, level, committed downstroke, low, recovery), then bank left and bank right. SAME head/body/feather identity and proportions. Native about60px wide. No target circles, lightning beams, halos, shadow or ground; engine draws effects.\nLayout: exactly 4 columns by 2 rows, 8 cells, read left to right across rows. Target maximum native width 60px and height 65px. Ground/feet or floating-body anchor stays registered in each cell.",
+    "transparent": true,
+    "alphaMode": "binary",
+    "directory": "design/creatures/thunderbird",
+    "references": [
+      "assets/gritty-sprites.png"
+    ]
+  },
+  {
+    "name": "gargoyle",
+    "category": "creature",
+    "targetWidth": 35,
+    "targetHeight": 46,
+    "columns": 3,
+    "rows": 2,
+    "poses": [
+      "Perched asleep",
+      "Perched awake",
+      "Flight up",
+      "Flight down",
+      "Landed ready",
+      "Defeated"
+    ],
+    "prompt": "Use case: stylized-concept. Production pixel-art sprite sheet for Frostline, a snowy downhill ski game. Attached gritty-sprites atlas is STYLE/SCALE guidance only, never an edit target. Match its tiny crisp low-resolution PC-game pixel clusters, dark slate outlines, off-white snow, muted blue-violet shadows and restrained warm accents. Core colours: ink #344b53, snow #edf1df, shade #a6bec5, teal #508d92, gold #e4bd6f. Same above/front 3/4 downhill game view. Cute, characterful and beautifully readable with a strong organic silhouette, never crude boxes or a smooth HD painting. The player is only 22 logical pixels wide; design to survive the stated native width. Each cell holds one complete isolated pose, same identity and character scale, consistent ground/foot baseline; generous transparent gutters, no clipping or cell overlap. Genuine transparent alpha background. No background scene, text, labels, grid lines, watermark, cast shadow, gradients, blur, smooth vector edges or painted checkerboard. The engine adds ground shadows and dynamic glow, so do not paint either around sprites. No extra characters. Follow the exact pose order. For cycles the poses must be consecutive articulated phases, never left/right mirrored substitutes.\nSubject and exact sequence: A small GREY STONE GARGOYLE, curled short horns, bat wings, green eyes, clawed hands/feet, compact crouching body and tiny stone tail, friendly-grumpy cathedral creature. Six complete poses: curled/perched asleep, perched awake head lifted, flying wings up, flying wings down, landed crouched ready to pounce, harmless defeated sitting with chipped dust. Preserve same face/horns and weathered slate stone clusters. No plinth in these creature frames: a separate plinth will be drawn by the game, so feet align to common baseline. Native35px maximum width including open wings; maintain head/eye readability at tiny size. No ground, glow halo or shadow.\nLayout: exactly 3 columns by 2 rows, 6 cells, read left to right across rows. Target maximum native width 35px and height 46px. Ground/feet or floating-body anchor stays registered in each cell.",
+    "transparent": true,
+    "alphaMode": "binary",
+    "directory": "design/creatures/gargoyle",
+    "references": [
+      "assets/gritty-sprites.png"
+    ]
+  },
+  {
+    "name": "wisps",
+    "category": "creature",
+    "targetWidth": 22,
+    "targetHeight": 26,
+    "columns": 2,
+    "rows": 2,
+    "poses": [
+      "Float A",
+      "Float B",
+      "Lean",
+      "Flicker"
+    ],
+    "prompt": "Use case: stylized-concept. Production pixel-art sprite sheet for Frostline, a snowy downhill ski game. Attached gritty-sprites atlas is STYLE/SCALE guidance only, never an edit target. Match its tiny crisp low-resolution PC-game pixel clusters, dark slate outlines, off-white snow, muted blue-violet shadows and restrained warm accents. Core colours: ink #344b53, snow #edf1df, shade #a6bec5, teal #508d92, gold #e4bd6f. Same above/front 3/4 downhill game view. Cute, characterful and beautifully readable with a strong organic silhouette, never crude boxes or a smooth HD painting. The player is only 22 logical pixels wide; design to survive the stated native width. Each cell holds one complete isolated pose, same identity and character scale, consistent ground/foot baseline; generous transparent gutters, no clipping or cell overlap. Genuine transparent alpha background. No background scene, text, labels, grid lines, watermark, cast shadow, gradients, blur, smooth vector edges or painted checkerboard. The engine adds ground shadows and dynamic glow, so do not paint either around sprites. No extra characters. Follow the exact pose order. For cycles the poses must be consecutive articulated phases, never left/right mirrored substitutes.\nSubject and exact sequence: A GROUP OF EXACTLY THREE tiny floating WILL-O-THE-WISPS, pale green to creamy-white pixel flames with two tiny dark eyes each. Entire three-flame group must read at only22 logical pixels wide. Four poses in2x2: float with left flame high; float with right flame high; drift/lean together; a crisp changing flame-tip flicker. Same three identities and overall size. Use a dark teal rim and pale cores so silhouettes read on white snow and dark night. No diffuse glow halo, gradients, background or ground; magical lighting is rendered in code. No shield/pickup icon in the flame group.\nLayout: exactly 2 columns by 2 rows, 4 cells, read left to right across rows. Target maximum native width 22px and height 26px. Ground/feet or floating-body anchor stays registered in each cell.",
+    "transparent": true,
+    "alphaMode": "binary",
+    "directory": "design/creatures/wisps",
+    "references": [
+      "assets/gritty-sprites.png"
+    ]
+  },
+  {
+    "name": "ghost",
+    "category": "creature",
+    "targetWidth": 28,
+    "targetHeight": 38,
+    "columns": 2,
+    "rows": 2,
+    "poses": [
+      "Float A",
+      "Float B",
+      "Reach",
+      "Fade"
+    ],
+    "prompt": "Use case: stylized-concept. Production pixel-art sprite sheet for Frostline, a snowy downhill ski game. Attached gritty-sprites atlas is STYLE/SCALE guidance only, never an edit target. Match its tiny crisp low-resolution PC-game pixel clusters, dark slate outlines, off-white snow, muted blue-violet shadows and restrained warm accents. Core colours: ink #344b53, snow #edf1df, shade #a6bec5, teal #508d92, gold #e4bd6f. Same above/front 3/4 downhill game view. Cute, characterful and beautifully readable with a strong organic silhouette, never crude boxes or a smooth HD painting. The player is only 22 logical pixels wide; design to survive the stated native width. Each cell holds one complete isolated pose, same identity and character scale, consistent ground/foot baseline; generous transparent gutters, no clipping or cell overlap. Genuine transparent alpha background. No background scene, text, labels, grid lines, watermark, cast shadow, gradients, blur, smooth vector edges or painted checkerboard. The engine adds ground shadows and dynamic glow, so do not paint either around sprites. No extra characters. Follow the exact pose order. For cycles the poses must be consecutive articulated phases, never left/right mirrored substitutes.\nSubject and exact sequence: A classic cute WHITE SHEET GHOST, soft billowing cloth silhouette with a wavy lower hem, two dark hollow eyes and small sheet-like arms. Four poses in2x2: floating with hem curled left; floating hem curled right; reaching with arms spread; fading out with thinner translucent body. Keep face/identity and logical scale consistent. Pixel art with discrete square edges and controlled semi-transparent alpha in the sheet (especially fade), not an airbrushed glow. Body about28 native pixels wide. No floor, shadow, glow aura, background or extra ghosts.\nLayout: exactly 2 columns by 2 rows, 4 cells, read left to right across rows. Target maximum native width 28px and height 38px. Ground/feet or floating-body anchor stays registered in each cell.",
+    "transparent": true,
+    "alphaMode": "preserve",
+    "directory": "design/creatures/ghost",
+    "references": [
+      "assets/gritty-sprites.png"
+    ]
+  },
+  {
+    "name": "griffin",
+    "category": "creature",
+    "targetWidth": 60,
+    "targetHeight": 68,
+    "columns": 3,
+    "rows": 2,
+    "poses": [
+      "Circle up",
+      "Circle down",
+      "Dive prepare",
+      "Dive grab",
+      "Carry up",
+      "Carry down"
+    ],
+    "prompt": "Use case: stylized-concept. Production pixel-art sprite sheet for Frostline, a snowy downhill ski game. Attached gritty-sprites atlas is STYLE/SCALE guidance only, never an edit target. Match its tiny crisp low-resolution PC-game pixel clusters, dark slate outlines, off-white snow, muted blue-violet shadows and restrained warm accents. Core colours: ink #344b53, snow #edf1df, shade #a6bec5, teal #508d92, gold #e4bd6f. Same above/front 3/4 downhill game view. Cute, characterful and beautifully readable with a strong organic silhouette, never crude boxes or a smooth HD painting. The player is only 22 logical pixels wide; design to survive the stated native width. Each cell holds one complete isolated pose, same identity and character scale, consistent ground/foot baseline; generous transparent gutters, no clipping or cell overlap. Genuine transparent alpha background. No background scene, text, labels, grid lines, watermark, cast shadow, gradients, blur, smooth vector edges or painted checkerboard. The engine adds ground shadows and dynamic glow, so do not paint either around sprites. No extra characters. Follow the exact pose order. For cycles the poses must be consecutive articulated phases, never left/right mirrored substitutes.\nSubject and exact sequence: A cute powerful GRIFFIN with golden-brown eagle head and hooked beak, layered feathered wings, a tawny LION quadruped body, foretalons, lion hind paws and a tufted tail. Clearly half eagle/half lion, not an all-bird eagle or a winged horse. Six full consistent poses: high circling wings up; circling wings down; dive aiming talons forward; committed dive with talons open; carrying posture wings up and talons curled into an empty grasp; carrying posture wings down with same empty grasp. DO NOT draw a victim/object between talons: game renders that separately. Same identity and full tail in each cell, no crop. Native about60px wide.\nLayout: exactly 3 columns by 2 rows, 6 cells, read left to right across rows. Target maximum native width 60px and height 68px. Ground/feet or floating-body anchor stays registered in each cell.",
+    "transparent": true,
+    "alphaMode": "binary",
+    "directory": "design/creatures/griffin",
+    "references": [
+      "assets/gritty-sprites.png"
+    ]
+  },
+  {
+    "name": "cyclops",
+    "category": "creature",
+    "targetWidth": 80,
+    "targetHeight": 100,
+    "columns": 3,
+    "rows": 2,
+    "poses": [
+      "Reach rock",
+      "Lift rock",
+      "Wind-up low",
+      "Wind-up high",
+      "Throw",
+      "Follow-through"
+    ],
+    "prompt": "Use case: stylized-concept. Production pixel-art sprite sheet for Frostline, a snowy downhill ski game. Attached gritty-sprites atlas is STYLE/SCALE guidance only, never an edit target. Match its tiny crisp low-resolution PC-game pixel clusters, dark slate outlines, off-white snow, muted blue-violet shadows and restrained warm accents. Core colours: ink #344b53, snow #edf1df, shade #a6bec5, teal #508d92, gold #e4bd6f. Same above/front 3/4 downhill game view. Cute, characterful and beautifully readable with a strong organic silhouette, never crude boxes or a smooth HD painting. The player is only 22 logical pixels wide; design to survive the stated native width. Each cell holds one complete isolated pose, same identity and character scale, consistent ground/foot baseline; generous transparent gutters, no clipping or cell overlap. Genuine transparent alpha background. No background scene, text, labels, grid lines, watermark, cast shadow, gradients, blur, smooth vector edges or painted checkerboard. The engine adds ground shadows and dynamic glow, so do not paint either around sprites. No extra characters. Follow the exact pose order. For cycles the poses must be consecutive articulated phases, never left/right mirrored substitutes.\nSubject and exact sequence: A huge stocky ONE-EYED CYCLOPS in a fur loincloth with a wooden club secured to his belt. Exactly ONE central eye in a broad expressive face, rounded ears, strong large arms, thick legs. Cute gruff mythical giant, no gore, no modern clothing. Six consecutive poses: bending to reach a grey boulder; lifting the boulder to waist; winding up with boulder near shoulder; high wind-up over head; arm extended releasing boulder; empty-handed follow-through. Same boulder size/shape in held poses, frame5 should have hand just released (no flying projectile outside cell), all body/belt/club features identical. Native about80px wide. No background or floor shadow.\nLayout: exactly 3 columns by 2 rows, 6 cells, read left to right across rows. Target maximum native width 80px and height 100px. Ground/feet or floating-body anchor stays registered in each cell.",
+    "transparent": true,
+    "alphaMode": "binary",
+    "directory": "design/creatures/cyclops",
+    "references": [
+      "assets/gritty-sprites.png"
+    ]
+  },
+  {
+    "name": "phoenix",
+    "category": "creature",
+    "targetWidth": 50,
+    "targetHeight": 62,
+    "columns": 4,
+    "rows": 2,
+    "poses": [
+      "Wing high",
+      "Wing open",
+      "Wing level",
+      "Downstroke",
+      "Wing low",
+      "Recovery",
+      "Ash",
+      "Rebirth"
+    ],
+    "prompt": "Use case: stylized-concept. Production pixel-art sprite sheet for Frostline, a snowy downhill ski game. Attached gritty-sprites atlas is STYLE/SCALE guidance only, never an edit target. Match its tiny crisp low-resolution PC-game pixel clusters, dark slate outlines, off-white snow, muted blue-violet shadows and restrained warm accents. Core colours: ink #344b53, snow #edf1df, shade #a6bec5, teal #508d92, gold #e4bd6f. Same above/front 3/4 downhill game view. Cute, characterful and beautifully readable with a strong organic silhouette, never crude boxes or a smooth HD painting. The player is only 22 logical pixels wide; design to survive the stated native width. Each cell holds one complete isolated pose, same identity and character scale, consistent ground/foot baseline; generous transparent gutters, no clipping or cell overlap. Genuine transparent alpha background. No background scene, text, labels, grid lines, watermark, cast shadow, gradients, blur, smooth vector edges or painted checkerboard. The engine adds ground shadows and dynamic glow, so do not paint either around sprites. No extra characters. Follow the exact pose order. For cycles the poses must be consecutive articulated phases, never left/right mirrored substitutes.\nSubject and exact sequence: A beautiful cute PHOENIX fire bird with orange/red/gold feathered wings, expressive beaked face, a long elegant EMBER TAIL and discrete flame pixels. Eight cells in4columns2rows: frames1\u20136 six coherent successive wingbeat phases, same identity/scale/facing; frame7 a small compact ash pile with a few orange embers (intentionally smaller than the bird); frame8 the same bird reforming/upward from a localized ash burst, readable full-body rebirth. Crisp warm pixel clusters, not an airbrushed fire illustration. Flame light/glow and trail are engine effects; no diffuse aura, no scenery, shadows or typography. Native50px width for full bird; full tail stays inside each cell.\nLayout: exactly 4 columns by 2 rows, 8 cells, read left to right across rows. Target maximum native width 50px and height 62px. Ground/feet or floating-body anchor stays registered in each cell.",
+    "transparent": true,
+    "alphaMode": "binary",
+    "directory": "design/creatures/phoenix",
+    "references": [
+      "assets/gritty-sprites.png"
+    ]
+  },
+  {
+    "name": "genie",
+    "category": "creature",
+    "targetWidth": 40,
+    "targetHeight": 62,
+    "columns": 3,
+    "rows": 2,
+    "poses": [
+      "Lamp",
+      "Emerge",
+      "Arms crossed",
+      "Grant left",
+      "Grant right",
+      "Return"
+    ],
+    "prompt": "Use case: stylized-concept. Production pixel-art sprite sheet for Frostline, a snowy downhill ski game. Attached gritty-sprites atlas is STYLE/SCALE guidance only, never an edit target. Match its tiny crisp low-resolution PC-game pixel clusters, dark slate outlines, off-white snow, muted blue-violet shadows and restrained warm accents. Core colours: ink #344b53, snow #edf1df, shade #a6bec5, teal #508d92, gold #e4bd6f. Same above/front 3/4 downhill game view. Cute, characterful and beautifully readable with a strong organic silhouette, never crude boxes or a smooth HD painting. The player is only 22 logical pixels wide; design to survive the stated native width. Each cell holds one complete isolated pose, same identity and character scale, consistent ground/foot baseline; generous transparent gutters, no clipping or cell overlap. Genuine transparent alpha background. No background scene, text, labels, grid lines, watermark, cast shadow, gradients, blur, smooth vector edges or painted checkerboard. The engine adds ground shadows and dynamic glow, so do not paint either around sprites. No extra characters. Follow the exact pose order. For cycles the poses must be consecutive articulated phases, never left/right mirrored substitutes.\nSubject and exact sequence: A whimsical classic BLUE GENIE with a broad grin, crossed muscular arms, small dark topknot/turban, gold cuffs and a curled smoke lower body rising from a GOLD OIL LAMP. Six cells in3columns2rows: 1 lamp alone glinting in snow (isolated lamp, no snow floor, intentionally about18px native), 2 genie partly emerging in curling blue smoke, 3 full genie arms crossed grinning, 4 granting wish with left hand, 5 granting with right hand, 6 curling/fading back into lamp. Same lamp at same baseline in all poses, genie identity stable. Native full genie40px wide. No wish gates/icons/letters, no floor shadow, no diffuse glow, no extra characters.\nLayout: exactly 3 columns by 2 rows, 6 cells, read left to right across rows. Target maximum native width 40px and height 62px. Ground/feet or floating-body anchor stays registered in each cell.",
+    "transparent": true,
+    "alphaMode": "binary",
+    "directory": "design/creatures/genie",
+    "references": [
+      "assets/gritty-sprites.png"
+    ],
+    "frameWidths": [
+      18,
+      null,
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  {
+    "name": "witch-props",
+    "category": "props",
+    "targetWidth": 30,
+    "targetHeight": 40,
+    "frameWidths": [
+      10,
+      10,
+      10,
+      30,
+      30,
+      30
+    ],
+    "columns": 3,
+    "rows": 2,
+    "poses": [
+      "Green potion",
+      "Purple potion",
+      "Orange potion",
+      "Green splash",
+      "Purple splash",
+      "Orange splash"
+    ],
+    "prompt": "Use case: stylized-concept. Production pixel-art sprite sheet for Frostline, a snowy downhill ski game. Attached gritty-sprites atlas is STYLE/SCALE guidance only, never an edit target. Match its tiny crisp low-resolution PC-game pixel clusters, dark slate outlines, off-white snow, muted blue-violet shadows and restrained warm accents. Core colours: ink #344b53, snow #edf1df, shade #a6bec5, teal #508d92, gold #e4bd6f. Same above/front 3/4 downhill game view. Cute, characterful and beautifully readable with a strong organic silhouette, never crude boxes or a smooth HD painting. The player is only 22 logical pixels wide; design to survive the stated native width. Each cell holds one complete isolated pose, same identity and character scale, consistent ground/foot baseline; generous transparent gutters, no clipping or cell overlap. Genuine transparent alpha background. No background scene, text, labels, grid lines, watermark, cast shadow, gradients, blur, smooth vector edges or painted checkerboard. The engine adds ground shadows and dynamic glow, so do not paint either around sprites. No extra characters. Follow the exact pose order. For cycles the poses must be consecutive articulated phases, never left/right mirrored substitutes.\nProp sheet: Exactly six separate tiny props in3columns2rows: top row three corked potion bottles filled green, purple, orange; bottom row three matching ground splashes/puddles seen from above at3/4, with irregular crisp pixel rims. Bottles designed10px wide, puddles30px wide. Transparent, no shadows, no text, no creature or scenery. Broad flat colour areas must distinguish status effects at tiny size.",
+    "transparent": true,
+    "alphaMode": "binary",
+    "directory": "design/creatures/witch-props",
+    "references": [
+      "assets/gritty-sprites.png"
+    ]
+  },
+  {
+    "name": "medusa-props",
+    "category": "props",
+    "targetWidth": 22,
+    "targetHeight": 40,
+    "frameWidths": [
+      22,
+      22,
+      22,
+      18,
+      20,
+      22
+    ],
+    "columns": 3,
+    "rows": 2,
+    "poses": [
+      "Skier statue A",
+      "Skier statue B",
+      "Skier statue C",
+      "Mirror shield",
+      "Stone plinth",
+      "Stone ward"
+    ],
+    "prompt": "Edit the attached transparent pixel-art prop sheet. Preserve the exact six-cell 3-column 2-row layout, canvas dimensions, crisp pixel art, palette, native-scale readability, and transparent background. Leave the three petrified skiers in the top row, the round mirror shield bottom left, and stone ward shield bottom right unchanged. In the BOTTOM MIDDLE cell remove the entire gargoyle creature (head, wings, body, limbs), leaving ONLY its low empty rectangular weathered stone pedestal/plinth. Its flat snow-capped top must be empty, ready for a separately animated creature to stand on it. The empty plinth is one squat low standalone object, no sculpture, face, animal, gargoyle or creature on it. Keep the same plinth stonework and position. No text, new objects, background, grid lines, cast shadow or glow. Actual alpha transparency.",
+    "transparent": true,
+    "alphaMode": "binary",
+    "directory": "design/creatures/medusa-props",
+    "references": [
+      "design/creatures/medusa-props/source-v1.png"
+    ]
+  },
+  {
+    "name": "cyclops-props",
+    "category": "props",
+    "targetWidth": 32,
+    "targetHeight": 40,
+    "frameWidths": [
+      32,
+      32,
+      32,
+      28
+    ],
+    "columns": 2,
+    "rows": 2,
+    "poses": [
+      "Boulder",
+      "Boulder turned",
+      "Boulder settled",
+      "Rock fragments"
+    ],
+    "prompt": "Use case: stylized-concept. Production pixel-art sprite sheet for Frostline, a snowy downhill ski game. Attached gritty-sprites atlas is STYLE/SCALE guidance only, never an edit target. Match its tiny crisp low-resolution PC-game pixel clusters, dark slate outlines, off-white snow, muted blue-violet shadows and restrained warm accents. Core colours: ink #344b53, snow #edf1df, shade #a6bec5, teal #508d92, gold #e4bd6f. Same above/front 3/4 downhill game view. Cute, characterful and beautifully readable with a strong organic silhouette, never crude boxes or a smooth HD painting. The player is only 22 logical pixels wide; design to survive the stated native width. Each cell holds one complete isolated pose, same identity and character scale, consistent ground/foot baseline; generous transparent gutters, no clipping or cell overlap. Genuine transparent alpha background. No background scene, text, labels, grid lines, watermark, cast shadow, gradients, blur, smooth vector edges or painted checkerboard. The engine adds ground shadows and dynamic glow, so do not paint either around sprites. No extra characters. Follow the exact pose order. For cycles the poses must be consecutive articulated phases, never left/right mirrored substitutes.\nProp sheet: Four isolated crisp pixel-art rock props in2x2: a large rounded grey-blue boulder, same boulder turned slightly, same boulder settled with thin snow cap, scattered fresh rock fragments in a compact pile. Native32px boulder,28px fragments. Organic shaded rock clusters and dark readable edges, no glow, no floor, no shadow, no text or scenery.",
+    "transparent": true,
+    "alphaMode": "binary",
+    "directory": "design/creatures/cyclops-props",
+    "references": [
+      "assets/gritty-sprites.png"
+    ]
+  },
+  {
+    "name": "stage-icons",
+    "category": "icons",
+    "targetWidth": 24,
+    "targetHeight": 24,
+    "columns": 6,
+    "rows": 4,
+    "poses": [
+      "town",
+      "quiet",
+      "trees",
+      "lake",
+      "runout",
+      "christmas",
+      "avalanche",
+      "cemetery",
+      "halloween",
+      "rivalRace",
+      "forest",
+      "denseForest",
+      "boulder",
+      "scramble",
+      "piedPiper",
+      "werewolfIntro",
+      "ravagerIntro",
+      "burrowField",
+      "crowd",
+      "beginner",
+      "legendarium",
+      "opening",
+      "night",
+      "day"
+    ],
+    "prompt": "Use case: stylized-concept. Production pixel-art sprite sheet for Frostline, a snowy downhill ski game. Attached gritty-sprites atlas is STYLE/SCALE guidance only, never an edit target. Match its tiny crisp low-resolution PC-game pixel clusters, dark slate outlines, off-white snow, muted blue-violet shadows and restrained warm accents. Core colours: ink #344b53, snow #edf1df, shade #a6bec5, teal #508d92, gold #e4bd6f. Same above/front 3/4 downhill game view. Cute, characterful and beautifully readable with a strong organic silhouette, never crude boxes or a smooth HD painting. The player is only 22 logical pixels wide; design to survive the stated native width. Each cell holds one complete isolated pose, same identity and character scale, consistent ground/foot baseline; generous transparent gutters, no clipping or cell overlap. Genuine transparent alpha background. No background scene, text, labels, grid lines, watermark, cast shadow, gradients, blur, smooth vector edges or painted checkerboard. The engine adds ground shadows and dynamic glow, so do not paint either around sprites. No extra characters. Follow the exact pose order. For cycles the poses must be consecutive articulated phases, never left/right mirrored substitutes.\nIcon sheet: EXACTLY 24 distinct square game route icons in6columns4rows. Each must read at24x24 native pixels, use strong simple silhouettes. No letters or numbers. Read left-to-right across rows: 1: warm snow-roof chalet; 2: winding snow trail with one amber lamp; 3: zigzag corridor between pines; 4: blue oval frozen lake and snow banks; 5: long parallel ski tracks with a little bench; 6: decorated Christmas tree; 7: three rolling snowballs downhill; 8: gravestone beside iron fence; 9: pumpkin beside a tiny haunted chalet; 10: crossed skis with a tiny checkered racing flag; 11: two widely spaced evergreen trees; 12: five densely clustered dark pines; 13: one giant snow boulder; 14: mixed pine, log and rock; 15: three small scary Yetis following ski tracks; 16: human face changing into an upright wolf; 17: distinct narrow burgundy dark Yeti with long limbs; 18: three small toothed burrow holes; 19: three skiers in red/yellow/green; 20: gentle beginner hill with green flag; 21: little open magical bestiary book; 22: red start flag on snowy slope; 23: warm crescent moon and star; 24: golden sunrise. Treat every slot as one isolated complete icon with generous transparent gutters, no scene/background, no shadows.",
+    "transparent": true,
+    "alphaMode": "binary",
+    "directory": "design/checkpoint-map/stage-icons",
+    "references": [
+      "assets/gritty-sprites.png"
+    ],
+    "sourceRowEdges": [
+      0,
+      310,
+      540,
+      778,
+      1024
+    ]
+  },
+  {
+    "name": "map-pickup",
+    "category": "icons",
+    "targetWidth": 28,
+    "targetHeight": 32,
+    "frameWidths": [
+      28,
+      28,
+      28,
+      20
+    ],
+    "columns": 2,
+    "rows": 2,
+    "poses": [
+      "Map",
+      "Map glint",
+      "Lift checkpoint",
+      "Location pin"
+    ],
+    "prompt": "Use case: stylized-concept. Production pixel-art sprite sheet for Frostline, a snowy downhill ski game. Attached gritty-sprites atlas is STYLE/SCALE guidance only, never an edit target. Match its tiny crisp low-resolution PC-game pixel clusters, dark slate outlines, off-white snow, muted blue-violet shadows and restrained warm accents. Core colours: ink #344b53, snow #edf1df, shade #a6bec5, teal #508d92, gold #e4bd6f. Same above/front 3/4 downhill game view. Cute, characterful and beautifully readable with a strong organic silhouette, never crude boxes or a smooth HD painting. The player is only 22 logical pixels wide; design to survive the stated native width. Each cell holds one complete isolated pose, same identity and character scale, consistent ground/foot baseline; generous transparent gutters, no clipping or cell overlap. Genuine transparent alpha background. No background scene, text, labels, grid lines, watermark, cast shadow, gradients, blur, smooth vector edges or painted checkerboard. The engine adds ground shadows and dynamic glow, so do not paint either around sprites. No extra characters. Follow the exact pose order. For cycles the poses must be consecutive articulated phases, never left/right mirrored substitutes.\nExactly four isolated UI/game pickup icons in2columns2rows: folded parchment route map with teal forest/blue path/red route mark (28px native); same map with a small gold glint at its corner; a simple chairlift chair hanging from a snowy timber tower (28px); red map location pin with cream centre (20px). No letters, no grid, no background, no cast shadow. Flat crisp pixel clusters, readable on snow and at night.",
+    "transparent": true,
+    "alphaMode": "binary",
+    "directory": "design/checkpoint-map/map-pickup",
+    "references": [
+      "assets/gritty-sprites.png"
+    ]
+  },
+  {
+    "name": "checkpoint",
+    "category": "scene",
+    "targetWidth": 320,
+    "targetHeight": 200,
+    "columns": 1,
+    "rows": 1,
+    "poses": [
+      "Rest at lift"
+    ],
+    "prompt": "Use case: illustration-story. Asset: cosy funny pixel-art checkpoint interlude for Frostline, 8:5 landscape, designed to be sampled to320x200 real pixels. References: Image1 existing gritty sprite atlas is STYLE/PLAYER-IDENTITY guidance; Image2 cocoa scene is COMPOSITION/PIXEL-ART-MOOD guidance, not an edit target. Create a NEW scene of the game's skier resting at an alpine CHAIRLIFT station. The player wears a RED ski jacket, dark navy wool beanie, blue/dark trousers and amber goggles, skis leaned safely nearby, sitting relaxed on a wooden bench by a cosy small timber lift hut, boots stretched out and hands warming a mug. A clearly visible chairlift chair and cable pass beside the hut; snowy fir trees and mountains establish the slope. Cute and peaceful, warm wooden details, a little unlettered checkpoint flag. No other characters. True coarse low-resolution PC-game pixel art, organic shaded pixel clusters, dark slate outlines, off-white snow, blue-violet shade and warm restrained amber highlights. NOT smooth HD illustration or vector art. Keep all important player/lift elements within central80% so landscape cropping is safe. No text anywhere: the game renders the exact title CHECKPOINT separately, so do not bake lettering. No frame, UI, progress bar, button or watermark. DAY VERSION: crisp pale winter daylight, gentle warm low sun, snow-capped mountains, warm hut windows, no dusk darkness.",
+    "transparent": false,
+    "directory": "design/checkpoint-map/checkpoint",
+    "references": [
+      "assets/gritty-sprites.png",
+      "assets/scenes/cocoa.png"
+    ]
+  },
+  {
+    "name": "checkpoint-night",
+    "category": "scene",
+    "targetWidth": 320,
+    "targetHeight": 200,
+    "columns": 1,
+    "rows": 1,
+    "poses": [
+      "Rest at lift"
+    ],
+    "prompt": "Use case: illustration-story. Asset: cosy funny pixel-art checkpoint interlude for Frostline, 8:5 landscape, designed to be sampled to320x200 real pixels. References: Image1 existing gritty sprite atlas is STYLE/PLAYER-IDENTITY guidance; Image2 cocoa scene is COMPOSITION/PIXEL-ART-MOOD guidance, not an edit target. Create a NEW scene of the game's skier resting at an alpine CHAIRLIFT station. The player wears a RED ski jacket, dark navy wool beanie, blue/dark trousers and amber goggles, skis leaned safely nearby, sitting relaxed on a wooden bench by a cosy small timber lift hut, boots stretched out and hands warming a mug. A clearly visible chairlift chair and cable pass beside the hut; snowy fir trees and mountains establish the slope. Cute and peaceful, warm wooden details, a little unlettered checkpoint flag. No other characters. True coarse low-resolution PC-game pixel art, organic shaded pixel clusters, dark slate outlines, off-white snow, blue-violet shade and warm restrained amber highlights. NOT smooth HD illustration or vector art. Keep all important player/lift elements within central80% so landscape cropping is safe. No text anywhere: the game renders the exact title CHECKPOINT separately, so do not bake lettering. No frame, UI, progress bar, button or watermark. NIGHT VERSION: deep blue-violet snow and starry dark sky, steady warm amber hut windows and a lantern illuminate the skier and lift, cosy magical night with crisp silhouettes, no white floodlight.",
+    "transparent": false,
+    "directory": "design/checkpoint-map/checkpoint-night",
+    "references": [
+      "assets/gritty-sprites.png",
+      "assets/scenes/cocoa.png"
+    ]
+  }
+]

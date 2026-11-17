@@ -11636,6 +11636,11 @@
               "minimum": 0,
               "maximum": 20,
               "description": "Extra reach around the station that still counts as skiing into it."
+            },
+            "mapAfterMetres": {
+              "type": "number",
+              "minimum": 8,
+              "maximum": 80
             }
           }
         }
@@ -11778,6 +11783,17 @@
           "minimum": 150,
           "maximum": 1200,
           "description": "Distance from the trail kept clear of random scenery and predators."
+        }
+      }
+    },
+    "sceneCards": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "minimumSeconds": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 5
         }
       }
     }

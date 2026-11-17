@@ -1,0 +1,151 @@
+{
+  "sourceSize": [
+    1536,
+    1024
+  ],
+  "width": 120,
+  "height": 112,
+  "cellWidth": 40,
+  "cellHeight": 56,
+  "alphaMode": "binary",
+  "frames": [
+    {
+      "name": "Skier statue A",
+      "x": 0,
+      "y": 0,
+      "w": 40,
+      "h": 56,
+      "bodyBounds": [
+        9,
+        27,
+        22,
+        21
+      ],
+      "anchor": [
+        20,
+        48
+      ],
+      "source": [
+        116,
+        132,
+        326,
+        313
+      ]
+    },
+    {
+      "name": "Skier statue B",
+      "x": 40,
+      "y": 0,
+      "w": 40,
+      "h": 56,
+      "bodyBounds": [
+        9,
+        26,
+        22,
+        22
+      ],
+      "anchor": [
+        20,
+        48
+      ],
+      "source": [
+        606,
+        147,
+        287,
+        293
+      ]
+    },
+    {
+      "name": "Skier statue C",
+      "x": 80,
+      "y": 0,
+      "w": 40,
+      "h": 56,
+      "bodyBounds": [
+        9,
+        27,
+        22,
+        21
+      ],
+      "anchor": [
+        20,
+        48
+      ],
+      "source": [
+        1080,
+        109,
+        363,
+        349
+      ]
+    },
+    {
+      "name": "Mirror shield",
+      "x": 0,
+      "y": 56,
+      "w": 40,
+      "h": 56,
+      "bodyBounds": [
+        11,
+        28,
+        18,
+        20
+      ],
+      "anchor": [
+        20,
+        48
+      ],
+      "source": [
+        151,
+        648,
+        217,
+        242
+      ]
+    },
+    {
+      "name": "Stone plinth",
+      "x": 40,
+      "y": 56,
+      "w": 40,
+      "h": 56,
+      "bodyBounds": [
+        10,
+        36,
+        20,
+        12
+      ],
+      "anchor": [
+        20,
+        48
+      ],
+      "source": [
+        649,
+        782,
+        209,
+        129
+      ]
+    },
+    {
+      "name": "Stone ward",
+      "x": 80,
+      "y": 56,
+      "w": 40,
+      "h": 56,
+      "bodyBounds": [
+        9,
+        21,
+        22,
+        27
+      ],
+      "anchor": [
+        20,
+        48
+      ],
+      "source": [
+        1150,
+        620,
+        236,
+        290
+      ]
+    }
+  ]
+}

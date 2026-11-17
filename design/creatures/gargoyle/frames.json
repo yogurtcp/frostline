@@ -1,0 +1,151 @@
+{
+  "sourceSize": [
+    1536,
+    1024
+  ],
+  "width": 168,
+  "height": 128,
+  "cellWidth": 56,
+  "cellHeight": 64,
+  "alphaMode": "binary",
+  "frames": [
+    {
+      "name": "Perched asleep",
+      "x": 0,
+      "y": 0,
+      "w": 56,
+      "h": 64,
+      "bodyBounds": [
+        18,
+        40,
+        20,
+        16
+      ],
+      "anchor": [
+        28,
+        56
+      ],
+      "source": [
+        135,
+        231,
+        252,
+        205
+      ]
+    },
+    {
+      "name": "Perched awake",
+      "x": 56,
+      "y": 0,
+      "w": 56,
+      "h": 64,
+      "bodyBounds": [
+        18,
+        36,
+        20,
+        20
+      ],
+      "anchor": [
+        28,
+        56
+      ],
+      "source": [
+        608,
+        182,
+        253,
+        254
+      ]
+    },
+    {
+      "name": "Flight up",
+      "x": 112,
+      "y": 0,
+      "w": 56,
+      "h": 64,
+      "bodyBounds": [
+        10,
+        31,
+        35,
+        25
+      ],
+      "anchor": [
+        28,
+        56
+      ],
+      "source": [
+        1036,
+        102,
+        436,
+        311
+      ]
+    },
+    {
+      "name": "Flight down",
+      "x": 0,
+      "y": 64,
+      "w": 56,
+      "h": 64,
+      "bodyBounds": [
+        13,
+        36,
+        30,
+        20
+      ],
+      "anchor": [
+        28,
+        56
+      ],
+      "source": [
+        83,
+        616,
+        371,
+        243
+      ]
+    },
+    {
+      "name": "Landed ready",
+      "x": 56,
+      "y": 64,
+      "w": 56,
+      "h": 64,
+      "bodyBounds": [
+        15,
+        39,
+        25,
+        17
+      ],
+      "anchor": [
+        28,
+        56
+      ],
+      "source": [
+        599,
+        670,
+        310,
+        209
+      ]
+    },
+    {
+      "name": "Defeated",
+      "x": 112,
+      "y": 64,
+      "w": 56,
+      "h": 64,
+      "bodyBounds": [
+        16,
+        35,
+        24,
+        21
+      ],
+      "anchor": [
+        28,
+        56
+      ],
+      "source": [
+        1098,
+        619,
+        293,
+        262
+      ]
+    }
+  ]
+}
