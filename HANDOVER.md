@@ -1836,3 +1836,9 @@ Changes:
 - Stakes: the Kelpie hunts you for `kelpieHuntSeconds` (7) at `kelpieSpeedRatio` 0.95 × top speed; contact knocks you down. Its frozen wake (ice, faster than top speed) is the escape. The Giant's gust is `giantGustMetresPerSecond` 6 (was 13.5).
 
 Verification: the showcase bot now gets the Kitsune chase, ram wake/roll, Kelpie and Thunderbird knockdowns, and Troll/Giant interactions. Targeted bots: the Hut shield and Troll sword on both timings; the Gargoyle shield when aiming at its landing spot (steering at its perch rock crashes first). Dragon boards at 0/4/6 m offsets, not at 8 m. Trace: 228 checkpoints, no errors.
+
+## 174. Legendary creatures parked for review; creature brief for Codex (2026-11-17)
+
+User wants the recent legendary creatures out of normal play until each is reviewed one by one. `endless.regions.legendary.enabled` is now false (config and config.js default), so no legend is ever planned in a run (fast-forward of 172 areas: zero). The showcase (`?showcase=legends`, L) still shows all ten for review. Werewolves, the Ravager and all older creatures are untouched.
+
+New `design/CREATURES.md`: a detailed brief, written for Codex art generation and for the review, covering the ten existing legends (folklore, areas, look and target native size, behaviour, danger, choice/reward, hint, review questions) plus eight proposals (Witch, Ghost, Unicorn, Griffin, Medusa, Cyclops, Phoenix, Genie), shared game and art rules, and a review checklist and order. New art goes to `design/creatures/<name>/` and is not wired into the game until approved.
