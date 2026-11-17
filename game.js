@@ -474,7 +474,7 @@ window.FROSTLINE_READY = (async () => {
     const half=mix(streetWidths[1],streetWidths[0],difficulty)*PX_PER_M*(townKind?1:scale)/2;
     const variant=Math.floor(random()*3),cycles=5+Math.round(difficulty),e={id:++a.encounterCount,kind,visit,difficulty,levelDifficulty,ease,stage:P0.stage,variant,scale,startY,endY:startY+length,half:half*(townKind?1:ease.width),paths:[],band:1000,chamberLength:length/cycles,generatedY:startY};
     e.routeGapAfter=reserved?.gapAfter;e.regionOrderIndex=a.regionOrderIndex||0;
-    e.night=reserved?.night??!!(Math.floor(Math.max(0,(a.regionOrderIndex||1)-1)/R.order.length)%2);
+    e.lap=reserved?.lap??Math.floor(Math.max(0,(a.regionOrderIndex||1)-1)/R.order.length);e.night=reserved?.night??!!(e.lap%2);
     a.previousEncounterKind=a.lastEncounterKind;a.encounters.push(e);a.lastEncounterKind=kind;if(kind==='crowd')a.lastCrowdEndY=e.endY;e.routeCrowdEndY=a.lastCrowdEndY??null;
     if(townKind){
       let names=S.village.names.filter(name=>!a.townNames.includes(name));if(!names.length){a.townNames=[];names=S.village.names;}const name=reserved?.townName&&names.includes(reserved.townName)?reserved.townName:a.resumeTownName&&names.includes(a.resumeTownName)?a.resumeTownName:pick(names);delete a.resumeTownName;a.townNames.push(name);
@@ -1415,12 +1415,12 @@ window.FROSTLINE_READY = (async () => {
 
   function die(cause='YETI',attacker=null) {
     if(state.deathTimer)return;
-    const animated=['YETI','WOLF','BEAR','ZOMBIE','BURROWER','WEREWOLF'].includes(cause),scene=animated?deathScene(cause,attacker):null;
+    const animated=['YETI','WOLF','BEAR','ZOMBIE','BURROWER','WEREWOLF'].includes(cause),legend=LEGEND_DEATHS[cause],scene=animated?deathScene(cause,attacker):legend&&images['scene:'+legend.key]?legend:null;
     state.deathYeti=null;state.deathTimer=animated?3:S.physics.deathSeconds;state.deaths++;
     state.p.fall=2;state.p.speed=0;state.p.vx=state.p.vy=0;state.p.draft=0;state.p.draftTarget=null;state.input={left:false,right:false,up:false,down:false,pointer:null,jump:false};
     if(state.arcade)state.arcade.endReason='CAUGHT BY '+cause;
     if(state.endless)recordEndless('CAUGHT BY '+cause);
-    announce(cause==='BURROWER'?'THE SNOW HAD TEETH.':cause==='WEREWOLF'?'A VERY HAIRY VILLAGER.':cause==='BEAR'?'THE BEAR CAUGHT YOU.':cause==='WOLF'?'THE PACK CAUGHT YOU.':cause==='ZOMBIE'?'THE DEAD CAUGHT YOU.':cause==='BOULDER'?'FLATTENED BY THE BOULDER.':'THE YETI GOT YOU.',scene?.detail||`Your ${state.bank} coins are safe.`,C.red,3);
+    announce(legend?legend.line:cause==='BURROWER'?'THE SNOW HAD TEETH.':cause==='WEREWOLF'?'A VERY HAIRY VILLAGER.':cause==='BEAR'?'THE BEAR CAUGHT YOU.':cause==='WOLF'?'THE PACK CAUGHT YOU.':cause==='ZOMBIE'?'THE DEAD CAUGHT YOU.':cause==='BOULDER'?'FLATTENED BY THE BOULDER.':'THE YETI GOT YOU.',scene?.detail||`Your ${state.bank} coins are safe.`,C.red,3);
     beep(110,.3,'triangle');save();
     if(animated){
       const actor=attacker||(cause==='YETI'?state.chasers.find(c=>!c.dead&&['fast','slow'].includes(c.kind)):null)||{kind:cause==='YETI'?'fast':cause.toLowerCase(),type:cause.toLowerCase(),zombieRole:'wanderer',zombieStyle:0,width:34,phase:0};

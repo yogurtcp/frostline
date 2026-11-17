@@ -2,7 +2,7 @@
 const LEGEND_V2=new Set(['dragon','mountain','kitsune']),FOX_DECOYS=objectView(o=>o.foxDecoy),RAM_GATES=objectView(o=>o.type==='gate');
 const legendV2Art=new Map(),ramPreyCache={time:-1,index:null};
 function legendV2Config(kind){return S.endless.regions.legendary[kind==='mountain'?'ram':kind];}
-function legendV2Nearby(o){return LEGEND_V2.has(o.legendKind)||LEGEND_V3.has(o.legendKind)?!o.eaten&&Math.abs(state.p.y-o.y)<2100&&Math.abs(state.p.x-o.x)<1500:legendNearby(o);}
+function legendV2Nearby(o){if(o.legendKind==='giant')return !o.eaten&&state.p.y>o.homeY-1300&&state.p.y<o.homeY+((S.endless.regions.legendary.giantWindMetres??150)+30)*PX_PER_M;return LEGEND_V2.has(o.legendKind)||LEGEND_V3.has(o.legendKind)||o.legendKind==='kelpie'?!o.eaten&&Math.abs(state.p.y-o.y)<2100&&Math.abs(state.p.x-o.x)<1500:legendNearby(o);}
 function setupLegendV2(o,showcase){
   if(!LEGEND_V2.has(o.legendKind))return;o.showcase=showcase;o.travelled=0;o.gait=0;
   if(o.legendKind==='dragon'){
@@ -142,7 +142,10 @@ function updateKitsune(o,dt,previous){
     const desired=Math.atan2(targetX-f.x,targetY-f.y);f.foxHeading=ease(f.foxHeading||0,desired,2.5,dt);
     const base=topSpeed()*f.foxSpeed,gap=f.y-p.y,targetSpeed=gap>300?Math.min(base,Math.max(80,p.vy*(.58+.17*f.foxSpeed/K.speedRatio[1]))):base;f.foxPace=ease(f.foxPace??targetSpeed,targetSpeed,5,dt);
     const speed=f.foxPace,goal={x:f.x+Math.sin(f.foxHeading)*250,y:f.y+Math.cos(f.foxHeading)*250};
-    travel(f,Math.atan2(goal.y-f.y,goal.x-f.x),speed,dt,false,false,true,false,goal,false,false,true);
+    if(f.tumbleUntil>clock){f.foxPace=0;continue;}
+    travel(f,Math.atan2(goal.y-f.y,goal.x-f.x),speed,dt,false,false,false,false,goal,false,false,true);
+    // Foxes are solid little animals: running into a tree or rock sends them tumbling for a moment.
+    if(clock>(f.tumbleImmune||0)&&nearbyFootprints(f.x,f.y,40).some(q=>q.r>0&&!q.legendBuried&&q!==o&&obstacleClearance(q,f.x,f.y)<6)){f.tumbleUntil=clock+.9;f.tumbleImmune=clock+1.8;burst(f.x,f.y,C.ice,8);say('Kyan!',f===o?o:f,.6);}
     const moved=Math.hypot(f.x-f.oldX,f.y-f.oldY);f.gait=(f.gait||0)+moved/70;if(Math.abs(f.x-f.oldX)>dt*20)f.facing=f.x<f.oldX;
   }
   // Equal opacity, size, navigation and animation for all three. No tracks or lasting visual tell.

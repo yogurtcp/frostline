@@ -648,7 +648,10 @@
         "once": true
       },
       "legendary": {
-        "enabled": false,
+        "enabled": true,
+        "fromLap": 2,
+        "giantWindMetres": 150,
+        "giantBreezeMetresPerSecond": 2,
         "chancePerArea": [
           0.12,
           0.3
@@ -657,7 +660,7 @@
         "firstStage": 3,
         "maxActive": 2,
         "giantGustMetresPerSecond": 6,
-        "kelpieHuntSeconds": 7,
+        "kelpieHuntSeconds": 30,
         "kelpieSpeedRatio": 0.95,
         "thunderbirdFollowSeconds": 12,
         "thunderbirdStrikeSeconds": 2.4,

@@ -1,9 +1,10 @@
 /* Native-pixel folklore encounters. One bounded scene per eligible area; no new controls required. */
 const LEGEND_KINDS=['witch','ghost','unicorn','griffin','medusa','cyclops','phoenix','genie','hut','kitsune','giant','kelpie','troll','thunderbird','gargoyle','wisps','dragon','mountain'];
 const LEGEND_NAMES={hut:"Baba Yaga's Walking Hut",kitsune:'Kitsune',giant:'Frost Giant',kelpie:'Kelpie',troll:'Bridge Troll',thunderbird:'Thunderbird',gargoyle:'Gargoyle',wisps:"Will-o'-the-wisps",dragon:'Snow Dragon',mountain:'Mountain Spirit',witch:'Witch',ghost:'Ghosts',unicorn:'Unicorn',griffin:'Griffin',medusa:'Medusa',cyclops:'Cyclops',phoenix:'Phoenix',genie:'Genie'};
-const LEGEND_HINTS={hut:'PASS BETWEEN ITS LEGS WHILE THE HOUSE IS UP',kitsune:'WATCH THE ORIGINAL THROUGH THE SPLIT - CATCH A FOX SPIRIT',giant:'HIDE BEHIND ROCKS - HIS CHARM LIES IN THE WIND',kelpie:'OUTRUN ITS HUNT TO WIN ITS BRIDLE - THE FROZEN WAKE IS FAST',troll:'BAIT ITS CHARGE, THEN TAKE THE OTHER SIDE OF THE BRIDGE',thunderbird:'DODGE EVERY STRIKE FOR A FEATHER - LIGHTNING HITS YETIS TOO',gargoyle:'PASS SLOWLY TO LEAVE IT ASLEEP - WATCH ITS LANDING SHADOW',wisps:'FOLLOW THE LIGHT OFF THE ROAD TO FIND ITS GIFT',dragon:'JUMP ONTO ITS BACK - STEER OFF BEFORE IT DIVES',mountain:'PASS CLOSE TO EITHER FLANK TO STEER ITS ROLL',witch:'POTIONS SPLASH EVERYONE - TOUCH HER LOW SWOOP FOR THE BROOM',ghost:'THEY GO THROUGH TREES - LEAD THEM INTO THE LAMPLIGHT',unicorn:'RIDE CLOSE BESIDE IT (DON\'T TOUCH) TO SHARE ITS MAGIC',griffin:'ITS SHADOW MARKS ITS PREY - LET IT TAKE YOUR PURSUERS',medusa:'HIDE BEHIND STATUES - SLIP CLOSE PAST HER FOR THE MIRROR',cyclops:'HE THROWS WHERE YOU ARE - KEEP TURNING. RAM HIS SHINS',phoenix:'DODGE THE SLUSH - RIDE THE HOT AIR RIGHT BEHIND IT',genie:'TOUCH THE LAMP, THEN PICK A WISH GATE - GREED HAS A PRICE'};
-const LEGEND_VIEW=objectView(o=>o.type==='legendary'),LEGEND_ELIGIBLE={forest:['hut','kitsune','giant','thunderbird','dragon','mountain','troll'],trees:['kitsune','giant','gargoyle'],denseForest:['hut','kitsune'],lake:['kelpie','dragon'],town:['gargoyle','wisps'],halloween:['hut','gargoyle','wisps'],cemetery:['gargoyle','wisps'],avalanche:['giant','dragon'],boulder:['thunderbird','mountain','cyclops']};
-for(const [area,kinds] of Object.entries({forest:['griffin','phoenix','cyclops'],trees:['unicorn','griffin','medusa','phoenix'],cemetery:['ghost','witch','medusa'],halloween:['witch','ghost'],town:['genie'],christmas:['genie'],lake:['phoenix']}))LEGEND_ELIGIBLE[area]=[...(LEGEND_ELIGIBLE[area]||[]),...kinds];
+const LEGEND_HINTS={hut:"IT CHASES YOU OVER EVERYTHING - DON'T SLOW DOWN",kitsune:'WATCH THE ORIGINAL THROUGH THE SPLIT - CATCH A FOX SPIRIT',giant:'A LONG WINDY STRETCH - ROCKS SHELTER YOU',kelpie:'IT HUNTS YOU FOR 30 SECONDS - OUTRUN IT FOR ITS BRIDLE',troll:'GET PAST HIM ON THE BRIDGE - OR PAY WITH YOUR GEAR',thunderbird:'LIGHTNING ROWS - FIND THE GAP',gargoyle:'IT HUNTS FROM THE AIR - DODGE WHEN IT SCREECHES',wisps:'CATCH THE LIGHTS - THEY KEEP THE NIGHT BACK',dragon:'JUMP ONTO ITS BACK - STEER OFF BEFORE IT DIVES',mountain:'PASS CLOSE TO EITHER FLANK TO STEER ITS ROLL',witch:'POTIONS SPLASH EVERYONE - SHE GETS BORED EVENTUALLY',ghost:'THEY KILL - STAY IN THE LIGHT',unicorn:'MONSTERS FEAR IT - STAY CLOSE, NEVER BUMP',griffin:'ITS SHADOW MARKS ITS PREY - IT CARRIES YOU UPHILL',medusa:'HIDE BEHIND STATUES - SLIP CLOSE PAST HER FOR THE MIRROR',cyclops:'BOULDERS RAIN FOR A WHILE - KEEP TURNING',phoenix:'FIREBALLS! THE MELTED SNOW IS FAST ICE',genie:'HE TURNS THINGS INTO OTHER THINGS - WATCH HIS SPELL'};
+const LEGEND_VIEW=objectView(o=>o.type==='legendary');
+// Which legends can appear in which area. Night-only kinds (LEGEND_NIGHT) are filtered by the area's lap.
+const LEGEND_ELIGIBLE={forest:['hut','kitsune','giant','thunderbird','dragon','mountain','troll','griffin','phoenix','cyclops','unicorn'],trees:['kitsune','giant','gargoyle','unicorn','griffin','medusa','phoenix','witch','genie','cyclops'],denseForest:['hut','kitsune','ghost','witch'],lake:['kelpie','dragon','phoenix'],town:['gargoyle','wisps','genie','witch'],christmas:['genie','griffin','unicorn'],halloween:['hut','gargoyle','wisps','witch','ghost'],cemetery:['gargoyle','wisps','ghost','witch','medusa'],scramble:['cyclops','thunderbird','mountain','troll'],avalanche:['giant','dragon','griffin'],boulder:['thunderbird','griffin'],burrowField:['phoenix','witch','kitsune'],piedPiper:['unicorn','griffin','medusa'],rivalRace:['witch','thunderbird','genie']};
 let legendPreviewIndex=0,legendPanel=null,legendPanelValue=-1;
 function planLegendShowcase(e,section){
   e.legendIndex=(legendPreviewIndex+e.visit-1)%LEGEND_KINDS.length;e.legendKind=LEGEND_KINDS[e.legendIndex];e.title=LEGEND_NAMES[e.legendKind];if(LEGEND_V2.has(e.legendKind))e.endY=e.startY+legendV2Config(e.legendKind).showcaseMetres*PX_PER_M;else if(LEGEND_V3.has(e.legendKind))e.endY=e.startY+V3.bayMetres[e.legendKind]*PX_PER_M;
@@ -20,7 +21,14 @@ function legendGift(kind,o,line){
 function planLegendaryEncounter(e,section){
   const C=S.endless.regions.legendary,choices=LEGEND_ELIGIBLE[e.kind];
   if(e.kind==='legendarium')e.legendKind=LEGEND_KINDS[e.legendIndex];
-  else{if(!C.enabled||!choices||(e.startY-state.endless.startY)/PX_PER_M<C.firstMetres||(e.stage??99)<(C.firstStage??1)||random()>=legendChance(e))return;const options=choices.filter(k=>k!=='wisps'||e.night);if(!options.length)return;e.legendKind=pick(options);}
+  else{
+    // One legend per active stage, starting with the second day (after the first night). Least-seen kinds first.
+    const a=state.endless;if(!C.enabled||!choices||!a||a.debug||(e.lap??0)<(C.fromLap??2))return;
+    a.legendStages??={};a.legendUse??={};if(a.legendStages[e.stage])return;
+    const options=choices.filter(k=>!LEGEND_NIGHT.has(k)||e.night);if(!options.length)return;
+    const least=Math.min(...options.map(k=>a.legendUse[k]||0));e.legendKind=pick(options.filter(k=>(a.legendUse[k]||0)===least));
+    a.legendUse[e.legendKind]=(a.legendUse[e.legendKind]||0)+1;a.legendStages[e.stage]=e.legendKind;
+  }
   const y=e.startY+(e.endY-e.startY)*(e.kind==='legendarium'?.3:.55),path=e.paths[0];e.legendPlan={kind:e.legendKind,x:encounterPathX(path,y),y,spawned:false};if(e.town)populateLegendaryEncounter(e,section,e.startY,e.endY);
 }
 function populateLegendShowcase(e,section,from,to){
@@ -43,15 +51,11 @@ function populateLegendaryEncounter(e,section,from,to){
     if(!lake)lake=prop('ice',0,30,{rx:330,ry:400,width:660,r:0});o.lake=lake;o.x-=120;o.width=90;
   }else if(kind==='giant'){
     o.x+=340;o.width=200;for(const [x,y] of [[-105,-30],[110,170],[-160,370]])prop('rock',x,y,{width:85,r:34});
-  }else if(kind==='troll'){
-    o.x-=75;o.width=90;o.bridge={x:point.x,y:point.y,half:120,length:300};
-    for(const side of [-1,1])for(const dy of [-180,180])prop('rock',side*180,dy,{width:90,r:35});
   }else if(kind==='gargoyle'){
-    o.x+=105;o.width=70;if(scene||!e.town)prop('lodge',-260,100,{width:180,r:75,buildingKind:'inn'});prop('rock',125,10,{width:50,r:18});
+    if(!e.town)prop('lodge',-260,100,{width:180,r:75,buildingKind:'inn'});
   }else if(kind==='mountain'){o.width=210;}else if(kind==='hut')o.width=165;
   else if(kind==='dragon'){o.width=165;}
   else if(kind==='thunderbird')o.width=120;
-  else if(kind==='wisps'){o.width=44;const y=point.y+540,path=e.town?.backRoute?.points;o.gift={x:path?encounterPathX(path,y):point.x+260,y};for(const dx of [0,45,-45,90,-90])if(!nearbyFootprints(o.gift.x+dx,y,80).some(q=>obstacleClearance(q,o.gift.x+dx,y)<25)){o.gift.x+=dx;break;}}
   else if(kind==='kitsune')o.width=65;
   setupLegendV2(o,scene);setupLegendV3(o,scene);
 }
@@ -83,7 +87,7 @@ function updateLegendaryCreatures(dt,previous){
   if(!state.started)return;updateFoxSpirit(dt);updateLegendPlayerEffects(dt);
   for(const o of actors){
     o.temporary=o.temporary.filter(q=>{if(q.until<=clock)q.eaten=true;return !q.eaten;});
-    if(o.defeated&&!o.bounty){o.bounty=true;if(o.legendKind==='troll')legendGift('sword',o,"THE TROLL'S AXE IS YOURS!");else if(o.legendKind==='gargoyle')legendGift('shield',o,'A STONE WARD!');else if(o.legendKind==='cyclops')legendGift('sword',o,"THE CYCLOPS' CLUB!");}
+    if(o.defeated&&!o.bounty){o.bounty=true;if(o.legendKind==='cyclops')legendGift('sword',o,"THE CYCLOPS' CLUB!");}
     if(o.dead||o.eaten||o.defeated){restoreLegendSnow(o);continue;}
     // A kelpie you outran past its lake still gives up - and pays out if it never touched you.
     if(o.legendKind==='kelpie'&&o.huntUntil&&!o.gaveUp&&clock>=o.huntUntil){o.gaveUp=true;if(!o.huntHit)legendGift('shield',o,"THE KELPIE'S BRIDLE!");}
@@ -93,55 +97,28 @@ function updateLegendaryCreatures(dt,previous){
     if(!o.activeAt)continue;
     const elapsed=clock-o.activeAt; o.motionFromX=o.x;o.motionFromY=o.y;o.motionFromStamp=clock;
     if(updateLegendV2(o,dt,previous)){o.motionVx=(o.x-o.motionFromX)/dt;o.motionVy=(o.y-o.motionFromY)/dt;continue;}
-    if(o.legendKind==='hut'){
-      // It strides across the slope toward your line, crouching between strides (then it is a solid wall).
-      const cycle=elapsed%16,moving=cycle<5||cycle>=8&&cycle<13;o.legendState=moving?'standing':'crouching';const shift=cycle<5?-Math.cos(cycle/5*Math.PI):cycle<8?1:cycle<13?Math.cos((cycle-8)/5*Math.PI):-1;
-      o.originX??=o.homeX;if(p.y<o.homeY)o.homeX=ease(o.homeX,o.originX+clamp(p.x-o.originX,-260,260),.6,dt);o.x=o.homeX+shift*145;o.y=o.homeY;
-      if(o.legendState==='crouching')legendBump(o,previous,o.x,o.y,75);else for(const side of [-1,1])legendBump(o,previous,o.x+side*66,o.y,16);
-      // Threading the chicken legs while the house is up earns Baba Yaga's charm.
-      if(!o.rewarded&&o.legendState==='standing'&&!p.fall&&previous.y<o.y&&p.y>=o.y&&Math.abs(p.x-o.x)<48){o.rewarded=true;legendGift('shield',o,"BABA YAGA'S CHARM!");}
-    }else if(o.legendKind==='giant'){
-      const cycle=elapsed%7;o.legendState=cycle<2?'inhale':cycle<5?'blowing':'rest';
-      const gust=S.endless.regions.legendary.giantGustMetresPerSecond*PX_PER_M*dt;
-      if(o.legendState==='blowing'&&Math.abs(p.y-o.homeY)<650&&!legendSheltered(o,p.x,p.y)&&p.air<=0){p.x-=gust;}
-      // The gust is everyone's problem: pursuers and bystanders get shoved too.
-      if(o.legendState==='blowing'){for(const c of labMonsters())if(Math.abs(c.y-o.homeY)<650&&!legendSheltered(o,c.x,c.y))c.x-=gust*1.3;for(const n of labHumans(o.homeX,o.homeY,650))if((n.type==='skier'||n.type==='boarder')&&!legendSheltered(o,n.x,n.y))n.x-=gust;}
+    if(o.legendKind==='giant'){
+      // A long windy stretch around and after him: gusts every few seconds, a breeze in between. Rocks shelter.
+      const cycle=elapsed%7,L=S.endless.regions.legendary;o.legendState=cycle<2?'inhale':cycle<5?'blowing':'rest';
+      const inZone=y=>y>o.homeY-500&&y<o.homeY+(L.giantWindMetres??150)*PX_PER_M;o.inZone=inZone(p.y);
+      const push=(o.legendState==='blowing'?L.giantGustMetresPerSecond:L.giantBreezeMetresPerSecond??2)*PX_PER_M*dt;
+      if(o.inZone&&!legendSheltered(o,p.x,p.y)&&playerFree())p.x-=push;
+      for(const c of labMonsters())if(inZone(c.y)&&!legendSheltered(o,c.x,c.y))c.x-=push*1.3;
+      for(const n of viewItems(CAT_AUDIENCE_VIEW))if((n.type==='skier'||n.type==='boarder')&&!n.dead&&inZone(n.y)&&Math.abs(n.x-p.x)<700&&!legendSheltered(o,n.x,n.y))n.x-=push;
+      for(const a of viewItems(PREY_VIEW))if(a.animal&&!a.dead&&inZone(a.y)&&Math.abs(a.x-p.x)<700)a.x-=push*1.2;
       // His frost charm sits upwind, where the gust pushes hardest.
       if(o.gift&&!o.giftTaken&&playerFree()&&p.air<=0&&Math.hypot(p.x-o.gift.x,p.y-o.gift.y)<32){o.giftTaken=true;legendGift('shield',o,'THE FROST CHARM!');}
     }else if(o.legendKind==='kelpie'){
       if(p.y>o.homeY-430){
         // The water horse hunts whoever crosses its lake. Its frozen wake is fast: ride it to get away.
         const hunting=o.huntUntil===undefined?(o.huntUntil=clock+S.endless.regions.legendary.kelpieHuntSeconds):o.huntUntil;
-        const goal=clock<hunting&&!p.fall?{x:p.x+p.vx*.35,y:p.y+p.vy*.35}:{x:o.homeX+Math.sin(elapsed*1.1)*170,y:o.homeY+650};
+        const backing=o.backoffUntil>clock,goal=clock<hunting&&!p.fall&&!p.awaitingInput&&!backing?{x:p.x+p.vx*.35,y:p.y+p.vy*.35}:backing?{x:o.x+(o.x>p.x?300:-300),y:p.y+300}:{x:o.x+Math.sin(elapsed*1.1)*170,y:o.y+650};
         if(clock<hunting&&(p.fall>0||p.awaitingInput))o.huntHit=true;
         if(clock>=hunting&&!o.gaveUp){o.gaveUp=true;say('...',o,1);if(!o.huntHit)legendGift('shield',o,"THE KELPIE'S BRIDLE!");}
+        if(o.gaveUp&&clock-o.huntUntil>4)o.eaten=true;
         travel(o,Math.atan2(goal.y-o.y,goal.x-o.x),topSpeed()*S.endless.regions.legendary.kelpieSpeedRatio,dt,false,false,true,false,goal,true);
-        if(clock<hunting&&legendBump(o,previous,o.x,o.y,26))o.huntHit=true;
+        if(clock<hunting&&!backing&&legendBump(o,previous,o.x,o.y,26)){o.huntHit=true;o.backoffUntil=clock+3;}
         if(clock>=(o.wakeAt||0)){legendaryIce(o,o.x,o.y+70,36,78,9);o.wakeAt=clock+.45;}}
-    }else if(o.legendKind==='troll'){
-      if(!o.legendState||o.legendState==='waiting'){if(Math.abs(p.y-o.homeY)<480){o.legendState='aiming';o.until=clock+1;}}
-      if(o.legendState==='aiming'){o.aimX=clamp(p.x,o.homeX-100,o.homeX+100);if(clock>=o.until){o.legendState='charging';o.chargeTarget={x:o.aimX,y:o.homeY-250};o.until=clock+1.2;}}
-      if(o.legendState==='charging'){const g=o.chargeTarget;travel(o,Math.atan2(g.y-o.y,g.x-o.x),topSpeed()*1.12,dt,false,false,true,true,g);legendBump(o,previous,o.x,o.y,30,true);if(clock>=o.until||Math.hypot(g.x-o.x,g.y-o.y)<20){o.legendState='recover';o.until=clock+2.8;}}
-      if(o.legendState==='recover'&&clock>=o.until){o.legendState='waiting';o.homeY=o.bridge.y;o.chargeTarget=null;}
-      legendBump(o,previous,o.x,o.y,28,true);
-      if(Math.abs(p.y-o.bridge.y)<o.bridge.length/2&&Math.abs(p.x-o.bridge.x)>o.bridge.half)legendBump(o,previous,p.x,p.y,5);
-    }else if(o.legendKind==='thunderbird'){
-      // It flies along above you for a while, calling down a strike where you are heading every couple of seconds.
-      const T=S.endless.regions.legendary,following=p.y>o.homeY-850&&elapsed<T.thunderbirdFollowSeconds;
-      if(following){o.x=ease(o.x,p.x+Math.sin(elapsed*.8)*160,1.5,dt);o.y=ease(o.y,p.y-260,2,dt);}else{o.y+=topSpeed()*.5*dt;if(!o.feather&&elapsed>=T.thunderbirdFollowSeconds){o.feather=true;if(!o.struckPlayer)legendGift('sword',o,'A THUNDER FEATHER!');}}
-      if(following&&clock>=o.nextAt){o.marks.push({x:p.x+p.vx*1.4,y:p.y+Math.max(180,p.vy*1.4),at:clock+1.4});o.nextAt=clock+T.thunderbirdStrikeSeconds;}
-      for(const m of o.marks)if(!m.struck&&clock>=m.at){m.struck=true;m.fade=clock+.65;if(legendBump(o,previous,m.x,m.y,48))o.struckPlayer=true;burst(m.x,m.y,'#b3d9eb',14);
-        for(const c of labMonsters())if(Math.hypot(c.x-m.x,c.y-m.y)<60){if(state.chasers.includes(c))stunMonster(c,3);else knockDownByTerrain(c);say('ZZAP!',c,.8);}for(const n of labHumans(m.x,m.y,56))knockHuman(n,o);
-        let n=0;for(const t of nearbyFootprints(m.x,m.y,150))if(TREE_TYPES.has(t.type)&&Math.hypot(t.x-m.x,t.y-m.y)<130&&n++<2){t.eaten=true;const f=entity('fallingTree',t.x,t.y,{arcadeRun:o.arcadeRun,encounter:o.encounter,fallTowardX:m.x});f.legendLightning=true;Object.assign(f,{fallState:'falling',fallAt:clock,fallSide:m.x<f.x?-1:1,r:S.terrainFeatures.fallingTree.fallenRadiusMetres*PX_PER_M});}}
-      o.marks=o.marks.filter(m=>!m.struck||m.fade>clock).slice(-4);
-    }else if(o.legendKind==='gargoyle'){
-      if(o.legendState==='waiting'&&p.speed>220&&Math.hypot(p.x-o.x,p.y-o.y)<460){o.legendState='swooping';o.flyAt=clock;o.from={x:o.x,y:o.y};const y=p.y+Math.max(250,p.vy*1.5);let x=p.x+p.vx*1.5;for(const offset of [0,80,-80,160,-160])if(!nearbyFootprints(x+offset,y,70).some(q=>obstacleClearance(q,x+offset,y)<35)){x+=offset;break;}o.landing={x,y};if(nearbyFootprints(x,y,70).some(q=>obstacleClearance(q,x,y)<35)){o.legendState='waiting';delete o.landing;continue;}}
-      if(o.legendState==='swooping'){const t=clamp((clock-o.flyAt)/1.5,0,1);o.x=mix(o.from.x,o.landing.x,t);o.y=mix(o.from.y,o.landing.y,t);o.altitude=Math.sin(t*Math.PI)*100;if(t>=1){o.legendState='landed';o.until=clock+2.5;}}
-      if(o.legendState==='landed'){legendBump(o,previous,o.x,o.y,28,true);if(clock>=o.until){o.legendState='returning';o.until=clock+1.5;}}
-      if(o.legendState==='returning'){o.x=ease(o.x,o.homeX,4,dt);o.y=ease(o.y,o.homeY,4,dt);o.altitude=45;if(clock>=o.until){o.x=o.homeX;o.y=o.homeY;o.altitude=0;o.legendState='waiting';}}
-    }else if(o.legendKind==='wisps'){
-      if(p.y>o.homeY-450){o.x=ease(o.x,o.gift.x,1.1,dt);o.y=ease(o.y,o.gift.y,1.1,dt);if(!o.rewarded&&p.air<=0&&Math.hypot(p.x-o.gift.x,p.y-o.gift.y)<35){o.rewarded=true;const a=state.endless||state.arcade;if(a)a.shields=Math.min(a.shields+1,S.arcade.gear.maxShields);p.boost=Math.max(p.boost,1);burst(o.x,o.y,C.gold,15);say('A GIFT FOR A BRAVE SOUL',o,2);}}
-
     }
     o.motionVx=(o.x-o.motionFromX)/dt;o.motionVy=(o.y-o.motionFromY)/dt;
   }

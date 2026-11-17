@@ -231,6 +231,39 @@ Start with the cheapest decisions:
 
 ---
 
+# Current design (round 2, 2026-11-17)
+
+**In the game:** `endless.regions.legendary.enabled: true`, `fromLap: 2`. Legends appear **one per active stage, from the second day on** (after the first night). Quiet and runout areas don't count as active. Each legend appears in an area it suits (`LEGEND_ELIGIBLE`), least-seen kinds come first, and ghosts and wisps appear only at night. In the **Creature Lab** (`?showcase=creatures`) every creature can still be tried directly.
+
+Code: `legendary-v3.js` (witch, ghost, unicorn, griffin, medusa, cyclops, phoenix, genie, hut, troll, thunderbird, gargoyle, wisps; art; reactions; lab), `legendary-creatures.js` (giant, kelpie, planning), `legendary-v2.js` (dragon, stone ram, kitsune). Prototype tuning is in the `V3` object.
+
+When a legend catches you, the same rule applies everywhere:
+1. A **sword** beats it.
+2. Otherwise a **shield** lets you escape.
+3. Otherwise you **die** (ghost, gargoyle, troll, hut).
+
+The death cards for these are wired up and will show once the art exists (see `design/CREATURE-ART-REQUESTS.md`).
+
+| Creature | What it does now |
+| --- | --- |
+| Witch | Annoying visitor. Potions splash you, monsters and skiers: green slows, purple dizzies, orange gives a speed burst. **No reward.** She leaves after 20 s. |
+| Ghosts | Come **one at a time** (4 over about 14 s), drift through trees and **kill on touch**. They won't enter light: lamps, houses, torch-carrying people, skiers, festive lights, the phoenix, wisps. Lamps line their area. |
+| Unicorn | Monsters within ~17 m are **scared away** from it. Ski close to it for protection, but **bumping it knocks you down**. It stays 22 s. |
+| Griffin | Its shadow locks onto the nearest prey and leads its aim. It **carries its catch uphill**, back toward the Yetis, then drops it (a fall unless you have a shield). 3 dives. |
+| Medusa | Her glare sweeps left, centre and right, with a shimmer as warning. Statues block it. **5 s of stone** for you, skiers, people and monsters alike. Slip close past her for the mirror (shield). |
+| Cyclops | A **bombardment zone** for 16 s. Boulders land around and ahead of you and stay as rocks, and they **keep coming after he is out of sight**. Ram him at full speed while he's visible for a sword. |
+| Phoenix | **An enemy.** It shoots fireballs at you, bystanders and other monsters (it fries them). Every blast **melts the snow into fast ice**. It's reborn from ash every 9 s. |
+| Genie | Swoops to something near your line and casts for **1 s** (a ring shows the target). Then: tree → Yeti or bear, rock → bear, Yeti or animal → rock, person → Yeti. He never turns a tree into a rock. 24 s. |
+| Baba Yaga's hut | Crouches beside the course and **rises and chases you** for 22 s, striding straight over trees and trampling anyone in its way. It's slightly slower than you: don't slow down. |
+| Kitsune | As before, but the foxes **trip over obstacles**, which opens a chance to catch the real one. |
+| Frost Giant | A **150 m windy stretch** around and after him: gusts every few seconds and a breeze in between. It pushes you, monsters, skiers and animals. Rocks shelter. The charm (shield) sits upwind. |
+| Kelpie | Hunts you for **30 s**, backing off for 3 s after each hit. Its wake is fast ice. Survive the hunt untouched for the bridle (shield). |
+| Bridge Troll | A **gorge with one bridge**. He walks up the bridge mirroring your line, so fake him out. If he catches you, he takes a sword (he's beaten), a shield (the toll; he steps aside), or your life. |
+| Thunderbird | Calls down **rows of lightning across the slope with one gap**, every 2.4 s for 14 s. Strikes topple trees and fry monsters. Get through untouched for a feather (sword). |
+| Gargoyle | Perches by an inn. When you pass it **flies after you**. Close in, it screeches (warning), then lunges at where you were heading, so swerve. If it gets you, it eats you. |
+| Will-o'-the-wisps | Three shy lights drift on screen ahead of you, darting sideways when you're near. Each one you catch **orbits you for 25 s**, lighting you up (ghosts stay away) and keeping monsters back. Night only. |
+| Snow Dragon, Stone Ram | Unchanged (approved). |
+
 # Lab implementation (2026-11-17)
 
 Code: `legendary-v3.js` (art for all sheets, the eight new creatures, bystander reactions, lab dressing and panel), plus small hooks in `legendary-creatures.js`, `legendary-v2.js` and `game.js`. Art comes straight from `design/creatures/*/native.png` + `frames.json` (embedded by `build.py`). Prototype tuning lives in the `V3` object at the top of `legendary-v3.js`; move it to `game-config.json` once a creature is approved.

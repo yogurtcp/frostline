@@ -9100,7 +9100,7 @@
             "pathPlacementChance",
             "pathOffsetMetres"
           ],
-          "description": "Tall pine that warns, rotates rigidly sideways toward the skier’s side, and remains a jumpable fallen obstacle.",
+          "description": "Tall pine that warns, rotates rigidly sideways toward the skier\u2019s side, and remains a jumpable fallen obstacle.",
           "properties": {
             "pathPlacementChance": {
               "type": "number",
@@ -10648,7 +10648,7 @@
                       },
                       "minItems": 2,
                       "maxItems": 2,
-                      "description": "[easy, hard] ± spread of individual speeds"
+                      "description": "[easy, hard] \u00b1 spread of individual speeds"
                     },
                     "skiersPer100Metres": {
                       "type": "array",
@@ -10845,7 +10845,7 @@
                       },
                       "minItems": 2,
                       "maxItems": 2,
-                      "description": "[easy, hard] ± spread of individual speeds"
+                      "description": "[easy, hard] \u00b1 spread of individual speeds"
                     },
                     "lurkersPer100Metres": {
                       "type": "array",
@@ -11403,6 +11403,21 @@
                       "description": "The Kitsune notices a skier passing within this distance to the side"
                     }
                   }
+                },
+                "fromLap": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "description": "Legends appear from this lap (0 = first day, 1 = first night, 2 = second day): one per active stage"
+                },
+                "giantWindMetres": {
+                  "type": "number",
+                  "minimum": 0,
+                  "description": "Length of the frost giant's windy stretch after him"
+                },
+                "giantBreezeMetresPerSecond": {
+                  "type": "number",
+                  "minimum": 0,
+                  "description": "Side push between gusts inside the giant's wind"
                 }
               }
             }
