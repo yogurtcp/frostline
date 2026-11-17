@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#f1f6ff">
-<meta name="frostline-build" content="cd94e868adcebf2b">
+<meta name="frostline-build" content="e2c25260a5e55565">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="manifest" href="manifest.webmanifest">
@@ -22,7 +22,7 @@ body{padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bot
 <dialog id="install-help" aria-labelledby="install-title"><h2 id="install-title">Install Frostline</h2><p id="install-instructions"></p><p>Once saved, Frostline plays offline. Installed apps check for updates at startup; ordinary browser visits open directly. Installing this same site keeps your scores and settings. A downloaded file or a different browser uses a separate save.</p><p><a href="https://yogurtcp.github.io/frostline/">Open published game</a></p><button id="close-install-help">Done</button></dialog>
 <script>/* Browser visits load normally; installed apps check once before startup. */
 (() => {
-  const BUILD = 'cd94e868adcebf2b';
+  const BUILD = 'e2c25260a5e55565';
   window.FROSTLINE_DEV = new URL(location.href).searchParams.has('dev');
   let prompt = null, playing = false, offlinePreparation = false;
   const standalone = () => window.matchMedia('(display-mode: standalone)').matches || navigator.standalone;
@@ -2790,7 +2790,16 @@ function cycleFrame(list,fps,phase=0){return list[Math.floor(clock*fps+phase)%li
 // Art props (statues, boulders) and bystanders Medusa has turned to stone for a while.
 function drawLegendArtProp(o,s){
   if(o.legendStoneUntil>clock&&(o.type.startsWith('person')||o.type==='skier'||o.type==='boarder')){shadow(s.x,s.y,10*ZOOM,3,.1);artDraw('medusa-props',o.type==='skier'||o.type==='boarder'?0:1,s.x,s.y);return true;}
-  if(!o.legendArt)return false;if(o.eaten||o.dead)return true;shadow(s.x,s.y,o.width*.28*ZOOM,4,.1);artDraw(o.legendArt.name,o.legendArt.frame,s.x,s.y);return true;
+  if(!o.legendArt)return false;if(o.eaten||o.dead)return true;
+  const land=o.landedAt!==undefined?(clock-o.landedAt)/.45:1;
+  if(land<1){drawBoulderImpact(s.x,s.y,land);const hop=Math.sin(land*Math.PI)*10*(1-land);shadow(s.x,s.y,o.width*.28*ZOOM,4,.1);artDraw(o.legendArt.name,land<.3?1:o.legendArt.frame,s.x,s.y,{altitude:hop,rotate:(1-land)*.5});return true;}
+  shadow(s.x,s.y,o.width*.28*ZOOM,4,.1);artDraw(o.legendArt.name,o.legendArt.frame,s.x,s.y);return true;
+}
+
+function drawBoulderImpact(x,y,t){
+  // Dust ring spreading out and fragments thrown sideways, fading over the first half second.
+  ctx.save();ctx.globalAlpha=(1-t)*.55;ctx.strokeStyle='#d9e3e6';ctx.lineWidth=3;ctx.beginPath();ctx.ellipse(x,y,(14+t*34)*ZOOM,(6+t*14)*ZOOM,0,0,TAU);ctx.stroke();ctx.restore();
+  for(const side of [-1,1])artDraw('cyclops-props',3,x+side*t*26*ZOOM,y,{altitude:Math.sin(t*Math.PI)*14,alpha:1-t,flip:side<0,scale:.7});
 }
 
 // ---------- shared helpers ----------
@@ -3039,14 +3048,14 @@ function updateCyclops(o,dt,previous){
   if(!o.hidden)legendBump(o,previous,o.x,o.y-6,32,true);if(o.defeated)return;
   if(t<K.seconds&&clock>=(o.throwAt||o.activeAt+.6)){o.throwAt=clock+K.throwEvery*range(.8,1.2);o.windAt=clock;
     const tx=p.x+p.vx*K.flightSeconds*.85+range(-K.spread,K.spread),ty=p.y+p.vy*K.flightSeconds*.85+range(-50,70);
-    const from=o.hidden?{x:o.homeX+260,y:p.y-560}:{x:o.x-20,y:o.y-30};o.flights.push({x0:from.x,y0:from.y,x:tx,y:ty,at:clock});if(!o.hidden&&random()<.4)say(pick(['HRAAH!','RAAA!','UNGH!']),o,.7);}
+    const from=o.hidden?{x:o.homeX+260,y:p.y-560}:{x:o.x-20,y:o.y-30};o.flights.push({x0:from.x,y0:from.y,a0:o.hidden?260:70,x:tx,y:ty,at:clock});if(!o.hidden&&random()<.4)say(pick(['HRAAH!','RAAA!','UNGH!']),o,.7);}
   if(t>=K.seconds&&!o.flights.length&&o.hidden)o.eaten=true;
   for(const f of o.flights)if(!f.done&&clock-f.at>=K.flightSeconds){
     f.done=true;burst(f.x,f.y,'#a7a29b',14);state.screenShake=Math.max(state.screenShake||0,.12);beep(110,.1,'triangle');
     if(playerFree()&&!p.air&&!(p.shield>0)&&Math.hypot(p.x-f.x,p.y-f.y)<K.hitRadius+S.physics.playerRadius)crash(o);
     for(const c of labMonsters())if(Math.hypot(c.x-f.x,c.y-f.y)<K.hitRadius+12){if(state.chasers.includes(c))stunMonster(c,3);else knockDownByTerrain(c);}
     for(const n of labHumans(f.x,f.y,K.hitRadius+8))knockHuman(n,o);
-    if(o.rocks.length<K.maxRocks&&!nearbyFootprints(f.x,f.y,40).some(q=>q.r>0&&obstacleClearance(q,f.x,f.y)<10))o.rocks.push(entity('rock',f.x,f.y,{...labOwn(o),r:20,width:64,legendArt:{name:'cyclops-props',frame:2}}));
+    if(o.rocks.length<K.maxRocks&&!nearbyFootprints(f.x,f.y,40).some(q=>q.r>0&&obstacleClearance(q,f.x,f.y)<10))o.rocks.push(entity('rock',f.x,f.y,{...labOwn(o),r:20,width:64,legendArt:{name:'cyclops-props',frame:2},landedAt:clock}));else o.dust=[...(o.dust||[]),{x:f.x,y:f.y,at:clock}];
   }
   o.flights=o.flights.filter(f=>!f.done);
 }
@@ -3231,6 +3240,7 @@ function drawLegendV3Ground(o){
     const M=V3.medusa,g=o.gaze,c=screen(o.x,o.y-10),a=g.sector*M.sectorDegrees*Math.PI/180,h=M.coneHalfDegrees*Math.PI/180,L=M.length*ZOOM;
     ctx.save();ctx.globalAlpha=g.glaring?.32:.1+.06*Math.sin(clock*18);ctx.fillStyle=g.glaring?'#a8d68e':'#cfe8b8';ctx.beginPath();ctx.moveTo(c.x,c.y);ctx.lineTo(c.x+Math.sin(a-h)*L,c.y-Math.cos(a-h)*L*.75);ctx.lineTo(c.x+Math.sin(a+h)*L,c.y-Math.cos(a+h)*L*.75);ctx.closePath();ctx.fill();ctx.restore();
   }
+  if(k==='cyclops'){o.dust=(o.dust||[]).filter(d=>clock-d.at<.45);for(const d of o.dust){const p=screen(d.x,d.y);drawBoulderImpact(p.x,p.y,(clock-d.at)/.45);}}
   if(k==='cyclops')for(const f of o.flights){const p=screen(f.x,f.y),s=clamp((clock-f.at)/V3.cyclops.flightSeconds,0,1);shadow(p.x,p.y,(8+s*20)*ZOOM,(3+s*8)*ZOOM,.08+s*.16);if(s>.4)text('!',p.x,p.y-12,11,C.red);}
   if(k==='phoenix')for(const f of o.fireballs){const p=screen(f.x,f.y),s=clamp((clock-f.at)/V3.phoenix.flightSeconds,0,1);shadow(p.x,p.y,(6+s*14)*ZOOM,(3+s*6)*ZOOM,.08+s*.14);if(s>.35)text('!',p.x,p.y-12,11,C.red);}
   if(k==='griffin'&&o.lockPoint&&['lock','dive'].includes(o.legendState)){const p=screen(o.lockPoint.x,o.lockPoint.y),s=clamp((clock-(o.lockAt||clock))/V3.griffin.lockSeconds,0,1);shadow(p.x,p.y,(26-s*12)*ZOOM,(10-s*4)*ZOOM,.12+s*.15);text('!',p.x,p.y-14,12,C.red);}
@@ -3244,6 +3254,7 @@ function drawLegendSky(){
     if(o.eaten||!legendV2Nearby(o))continue;const k=o.legendKind;
     if(k==='ghost'){for(const g of o.ghosts||[]){let a=g.alpha??1;if(g.gone){a=clamp(1-(clock-(g.goneAt||0))/.6,0,1)*.9;}if(a<=0)continue;const p=screen(g.x,g.y),near=Math.hypot(state.p.x-g.x,state.p.y-g.y)<90;shadow(p.x,p.y,10*ZOOM,3,.06*a);artDraw('ghost',a<.6||clock-(g.recoil||-9)<.3?3:near?2:cycleFrame([0,1],3,g.phase),p.x,p.y,{altitude:10+Math.sin(clock*2+g.phase)*3,alpha:a*.9,flip:(g.vx||0)<0});}continue;}
     if(k==='wisps'){for(const w of o.wisps||[])if(!w.taken){const p=screen(w.x,w.y);artDraw('wisps',cycleFrame([0,1,0,3],4,w.phase),p.x,p.y,{altitude:14+Math.sin(clock*2+w.phase)*4,scale:.7});}continue;}
+    if(k==='cyclops'){for(const f of o.flights){const t=clamp((clock-f.at)/V3.cyclops.flightSeconds,0,1),p=screen(mix(f.x0,f.x,t),mix(f.y0,f.y,t)),alt=mix(f.a0??50,0,t)+Math.sin(t*Math.PI)*170;artDraw('cyclops-props',Math.floor(t*8)%2,p.x,p.y,{altitude:alt,rotate:t*7,scale:.85+.15*t});}continue;}
     if(!LEGEND_SKY.has(k))continue;
     const s=screen(o.x,o.y),alpha=o.defeated?clamp(1-(clock-o.defeatedAt)/1.2,0,1):1,flip=(o.motionVx||0)<-6;if(alpha<=0)continue;
     if(k==='gargoyle'&&['perched','done'].includes(o.legendState)){artDraw('medusa-props',4,s.x,s.y+4);artDraw('gargoyle',Math.hypot(state.p.x-o.x,state.p.y-o.y)<500?1:0,s.x,s.y);continue;}
