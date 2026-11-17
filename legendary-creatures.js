@@ -133,8 +133,8 @@ function drawLegendaryGround(){
     drawLegendV2Marks(o);drawLegendV3Ground(o);
     for(const q of o.tracks){const p=screen(q.x,q.y);box(p.x-4,p.y,2,3,'#819f9d');box(p.x+3,p.y+3,2,3,'#819f9d');}
     if(o.legendKind==='giant'&&o.legendState==='blowing')for(let i=0;i<18;i++){const x=o.homeX+360-((clock*400+i*67)%800),y=o.homeY-350+(i*83)%900,p=screen(x,y);line(p.x,p.y,p.x+12,p.y-2,'#a2c9cd',1);}
-    if(o.bridge){const b=o.bridge,a=screen(b.x-700,b.y-b.length/2),z=screen(b.x+700,b.y+b.length/2);box(a.x,a.y,z.x-a.x,z.y-a.y,'#688e9e');box(a.x,a.y,z.x-a.x,5,'#c2d9d7');for(let y=b.y-b.length/2;y<b.y+b.length/2;y+=30){const p=screen(b.x-b.half,y);box(p.x,p.y,b.half*2*ZOOM,10,'#ad8864');line(p.x,p.y,p.x+b.half*2*ZOOM,p.y,'#725e51');}for(const side of [-1,1]){const p=screen(b.x+side*b.half,b.y-b.length/2),q=screen(b.x+side*b.half,b.y+b.length/2);line(p.x,p.y,q.x,q.y,'#6b6760',2);}}
-    for(const m of o.marks){const p=screen(m.x,m.y),r=48*ZOOM;ctx.strokeStyle=m.struck?'#e7e8c4':'#b49a5d';ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(p.x,p.y,r,r*.55,0,0,TAU);ctx.stroke();if(m.struck){line(p.x-8,p.y-90,p.x+3,p.y-40,'#e8e9bc',3);line(p.x+3,p.y-40,p.x,p.y,'#e8e9bc',3);}else{box(p.x-2,p.y-5,4,10,'#a18854');box(p.x-5,p.y-1,10,2,'#a18854');}}
+
+    if(o.legendKind!=='thunderbird')for(const m of o.marks){const p=screen(m.x,m.y),r=48*ZOOM;ctx.strokeStyle=m.struck?'#e7e8c4':'#b49a5d';ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(p.x,p.y,r,r*.55,0,0,TAU);ctx.stroke();if(m.struck){line(p.x-8,p.y-90,p.x+3,p.y-40,'#e8e9bc',3);line(p.x+3,p.y-40,p.x,p.y,'#e8e9bc',3);}else{box(p.x-2,p.y-5,4,10,'#a18854');box(p.x-5,p.y-1,10,2,'#a18854');}}
     if(o.landing&&o.legendState==='swooping'){const p=screen(o.landing.x,o.landing.y);shadow(p.x,p.y,18,8);text('!',p.x,p.y-12,12,C.gold);}
     if(o.breath&&!o.breath.frozen){const b=o.breath,a=screen(b.ax,b.ay),z=screen(b.bx,b.by);line(a.x,a.y,z.x,z.y,'#8eb9c4',5);for(let i=0;i<8;i++){const t=i/7;box(mix(a.x,z.x,t),mix(a.y,z.y,t),2,3,'#e9f2db');}}
     if(o.waveAt&&clock-o.waveAt<3.5){const y=o.homeY-240+(clock-o.waveAt)*250,p=screen(o.homeX-400,y);for(let i=0;i<12;i++)box(p.x+i*29,p.y+Math.sin(i+clock*4)*4,30,13,'#d2e3df');}

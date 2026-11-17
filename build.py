@@ -10,12 +10,13 @@ assets = {name: 'data:image/png;base64,' + base64.b64encode((root / 'assets' / f
 for name, file in [('hillSmall', 'hill-small.png'), ('hillLarge', 'hill-large.png'), ('fallingTree', 'falling-tree.png'), ('wideLog', 'wide-log-v2.png'), ('rollingSnowball', 'rolling-snowball.png'), ('bears', 'bear-sprites.png'), ('people', 'people-animations.png'), ('cozyBuildings', 'cozy-buildings.png'), ('yetis', 'yeti-sprites.png'), ('stiltwalker', 'stiltwalker.png'), ('werewolf', 'werewolf.png'), ('legendDragon','legend-dragon.png'), ('legendMountain','legend-mountain.png'), ('legendKitsune','legend-kitsune.png'), ('stageIcons','stage-icons.png'), ('mapPickup','map-pickup.png')]:
     assets[name] = 'data:image/png;base64,' + base64.b64encode((root / 'assets' / file).read_bytes()).decode()
 # Creature lab sheets: native exports straight from design/creatures (see design/creatures/README.md).
-CREATURE_SHEETS = ['witch', 'ghost', 'unicorn', 'griffin', 'medusa', 'cyclops', 'phoenix', 'genie', 'hut', 'giant', 'kelpie', 'troll', 'thunderbird', 'gargoyle', 'wisps', 'witch-props', 'medusa-props', 'cyclops-props']
+CREATURE_SHEETS = ['witch', 'ghost', 'unicorn', 'griffin', 'medusa', 'cyclops', 'phoenix', 'genie', 'hut', 'giant', 'kelpie', 'troll', 'thunderbird', 'gargoyle', 'wisps', 'witch-props', 'medusa-props', 'cyclops-props',
+                  'hut-run', 'troll-bridge', 'bridge', 'gargoyle-hunt', 'wisp', 'phoenix-fire', 'genie-magic', 'petrified', 'lightning', 'unicorn-kick', 'kitsune-tumble', 'griffin-carry-skier', 'giant-wind']
 creature_art = {}
 for name in CREATURE_SHEETS:
     folder = root / 'design/creatures' / name
     assets['creature:' + name] = 'data:image/png;base64,' + base64.b64encode((folder / 'native.png').read_bytes()).decode()
-    creature_art[name] = [{k: f[k] for k in ('x', 'y', 'w', 'h', 'anchor')} for f in json.loads((folder / 'frames.json').read_text())['frames']]
+    creature_art[name] = [{k: f[k] for k in ('x', 'y', 'w', 'h', 'anchor', 'tileRect') if k in f} for f in json.loads((folder / 'frames.json').read_text())['frames']]
 assets['gritty'] = 'data:image/png;base64,' + base64.b64encode((root / 'assets/gritty-sprites.png').read_bytes()).decode()
 scenes = json.loads((root / 'assets/scenes/manifest.json').read_text())
 for scene in scenes['images']:

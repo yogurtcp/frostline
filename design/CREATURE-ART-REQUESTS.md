@@ -1,5 +1,7 @@
 # Creature art requests (round 2)
 
+**Status (2026-11-17): all delivered by Codex and wired into the game.** See the HANDOVER entry "Round-two creature art integrated".
+
 These are for Codex. Same rules as [design/creatures/README.md](creatures/README.md):
 - Use `assets/gritty-sprites.png` as the style and scale reference.
 - Make native-size, nearest-neighbour sheets with transparent gutters.

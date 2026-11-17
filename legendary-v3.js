@@ -55,7 +55,10 @@ function artDraw(name,frame,x,y,{alpha=1,altitude=0,flip=false,rotate=0,scale=1}
 function cycleFrame(list,fps,phase=0){return list[Math.floor(clock*fps+phase)%list.length];}
 // Art props (statues, boulders) and bystanders Medusa has turned to stone for a while.
 function drawLegendArtProp(o,s){
-  if(o.legendStoneUntil>clock&&(o.type.startsWith('person')||o.type==='skier'||o.type==='boarder')){shadow(s.x,s.y,10*ZOOM,3,.1);artDraw('medusa-props',o.type==='skier'||o.type==='boarder'?0:1,s.x,s.y);return true;}
+  if(o.legendStoneUntil>clock){
+    const skier=o.type==='skier'||o.type==='boarder',frame=o.type.startsWith('person')?3:o.type==='wolf'?2:o.type==='bear'?1:['lurker','yeti','werewolf','zombie'].includes(o.type)?0:-1;
+    if(skier||frame>=0){shadow(s.x,s.y,10*ZOOM,3,.1);if(skier)artDraw('medusa-props',0,s.x,s.y);else artDraw('petrified',frame,s.x,s.y,{flip:(o.motionVx||o.vx||0)<0});return true;}
+  }
   if(!o.legendArt)return false;if(o.eaten||o.dead)return true;
   const land=o.landedAt!==undefined?(clock-o.landedAt)/.45:1;
   if(land<1){drawBoulderImpact(s.x,s.y,land);const hop=Math.sin(land*Math.PI)*10*(1-land);shadow(s.x,s.y,o.width*.28*ZOOM,4,.1);artDraw(o.legendArt.name,land<.3?1:o.legendArt.frame,s.x,s.y,{altitude:hop,rotate:(1-land)*.5});return true;}
@@ -66,6 +69,23 @@ function drawBoulderImpact(x,y,t){
   // Dust ring spreading out and fragments thrown sideways, fading over the first half second.
   ctx.save();ctx.globalAlpha=(1-t)*.55;ctx.strokeStyle='#d9e3e6';ctx.lineWidth=3;ctx.beginPath();ctx.ellipse(x,y,(14+t*34)*ZOOM,(6+t*14)*ZOOM,0,0,TAU);ctx.stroke();ctx.restore();
   for(const side of [-1,1])artDraw('cyclops-props',3,x+side*t*26*ZOOM,y,{altitude:Math.sin(t*Math.PI)*14,alpha:1-t,flip:side<0,scale:.7});
+}
+
+function drawPhoenixMelt(o){
+  const s=screen(o.x,o.y);if(s.y<-200||s.y>H+200)return true;const k=o.rx/40;
+  artDraw('phoenix-fire',8+(o.phoenixMelt||0),s.x,s.y+o.ry*ZOOM*.9,{alpha:clamp((o.until-clock)/1.5,0,1),scale:k});return true;
+}
+// The troll's gorge: dark drop between snow lips, a plank bridge tiled down the middle, rock walls at either end.
+function drawTrollGorge(b){
+  const A=CREATURE_ART.bridge,img=images['creature:bridge'];if(!A||!img)return;
+  const k=ZOOM/.5,top=b.y-b.length/2,bottom=b.y+b.length/2,a=screen(b.x-700,top),z=screen(b.x+700,bottom);
+  if(z.y<-60||a.y>H+60)return;
+  box(a.x,a.y,z.x-a.x,z.y-a.y,'#202b3b');
+  const tile=(f,x,y,rot)=>{const [tx,ty,tw,th]=A[f].tileRect;ctx.save();ctx.translate(Math.round(x),Math.round(y));if(rot)ctx.rotate(rot);ctx.drawImage(img,tx,ty,tw,th,Math.round(-tw*k/2),Math.round(-th*k/2),Math.round(tw*k),Math.round(th*k));ctx.restore();};
+  const lip=A[1].tileRect[3]*k;for(let x=a.x+lip/2;x<z.x+lip/2;x+=lip-1){tile(1,x,a.y,Math.PI/2);tile(2,x,z.y,Math.PI/2);}
+  const edge=A[1].tileRect[3]*k;for(let y=a.y+edge/2;y<z.y+edge/2;y+=edge-1){tile(1,a.x,y,0);tile(2,z.x,y,0);}
+  const deck=A[0].tileRect,dw=b.half*2*ZOOM,dh=deck[3]*(dw/deck[2]),c=screen(b.x,top);
+  for(let y=c.y;y<z.y;y+=dh-1){const h=Math.min(dh,z.y-y);ctx.drawImage(img,deck[0],deck[1],deck[2],deck[3]*h/dh,Math.round(c.x-dw/2),Math.round(y),Math.round(dw),Math.round(h));}
 }
 
 // ---------- shared helpers ----------
@@ -346,7 +366,7 @@ function updatePhoenix(o,dt){
     if(playerFree()&&!p.air&&!(p.shield>0)&&Math.hypot(p.x-f.x,p.y-f.y)<P.blastRadius+S.physics.playerRadius){crash(o);say('HOT HOT HOT!',p,1.2);}
     for(const c of labMonsters())if(Math.hypot(c.x-f.x,c.y-f.y)<P.blastRadius+14){fryMonster(c);say('FRIED!',c,1);}
     for(const n of labHumans(f.x,f.y,P.blastRadius+8))knockHuman(n,o);
-    legendaryIce(o,f.x,f.y,42,64,P.iceSeconds);
+    legendaryIce(o,f.x,f.y,42,64,P.iceSeconds).phoenixMelt=Math.floor(random()*2);o.blasts=[...(o.blasts||[]),{x:f.x,y:f.y,at:clock}];
   }
   o.fireballs=o.fireballs.filter(f=>!f.done);
 }
@@ -360,7 +380,7 @@ function genieTarget(o){
   return options.length?pick(options):null;
 }
 function genieTransform(o,q){
-  const p=state.p,own=labOwn(o);burst(q.x,q.y,'#8fb0e0',18);burst(q.x,q.y,C.gold,10);beep(820,.1,'triangle');
+  const p=state.p,own=labOwn(o);burst(q.x,q.y,C.gold,8);beep(820,.1,'triangle');o.poofs=[...(o.poofs||[]),{x:q.x,y:q.y,at:clock}];
   if(state.chasers.includes(q)||q.type==='lurker'||q.type==='wolf'||q.type==='bear'||q.type==='zombie'){
     if(state.chasers.includes(q))state.chasers.splice(state.chasers.indexOf(q),1);else{q.eaten=true;}
     const r=entity('rock',q.x,q.y,{...own,r:20,width:64,legendArt:{name:'cyclops-props',frame:2},genieCursed:true});say('...rock?',r,1);
@@ -420,7 +440,7 @@ function updateThunderbird(o,dt,previous){
       const y=p.y+Math.max(260,p.vy*(T.warnSeconds+.2)),gapX=p.x+range(-200,200);
       for(let x=p.x-400;x<=p.x+400;x+=T.spacing)if(Math.abs(x-gapX)>T.gap/2+20)o.marks.push({x:x+range(-12,12),y:y+range(-25,25),at:clock+T.warnSeconds});}}
   else{o.y+=topSpeed()*.5*dt;o.altitude+=30*dt;if(!o.feather){o.feather=true;if(!o.struckPlayer)labGear('sword',o,'A THUNDER FEATHER!');}if(t>T.seconds+3&&!o.marks.some(m=>!m.struck))o.eaten=true;}
-  for(const m of o.marks)if(!m.struck&&clock>=m.at){m.struck=true;m.fade=clock+.65;if(legendBump(o,previous,m.x,m.y,T.ringRadius))o.struckPlayer=true;burst(m.x,m.y,'#b3d9eb',10);
+  for(const m of o.marks)if(!m.struck&&clock>=m.at){m.struck=true;m.fade=clock+.65;o.scorches=[...(o.scorches||[]),{x:m.x,y:m.y,at:clock}].slice(-30);if(legendBump(o,previous,m.x,m.y,T.ringRadius))o.struckPlayer=true;burst(m.x,m.y,'#b3d9eb',10);
     for(const c of labMonsters())if(Math.hypot(c.x-m.x,c.y-m.y)<T.ringRadius+12){fryMonster(c);say('ZZAP!',c,.8);}for(const n of labHumans(m.x,m.y,T.ringRadius+8))knockHuman(n,o);
     for(const q of nearbyFootprints(m.x,m.y,90))if(TREE_TYPES.has(q.type)&&!q.eaten&&Math.hypot(q.x-m.x,q.y-m.y)<70){q.eaten=true;const f=entity('fallingTree',q.x,q.y,{arcadeRun:o.arcadeRun,encounter:o.encounter,fallTowardX:m.x});Object.assign(f,{legendLightning:true,fallState:'falling',fallAt:clock,fallSide:m.x<f.x?-1:1,r:S.terrainFeatures.fallingTree.fallenRadiusMetres*PX_PER_M});break;}}
   o.marks=o.marks.filter(m=>!m.struck||m.fade>clock);
@@ -481,6 +501,8 @@ function legendFrame(o){
 function drawLegendV3Creature(o,s){
   const k=o.legendKind;if(LEGEND_SKY.has(k)||k==='ghost'||k==='wisps')return true;
   const alpha=o.defeated?clamp(1-(clock-o.defeatedAt)/1.5,0,1):1,flip=(o.motionVx||0)<-6;
+  if(k==='hut'&&o.legendState==='chasing'){shadow(s.x,s.y,o.width*.22*ZOOM,5,.1);artDraw('hut-run',cycleFrame([0,1,2,3,4,5],9),s.x,s.y,{flip:(o.motionVx||0)<-30});return true;}
+  if(k==='troll'&&!o.defeated&&o.legendState!=='waiting'){const vx=o.motionVx||0,frame=o.legendState==='paid'?6:vx<-40?4:vx>40?5:cycleFrame([0,1,2,3],6);shadow(s.x,s.y,o.width*.22*ZOOM,5,.1);artDraw('troll-bridge',frame,s.x,s.y);if(Math.abs(state.p.y-o.y)<200&&o.legendState!=='paid')text('!',s.x,s.y-58*ZOOM,15,C.gold);return true;}
   if(['hut','giant','kelpie','troll'].includes(k)){
     shadow(s.x,s.y,o.width*.22*ZOOM,5,.1);artDraw(k,legendFrame(o),s.x,s.y,{alpha,flip:k==='kelpie'||k==='troll'?flip:false});
     if(k==='troll'&&['aiming','charging'].includes(o.legendState)&&Math.abs(state.p.y-o.y)<200)text('!',s.x,s.y-58*ZOOM,15,C.gold);
@@ -488,7 +510,7 @@ function drawLegendV3Creature(o,s){
   }
   if(k==='unicorn'){
     ctx.save();ctx.globalAlpha=.10+.04*Math.sin(clock*4);ctx.fillStyle='#f6e6a6';ctx.beginPath();ctx.ellipse(s.x,s.y,V3.unicorn.scareRadius*ZOOM,V3.unicorn.scareRadius*.55*ZOOM,0,0,TAU);ctx.fill();ctx.restore();
-    shadow(s.x,s.y,20*ZOOM,5,.1);artDraw('unicorn',cycleFrame([0,1,2,3,4,5],11),s.x,s.y,{flip});
+    shadow(s.x,s.y,20*ZOOM,5,.1);const kick=o.boltUntil-clock;if(kick>.6)artDraw('unicorn-kick',kick>.9?0:1,s.x,s.y,{flip});else artDraw('unicorn',cycleFrame([0,1,2,3,4,5],11),s.x,s.y,{flip});
     if(random()<.3)burst(o.x+range(-20,20),o.y-range(10,40),pick(['#dc666a','#eda859','#e7d366','#75ac79','#66b9c6','#9885bb']),1);return true;}
   if(k==='medusa'){const g=o.gaze,frame=!g?0:g.glaring?(g.sector<0?3:g.sector>0?4:0):(g.sector<0?1:g.sector>0?2:5);shadow(s.x,s.y,22*ZOOM,5,.1);artDraw('medusa',frame,s.x,s.y);return true;}
   if(k==='cyclops'){if(o.hidden&&!o.defeated)return true;const ph=clock-(o.windAt??-9),frame=o.defeated?5:ph<.15?3:ph<.35?4:ph<.6?5:ph<.75?0:ph<.85?1:2;shadow(s.x,s.y,40*ZOOM,8,.12);artDraw('cyclops',frame,s.x,s.y,{alpha,rotate:o.defeated?Math.min(1.4,(clock-o.defeatedAt)*2):0});return true;}
@@ -510,16 +532,18 @@ function drawLegendV3Ground(o){
   if(k==='cyclops')for(const f of o.flights){const p=screen(f.x,f.y),s=clamp((clock-f.at)/V3.cyclops.flightSeconds,0,1);shadow(p.x,p.y,(8+s*20)*ZOOM,(3+s*8)*ZOOM,.08+s*.16);if(s>.4)text('!',p.x,p.y-12,11,C.red);}
   if(k==='phoenix')for(const f of o.fireballs){const p=screen(f.x,f.y),s=clamp((clock-f.at)/V3.phoenix.flightSeconds,0,1);shadow(p.x,p.y,(6+s*14)*ZOOM,(3+s*6)*ZOOM,.08+s*.14);if(s>.35)text('!',p.x,p.y-12,11,C.red);}
   if(k==='griffin'&&o.lockPoint&&['lock','dive'].includes(o.legendState)){const p=screen(o.lockPoint.x,o.lockPoint.y),s=clamp((clock-(o.lockAt||clock))/V3.griffin.lockSeconds,0,1);shadow(p.x,p.y,(26-s*12)*ZOOM,(10-s*4)*ZOOM,.12+s*.15);text('!',p.x,p.y-14,12,C.red);}
-  if(k==='genie'&&o.legendState==='cast'&&o.target){const p=screen(o.target.x,o.target.y),s=clamp(clock-o.stateAt,0,1);ctx.save();ctx.strokeStyle='#9cc0f0';ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(p.x,p.y,(40-s*18)*ZOOM,(22-s*10)*ZOOM,0,0,TAU);ctx.stroke();ctx.restore();for(let i=0;i<4;i++){const a=clock*6+i*TAU/4;box(p.x+Math.cos(a)*30*ZOOM*(1-s*.5),p.y-20+Math.sin(a)*10,3,3,i%2?C.gold:'#cfe0ff');}}
+  if(k==='genie'&&o.legendState==='cast'&&o.target){const p=screen(o.target.x,o.target.y),s=clamp(clock-o.stateAt,0,1);artDraw('genie-magic',cycleFrame([4,5,6,7],10),p.x,p.y+8*ZOOM,{scale:1.3-s*.3});}
+  if(k==='thunderbird'){o.scorches=(o.scorches||[]).filter(q=>clock-q.at<4);for(const q of o.scorches){const p=screen(q.x,q.y);artDraw('lightning',4,p.x,p.y+8*ZOOM,{alpha:clamp(1-(clock-q.at-3)/1,0,1)});}
+    for(const m of o.marks)if(!m.struck){const p=screen(m.x,m.y),warn=clamp(1-(m.at-clock)/V3.thunderbird.warnSeconds,0,1);artDraw('lightning',3,p.x,p.y+10*ZOOM,{alpha:.45+.55*warn,scale:V3.thunderbird.ringRadius/24*(1.15-.15*warn)});}}
   if(k==='gargoyle'&&o.legendState==='warn'&&o.lungeTarget){const p=screen(o.lungeTarget.x,o.lungeTarget.y);shadow(p.x,p.y,16*ZOOM,6*ZOOM,.2);text('!',p.x,p.y-14,12,C.red);}
-  if(k==='giant'&&o.inZone&&o.legendState==='blowing')for(let i=0;i<22;i++){const p=screen(state.p.x+((i*97-clock*520)%900+900)%900-450,state.p.y-350+(i*83)%900);line(p.x,p.y,p.x-14,p.y+1,'#a2c9cd',1);}
+  if(k==='giant'&&o.inZone&&o.legendState==='blowing')for(let i=0;i<26;i++){const p=screen(state.p.x+((i*97-clock*620)%900+900)%900-450,state.p.y-350+(i*83)%900);artDraw('giant-wind',(i+Math.floor(clock*6))%4,p.x,p.y,{flip:true});}
 }
 // Sky layer, drawn after everything on the ground: fliers, ghosts, wisps, player status overlays.
 function drawLegendSky(){
   for(const o of legendActors()){
     if(o.eaten||!legendV2Nearby(o))continue;const k=o.legendKind;
     if(k==='ghost'){for(const g of o.ghosts||[]){let a=g.alpha??1;if(g.gone){a=clamp(1-(clock-(g.goneAt||0))/.6,0,1)*.9;}if(a<=0)continue;const p=screen(g.x,g.y),near=Math.hypot(state.p.x-g.x,state.p.y-g.y)<90;shadow(p.x,p.y,10*ZOOM,3,.06*a);artDraw('ghost',a<.6||clock-(g.recoil||-9)<.3?3:near?2:cycleFrame([0,1],3,g.phase),p.x,p.y,{altitude:10+Math.sin(clock*2+g.phase)*3,alpha:a*.9,flip:(g.vx||0)<0});}continue;}
-    if(k==='wisps'){for(const w of o.wisps||[])if(!w.taken){const p=screen(w.x,w.y);artDraw('wisps',cycleFrame([0,1,0,3],4,w.phase),p.x,p.y,{altitude:14+Math.sin(clock*2+w.phase)*4,scale:.7});}continue;}
+    if(k==='wisps'){for(const w of o.wisps||[])if(!w.taken){const p=screen(w.x,w.y);artDraw('wisp',cycleFrame([0,1,2,3],6,w.phase),p.x,p.y,{altitude:14+Math.sin(clock*2+w.phase)*4,scale:1.3});}continue;}
     if(k==='cyclops'){for(const f of o.flights){const t=clamp((clock-f.at)/V3.cyclops.flightSeconds,0,1),p=screen(mix(f.x0,f.x,t),mix(f.y0,f.y,t)),alt=mix(f.a0??50,0,t)+Math.sin(t*Math.PI)*170;artDraw('cyclops-props',Math.floor(t*8)%2,p.x,p.y,{altitude:alt,rotate:t*7,scale:.85+.15*t});}continue;}
     if(!LEGEND_SKY.has(k))continue;
     const s=screen(o.x,o.y),alpha=o.defeated?clamp(1-(clock-o.defeatedAt)/1.2,0,1):1,flip=(o.motionVx||0)<-6;if(alpha<=0)continue;
@@ -533,24 +557,27 @@ function drawLegendSky(){
     }else if(k==='griffin'){
       const st=o.legendState,frame=st==='carry'?cycleFrame([4,5],6):st==='dive'?3:st==='lock'?2:cycleFrame([0,1],4);
       const K=o.carry;if(K&&K.kind!=='player'){const p=screen(o.x,o.y),y=p.y-(o.altitude-6)*ZOOM;if(K.kind==='yeti')drawYeti(K.q,{x:p.x,y},'alert',44);else if(K.kind==='human')sprite(K.q.type==='skier'||K.q.type==='boarder'?'skier':K.q.type,p.x,y,30);else sprite('wolf',p.x,y,40);}
-      artDraw('griffin',frame,s.x,s.y,{altitude:o.altitude,alpha,flip});
+      if(K?.kind==='player')artDraw('griffin-carry-skier',cycleFrame([0,1],4),s.x,s.y,{altitude:o.altitude});else artDraw('griffin',frame,s.x,s.y,{altitude:o.altitude,alpha,flip});
     }else if(k==='phoenix'){
       if(o.legendState==='ash')artDraw('phoenix',6,s.x,s.y);else artDraw('phoenix',o.legendState==='reborn'?7:cycleFrame([0,1,2,3,4,5],10),s.x,s.y,{altitude:o.altitude,flip});
-      for(const f of o.fireballs){const t=clamp((clock-f.at)/V3.phoenix.flightSeconds,0,1),p=screen(mix(f.x0,f.x,t),mix(f.y0,f.y,t)),alt=mix(f.a0,0,t)+Math.sin(t*Math.PI)*25,y=p.y-alt*ZOOM;box(p.x-4,y-4,8,8,'#e8743c');box(p.x-2,y-2,4,4,'#f7d27a');if(random()<.5)burst(mix(f.x0,f.x,t),mix(f.y0,f.y,t)-alt,'#f0a050',1);}
+      for(const f of o.fireballs){const t=clamp((clock-f.at)/V3.phoenix.flightSeconds,0,1),p=screen(mix(f.x0,f.x,t),mix(f.y0,f.y,t)),alt=mix(f.a0,0,t)+Math.sin(t*Math.PI)*25;artDraw('phoenix-fire',cycleFrame([0,1,2,3],12),p.x,p.y,{altitude:alt,scale:1.4});if(random()<.5)burst(mix(f.x0,f.x,t),mix(f.y0,f.y,t)-alt,'#f0a050',1);}
+      o.blasts=(o.blasts||[]).filter(b=>clock-b.at<.4);for(const b of o.blasts){const p=screen(b.x,b.y);artDraw('phoenix-fire',4+Math.min(3,Math.floor((clock-b.at)/.1)),p.x,p.y,{scale:1.6});}
     }else if(k==='genie'){
+      o.poofs=(o.poofs||[]).filter(b=>clock-b.at<.5);for(const b of o.poofs){const p=screen(b.x,b.y);artDraw('genie-magic',Math.min(3,Math.floor((clock-b.at)/.125)),p.x,p.y+6*ZOOM,{scale:1.4});}
       const frame=o.legendState==='emerge'?1:o.legendState==='leave'?5:o.legendState==='cast'?(Math.floor(clock*3)%2?3:4):2;artDraw('genie',frame,s.x,s.y,{altitude:o.altitude,alpha:o.legendState==='leave'?clamp(1-(clock-o.stateAt)/2,0,1):1,flip:o.target&&o.legendState==='cast'?o.target.x>o.x:false});
     }else if(k==='gargoyle'){
-      const st=o.legendState,frame=o.defeated?5:st==='lunge'?3:st==='warn'?4:cycleFrame([2,3],8);artDraw('gargoyle',frame,s.x,s.y,{altitude:o.altitude,alpha,flip});
+      const st=o.legendState;if(o.defeated)artDraw('gargoyle',5,s.x,s.y,{altitude:o.altitude,alpha});else artDraw('gargoyle-hunt',st==='lunge'?5:st==='warn'?4:cycleFrame([0,1,2,3],9),s.x,s.y,{altitude:o.altitude,flip});
     }else if(k==='thunderbird'){
+      for(const m of o.marks)if(m.struck&&m.fade>clock){const age=.65-(m.fade-clock),p=screen(m.x,m.y);artDraw('lightning',age<.12?1:age<.4?0:2,p.x,p.y,{scale:1.3});}
       const vx=o.motionVx||0;artDraw('thunderbird',Math.abs(vx)>140?(vx<0?6:7):cycleFrame([0,1,2,3,4,5],9),s.x,s.y,{altitude:o.altitude});
     }
   }
   const p=state.p,s=screen(p.x,p.y);
   if(p.legendStoneUntil>clock)artDraw('medusa-props',0,s.x,s.y+2);
   if(p.legendDizzyUntil>clock)for(let i=0;i<3;i++){const a=clock*6+i*TAU/3;box(s.x+Math.cos(a)*10,s.y-34+Math.sin(a)*3,3,3,'#c6a6ef');}
-  const orbit=wispsOrbiting();for(let i=0;i<orbit;i++){const a=clock*2.2+i*TAU/orbit;artDraw('wisps',cycleFrame([0,1],4,i),s.x+Math.cos(a)*26*ZOOM,s.y+Math.sin(a)*12*ZOOM,{altitude:16,scale:.45});}
+  const orbit=wispsOrbiting();for(let i=0;i<orbit;i++){const a=clock*2.2+i*TAU/orbit;artDraw('wisp',cycleFrame([0,1,2,3],6,i),s.x+Math.cos(a)*26*ZOOM,s.y+Math.sin(a)*12*ZOOM,{altitude:16});}
 }
-function drawLegendStoneChaser(c){if(!(c.legendStoneUntil>clock))return false;const s=screen(c.x,c.y);ctx.save();if('filter' in ctx)ctx.filter='grayscale(1) brightness(.85)';if(c.kind==='bear')drawBear(c,s,false);else drawYeti(c,s,'alert',56);ctx.restore();return true;}
+function drawLegendStoneChaser(c){if(!(c.legendStoneUntil>clock))return false;const s=screen(c.x,c.y);shadow(s.x,s.y,14*ZOOM,4,.1);artDraw('petrified',c.kind==='bear'?1:0,s.x,s.y,{flip:(c.vx||0)<0});return true;}
 
 // ---------- lab panel extras ----------
 function labCurrentActor(){const e=state.endless?endlessEncounterAt(state.p.y):null;return e?.legendActor||legendActors().find(o=>!o.eaten)||null;}

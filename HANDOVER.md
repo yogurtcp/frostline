@@ -1897,3 +1897,20 @@ Death scenes runtime: assets/scenes/death-{ghost,gargoyle,troll,baba-yaga}{,-nig
 Updated optional baker supports --jobs and --only, per-frame size targets, measured source rectangles, animation metadata, vertical tile rectangles, and64-colour scene export. Sharp0.35 PNG palette options round64 up to256 entries; added explicit weighted median-cut reduction before indexed encoding, verified actual distinct pixel colours<=64. Ordinary builds still use committed PNGs and have no new runtime dependencies.
 
 Checks: validated build/schema, JS/worker/diff checks; tools/check-creature-art-round2.cjs checks all21 deliveries/source records,65 nonempty unique poses, body limits,8px gutters, binary transparency, registered anchors, continuous opaque bridge deck/repeat edges and genuine64-colour indexed scenes. Owned Chrome verifies all8 automatic death-card selections and existing0.5s lock, gallery manual-pose changes while paused,1×/3× previews and day/night toggle with no page errors. All native sheets and day/night cards visually inspected, plus real gallery and4× repeated bridge/cliff screenshots. Installed startup upgrade from33c05044a0887851 and offline reopening preserves bank4321/mute/record987/real saved checkpoint, includes all8 new cards and shows actual Ghost death offline. Scratch: /tmp/frostline-creature-round2 (gallery.png,bridge-repeat.png,death-baba-yaga-night.png,upgrade.cjs). Game build1586ee8963d99901.
+
+## 180. Round-two creature art integrated (2026-11-17)
+
+Codex delivered the 13 round-two sheets and 8 death cards (commit c143941, design/creatures/ROUND2.md). They are now all used:
+- build.py embeds the new sheets (CREATURE_SHEETS) and keeps the bridge tiles' `tileRect`.
+- Death cards for GHOST, GARGOYLE, TROLL and BABA YAGA (day and night) already worked through `LEGEND_DEATHS` plus the manifest.
+- hut-run while the hut chases; troll-bridge walk, side-steps and toll pose; `drawTrollGorge` (dark gorge, snow lips made from the edge tiles rotated, edge walls, plank deck tiled down the bridge) is drawn after drawGritSnow so the snow grit doesn't speckle the gorge; it replaces the old painted water.
+- gargoyle-hunt chase, screech and lunge; a single `wisp` for both free and orbiting wisps.
+- phoenix-fire fireballs, impact bursts and melt decals: phoenix ice patches get `phoenixMelt`, and drawIce hands them to `drawPhoenixMelt`.
+- genie-magic spell ring during the cast and a poof on transformation.
+- `petrified` stone Yeti, bear, wolf and person for Medusa (skiers keep the skier statues).
+- lightning target rings, bolts (sky layer) and scorch decals (4 s) for the thunderbird; the generic legend mark drawing now skips the thunderbird.
+- unicorn-kick when bumped; kitsune-tumble when a fox trips (legendary-v2 paint).
+- griffin-carry-skier while it carries the player (drawPlayer hides the player during `legendCarry`); giant-wind particles in the wind zone.
+- window.Frostline exposes `clock` for tests.
+
+Verified with lab screenshots of each item (including forced states for the rare moments), the full lab bot (no page errors) and a real-time run from the second day (gargoyle, phoenix, griffin, dragon in consecutive stages, about 1.2 ms/step).

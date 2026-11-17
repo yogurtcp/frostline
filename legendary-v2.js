@@ -227,7 +227,7 @@ function drawLegendV2(o,s){
     }else{const pose=o.legendState==='sleep'||o.legendState==='rest'?0:o.legendState==='brake'?3:1;drawV2Tile(v2Pose('mountain',pose),s,128,{bob:pose===0?Math.round(Math.sin(clock*1.6)*.6):0});}
   }else{
     const splitting=clock-(o.splitAt??-100)<.23;
-    const paint=f=>{const p=screen(f.x,f.y),tile=splitting?v2Pose('kitsune',3):o.rewarded?v2Pose('kitsune',2):kitsuneRunTile(Math.floor((f.gait||0)*8)%8);shadow(p.x,p.y,9,2,.08);drawV2Tile(tile,p,48,{flip:!!f.facing});};
+    const paint=f=>{const p=screen(f.x,f.y);if(f.tumbleUntil>clock){shadow(p.x,p.y,9,2,.08);artDraw('kitsune-tumble',Math.min(3,Math.floor((1-(f.tumbleUntil-clock)/.9)*4)),p.x,p.y,{flip:!!f.facing});return;}const tile=splitting?v2Pose('kitsune',3):o.rewarded?v2Pose('kitsune',2):kitsuneRunTile(Math.floor((f.gait||0)*8)%8);shadow(p.x,p.y,9,2,.08);drawV2Tile(tile,p,48,{flip:!!f.facing});};
     // Sort foxes by depth, never by real/illusion identity.
     [...o.foxes,o].sort((a,b)=>a.y-b.y).forEach(paint);
   }return true;
