@@ -25,29 +25,30 @@ function planShortcutCat(town){
   Object.assign(cat,{x:spot.x,y:spot.y,homeX:spot.x,homeY:spot.y,catGuide:true,guideState:'waiting',guidePoints:[spot,...route.slice(1)],guideIndex:1,guideAlong:0,guideTracks:[],ai:'idle',nextAI:Infinity});
   town.catGuide=cat;town.catRoute=route;
 }
+// The shortcut cat is a quiet hint: when you come near, it pads a little way toward the hidden route,
+// then either climbs the nearest tree or house, or just sits down. No talking, no markers.
 function updateShortcutCat(o,dt){
   const p=state.p,G=S.wildlife.catGuide;
   o.motionVx=o.motionVy=o.travelSpeed=0;o.travelStamp=clock;
   if(o.guideState==='waiting'){
     if(!state.started||p.air>0||p.fall||p.awaitingInput||p.y>o.y+G.noticeRadius||Math.hypot(p.x-o.x,p.y-o.y)>G.noticeRadius)return;
-    o.guideState='leading';say('MEOW! FOLLOW ME!',o,2.2);announce('FOLLOW THE CAT','A narrow snow route through the houses.',C.gold,2);
+    o.guideState='walking';o.guideAlong=0;
   }
-  if(o.guideState!=='leading')return;
-  const points=o.guidePoints,projection=routeProjection(points,p.x,p.y);
-  if(p.y>points.at(-1).y+150){o.guideState='done';return;}
-  if(p.fall||p.awaitingInput||projection.distance>G.followDistance||o.guideAlong>projection.along+G.leadDistance)return;
-  let budget=Math.min(S.physics.freePace*S.physics.speedMultiplier*1.5,Math.max(100,p.speed*1.12+40))*dt;
-  while(budget>0&&o.guideIndex<points.length){
+  if(o.guideState!=='walking')return;
+  const points=o.guidePoints;let budget=G.walkSpeed*dt;
+  while(budget>0&&o.guideIndex<points.length&&o.guideAlong<G.walkDistance){
     const goal=points[o.guideIndex],d=Math.hypot(goal.x-o.x,goal.y-o.y);
     if(d<3){o.guideIndex++;continue;}
-    const distance=Math.min(budget,d),before={x:o.x,y:o.y};
+    const distance=Math.min(budget,d,G.walkDistance-o.guideAlong),before={x:o.x,y:o.y};
     travel(o,Math.atan2(goal.y-o.y,goal.x-o.x),distance/dt,dt,false,false,true,false,goal,false,false,true);
     const moved=Math.hypot(o.x-before.x,o.y-before.y);o.guideAlong+=moved;budget-=distance;
     if(Math.abs(o.x-before.x)>1)o.catFacing=o.x<before.x;
-    const last=o.guideTracks.at(-1);if(moved&&(!last||Math.hypot(last.x-o.x,last.y-o.y)>20))o.guideTracks.push({x:o.x,y:o.y,until:clock+8});
-    if(o.guideTracks.length>48)o.guideTracks.shift();if(moved<distance*.8)break;
+    if(moved<distance*.5){o.guideAlong=G.walkDistance;break;}
   }
-  if(o.guideIndex>=points.length){o.guideState='done';say('Mrrp!',o,1.5);}
+  if(o.guideAlong<G.walkDistance&&o.guideIndex<points.length)return;
+  o.guideState='done';
+  const perch=state.objects.filter(t=>['pine','fir','lodge','rental'].includes(t.type)&&!t.eaten&&Math.hypot(t.x-o.x,t.y-o.y)<G.climbRadius).sort((a,b)=>Math.hypot(a.x-o.x,a.y-o.y)-Math.hypot(b.x-o.x,b.y-o.y))[0];
+  if(perch&&random()<G.climbChance){o.catGuide=false;o.perch=perch;o.ai='flee';o.calmAt=clock+G.perchSeconds;}
 }
 function setupBonusRabbit(o,row){
   if(row%S.wildlife.bonusRabbit.everyRabbits!==1)return;
@@ -109,7 +110,6 @@ function drawAnimalTracks(){
   for(const o of viewItems(CAT_VIEW))if(o.catGuide){o.guideTracks=o.guideTracks.filter(t=>t.until>clock);for(const t of o.guideTracks){const s=screen(t.x,t.y);if(s.x<0||s.x>W||s.y<0||s.y>H)continue;box(s.x-3,s.y-1,2,2,'#899793');box(s.x+1,s.y+2,2,2,'#899793');}}
 }
 function drawAnimalMarker(o,s){
-  if(o.catGuide&&o.guideState!=='done'){const y=s.y-o.width*ZOOM-8;box(s.x-1,y,3,6,C.gold);box(s.x-4,y+3,3,2,C.gold);box(s.x+2,y+3,3,2,C.gold);}
   if(o.bonusRabbit){
     const y=s.y-o.width*ZOOM-7-Math.sin(clock*2)*1.5;
     box(s.x-4,y-3,8,7,'#c69b61');box(s.x-1,y-3,2,7,o.bonusKind==='sword'?S.arcade.gear.swordColor:S.arcade.gear.shieldColor);box(s.x-4,y,8,1,'#f4deb0');

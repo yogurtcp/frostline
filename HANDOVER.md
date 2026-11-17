@@ -1914,3 +1914,7 @@ Codex delivered the 13 round-two sheets and 8 death cards (commit c143941, desig
 - window.Frostline exposes `clock` for tests.
 
 Verified with lab screenshots of each item (including forced states for the rare moments), the full lab bot (no page errors) and a real-time run from the second day (gargoyle, phoenix, griffin, dragon in consecutive stages, about 1.2 ms/step).
+
+## 181. Quiet shortcut cat (2026-11-17)
+
+User: the town cat that hints at the hidden back route was too much. It no longer talks (removed "MEOW! FOLLOW ME!" and "Mrrp!"), no longer announces "FOLLOW THE CAT", and no longer shows the gold marker or pawprints, and it does not lead you along the whole route. When you come within noticeRadius it pads about 16 m (walkDistance 160 at walkSpeed 70) along the start of the hidden route, then either climbs the nearest tree or house within climbRadius (chance 0.6, using the normal cat climb/perch code for perchSeconds 10, after which it is an ordinary cat) or just sits there. Config wildlife.catGuide: followDistance/leadDistance were replaced by walkSpeed, walkDistance, climbRadius, climbChance, perchSeconds (schema and config.js updated). Tested: no speech or announcements; it walked about 160 px, then climbed a lodge.

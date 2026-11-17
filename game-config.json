@@ -2702,9 +2702,12 @@
     },
     "catGuide": {
       "noticeRadius": 170,
-      "followDistance": 300,
-      "leadDistance": 130,
-      "pathPadding": 5
+      "pathPadding": 5,
+      "walkSpeed": 70,
+      "walkDistance": 160,
+      "climbRadius": 180,
+      "climbChance": 0.6,
+      "perchSeconds": 10
     },
     "bonusRabbit": {
       "everyRabbits": 7,

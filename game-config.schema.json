@@ -5575,17 +5575,34 @@
               "type": "number",
               "exclusiveMinimum": 0
             },
-            "followDistance": {
-              "type": "number",
-              "exclusiveMinimum": 0
-            },
-            "leadDistance": {
-              "type": "number",
-              "exclusiveMinimum": 0
-            },
             "pathPadding": {
               "type": "number",
               "exclusiveMinimum": 0
+            },
+            "walkSpeed": {
+              "type": "number",
+              "minimum": 0,
+              "description": "How fast the shortcut cat pads toward the hidden route (px/s)"
+            },
+            "walkDistance": {
+              "type": "number",
+              "minimum": 0,
+              "description": "How far it walks before stopping or climbing (px)"
+            },
+            "climbRadius": {
+              "type": "number",
+              "minimum": 0,
+              "description": "Trees or houses within this distance can be climbed"
+            },
+            "climbChance": {
+              "type": "number",
+              "minimum": 0,
+              "description": "Chance it climbs instead of just sitting"
+            },
+            "perchSeconds": {
+              "type": "number",
+              "minimum": 0,
+              "description": "How long it stays up before coming down"
             }
           }
         },
