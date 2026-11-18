@@ -43,7 +43,7 @@ const LAB_REACTIONS={
 };
 const labState={yetis:true};
 // Legend deaths. The scene card shows once Codex delivers assets/scenes/<key>.png (see design/CREATURE-ART-REQUESTS.md).
-const LEGEND_DEATHS={GHOST:{key:'death-ghost',title:'SPIRITED AWAY',detail:'Next time, stay where the lights are on.',line:'THE GHOST GOT YOU.'},GARGOYLE:{key:'death-gargoyle',title:'STONE COLD SNACK',detail:'It was not a statue. It was never a statue.',line:'THE GARGOYLE ATE YOU.'},TROLL:{key:'death-troll',title:'TOLL UNPAID',detail:'The troll accepts gear, not excuses.',line:'THE TROLL GOT YOU.'},'BABA YAGA':{key:'death-baba-yaga',title:'INVITED IN',detail:"Baba Yaga's hut always has room for one more.",line:'THE HUT SWALLOWED YOU.'}};
+const LEGEND_DEATHS={BOULDER:{key:'death-boulder',title:'SLOPE PANCAKE',detail:'Freshly pressed. Extra thin.',line:'FLATTENED BY THE BOULDER.'},GHOST:{key:'death-ghost',title:'SPIRITED AWAY',detail:'Next time, stay where the lights are on.',line:'THE GHOST GOT YOU.'},GARGOYLE:{key:'death-gargoyle',title:'STONE COLD SNACK',detail:'It was not a statue. It was never a statue.',line:'THE GARGOYLE ATE YOU.'},TROLL:{key:'death-troll',title:'TOLL UNPAID',detail:'The troll accepts gear, not excuses.',line:'THE TROLL GOT YOU.'},'BABA YAGA':{key:'death-baba-yaga',title:'INVITED IN',detail:"Baba Yaga's hut always has room for one more.",line:'THE HUT SWALLOWED YOU.'}};
 const POTIONS=['green','purple','orange'],POTION_COLORS={green:'#7fb069',purple:'#9a76c4',orange:'#e59a4d'};
 
 // ---------- art ----------

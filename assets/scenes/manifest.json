@@ -319,6 +319,22 @@
       "width": 320,
       "height": 200,
       "colors": 64
+    },
+    {
+      "key": "death-boulder",
+      "file": "death-boulder.png",
+      "source": "design/scenes/boulder/death-boulder/source.png",
+      "width": 320,
+      "height": 200,
+      "colors": 64
+    },
+    {
+      "key": "death-boulder-night",
+      "file": "death-boulder-night.png",
+      "source": "design/scenes/boulder/death-boulder-night/source.png",
+      "width": 320,
+      "height": 200,
+      "colors": 64
     }
   ]
 }
