@@ -746,6 +746,14 @@
           "Blast it! Now I have to start OVER!"
         ]
       }
+    },
+    "dogs": {
+      "everyStages": 2,
+      "firstMetres": 200,
+      "quietCount": [
+        2,
+        3
+      ]
     }
   },
   "arcade": {

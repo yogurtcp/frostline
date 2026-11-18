@@ -64,6 +64,8 @@ def validate(value, schema, path='config'):
         ranges += list(regions.get('lengthMetres', {}).values()) + list(regions.get('zombies', {}).get(key, []) for key in ['count', 'speedKmh', 'wandererCount', 'wandererSpeedKmh', 'roamerCount'])
         for pair in ranges:
             if pair and pair[0] > pair[1]: fail('endless.regions ranges must be ordered')
+        quiet_dogs = (endless or {}).get('dogs', {}).get('quietCount', [2, 3])
+        if quiet_dogs[0] > quiet_dogs[1]: fail('endless.dogs.quietCount must be ordered')
         wildlife = (endless or {}).get('wildlife', {})
         pack = wildlife.get('wolfPackSize', [2, 3])
         if pack[0] > pack[1]: fail('endless.wildlife.wolfPackSize must be ordered')

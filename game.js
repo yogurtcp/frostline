@@ -720,6 +720,55 @@ window.FROSTLINE_READY = (async () => {
     if(from===e.startY)mouth(false);
     if(to===e.endY)mouth(true);
   }
+  // Stream friendly dogs with the course, never by chance or once per render frame.
+  function placeEndlessDog(section,e,y,kind){
+    const low=Math.max(section.startY,e?.startY??section.startY)+20,high=Math.min(section.endY,e?.endY??section.endY)-20,side=pick([-1,1]);
+    for(const dy of [0,35,-35,70,-70,120,-120]){
+      const at=y+dy;if(at<low||at>high)continue;
+      const center=e?.paths?.length?encounterPathX(e.paths[0],at):section.endlessRoot.x;
+      for(const offset of [40,-40,56,-56,28,-28]){
+        const x=center+offset*side;
+        if(patchAt(x,at))continue;
+        if(state.objects.some(o=>!o.dead&&!o.eaten&&(
+          o.r>0&&NPC_STATIC_SOLIDS.has(o.type)&&obstacleClearance(o,x,at)<24||
+          o.type==='dog'&&Math.hypot(o.x-x,o.y-at)<120||
+          ['ramp','smallHill','largeHill','rainbow','spring','logBump'].includes(o.type)&&Math.abs(o.x-x)<o.width/2+30&&Math.abs(o.y-at)<85
+        )))continue;
+        return entity('dog',x,at,{...ARCADE_ITEMS.dog,arcadeRun:section,encounter:e,humanVisitor:true,endlessDog:true,dogSupplyKind:kind});
+      }
+    }
+    return null;
+  }
+  function spawnEndlessDogs(section,endY){
+    const a=state.endless,D=S.endless.dogs;if(!a||a.legendShowcase)return;
+    for(const e of a.encounters){
+      if(e.kind!=='quiet'||e.startY>=endY||e.endY<=section.startY)continue;
+      if(!e.quietDogSlots){
+        const count=Math.floor(range(D.quietCount[0],D.quietCount[1]+1));
+        e.quietDogSlots=Array.from({length:count},(_,i)=>({y:mix(e.startY,e.endY,.2+.6*(i+.5)/count),spawned:false}));
+      }
+      for(const slot of e.quietDogSlots)if(!slot.spawned&&slot.y<endY){
+        const dog=placeEndlessDog(section,e,Math.max(slot.y,section.startY+20),'quiet');
+        if(dog)slot.spawned=true;
+      }
+    }
+    if(a.debug)return;
+    const interval=D.everyStages*S.endless.stages.metres*PX_PER_M,first=a.startY+D.firstMetres*PX_PER_M;
+    // Reconstruct the original-run cadence when loading an older or newer town checkpoint.
+    a.nextDogY??=first+Math.max(0,Math.ceil((section.startY-first)/interval))*interval;
+    while(a.nextDogY<endY){
+      let y=Math.max(a.nextDogY,a.dogWaitUntilY??-Infinity,section.startY+20),e=endlessEncounterAt(y);
+      // Keep dogs off open lakes and out of the deliberately tight short forest.
+      while(e&&(e.kind==='lake'||e.kind==='denseForest')){y=e.endY+(e.kind==='lake'?120:12)*PX_PER_M;a.dogWaitUntilY=y;e=endlessEncounterAt(y);}
+      if(y>=endY)return;
+      if(e?.kind==='quiet'){
+        // This trail already supplies 2–3 dogs; don't turn its regular slot into a fourth.
+        a.nextDogY+=interval;delete a.dogWaitUntilY;continue;
+      }
+      if(!placeEndlessDog(section,e,y,'regular'))return; // Try again in the next streamed chunk if all spots are blocked.
+      a.nextDogY+=interval;delete a.dogWaitUntilY;
+    }
+  }
   function populateSmallWildlife(e,section,from,to){
     if(!['forest','trees','denseForest','quiet','runout'].includes(e.kind))return;
     const A=S.wildlife,profiles=[
@@ -1009,7 +1058,7 @@ window.FROSTLINE_READY = (async () => {
         }
         a.nextYetiY=Math.max(a.nextYetiY,endY)+Math.max(E.yetis.intervalMetres[1]*.6,mix(...E.yetis.intervalMetres,P.t))/P.ease.density*PX_PER_M*scale;
       }
-      spawnEndlessWildlife(section,endY,P);spawnEndlessRavager(section,endY);spawnEncounterEnemies(section,endY);clearLakeExitSpringApproaches();
+      spawnEndlessWildlife(section,endY,P);spawnEndlessRavager(section,endY);spawnEncounterEnemies(section,endY);clearLakeExitSpringApproaches();spawnEndlessDogs(section,endY);
       a.sections.push(section);a.plannedY=endY;
     }
     extendEndlessTownLanes();

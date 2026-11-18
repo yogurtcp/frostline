@@ -11675,6 +11675,38 @@
               "maximum": 80
             }
           }
+        },
+        "dogs": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Guaranteed friendly dogs along Arcade paths. Regular cadence uses the distance-based HUD stages; quietCount is per Snowy Trail area.",
+          "properties": {
+            "everyStages": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 10
+            },
+            "firstMetres": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1000
+            },
+            "quietCount": {
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 8
+              },
+              "minItems": 2,
+              "maxItems": 2
+            }
+          },
+          "required": [
+            "everyStages",
+            "firstMetres",
+            "quietCount"
+          ]
         }
       }
     },

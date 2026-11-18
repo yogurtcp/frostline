@@ -71,6 +71,8 @@ window.loadFrostlineConfig = async function () {
   for(const [key,value] of Object.entries({count:[8,14],radiusMetres:140,intervalSeconds:.25}))config.endless.regions.zombies.graveWake[key] ??= value;
   config.endless.regions.zombies.ambush ??= {};
   for(const [key,value] of Object.entries({rangeMetres:24,windupSeconds:.6,leapSeconds:.65,maxLeapMetres:50,heightWorld:60}))config.endless.regions.zombies.ambush[key] ??= value;
+  config.endless.dogs ??= {};
+  for(const [key,value] of Object.entries({everyStages:2,firstMetres:200,quietCount:[2,3]}))config.endless.dogs[key] ??= value;
   config.endless.wildlife ??= {firstMetres:650,intervalMetres:[360,200],maxNearby:6,wolfPackSize:[2,3],noticeMetres:55};
   config.skiers.crashSeconds ??= [4,5];
   config.skiers.getUpSeconds ??= .6;
@@ -185,6 +187,7 @@ window.loadFrostlineConfig = async function () {
   if(config.skiers.crashSeconds[0]>config.skiers.crashSeconds[1])throw new Error('skiers.crashSeconds must be ordered');
   if(config.endless.maxPlayerSpeedKmh<config.endless.playerSpeedKmh)throw new Error('endless.maxPlayerSpeedKmh must be at least playerSpeedKmh');
   for(const [key,pair] of Object.entries(config.endless.encounters))if(Array.isArray(pair)&&pair[0]>pair[1])throw new Error('endless.encounters.'+key+' must be ordered');
+  if(config.endless.dogs.quietCount[0]>config.endless.dogs.quietCount[1])throw new Error('endless.dogs.quietCount must be ordered');
   if(config.endless.wildlife.wolfPackSize[0]>config.endless.wildlife.wolfPackSize[1])throw new Error('endless.wildlife.wolfPackSize must be ordered');
   if(config.endless.lakeRadiusMetres[0]>config.endless.lakeRadiusMetres[1])throw new Error('endless.lakeRadiusMetres must be ordered');
   if (config.wildlife.packMin > config.wildlife.packMax) throw new Error('packMin must not exceed packMax');
